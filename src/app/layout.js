@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header";
+import AccessibilityWidget from "../components/AccessibilityWidget";
 import Footer from "../components/Footer";
 import FloatingActions from "../components/FloatingActions";
 import Providers from "../components/Providers";
@@ -32,11 +33,14 @@ export default function RootLayout({ children }) {
 
           <div className="flex min-h-screen flex-col">
             <Header />
-            <div className="flex-1">{children}</div>
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
             <Footer />
           </div>
 
           <FloatingActions />
+          <AccessibilityWidget />
         </Providers>
       </body>
     </html>
