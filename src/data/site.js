@@ -8,7 +8,7 @@ const mapQuery = "Kementerian Agama Kabupaten Barito Utara";
 
 export const siteInfo = {
   name: "Kementerian Agama Kabupaten Barito Utara",
-  shortName: "Kemenag Barito Utara",
+  shortName: "KEMENAG BARITO UTARA",
   tagline: "Melayani Umat dengan Integritas dan Profesionalitas",
   description:
     "Website resmi instansi untuk pelayanan informasi, publikasi kegiatan, pengumuman, agenda, dan akses layanan digital secara terpadu.",
