@@ -6,10 +6,10 @@ const EDITOR_ROLES = new Set(["super_admin", "admin", "editor"]);
 
 export async function getCurrentSessionContext() {
   const supabase = await createClient();
-  const {
-    data: { claims },
-    error: claimsError,
-  } = await supabase.auth.getClaims();
+
+  const claimsResult = await supabase.auth.getClaims();
+  const claims = claimsResult?.data?.claims ?? null;
+  const claimsError = claimsResult?.error ?? null;
 
   if (claimsError || !claims?.sub) {
     return {
@@ -58,8 +58,11 @@ export async function requireAuthenticated(options = {}) {
 }
 
 export async function requireAdmin(options = {}) {
-  const { loginRedirect = "/login", forbiddenRedirect = "/error?code=403" } =
-    options;
+  const {
+    loginRedirect = "/admin/login",
+    forbiddenRedirect = "/error?code=403",
+  } = options;
+
   const session = await getCurrentSessionContext();
 
   if (!session.isAuthenticated) {
@@ -74,8 +77,11 @@ export async function requireAdmin(options = {}) {
 }
 
 export async function requireEditor(options = {}) {
-  const { loginRedirect = "/login", forbiddenRedirect = "/error?code=403" } =
-    options;
+  const {
+    loginRedirect = "/admin/login",
+    forbiddenRedirect = "/error?code=403",
+  } = options;
+
   const session = await getCurrentSessionContext();
 
   if (!session.isAuthenticated) {
