@@ -23,12 +23,12 @@ export const profileOverview = {
 
 export const visionMission = {
   vision:
-    "Terwujudnya pelayanan kehidupan beragama yang moderat, profesional, akuntabel, dan berdampak bagi masyarakat di Kabupaten Barito Utara.",
+    "Terwujudnya Masyarakat Kabupaten Barito Utara yang Taat Beragama, Rukun, Cerdas, Mandiri dan Sejahtera Lahir Batin dalam rangka mewujudkan Indonesia yang berdaulat, mandiri dan berkepribadian berlandaskan gotong royong.",
   missions: [
-    "Meningkatkan kualitas pelayanan publik di bidang keagamaan secara mudah, cepat, dan transparan.",
-    "Menguatkan pembinaan madrasah, pendidikan keagamaan, serta lembaga keagamaan di wilayah kerja.",
-    "Mendorong penguatan moderasi beragama, kerukunan umat, dan nilai-nilai kebangsaan dalam kehidupan masyarakat.",
-    "Mewujudkan tata kelola kelembagaan yang efektif, akuntabel, dan berbasis pelayanan.",
+    "Meningkatkan kualitas kehidupan beragama.",
+    "Meningkatkan kualitas kerukunan umat beragama.",
+    "Meningkatkan kualitas Raudhatul Athfal, Madrasah, Pendidikan Agama dan Pendidikan Keagamaan.",
+    "Mewujudkan tata kelola pemerintahan yang bersih, akuntabel, terpercaya dan berwibawa.",
   ],
   values: [
     "Integritas",
