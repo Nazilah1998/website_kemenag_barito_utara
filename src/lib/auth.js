@@ -1,66 +1,101 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
-const ADMIN_ROLES = new Set(["super_admin", "admin"]);
-const EDITOR_ROLES = new Set(["super_admin", "admin", "editor"]);
+function normalizeRole(role) {
+  if (!role || typeof role !== "string") {
+    return null;
+  }
+
+  return role.trim().toLowerCase();
+}
+
+export async function createServerSupabaseClient() {
+  const cookieStore = await cookies();
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL belum diatur.");
+  }
+
+  if (!anonKey) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY belum diatur.");
+  }
+
+  return createServerClient(supabaseUrl, anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        } catch {
+          // Di beberapa context server component, set cookie bisa tidak diizinkan.
+        }
+      },
+    },
+  });
+}
 
 export async function getCurrentSessionContext() {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
-  const claimsResult = await supabase.auth.getClaims();
-  const claims = claimsResult?.data?.claims ?? null;
-  const claimsError = claimsResult?.error ?? null;
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (claimsError || !claims?.sub) {
+  if (userError || !user) {
     return {
-      supabase,
-      claims: null,
-      profile: null,
-      role: null,
       isAuthenticated: false,
       isAdmin: false,
       isEditor: false,
+      role: null,
+      claims: null,
+      profile: null,
+      user: null,
     };
   }
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, full_name, email, role, unit_name, is_active")
-    .eq("id", claims.sub)
+    .select("id, email, full_name, role")
+    .eq("id", user.id)
     .maybeSingle();
 
   if (profileError) {
-    throw profileError;
+    throw new Error(profileError.message || "Gagal membaca profil pengguna.");
   }
 
-  const role = profile?.role ?? null;
+  const role = normalizeRole(profile?.role);
+  const isAdmin = role === "admin";
+  const isEditor = role === "admin" || role === "editor";
 
   return {
-    supabase,
-    claims,
-    profile,
+    isAuthenticated: true,
+    isAdmin,
+    isEditor,
     role,
-    isAuthenticated: Boolean(claims?.sub),
-    isAdmin: ADMIN_ROLES.has(role),
-    isEditor: EDITOR_ROLES.has(role),
+    claims: user,
+    profile: profile || {
+      id: user.id,
+      email: user.email ?? null,
+      full_name: user.user_metadata?.full_name ?? null,
+      role: null,
+    },
+    user,
   };
-}
-
-export async function requireAuthenticated(options = {}) {
-  const { redirectTo = "/login" } = options;
-  const session = await getCurrentSessionContext();
-
-  if (!session.isAuthenticated) {
-    redirect(redirectTo);
-  }
-
-  return session;
 }
 
 export async function requireAdmin(options = {}) {
   const {
     loginRedirect = "/admin/login",
-    forbiddenRedirect = "/error?code=403",
+    forbiddenRedirect = "/error?message=" + encodeURIComponent("Akses ditolak."),
   } = options;
 
   const session = await getCurrentSessionContext();
@@ -79,7 +114,7 @@ export async function requireAdmin(options = {}) {
 export async function requireEditor(options = {}) {
   const {
     loginRedirect = "/admin/login",
-    forbiddenRedirect = "/error?code=403",
+    forbiddenRedirect = "/error?message=" + encodeURIComponent("Akses ditolak."),
   } = options;
 
   const session = await getCurrentSessionContext();
