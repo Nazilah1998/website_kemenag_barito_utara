@@ -1,11 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "../components/Header";
-import AccessibilityWidget from "../components/AccessibilityWidget";
-import Footer from "../components/Footer";
-import FloatingActions from "../components/FloatingActions";
-import Providers from "../components/Providers";
-import { siteInfo } from "../data/site";
+import Providers from "@/components/Providers";
+import AppShell from "@/components/AppShell";
+import { siteInfo } from "@/data/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,28 +16,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <body
-        className={`${inter.className} min-h-screen bg-slate-50 text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100`}
-      >
+    <html lang="id">
+      <body className={inter.className}>
         <Providers>
-          <a
-            href="#main-content"
-            className="sr-only absolute left-4 top-4 z-[100] rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white focus:not-sr-only"
-          >
-            Lewati ke konten utama
-          </a>
-
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
-
-          <FloatingActions />
-          <AccessibilityWidget />
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>
