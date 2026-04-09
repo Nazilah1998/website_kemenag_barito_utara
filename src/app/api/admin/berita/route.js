@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -48,7 +49,6 @@ function buildPayload(body) {
   if (!content) throw new Error("Isi berita wajib diisi.");
 
   const publishedAt = publishedAtInput ? new Date(publishedAtInput) : new Date();
-
   if (Number.isNaN(publishedAt.getTime())) {
     throw new Error("Tanggal publish tidak valid.");
   }
@@ -77,7 +77,6 @@ async function ensureUniqueSlug(supabase, rawSlug, currentId = null) {
     }
 
     const { data, error } = await query.maybeSingle();
-
     if (error) throw error;
     if (!data) return candidate;
 
@@ -157,6 +156,10 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
+
+    revalidatePath("/");
+    revalidatePath("/berita");
+    revalidatePath(`/berita/${data.slug}`);
 
     return NextResponse.json(
       {

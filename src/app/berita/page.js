@@ -7,20 +7,20 @@ export const metadata = {
   description: "Informasi dan kegiatan terbaru Kemenag Barito Utara",
 };
 
-export default function BeritaPage() {
-  const beritaList = getAllBerita();
+export const dynamic = "force-dynamic";
+
+export default async function BeritaPage() {
+  const beritaList = await getAllBerita();
 
   return (
     <>
       <PageBanner
         title="Berita"
-        description="Publikasi berita dan kegiatan terbaru disusun dengan tampilan yang lebih rapi, nyaman dibaca, dan mudah ditelusuri."
-        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Berita" }]}
+        description="Informasi, publikasi, dan kegiatan terbaru Kemenag Barito Utara."
       />
-
-      <main id="main-content" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-6 py-10">
         <BeritaListClient items={beritaList} />
-      </main>
+      </section>
     </>
   );
 }

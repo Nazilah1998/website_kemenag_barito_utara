@@ -16,8 +16,9 @@ const heroStats = [
   { label: "Informasi Resmi", value: "100%" },
 ];
 
-export default function HomePage() {
-  const latestBerita = getLatestBerita(3);
+export const dynamic = "force-dynamic";
+export default async function HomePage() {
+  const latestBerita = await getLatestBerita(3);
 
   return (
     <main id="main-content">

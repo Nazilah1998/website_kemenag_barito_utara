@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -48,7 +49,6 @@ function buildPayload(body) {
   if (!content) throw new Error("Isi berita wajib diisi.");
 
   const publishedAt = publishedAtInput ? new Date(publishedAtInput) : new Date();
-
   if (Number.isNaN(publishedAt.getTime())) {
     throw new Error("Tanggal publish tidak valid.");
   }
@@ -77,7 +77,6 @@ async function ensureUniqueSlug(supabase, rawSlug, currentId = null) {
     }
 
     const { data, error } = await query.maybeSingle();
-
     if (error) throw error;
     if (!data) return candidate;
 
@@ -115,6 +114,14 @@ export async function PUT(request, context) {
     const body = await request.json();
     const supabase = createAdminClient();
 
+    const { data: existingItem, error: existingError } = await supabase
+      .from("berita")
+      .select("id, slug")
+      .eq("id", id)
+      .single();
+
+    if (existingError) throw existingError;
+
     const payload = buildPayload(body);
     const slug = await ensureUniqueSlug(
       supabase,
@@ -133,6 +140,14 @@ export async function PUT(request, context) {
       .single();
 
     if (error) throw error;
+
+    revalidatePath("/");
+    revalidatePath("/berita");
+    revalidatePath(`/berita/${data.slug}`);
+
+    if (existingItem?.slug && existingItem.slug !== data.slug) {
+      revalidatePath(`/berita/${existingItem.slug}`);
+    }
 
     return NextResponse.json({
       message: "Berita berhasil diperbarui.",
@@ -154,12 +169,27 @@ export async function DELETE(_request, context) {
     const { id } = await context.params;
     const supabase = createAdminClient();
 
+    const { data: existingItem, error: existingError } = await supabase
+      .from("berita")
+      .select("id, slug")
+      .eq("id", id)
+      .single();
+
+    if (existingError) throw existingError;
+
     const { error } = await supabase
       .from("berita")
       .delete()
       .eq("id", id);
 
     if (error) throw error;
+
+    revalidatePath("/");
+    revalidatePath("/berita");
+
+    if (existingItem?.slug) {
+      revalidatePath(`/berita/${existingItem.slug}`);
+    }
 
     return NextResponse.json({
       message: "Berita berhasil dihapus.",
