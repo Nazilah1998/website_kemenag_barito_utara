@@ -1,36 +1,76 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
+
 export const dynamic = "force-dynamic";
+
 const table = "pengumuman";
-const BUCKET = "pengumuman-files";
-const selectFields = ` id, slug, title, excerpt, content, category, is_important, is_published, published_at, author_id, attachment_url, attachment_name, attachment_path, attachment_source, attachment_type, created_at, updated_at `;
+const BUCKET =
+  process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET_PENGUMUMAN ||
+  process.env.SUPABASE_STORAGE_BUCKET_PENGUMUMAN ||
+  "pengumuman-files";
+
+const selectFields = `
+  id,
+  slug,
+  title,
+  excerpt,
+  content,
+  category,
+  is_important,
+  is_published,
+  published_at,
+  author_id,
+  attachment_url,
+  attachment_name,
+  attachment_path,
+  attachment_source,
+  attachment_type,
+  created_at,
+  updated_at
+`;
+
+function createHttpError(message, status = 400) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 function inferAttachmentTypeFromUrl(url) {
   const lower = String(url || "").toLowerCase();
+
   if (lower.match(/\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/)) return "image";
   if (lower.match(/\.pdf(\?|$)/)) return "pdf";
   if (lower.includes("drive.google.com")) return "link";
+
   return "link";
 }
+
 function isValidUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     String(value || ""),
   );
 }
+
 async function resolveId(params) {
   const resolvedParams = await params;
   const id = resolvedParams?.id;
+
   if (!id || !isValidUuid(id)) {
-    throw new Error("ID pengumuman tidak valid.");
+    throw createHttpError("ID pengumuman tidak valid.", 400);
   }
+
   return id;
 }
+
 function normalizeAttachment(body) {
   const attachmentUrl = cleanString(body.attachment_url);
   const attachmentName = cleanString(body.attachment_name);
   const attachmentPath = cleanString(body.attachment_path);
   const attachmentSource = cleanString(body.attachment_source);
   const attachmentType = cleanString(body.attachment_type);
+
   if (!attachmentUrl) {
     return {
       attachment_url: null,
@@ -40,6 +80,7 @@ function normalizeAttachment(body) {
       attachment_type: null,
     };
   }
+
   return {
     attachment_url: attachmentUrl,
     attachment_name: attachmentName || "Lampiran Pengumuman",
@@ -49,6 +90,7 @@ function normalizeAttachment(body) {
       attachmentType || inferAttachmentTypeFromUrl(attachmentUrl),
   };
 }
+
 function buildPayload(body) {
   const title = cleanString(body.title);
   const excerpt = cleanString(body.excerpt);
@@ -57,21 +99,27 @@ function buildPayload(body) {
   const isImportant = Boolean(body.is_important);
   const isPublished = Boolean(body.is_published);
   const publishedAtInput = cleanString(body.published_at);
+
   if (!title) {
-    throw new Error("Judul pengumuman wajib diisi.");
+    throw createHttpError("Judul pengumuman wajib diisi.");
   }
+
   if (!excerpt) {
-    throw new Error("Ringkasan pengumuman wajib diisi.");
+    throw createHttpError("Ringkasan pengumuman wajib diisi.");
   }
+
   if (!content) {
-    throw new Error("Isi pengumuman wajib diisi.");
+    throw createHttpError("Isi pengumuman wajib diisi.");
   }
+
   const publishedAt = publishedAtInput
     ? new Date(publishedAtInput)
     : new Date();
+
   if (Number.isNaN(publishedAt.getTime())) {
-    throw new Error("Tanggal publish tidak valid.");
+    throw createHttpError("Tanggal publish tidak valid.");
   }
+
   return {
     title,
     excerpt,
@@ -83,8 +131,20 @@ function buildPayload(body) {
     ...normalizeAttachment(body),
   };
 }
+
+function revalidatePengumumanPaths(slug) {
+  revalidatePath("/");
+  revalidatePath("/pengumuman");
+  revalidatePath("/admin/pengumuman");
+
+  if (slug) {
+    revalidatePath(`/pengumuman/${slug}`);
+  }
+}
+
 export async function PUT(request, { params }) {
   const auth = await validateAdmin();
+
   if (!auth.ok) {
     return auth.response;
   }
@@ -96,7 +156,7 @@ export async function PUT(request, { params }) {
 
     const { data: existingItem, error: existingError } = await supabase
       .from(table)
-      .select("id, attachment_path, attachment_source")
+      .select("id, slug, attachment_path, attachment_source")
       .eq("id", id)
       .single();
 
@@ -111,7 +171,7 @@ export async function PUT(request, { params }) {
       table,
       cleanString(body.slug),
       payload.title,
-      id
+      id,
     );
 
     const nextAttachmentPath = payload.attachment_path;
@@ -120,14 +180,14 @@ export async function PUT(request, { params }) {
     const shouldRemoveOldUpload =
       existingItem?.attachment_source === "upload" &&
       existingItem?.attachment_path &&
-      (
-        !nextAttachmentPath ||
+      (!nextAttachmentPath ||
         nextAttachmentSource !== "upload" ||
-        existingItem.attachment_path !== nextAttachmentPath
-      );
+        existingItem.attachment_path !== nextAttachmentPath);
 
     if (shouldRemoveOldUpload) {
-      await supabase.storage.from(BUCKET).remove([existingItem.attachment_path]);
+      await supabase.storage
+        .from(BUCKET)
+        .remove([existingItem.attachment_path]);
     }
 
     const { data, error } = await supabase
@@ -144,22 +204,27 @@ export async function PUT(request, { params }) {
       throw error;
     }
 
+    revalidatePengumumanPaths(data?.slug);
+
+    if (existingItem?.slug && existingItem.slug !== data?.slug) {
+      revalidatePath(`/pengumuman/${existingItem.slug}`);
+    }
+
     return NextResponse.json({
       message: "Pengumuman berhasil diperbarui.",
       item: data,
     });
   } catch (error) {
     return NextResponse.json(
-      {
-        message: error.message || "Gagal memperbarui pengumuman.",
-      },
-      { status: 500 }
+      { message: error.message || "Gagal memperbarui pengumuman." },
+      { status: error.status || 500 },
     );
   }
 }
 
 export async function DELETE(_request, { params }) {
   const auth = await validateAdmin();
+
   if (!auth.ok) {
     return auth.response;
   }
@@ -170,7 +235,7 @@ export async function DELETE(_request, { params }) {
 
     const { data: currentData, error: fetchError } = await supabase
       .from(table)
-      .select("attachment_path, attachment_source")
+      .select("slug, attachment_path, attachment_source")
       .eq("id", id)
       .single();
 
@@ -191,15 +256,15 @@ export async function DELETE(_request, { params }) {
       throw error;
     }
 
+    revalidatePengumumanPaths(currentData?.slug);
+
     return NextResponse.json({
       message: "Pengumuman berhasil dihapus.",
     });
   } catch (error) {
     return NextResponse.json(
-      {
-        message: error.message || "Gagal menghapus pengumuman.",
-      },
-      { status: 500 }
+      { message: error.message || "Gagal menghapus pengumuman." },
+      { status: error.status || 500 },
     );
   }
 }
