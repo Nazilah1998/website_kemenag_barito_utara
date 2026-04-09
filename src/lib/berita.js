@@ -88,6 +88,7 @@ export async function getBeritaBySlug(slug) {
       cover_image,
       is_published,
       published_at,
+      views,
       created_at,
       updated_at
     `)

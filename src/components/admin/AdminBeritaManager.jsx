@@ -222,33 +222,36 @@ export default function AdminBeritaManager() {
     const value = event.target.value;
     if (!value) return;
 
-function enableCssStyling() {
-  if (typeof document !== "undefined" && typeof document.execCommand === "function") {
-    document.execCommand("styleWithCSS", false, true);
-  }
-}
-
-function handleFontFamilyChange(event) {
-  const value = event.target.value;
-  if (!value) return;
-
-  editorRef.current?.focus();
-  enableCssStyling();
-  runEditorCommand("fontName", value);
-  event.target.value = "";
-}
-
-function handleFontSizeChange(event) {
-  const value = event.target.value;
-  if (!value) return;
-
-  editorRef.current?.focus();
-  enableCssStyling();
-  runEditorCommand("fontSize", value);
-  event.target.value = "";
-}
-
     runEditorCommand("formatBlock", value);
+    event.target.value = "";
+  }
+
+  function enableCssStyling() {
+    if (
+      typeof document !== "undefined" &&
+      typeof document.execCommand === "function"
+    ) {
+      document.execCommand("styleWithCSS", false, true);
+    }
+  }
+
+  function handleFontFamilyChange(event) {
+    const value = event.target.value;
+    if (!value) return;
+
+    editorRef.current?.focus();
+    enableCssStyling();
+    runEditorCommand("fontName", value);
+    event.target.value = "";
+  }
+
+  function handleFontSizeChange(event) {
+    const value = event.target.value;
+    if (!value) return;
+
+    editorRef.current?.focus();
+    enableCssStyling();
+    runEditorCommand("fontSize", value);
     event.target.value = "";
   }
 
