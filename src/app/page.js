@@ -22,7 +22,7 @@ export default async function HomePage() {
 
   return (
     <main id="main-content">
-      <section className="border-b border-slate-200 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-950 text-white dark:border-slate-800">
+      <section className="border-b border-slate-200 bg-linear-to-br from-emerald-950 via-emerald-900 to-slate-950 text-white dark:border-slate-800">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-20">
           <div>
             <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/85">
@@ -30,7 +30,8 @@ export default async function HomePage() {
             </span>
 
             <h1 className="mt-6 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-              Website resmi {siteInfo.shortName} yang lebih rapi, responsif, dan mudah dipakai.
+              Website resmi {siteInfo.shortName} yang lebih rapi, responsif, dan
+              mudah dipakai.
             </h1>
 
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
@@ -60,7 +61,8 @@ export default async function HomePage() {
             <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
               <h2 className="text-xl font-bold">Informasi Publik</h2>
               <p className="mt-3 text-sm leading-6 text-white/80">
-                Menyediakan berita, pengumuman, agenda, dan dokumen resmi secara terbuka.
+                Menyediakan berita, pengumuman, agenda, dan dokumen resmi secara
+                terbuka.
               </p>
             </div>
 
@@ -208,7 +210,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="rounded-[2rem] bg-gradient-to-r from-emerald-700 to-emerald-900 p-8 text-white shadow-sm md:p-10">
+        <div className="rounded-4xl bg-linear-to-r from-emerald-700 to-emerald-900 p-8 text-white shadow-sm md:p-10">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/75">
               Hubungi Kami

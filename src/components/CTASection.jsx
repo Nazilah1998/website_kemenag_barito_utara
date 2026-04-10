@@ -4,7 +4,7 @@ import { ctaData } from "../data/cta";
 export default function CTASection() {
   return (
     <section className="mt-12">
-      <div className="rounded-[28px] bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-700 px-6 py-10 text-white md:px-10">
+      <div className="rounded-[28px] bg-linear-to-r from-emerald-900 via-emerald-800 to-teal-700 px-6 py-10 text-white md:px-10">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
             <h2 className="text-3xl font-bold">{ctaData.title}</h2>

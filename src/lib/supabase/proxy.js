@@ -3,9 +3,7 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 
 export async function updateSession(request) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     env.supabaseUrl,
@@ -20,9 +18,7 @@ export async function updateSession(request) {
             request.cookies.set(name, value);
           });
 
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next({ request });
 
           cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options);
@@ -35,9 +31,26 @@ export async function updateSession(request) {
           }
         },
       },
-    }
+    },
   );
 
-  await supabase.auth.getClaims();
+  try {
+    await supabase.auth.getClaims();
+  } catch (error) {
+    console.warn(
+      "Supabase session invalid, clearing stale cookies...",
+      error?.message,
+    );
+
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith("sb-")) {
+        supabaseResponse.cookies.set(cookie.name, "", {
+          path: "/",
+          maxAge: 0,
+        });
+      }
+    }
+  }
+
   return supabaseResponse;
 }
