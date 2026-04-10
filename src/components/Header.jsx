@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getNavigationItems } from "../data/navigation";
 import { siteInfo, siteLinks } from "../data/site";
@@ -22,17 +22,17 @@ function isItemActive(pathname, item) {
   return false;
 }
 
-function SearchIcon() {
+function SearchIcon({ className = "" }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      className="h-5 w-5"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
+      className={`h-5 w-5 ${className}`}
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />
@@ -40,10 +40,115 @@ function SearchIcon() {
   );
 }
 
+function ChevronDownIcon({ className = "" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`h-4 w-4 ${className}`}
+    >
+      <path d="m6 8 4 4 4-4" />
+    </svg>
+  );
+}
+
+function MenuItemArrowIcon({ className = "" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`h-4 w-4 ${className}`}
+    >
+      <path d="M7 13l4-4-4-4" />
+    </svg>
+  );
+}
+
+function HamburgerIcon({ className = "" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`h-5 w-5 ${className}`}
+    >
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className = "" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`h-5 w-5 ${className}`}
+    >
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </svg>
+  );
+}
+
+function HeaderSearchForm({
+  value,
+  onChange,
+  onSubmit,
+  placeholder,
+  buttonLabel,
+  compact = false,
+}) {
+  return (
+    <form
+      onSubmit={onSubmit}
+      className={`flex items-center gap-3 rounded-full border border-slate-200 bg-white shadow-sm transition focus-within:border-emerald-300 focus-within:ring-4 focus-within:ring-emerald-100 ${compact ? "h-12 w-full px-4" : "h-12 w-full max-w-62.5 px-4"
+        }`}
+    >
+      <SearchIcon className="shrink-0 text-slate-400" />
+      <input
+        type="search"
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+      />
+      <button
+        type="submit"
+        className="inline-flex shrink-0 items-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+      >
+        {buttonLabel}
+      </button>
+    </form>
+  );
+}
+
+
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { locale, t } = useLanguage();
+
   const navigationItems = useMemo(() => getNavigationItems(locale), [locale]);
 
   const [adminState, setAdminState] = useState({
@@ -51,8 +156,10 @@ export default function Header() {
     isAdmin: false,
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDesktopDropdown, setOpenDesktopDropdown] = useState(null);
   const [openMobileDropdown, setOpenMobileDropdown] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const desktopDropdownRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -76,7 +183,7 @@ export default function Header() {
           loaded: true,
           isAdmin: Boolean(data?.permissions?.isAdmin),
         });
-      } catch (error) {
+      } catch {
         if (!mounted) return;
 
         setAdminState({
@@ -96,7 +203,35 @@ export default function Header() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setOpenMobileDropdown({});
+    setOpenDesktopDropdown(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        desktopDropdownRef.current &&
+        !desktopDropdownRef.current.contains(event.target)
+      ) {
+        setOpenDesktopDropdown(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
@@ -114,8 +249,13 @@ export default function Header() {
     }));
   }
 
+  function toggleDesktopDropdown(label) {
+    setOpenDesktopDropdown((prev) => (prev === label ? null : label));
+  }
+
   function handleSearchSubmit(event) {
     event.preventDefault();
+
     const query = searchQuery.trim();
     closeMobileMenu();
 
@@ -127,115 +267,141 @@ export default function Header() {
     router.push(`/pencarian?q=${encodeURIComponent(query)}`);
   }
 
+
   const desktopLinkClass = (active) =>
     active
-      ? "inline-flex h-11 items-center rounded-2xl bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-      : "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-emerald-400";
+      ? "inline-flex h-11 items-center rounded-2xl bg-emerald-50 px-4 text-sm font-semibold text-emerald-700"
+      : "inline-flex h-11 items-center rounded-2xl px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700";
 
   const mobileLinkClass = (active) =>
     active
-      ? "block rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-      : "block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-emerald-400";
+      ? "block rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+      : "block rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
-      <div className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2 text-xs text-slate-600 md:flex-row md:items-center md:justify-between dark:text-slate-300">
-          <div className="hidden items-center gap-4 md:flex">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+      <div className="hidden border-b border-white/10 bg-slate-900 text-slate-200 lg:block">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-6 text-xs">
             <a
               href={siteLinks.emailHref}
-              className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
+              className="transition hover:text-white"
+              aria-label={`Email ${siteInfo.email}`}
             >
               Email: {siteInfo.email}
             </a>
+
             <a
               href={siteLinks.phoneHref}
-              className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
+              className="transition hover:text-white"
+              aria-label={`Telepon ${siteInfo.phone}`}
             >
               Telepon: {siteInfo.phone}
             </a>
           </div>
 
-          <div className="flex items-center justify-between gap-3 md:justify-end">
+          <div className="flex items-center gap-4 text-xs">
             <span>{siteInfo.officeHours}</span>
-            <Link
-              href="/kontak"
-              className="font-medium text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
-            >
+            <Link href="/kontak" className="font-semibold text-emerald-400">
               {t("header.contact")}
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="flex items-center justify-between gap-4 py-4 xl:gap-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-18.5 items-center justify-between gap-4">
           <Link
             href="/"
-            className="flex min-w-0 items-center gap-3 xl:w-[390px] xl:flex-shrink-0"
+            className="flex min-w-0 items-center gap-3 xl:min-w-95"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-500/10">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 shadow-sm">
               <Image
                 src={siteInfo.logoSrc}
                 alt={siteInfo.shortName}
                 width={34}
                 height={34}
+                priority
                 className="h-8 w-8 object-contain"
               />
             </div>
 
             <div className="min-w-0">
-              <p className="whitespace-nowrap text-sm font-extrabold uppercase tracking-[0.08em] text-slate-900 md:text-base dark:text-slate-100">
+              <p className="whitespace-nowrap text-[17px] font-extrabold tracking-[0.01em] text-slate-900 xl:text-[18px]">
                 {siteInfo.shortName}
               </p>
-              <p className="mt-1 whitespace-nowrap text-xs text-slate-600 dark:text-slate-400">
+              <p className="hidden whitespace-nowrap text-[11px] leading-none text-slate-500 xl:block">
                 {siteInfo.tagline}
               </p>
             </div>
           </Link>
 
-          <nav className="hidden xl:flex xl:flex-1 xl:items-center xl:gap-1 xl:pl-5">
+          <nav className="hidden items-center gap-0.5 xl:ml-10 xl:flex">
             {navigationItems.map((item) => {
               const active = isItemActive(pathname, item);
 
               if (item.children?.length) {
                 return (
-                  <div key={item.label} className="group relative">
+                  <div
+                    key={item.label}
+                    className="relative"
+                    ref={openDesktopDropdown === item.label ? desktopDropdownRef : null}
+                  >
                     <button
                       type="button"
+                      onClick={() => toggleDesktopDropdown(item.label)}
                       className={`${desktopLinkClass(active)} gap-2`}
+                      aria-haspopup="menu"
+                      aria-expanded={openDesktopDropdown === item.label}
                     >
-                      {item.label}
-                      <span className="text-xs">▾</span>
+                      <span>{item.label}</span>
+                      <ChevronDownIcon
+                        className={`transition duration-200 ${openDesktopDropdown === item.label ? "rotate-180" : ""
+                          }`}
+                      />
                     </button>
 
-                    <div className="invisible absolute left-0 top-full z-30 mt-2 min-w-[220px] rounded-2xl border border-slate-200 bg-white p-2 opacity-0 shadow-lg transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-slate-800 dark:bg-slate-900">
-                      {item.children.map((child) => {
-                        const childActive = isPathActive(pathname, child.href);
+                    {openDesktopDropdown === item.label ? (
+                      <div className="absolute left-1/2 top-full z-50 mt-3 w-[320px] -translate-x-1/2">
+                        <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.14)] backdrop-blur-xl">
+                          <div className="mb-2 px-3 pt-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                              Menu {item.label}
+                            </p>
+                          </div>
 
-                        return (
-                          <Link
-                            key={child.label}
-                            href={child.href}
-                            className={
-                              childActive
-                                ? "block rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                                : "block rounded-xl px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-emerald-400"
-                            }
-                          >
-                            {child.label}
-                          </Link>
-                        );
-                      })}
-                    </div>
+                          <div className="space-y-1">
+                            {item.children.map((child) => {
+                              const childActive = isPathActive(pathname, child.href);
+
+                              return (
+                                <Link
+                                  key={child.href}
+                                  href={child.href}
+                                  onClick={() => setOpenDesktopDropdown(null)}
+                                  className={
+                                    childActive
+                                      ? "group flex items-center justify-between rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+                                      : "group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700"
+                                  }
+                                >
+                                  <span className="leading-6">{child.label}</span>
+                                  <MenuItemArrowIcon className="opacity-60 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 );
               }
 
               return (
                 <Link
-                  key={item.label}
-                  href={item.href}
+                  key={item.href || item.label}
+                  href={item.href || "/"}
                   className={desktopLinkClass(active)}
                 >
                   {item.label}
@@ -244,31 +410,19 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden xl:flex xl:flex-shrink-0 xl:items-center xl:gap-3">
-            <form
+          <div className="hidden items-center gap-3 xl:flex">
+            <HeaderSearchForm
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               onSubmit={handleSearchSubmit}
-              className="flex h-11 items-center gap-3 rounded-full border border-slate-200 bg-white pl-4 pr-2 dark:border-slate-800 dark:bg-slate-900"
-            >
-              <SearchIcon />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder={t("header.searchPlaceholder")}
-                className="w-56 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
-              />
-              <button
-                type="submit"
-                className="inline-flex h-8 items-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
-              >
-                {t("common.search")}
-              </button>
-            </form>
+              placeholder={t("header.searchPlaceholder")}
+              buttonLabel={t("common.search")}
+            />
 
             {adminState.loaded && adminState.isAdmin ? (
               <Link
                 href="/admin"
-                className="inline-flex h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                className="inline-flex h-12 items-center rounded-full border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700"
               >
                 Admin
               </Link>
@@ -278,140 +432,144 @@ export default function Header() {
           <button
             type="button"
             onClick={toggleMobileMenu}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-700 transition hover:bg-slate-50 xl:hidden dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-            aria-label={
-              isMobileMenuOpen ? t("header.closeMenu") : t("header.openMenu")
-            }
-            title={
-              isMobileMenuOpen ? t("header.closeMenu") : t("header.openMenu")
-            }
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-emerald-200 hover:text-emerald-700 xl:hidden"
+            aria-expanded={isMobileMenuOpen}
+            aria-label={isMobileMenuOpen ? "Tutup menu" : "Buka menu"}
           >
-            {isMobileMenuOpen ? "✕" : "☰"}
+            {isMobileMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
           </button>
         </div>
       </div>
 
-      {isMobileMenuOpen && (
-        <div className="border-t border-slate-200 pb-5 pt-4 xl:hidden dark:border-slate-800">
-          <div className="mx-auto max-w-7xl space-y-4 px-4">
-            <form
-              onSubmit={handleSearchSubmit}
-              className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
-            >
-              <SearchIcon />
-              <input
-                type="text"
+      {isMobileMenuOpen ? (
+        <div className="border-t border-slate-200 bg-white xl:hidden">
+          <div className="mx-auto max-h-[calc(100vh-74px)] max-w-7xl overflow-y-auto px-4 py-4 sm:px-6">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+              <HeaderSearchForm
+                compact
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
+                onSubmit={handleSearchSubmit}
                 placeholder={t("header.searchPlaceholder")}
-                className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+                buttonLabel={t("common.search")}
               />
-              <button
-                type="submit"
-                className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
-              >
-                {t("common.search")}
-              </button>
-            </form>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-              <p className="font-semibold">{siteInfo.officeHours}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <a
-                  href={siteLinks.emailHref}
-                  className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium hover:bg-white dark:border-slate-700 dark:hover:bg-slate-800"
-                >
-                  Email
-                </a>
-                <a
-                  href={siteLinks.phoneHref}
-                  className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium hover:bg-white dark:border-slate-700 dark:hover:bg-slate-800"
-                >
-                  Telepon
-                </a>
-                <Link
-                  href="/kontak"
-                  className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium hover:bg-white dark:border-slate-700 dark:hover:bg-slate-800"
-                >
-                  Kontak
-                </Link>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Jam Layanan
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-700">
+                    {siteInfo.officeHours}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Kontak Cepat
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <a
+                      href={siteLinks.emailHref}
+                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700"
+                    >
+                      Email
+                    </a>
+                    <a
+                      href={siteLinks.phoneHref}
+                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700"
+                    >
+                      Telepon
+                    </a>
+                    <Link
+                      href="/kontak"
+                      className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"
+                    >
+                      Kontak
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {adminState.loaded && adminState.isAdmin ? (
-              <Link
-                href="/admin"
-                className="block rounded-2xl bg-emerald-600 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-emerald-700"
-              >
-                Admin
-              </Link>
-            ) : null}
+              {adminState.loaded && adminState.isAdmin ? (
+                <Link
+                  href="/admin"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:text-emerald-700"
+                >
+                  Admin
+                </Link>
+              ) : null}
 
-            <nav className="space-y-2">
-              {navigationItems.map((item) => {
-                const active = isItemActive(pathname, item);
+              <nav className="mt-4 space-y-2">
+                {navigationItems.map((item) => {
+                  const active = isItemActive(pathname, item);
 
-                if (item.children?.length) {
-                  const isOpen = !!openMobileDropdown[item.label];
+                  if (item.children?.length) {
+                    const isOpen = !!openMobileDropdown[item.label];
+
+                    return (
+                      <div
+                        key={item.label}
+                        className="rounded-2xl border border-slate-200 bg-white p-2"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleMobileDropdown(item.label)}
+                          className={
+                            active
+                              ? "flex w-full items-center justify-between rounded-2xl bg-emerald-50 px-4 py-3 text-left text-sm font-semibold text-emerald-700"
+                              : "flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+                          }
+                          aria-expanded={isOpen}
+                        >
+                          <span>{item.label}</span>
+                          <ChevronDownIcon
+                            className={`transition duration-200 ${isOpen ? "rotate-180" : ""
+                              }`}
+                          />
+                        </button>
+
+                        {isOpen ? (
+                          <div className="mt-2 space-y-1 pl-2">
+                            {item.children.map((child) => {
+                              const childActive = isPathActive(pathname, child.href);
+
+                              return (
+                                <Link
+                                  key={child.href}
+                                  href={child.href}
+                                  className={
+                                    childActive
+                                      ? "flex items-center justify-between rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+                                      : "flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+                                  }
+                                >
+                                  <span>{child.label}</span>
+                                  <MenuItemArrowIcon className="opacity-60" />
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  }
 
                   return (
-                    <div
-                      key={item.label}
-                      className="rounded-2xl border border-slate-200 p-2 dark:border-slate-800"
+                    <Link
+                      key={item.href || item.label}
+                      href={item.href || "/"}
+                      className={mobileLinkClass(active)}
                     >
-                      <button
-                        type="button"
-                        onClick={() => toggleMobileDropdown(item.label)}
-                        className={
-                          active
-                            ? "flex w-full items-center justify-between rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                            : "flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
-                        }
-                      >
-                        {item.label}
-                        <span>{isOpen ? "▴" : "▾"}</span>
-                      </button>
-
-                      {isOpen && (
-                        <div className="mt-2 space-y-1">
-                          {item.children.map((child) => {
-                            const childActive = isPathActive(
-                              pathname,
-                              child.href
-                            );
-
-                            return (
-                              <Link
-                                key={child.href}
-                                href={child.href}
-                                onClick={closeMobileMenu}
-                                className={mobileLinkClass(childActive)}
-                              >
-                                {child.label}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                      {item.label}
+                    </Link>
                   );
-                }
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={closeMobileMenu}
-                    className={mobileLinkClass(active)}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+                })}
+              </nav>
+            </div>
           </div>
         </div>
-      )}
+      ) : null}
     </header>
   );
 }

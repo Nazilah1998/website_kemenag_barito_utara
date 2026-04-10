@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 const profileLinks = [
   { label: "Profil Instansi", href: "/profil" },
   { label: "Visi & Misi", href: "/profil/visi-misi" },
+  { label: "5 Nilai Budaya Kerja", href: "/profil/nilai-budaya-kerja" },
   { label: "Struktur Organisasi", href: "/profil/struktur-organisasi" },
-  { label: "Profil Pimpinan", href: "/profil/pimpinan" },
+  { label: "Sejarah Singkat Kabupaten", href: "/profil/sejarah-singkat-kabupaten" },
+  { label: "Profil Kepala Kantor", href: "/profil/pimpinan" },
 ];
 
 function isActive(pathname, href) {
@@ -18,28 +20,26 @@ export default function ProfileSubnav() {
   const pathname = usePathname();
 
   return (
-    <section className="pb-8">
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm md:p-5">
-        <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
-          {profileLinks.map((item) => {
-            const active = isActive(pathname, item.href);
+    <div className="rounded-3xl border border-slate-200 bg-white/90 p-3 shadow-sm backdrop-blur">
+      <div className="flex flex-wrap gap-3">
+        {profileLinks.map((item) => {
+          const active = isActive(pathname, item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  active
-                    ? "inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white"
-                    : "inline-flex items-center justify-center rounded-2xl bg-slate-50 px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
-                }
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={
+                active
+                  ? "inline-flex items-center rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm"
+                  : "inline-flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+              }
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </div>
-    </section>
+    </div>
   );
 }

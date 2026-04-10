@@ -14,8 +14,13 @@ export function getNavigationItems(locale = "id") {
       children: [
         { label: nav.profileOverview, href: "/profil" },
         { label: nav.visionMission, href: "/profil/visi-misi" },
+        { label: nav.workCulture, href: "/profil/nilai-budaya-kerja" },
         { label: nav.structure, href: "/profil/struktur-organisasi" },
-        { label: nav.leaders, href: "/profil/pimpinan" },
+        {
+          label: nav.regencyHistory,
+          href: "/profil/sejarah-singkat-kabupaten",
+        },
+        { label: nav.headProfile, href: "/profil/pimpinan" },
       ],
     },
     {

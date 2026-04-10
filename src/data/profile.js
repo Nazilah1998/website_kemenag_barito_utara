@@ -130,3 +130,42 @@ export const leadershipProfiles = [
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
 ];
+
+export const workCultureValues = [
+  {
+    title: "Integritas",
+    description:
+      "Menjunjung kejujuran, konsistensi, dan komitmen dalam setiap pelaksanaan tugas dan pelayanan publik.",
+  },
+  {
+    title: "Profesionalitas",
+    description:
+      "Bekerja secara kompeten, disiplin, tepat sasaran, dan terus meningkatkan kualitas layanan kepada masyarakat.",
+  },
+  {
+    title: "Inovasi",
+    description:
+      "Mendorong pembaruan, kreativitas, dan perbaikan berkelanjutan agar pelayanan semakin mudah dan relevan.",
+  },
+  {
+    title: "Tanggung Jawab",
+    description:
+      "Menjalankan amanah pekerjaan dengan sungguh-sungguh, akuntabel, dan berorientasi pada hasil yang bermanfaat.",
+  },
+  {
+    title: "Keteladanan",
+    description:
+      "Menampilkan sikap dan perilaku yang dapat menjadi contoh baik dalam pelayanan, etika, dan kehidupan bermasyarakat.",
+  },
+];
+
+export const regencyHistory = {
+  title: "Sejarah Singkat Kabupaten Barito Utara",
+  intro:
+    "Kabupaten Barito Utara merupakan salah satu kabupaten di Provinsi Kalimantan Tengah yang memiliki posisi strategis dalam perkembangan wilayah hulu Sungai Barito.",
+  paragraphs: [
+    "Wilayah ini dikenal memiliki perjalanan sejarah yang erat dengan perkembangan pemerintahan daerah, aktivitas sosial masyarakat, dan pertumbuhan pusat-pusat pelayanan publik di Kalimantan Tengah.",
+    "Dalam perkembangannya, Kabupaten Barito Utara tumbuh sebagai daerah yang memiliki peran penting dalam pelayanan masyarakat, pendidikan, pembangunan daerah, serta pembinaan kehidupan keagamaan yang harmonis.",
+    "Sebagai bagian dari pelayanan pemerintah di daerah, Kantor Kementerian Agama Kabupaten Barito Utara hadir untuk mendukung pembinaan umat, layanan keagamaan, pendidikan keagamaan, serta penguatan tata kelola kelembagaan yang profesional.",
+  ],
+};
