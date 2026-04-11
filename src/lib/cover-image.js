@@ -1,54 +1,82 @@
-export function extractGoogleDriveFileId(input = "") {
-  const value = String(input || "").trim();
-  if (!value) return null;
+function extractGoogleDriveFileId(value = "") {
+  const input = String(value || "").trim();
+  if (!input) return "";
 
-  const patterns = [
-    /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i,
-    /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/i,
-    /drive\.google\.com\/uc\?(?:.*&)?id=([a-zA-Z0-9_-]+)/i,
-    /drive\.google\.com\/thumbnail\?(?:.*&)?id=([a-zA-Z0-9_-]+)/i,
-    /[?&]id=([a-zA-Z0-9_-]{10,})/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = value.match(pattern);
-    if (match?.[1]) return match[1];
-  }
+  const directIdMatch = input.match(/^[a-zA-Z0-9_-]{20,}$/);
+  if (directIdMatch) return directIdMatch[0];
 
   try {
-    const url = new URL(value);
-    const id = url.searchParams.get("id");
-    if (id) return id;
+    const url = new URL(input);
 
-    const pathMatch = url.pathname.match(/\/d\/([a-zA-Z0-9_-]+)/i);
-    if (pathMatch?.[1]) return pathMatch[1];
+    const idFromQuery = url.searchParams.get("id");
+    if (idFromQuery) return idFromQuery;
+
+    const fileMatch = url.pathname.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (fileMatch?.[1]) return fileMatch[1];
+
+    const docMatch = url.pathname.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+    if (docMatch?.[1]) return docMatch[1];
+
+    const sheetMatch = url.pathname.match(
+      /\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/,
+    );
+    if (sheetMatch?.[1]) return sheetMatch[1];
+
+    const presentationMatch = url.pathname.match(
+      /\/presentation\/d\/([a-zA-Z0-9_-]+)/,
+    );
+    if (presentationMatch?.[1]) return presentationMatch[1];
   } catch {
-    return null;
+    return "";
   }
 
-  return null;
+  return "";
 }
 
-export function normalizeGoogleDriveImageUrl(input = "") {
-  const value = String(input || "").trim();
-  if (!value) return "";
-
+function normalizeGoogleDriveUrl(value = "") {
   const fileId = extractGoogleDriveFileId(value);
-  if (!fileId) return value;
+  if (!fileId) return String(value || "").trim();
 
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
+  return `https://drive.google.com/uc?export=view&id=${fileId}`;
 }
 
-export function normalizeCoverImageUrl(input = "") {
-  const value = String(input || "").trim();
-  if (!value) return "";
+export function normalizeCoverImageUrl(value = "") {
+  const input = String(value || "").trim();
+  if (!input) return "";
 
-  if (
-    value.includes("drive.google.com") ||
-    value.includes("docs.google.com")
-  ) {
-    return normalizeGoogleDriveImageUrl(value);
+  if (input.startsWith("/")) return input;
+
+  if (/^https?:\/\//i.test(input)) {
+    try {
+      const url = new URL(input);
+
+      if (
+        url.hostname === "drive.google.com" ||
+        url.hostname === "docs.google.com"
+      ) {
+        return normalizeGoogleDriveUrl(input);
+      }
+
+      return input;
+    } catch {
+      return "";
+    }
   }
 
-  return value;
+  const googleDriveId = extractGoogleDriveFileId(input);
+  if (googleDriveId) {
+    return normalizeGoogleDriveUrl(googleDriveId);
+  }
+
+  return input;
+}
+
+export function toCoverPreviewUrl(value = "") {
+  const normalized = normalizeCoverImageUrl(value);
+  if (!normalized) return "";
+
+  if (normalized.startsWith("/")) return normalized;
+  if (!/^https?:\/\//i.test(normalized)) return normalized;
+
+  return `/api/image-proxy?url=${encodeURIComponent(normalized)}`;
 }

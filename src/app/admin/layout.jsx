@@ -17,15 +17,18 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 lg:flex">
       <AdminSidebar
         mobileOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
       />
 
-      <div className="md:pl-72">
+      <div className="min-w-0 flex-1">
         <AdminHeader onOpenSidebar={() => setMobileOpen(true)} />
-        <main className="px-4 py-6 md:px-8">{children}</main>
+
+        <main className="min-w-0 px-4 py-6 md:px-6 xl:px-8">
+          {children}
+        </main>
       </div>
     </div>
   );

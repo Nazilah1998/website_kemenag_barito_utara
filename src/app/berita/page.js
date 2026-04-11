@@ -2,10 +2,48 @@ import Image from "next/image";
 import Link from "next/link";
 import PageBanner from "../../components/PageBanner";
 import NewsPagination from "../../components/berita/NewsPagination";
-import { getAllBerita } from "../../lib/berita";
+import BeritaFilters from "../../components/berita/BeritaFilters";
+import BeritaViewsBadge from "../../components/berita/BeritaViewsBadge";
+import {
+  filterAndSortBerita,
+  getAllBerita,
+  getAvailableBeritaCategories,
+} from "../../lib/berita";
 
 const ITEMS_PER_PAGE = 6;
 const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+
+function getAvailableBeritaMonths(items = []) {
+  const formatter = new Intl.DateTimeFormat("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const uniqueMonths = new Map();
+
+  items.forEach((item) => {
+    const isoDate = String(item.isoDate || "");
+    const monthValue = isoDate.slice(0, 7);
+
+    if (!monthValue || uniqueMonths.has(monthValue)) return;
+
+    const date = new Date(`${monthValue}-01T00:00:00`);
+    if (Number.isNaN(date.getTime())) return;
+
+    const label =
+      formatter.format(date).charAt(0).toUpperCase() +
+      formatter.format(date).slice(1);
+
+    uniqueMonths.set(monthValue, {
+      value: monthValue,
+      label,
+    });
+  });
+
+  return Array.from(uniqueMonths.values()).sort((a, b) =>
+    b.value.localeCompare(a.value),
+  );
+}
 
 function clampPage(value, max) {
   if (!Number.isFinite(value) || value < 1) return 1;
@@ -21,53 +59,59 @@ function FeaturedNewsCard({ item }) {
   if (!item) return null;
 
   return (
-    <article className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
-      <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="relative min-h-70 bg-slate-100">
+    <article className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
+      <div className="grid lg:grid-cols-[1.2fr_0.9fr]">
+        <Link
+          href={`/berita/${item.slug}`}
+          className="relative block min-h-75 overflow-hidden bg-slate-100"
+        >
           <Image
             src={getCoverImage(item)}
             alt={item.title}
             fill
-            className="object-cover"
+            className="object-cover transition duration-500 hover:scale-[1.02]"
             sizes="(max-width: 1024px) 100vw, 60vw"
             priority
           />
-        </div>
+        </Link>
 
-        <div className="flex flex-col justify-between p-8">
-          <div>
-            <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-              Berita Terbaru
-            </span>
+        <div className="flex flex-col justify-center p-6 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
+            Berita Terbaru
+          </p>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-              <span>{item.date}</span>
-              {item.category ? (
-                <>
-                  <span>•</span>
-                  <span className="font-medium text-emerald-700">
-                    {item.category}
-                  </span>
-                </>
-              ) : null}
-            </div>
-
-            <h2 className="mt-4 text-3xl font-bold leading-tight text-slate-900">
-              {item.title}
-            </h2>
-
-            <p className="mt-4 text-base leading-8 text-slate-600">
-              {item.excerpt || "Berita terbaru dari Kemenag Barito Utara."}
-            </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+            <span>{item.date}</span>
+            {item.category ? (
+              <>
+                <span>•</span>
+                <span>{item.category}</span>
+              </>
+            ) : null}
           </div>
 
-          <div className="mt-8">
+          <h2 className="mt-4 text-3xl font-bold leading-tight text-slate-900">
             <Link
               href={`/berita/${item.slug}`}
-              className="inline-flex items-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+              className="hover:text-emerald-700"
+            >
+              {item.title}
+            </Link>
+          </h2>
+
+          <p className="mt-4 text-slate-600">
+            {item.excerpt || "Berita terbaru dari Kemenag Barito Utara."}
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <Link
+              href={`/berita/${item.slug}`}
+              className="inline-flex h-12 items-center justify-center rounded-2xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800"
             >
               Baca selengkapnya
             </Link>
+
+            <BeritaViewsBadge views={item.views} />
           </div>
         </div>
       </div>
@@ -77,127 +121,196 @@ function FeaturedNewsCard({ item }) {
 
 function NewsCard({ item }) {
   return (
-    <article className="overflow-hidden rounded-[26px] border border-slate-200 bg-[#061635] text-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-      <div className="relative aspect-16/10 bg-slate-100">
+    <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+      <Link
+        href={`/berita/${item.slug}`}
+        className="relative block aspect-16/10 overflow-hidden bg-slate-100"
+      >
         <Image
           src={getCoverImage(item)}
           alt={item.title}
           fill
-          className="object-cover"
+          className="object-cover transition duration-500 group-hover:scale-[1.03]"
           sizes="(max-width: 768px) 100vw, 33vw"
         />
-      </div>
+      </Link>
 
-      <div className="p-6">
-        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300">
+      <div className="p-5">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
           <span>{item.date}</span>
           {item.category ? (
             <>
               <span>•</span>
-              <span className="font-semibold text-emerald-400">
-                {item.category}
-              </span>
+              <span>{item.category}</span>
             </>
           ) : null}
         </div>
 
-        <h3 className="mt-4 line-clamp-2 text-2xl font-bold leading-snug text-white">
-          {item.title}
+        <h3 className="mt-3 text-xl font-bold leading-snug text-slate-900">
+          <Link
+            href={`/berita/${item.slug}`}
+            className="hover:text-emerald-700"
+          >
+            {item.title}
+          </Link>
         </h3>
 
-        <p className="mt-4 line-clamp-3 text-sm leading-7 text-slate-300">
+        <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
           {item.excerpt || "Klik untuk membaca berita selengkapnya."}
         </p>
 
-        <Link
-          href={`/berita/${item.slug}`}
-          className="mt-6 inline-flex items-center text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
-        >
-          Baca selengkapnya →
-        </Link>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Link
+            href={`/berita/${item.slug}`}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+          >
+            Baca selengkapnya
+            <span aria-hidden="true">→</span>
+          </Link>
+
+          <BeritaViewsBadge views={item.views} />
+        </div>
       </div>
     </article>
   );
 }
 
 export const metadata = {
-  title: "Berita | Kemenag Barito Utara",
-  description: "Informasi dan kegiatan terbaru Kemenag Barito Utara",
+  title: "Berita",
+  description:
+    "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
+  alternates: {
+    canonical: "/berita",
+  },
+  openGraph: {
+    title: "Berita",
+    description:
+      "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
+    url: "/berita",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Berita",
+    description:
+      "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
+  },
 };
 
 export const dynamic = "force-dynamic";
 
 export default async function BeritaPage({ searchParams }) {
   const params = await searchParams;
-  const beritaList = await getAllBerita();
 
-  const latestNews = beritaList[0] ?? null;
-  const remainingNews = beritaList.slice(1);
+  const q = typeof params?.q === "string" ? params.q.trim() : "";
+  const category = typeof params?.category === "string" ? params.category : "";
+  const month = typeof params?.month === "string" ? params.month : "";
+  const sort = typeof params?.sort === "string" ? params.sort : "newest";
+
+  const beritaList = await getAllBerita();
+  const categories = getAvailableBeritaCategories(beritaList);
+  const months = getAvailableBeritaMonths(beritaList);
+
+  const filteredBerita = filterAndSortBerita(beritaList, {
+    q,
+    category,
+    month,
+    sort,
+  });
+
+  const totalResults = filteredBerita.length;
+  const latestNews = filteredBerita[0] ?? null;
+  const remainingNews = filteredBerita.slice(1);
 
   const totalPages = Math.max(
     1,
     Math.ceil(remainingNews.length / ITEMS_PER_PAGE),
   );
-  const currentPage = clampPage(Number(params?.page ?? 1), totalPages);
 
+  const currentPage = clampPage(Number(params?.page ?? 1), totalPages);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedNews = remainingNews.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE,
   );
 
+  const showFeatured = currentPage === 1 && latestNews;
+
   return (
     <>
       <PageBanner
+        breadcrumbItems={[
+          { label: "Beranda", href: "/" },
+          { label: "Berita", href: "/berita" },
+        ]}
         title="Berita"
         description="Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara."
-        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Berita" }]}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {latestNews ? (
-          <FeaturedNewsCard item={latestNews} />
-        ) : (
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-slate-600 shadow-sm">
-            Belum ada berita yang dipublikasikan.
-          </div>
-        )}
+      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8">
+        <BeritaFilters
+          categories={categories}
+          months={months}
+          values={{ q, category, month, sort }}
+          totalResults={totalResults}
+        />
 
-        <section className="mt-10">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                Arsip Berita
-              </p>
-              <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                Berita Lainnya
-              </h2>
-            </div>
+        {showFeatured ? <FeaturedNewsCard item={latestNews} /> : null}
 
-            <div className="text-sm text-slate-500">
-              Menampilkan {paginatedNews.length} berita
-            </div>
+        <div className="mt-10 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
+              Arsip Berita
+            </p>
+            <h2 className="mt-2 text-3xl font-bold text-slate-900">
+              Berita Lainnya
+            </h2>
           </div>
 
-          {paginatedNews.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="text-sm text-slate-500">
+            {showFeatured
+              ? `Menampilkan ${paginatedNews.length} dari ${remainingNews.length} berita arsip`
+              : `Menampilkan ${paginatedNews.length} dari ${totalResults} berita`}
+          </div>
+        </div>
+
+        {paginatedNews.length > 0 ? (
+          <>
+            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {paginatedNews.map((item) => (
-                <NewsCard key={item.id || item.slug} item={item} />
+                <NewsCard key={item.id} item={item} />
               ))}
             </div>
-          ) : (
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-slate-600 shadow-sm">
-              Belum ada berita lain untuk ditampilkan.
-            </div>
-          )}
 
-          <NewsPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            basePath="/berita"
-          />
-        </section>
-      </main>
+            <NewsPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              basePath="/berita"
+              searchParams={{ q, category, month, sort }}
+            />
+          </>
+        ) : totalResults > 0 && showFeatured ? (
+          <div className="mt-6 rounded-[28px] border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-600">
+            Belum ada berita arsip lain untuk halaman ini.
+          </div>
+        ) : (
+          <div className="mt-6 rounded-[28px] border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+            <h3 className="text-xl font-semibold text-slate-900">
+              Berita tidak ditemukan
+            </h3>
+            <p className="mt-2 text-slate-600">
+              Coba ubah kata kunci pencarian atau reset filter yang sedang
+              aktif.
+            </p>
+            <Link
+              href="/berita"
+              className="mt-5 inline-flex h-11 items-center justify-center rounded-2xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              Reset filter
+            </Link>
+          </div>
+        )}
+      </section>
     </>
   );
 }

@@ -50,17 +50,43 @@ function buildPagination(totalPages, currentPage) {
     return [1, "...", currentPage, "...", totalPages];
 }
 
+function buildSearchString(searchParams = {}, page) {
+    const params = new URLSearchParams();
+
+    Object.entries(searchParams || {}).forEach(([key, value]) => {
+        if (key === "page") return;
+        if (value === undefined || value === null || value === "") return;
+
+        if (Array.isArray(value)) {
+            value
+                .filter(Boolean)
+                .forEach((item) => params.append(key, String(item)));
+            return;
+        }
+
+        params.set(key, String(value));
+    });
+
+    if (page > 1) {
+        params.set("page", String(page));
+    }
+
+    const queryString = params.toString();
+    return queryString ? `?${queryString}` : "";
+}
+
 export default function NewsPagination({
     currentPage,
     totalPages,
     basePath = "/berita",
+    searchParams = {},
 }) {
     if (totalPages <= 1) return null;
 
     const items = buildPagination(totalPages, currentPage);
 
     function pageHref(page) {
-        return page <= 1 ? basePath : `${basePath}?page=${page}`;
+        return `${basePath}${buildSearchString(searchParams, page)}`;
     }
 
     return (

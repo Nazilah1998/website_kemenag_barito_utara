@@ -24,6 +24,9 @@ export const siteInfo = {
   address: "Jl. Ahmad Yani No.126 Muara Teweh 73811",
   complaintHref: "/kontak",
   logoSrc: "/kemenag.svg",
+  siteUrl:
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://kemenag-baritoutara.vercel.app",
 };
 
 export const siteLinks = {

@@ -28,6 +28,11 @@ function mapMfaError(error) {
   return message;
 }
 
+function inputClassName(hasTrailingButton = false) {
+  return `w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 ${hasTrailingButton ? "pr-28" : ""
+    }`;
+}
+
 export default function AdminLoginClient({ initialUnauthorized = false }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -157,7 +162,10 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
       router.refresh();
     } catch (err) {
       console.error("handleSubmit error:", err);
-      setError(mapMfaError(err) || "Terjadi kesalahan jaringan. Coba lagi beberapa saat.");
+      setError(
+        mapMfaError(err) ||
+        "Terjadi kesalahan jaringan. Coba lagi beberapa saat."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -197,7 +205,9 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">
                     Panel Internal
                   </p>
-                  <h2 className="mt-1 text-lg font-bold">{siteInfo.shortName}</h2>
+                  <h2 className="mt-1 text-lg font-bold">
+                    {siteInfo.shortName}
+                  </h2>
                 </div>
               </div>
 
@@ -217,7 +227,9 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <p className="text-sm font-semibold text-white">Pengingat keamanan</p>
+              <p className="text-sm font-semibold text-white">
+                Pengingat keamanan
+              </p>
               <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
                 {securityPoints.map((item) => (
                   <li key={item} className="flex gap-3">
@@ -265,8 +277,9 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                   Masuk ke panel admin
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Gunakan akun admin Supabase yang sudah terdaftar. Setelah login,
-                  akun admin akan dicek status MFA-nya sebelum masuk ke dashboard.
+                  Gunakan akun admin Supabase yang sudah terdaftar. Setelah
+                  login, akun admin akan dicek status MFA-nya sebelum masuk ke
+                  dashboard.
                 </p>
               </div>
 
@@ -285,7 +298,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="nama@kemenag.go.id"
                     autoComplete="username"
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                    className={inputClassName(false)}
                     required
                   />
                 </div>
@@ -309,14 +322,14 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                       onBlur={() => setCapsLock(false)}
                       placeholder="Masukkan password admin"
                       autoComplete="current-password"
-                      className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 pr-28 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
+                      className={inputClassName(true)}
                       required
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-emerald-700"
                     >
                       {showPassword ? "Sembunyikan" : "Lihat"}
                     </button>
@@ -338,7 +351,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                 <button
                   type="submit"
                   disabled={submitDisabled}
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {submitting ? "Masuk..." : "Login Admin"}
                 </button>
@@ -350,7 +363,8 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                 </p>
                 <p className="mt-2 text-sm leading-7 text-slate-600">
                   Setelah email dan password benar, akun admin akan diarahkan ke
-                  verifikasi MFA atau setup authenticator jika belum pernah diaktifkan.
+                  verifikasi MFA atau setup authenticator jika belum pernah
+                  diaktifkan.
                 </p>
               </div>
             </div>

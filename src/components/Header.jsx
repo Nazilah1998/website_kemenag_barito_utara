@@ -282,7 +282,6 @@ export default function Header() {
     router.push(`/pencarian?q=${encodeURIComponent(query)}`);
   }
 
-
   const desktopLinkClass = (active) =>
     active
       ? "inline-flex h-11 items-center rounded-2xl bg-emerald-50 px-4 text-sm font-semibold text-emerald-700"
@@ -331,7 +330,11 @@ export default function Header() {
                   <div
                     key={item.label}
                     className="relative"
-                    ref={openDesktopDropdown === item.label ? desktopDropdownRef : null}
+                    ref={
+                      openDesktopDropdown === item.label
+                        ? desktopDropdownRef
+                        : null
+                    }
                   >
                     <button
                       type="button"
@@ -342,7 +345,9 @@ export default function Header() {
                     >
                       <span>{item.label}</span>
                       <ChevronDownIcon
-                        className={`transition duration-200 ${openDesktopDropdown === item.label ? "rotate-180" : ""
+                        className={`transition duration-200 ${openDesktopDropdown === item.label
+                          ? "rotate-180"
+                          : ""
                           }`}
                       />
                     </button>
@@ -358,7 +363,10 @@ export default function Header() {
 
                           <div className="space-y-1">
                             {item.children.map((child) => {
-                              const childActive = isPathActive(pathname, child.href);
+                              const childActive = isPathActive(
+                                pathname,
+                                child.href,
+                              );
 
                               return (
                                 <Link
@@ -371,7 +379,9 @@ export default function Header() {
                                       : "group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700"
                                   }
                                 >
-                                  <span className="leading-6">{child.label}</span>
+                                  <span className="leading-6">
+                                    {child.label}
+                                  </span>
                                   <MenuItemArrowIcon className="opacity-60 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
                                 </Link>
                               );
@@ -440,52 +450,6 @@ export default function Header() {
                 buttonLabel={t("common.search")}
               />
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Jam Layanan
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-700">
-                    {siteInfo.officeHours}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Kontak Cepat
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <a
-                      href={siteLinks.emailHref}
-                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700"
-                    >
-                      Email
-                    </a>
-                    <a
-                      href={siteLinks.phoneHref}
-                      className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700"
-                    >
-                      Telepon
-                    </a>
-                    <Link
-                      href="/kontak"
-                      className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"
-                    >
-                      Kontak
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {adminState.loaded && adminState.isAdmin ? (
-                <Link
-                  href="/admin"
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:text-emerald-700"
-                >
-                  Admin
-                </Link>
-              ) : null}
-
               <nav className="mt-4 space-y-2">
                 {navigationItems.map((item) => {
                   const active = isItemActive(pathname, item);
@@ -518,7 +482,10 @@ export default function Header() {
                         {isOpen ? (
                           <div className="mt-2 space-y-1 pl-2">
                             {item.children.map((child) => {
-                              const childActive = isPathActive(pathname, child.href);
+                              const childActive = isPathActive(
+                                pathname,
+                                child.href,
+                              );
 
                               return (
                                 <Link
@@ -551,6 +518,15 @@ export default function Header() {
                     </Link>
                   );
                 })}
+
+                {adminState.loaded && adminState.isAdmin ? (
+                  <Link
+                    href="/admin"
+                    className="block rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:text-emerald-700"
+                  >
+                    Admin
+                  </Link>
+                ) : null}
               </nav>
             </div>
           </div>
