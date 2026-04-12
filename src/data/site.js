@@ -11,7 +11,7 @@ export const siteInfo = {
   shortName: "KEMENAG BARITO UTARA",
   tagline: "Melayani Umat dengan Integritas dan Profesionalitas",
   description:
-    "Website resmi instansi untuk pelayanan informasi, publikasi kegiatan, pengumuman, agenda, dan akses layanan digital secara terpadu.",
+    "Kementerian Agama Kabupaten Barito Utara menyediakan informasi, publikasi kegiatan, pengumuman, agenda, dan akses layanan digital secara terpadu.",
   email: "kepegawaiankemenagbarut@gmail.com",
   phone: "(0519) 21269",
   phoneRaw: "051921269",

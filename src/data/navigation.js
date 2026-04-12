@@ -1,51 +1,84 @@
-import { messages } from "./i18n";
-
-export function getNavigationItems(locale = "id") {
-  const nav = messages[locale]?.nav ?? messages.id.nav;
-
+export function getNavigationItems() {
   return [
     {
-      label: nav.home,
-      href: "/",
-    },
-    {
-      label: nav.profile,
-      href: "/profil",
+      label: "Profil",
+      href: "/profil/sejarah",
       children: [
-        { label: nav.profileOverview, href: "/profil" },
-        { label: nav.visionMission, href: "/profil/visi-misi" },
-        { label: nav.workCulture, href: "/profil/nilai-budaya-kerja" },
-        { label: nav.structure, href: "/profil/struktur-organisasi" },
-        {
-          label: nav.regencyHistory,
-          href: "/profil/sejarah-singkat-kabupaten",
-        },
-        { label: nav.headProfile, href: "/profil/pimpinan" },
+        { label: "Sejarah", href: "/profil/sejarah" },
+        { label: "Visi & Misi", href: "/profil/visi-misi" },
+        { label: "Tugas dan Fungsi", href: "/profil/tugas-fungsi" },
+        { label: "Nilai Budaya Kerja", href: "/profil/nilai-budaya-kerja" },
+        { label: "Tujuan", href: "/profil/tujuan" },
       ],
     },
+
+    { label: "Berita", href: "/berita" },
+
     {
-      label: nav.publicInfo,
-      children: [
-        { label: nav.news, href: "/berita" },
-        { label: nav.announcements, href: "/pengumuman" },
-        { label: nav.documents, href: "/dokumen" },
-        { label: nav.agenda, href: "/agenda" },
-        { label: nav.gallery, href: "/galeri" },
-      ],
-    },
-    {
-      label: nav.services,
+      label: "Layanan",
       href: "/layanan",
       children: [
-        { label: nav.allServices, href: "/layanan" },
-        { label: nav.requirements, href: "/layanan/persyaratan" },
-        { label: nav.flow, href: "/layanan/alur" },
-        { label: nav.faq, href: "/layanan/faq" },
+        { label: "PTSP", href: "/layanan/ptsp" },
+        { label: "Maklumat Pelayanan", href: "/layanan/maklumat-pelayanan" },
+        { label: "Agen Perubahan", href: "/layanan/agen-perubahan" },
+        { label: "Layanan Pengaduan", href: "/layanan/pengaduan" },
+      ],
+    },
+
+    {
+      label: "Informasi",
+      href: "/informasi",
+      children: [
+        { label: "Regulasi", href: "/informasi/regulasi" },
+        { label: "Profil Pejabat", href: "/informasi/profil-pejabat" },
+        {
+          label: "Struktur Organisasi",
+          href: "/informasi/struktur-organisasi",
+        },
+        { label: "Dasar Hukum", href: "/informasi/dasar-hukum" },
+      ],
+    },
+
+    { label: "Survey", href: "/survey" },
+    { label: "PPID", href: "/ppid" },
+    {
+      label: "Zona Integritas",
+      href: "/zona-integritas",
+      children: [
+        {
+          label: "Area Perubahan - ZI",
+          href: "/zona-integritas/area-perubahan-zi",
+        },
+        {
+          label: "Video Pembangunan - ZI",
+          href: "/zona-integritas/video-pembangunan-zi",
+        },
+        {
+          label: "Berita Zona Integritas - ZI",
+          href: "/zona-integritas/berita-zona-integritas",
+        },
       ],
     },
     {
-      label: nav.contact,
-      href: "/kontak",
+      label: "Laporan",
+      href: "/laporan",
+      children: [
+        {
+          label: "SOP dan Standar Pelayanan",
+          href: "/laporan/sop-dan-standar-pelayanan",
+        },
+        { label: "Renstra", href: "/laporan/renstra" },
+        { label: "Perjanjian Kinerja", href: "/laporan/perjanjian-kinerja" },
+        { label: "Rencana Kinerja", href: "/laporan/rencana-kinerja" },
+        { label: "Capaian Kinerja", href: "/laporan/capaian-kinerja" },
+        { label: "Laporan Kinerja", href: "/laporan/laporan-kinerja" },
+        {
+          label: "Rencana Kerja Tahunan",
+          href: "/laporan/rencana-kerja-tahunan",
+        },
+      ],
     },
+    { label: "Galeri", href: "/galeri" },
+    { label: "Kontak", href: "/kontak" },
   ];
 }

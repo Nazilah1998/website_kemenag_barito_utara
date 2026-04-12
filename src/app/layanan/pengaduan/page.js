@@ -1,14 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { siteInfo } from "../../data/site";
+import { siteInfo } from "../../../data/site";
 
 export const metadata = {
-  title: "Layanan | Kementerian Agama Kabupaten Barito Utara",
+  title: "Layanan Pengaduan | Kementerian Agama Kabupaten Barito Utara",
 };
 
-export default function LayananPage() {
+export default function LayananPengaduanPage() {
+  const pageTitle = "Layanan Pengaduan Sedang Diperbarui";
+  const menuName = "Layanan Pengaduan";
+
   return (
-    <main className="min-h-screen bg-linear-to-brrom-emerald-50 via-slate-50 to-amber-50">
+    <main className="min-h-screen bg-linear-to-br from-emerald-50 via-slate-50 to-amber-50">
       <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div className="rounded-4xl border border-white bg-white/95 p-8 shadow-xl">
           <div className="flex flex-wrap gap-3">
@@ -36,23 +39,23 @@ export default function LayananPage() {
                 KEMENAG BARITO UTARA
               </p>
               <p className="mt-1 text-sm font-medium text-slate-500">
-                Layanan Publik
+                {menuName}
               </p>
             </div>
           </div>
 
           <h1 className="mt-8 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
-            Layanan Sedang Diperbarui
+            {pageTitle}
           </h1>
 
           <p className="mt-6 max-w-3xl text-base leading-8 text-slate-600">
-            Halaman layanan sedang dalam proses penataan ulang agar informasi
-            pelayanan dapat ditampilkan dengan lebih rapi, resmi, modern, dan
+            Halaman layanan ini sedang dalam proses penataan ulang agar
+            informasi dapat ditampilkan dengan lebih rapi, resmi, modern, dan
             mudah diakses oleh masyarakat.
           </p>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2">
-            <div className="rounded-3xlmerald-700 p-6 text-white shadow-lg">
+            <div className="rounded-3xl bg-emerald-700 p-6 text-white shadow-lg">
               <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-100">
                 Status Layanan
               </p>

@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   metadataBase: new URL(siteInfo.siteUrl),
   title: {
-    default: `Website Resmi ${siteInfo.name}`,
+    default: `${siteInfo.name}`,
     template: `%s | ${siteInfo.shortName}`,
   },
   description: siteInfo.description,
@@ -24,7 +24,7 @@ export const metadata = {
     locale: "id_ID",
     url: "/",
     siteName: siteInfo.shortName,
-    title: `Website Resmi ${siteInfo.name}`,
+    title: `${siteInfo.name}`,
     description: siteInfo.description,
     images: [
       {
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `Website Resmi ${siteInfo.name}`,
+    title: `${siteInfo.name}`,
     description: siteInfo.description,
     images: ["/kemenag.svg"],
   },
