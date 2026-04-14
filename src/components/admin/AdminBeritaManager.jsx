@@ -1,11 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  normalizeCoverImageUrl,
-  toCoverPreviewUrl,
-} from "@/lib/cover-image";
+import { compressImageToBase64 } from "@/lib/image-compress";
+import { toCoverPreviewUrl } from "@/lib/cover-image";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -26,7 +23,22 @@ const emptyForm = {
   category: "Umum",
   content: "",
   cover_image: "",
+  cover_upload_base64: "",
+  cover_upload_name: "",
+  cover_upload_size_kb: 0,
   is_published: true,
+  published_at: "",
+};
+
+const emptyGalleryForm = {
+  berita_id: "",
+  title: "",
+  slug: "",
+  image_url: "",
+  gallery_upload_base64: "",
+  gallery_upload_name: "",
+  gallery_upload_size_kb: 0,
+  link_url: "",
   published_at: "",
 };
 
@@ -44,16 +56,6 @@ function formatDate(value) {
   }).format(date);
 }
 
-function getMonthKey(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
-}
-
 function getYearKey(value) {
   if (!value) return "";
   const date = new Date(value);
@@ -61,9 +63,17 @@ function getYearKey(value) {
   return String(date.getFullYear());
 }
 
+function getMonthKey(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
 function getMonthLabelFromKey(key) {
   if (!key) return "Semua bulan";
-
   const [year, month] = key.split("-").map(Number);
   if (!year || !month) return key;
 
@@ -76,14 +86,13 @@ function getMonthLabelFromKey(key) {
 function toDateTimeLocal(value) {
   const date = value ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) return "";
-
   const timezoneOffset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date.getTime() - timezoneOffset);
   return localDate.toISOString().slice(0, 16);
 }
 
 function slugPreview(title = "") {
-  return String(title)
+  return String(title || "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -94,17 +103,11 @@ function slugPreview(title = "") {
 }
 
 function stripHtml(html = "") {
-  return String(html)
+  return String(html || "")
     .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function truncateText(value = "", maxLength = 120) {
-  if (!value) return "";
-  if (value.length <= maxLength) return value;
-  return `${value.slice(0, maxLength - 3).trim()}...`;
 }
 
 function countWords(value = "") {
@@ -129,46 +132,6 @@ function isMeaningfulHtml(html = "") {
   return stripHtml(html).length > 0;
 }
 
-function isHttpUrl(value = "") {
-  try {
-    const url = new URL(String(value || "").trim());
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function getAllowedCoverHosts() {
-  const hosts = new Set(["drive.google.com", "docs.google.com"]);
-
-  if (typeof window !== "undefined") {
-    hosts.add(window.location.hostname);
-  }
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (supabaseUrl) {
-    try {
-      hosts.add(new URL(supabaseUrl).hostname);
-    } catch {
-      // abaikan env tidak valid
-    }
-  }
-
-  return hosts;
-}
-
-function isAllowedCoverUrl(value = "") {
-  if (!value) return true;
-  if (!isHttpUrl(value)) return false;
-
-  try {
-    const url = new URL(value);
-    return getAllowedCoverHosts().has(url.hostname);
-  } catch {
-    return false;
-  }
-}
-
 function buildPagination(totalPages, currentPage) {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -185,45 +148,31 @@ function buildPagination(totalPages, currentPage) {
   return [1, "...", currentPage, "...", totalPages];
 }
 
-function StatCard({ label, value, helper }) {
-  return (
-    <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-        {label}
-      </p>
-      <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
-        {value}
-      </p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{helper}</p>
-    </div>
-  );
+async function readJsonSafely(response) {
+  const raw = await response.text();
+  if (!raw) return {};
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
 }
 
-function ToolbarButton({
-  type = "button",
-  onClick,
-  children,
-  title,
-  className = "",
-}) {
+function StatCard({ label, value, helper }) {
   return (
-    <button
-      type={type}
-      title={title}
-      aria-label={title}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 ${className}`.trim()}
-    >
-      {children}
-    </button>
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
+      <p className="mt-1 text-xs text-slate-500">{helper}</p>
+    </div>
   );
 }
 
 function StatusPill({ published }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${published
+      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${published
         ? "bg-emerald-100 text-emerald-700"
         : "bg-amber-100 text-amber-700"
         }`}
@@ -235,9 +184,9 @@ function StatusPill({ published }) {
 
 function CoverThumb({
   src,
-  alt = "Cover berita",
+  alt = "Preview gambar",
   className = "",
-  fallbackText = "Belum ada cover",
+  fallbackText = "Belum ada gambar",
 }) {
   const [failedSrc, setFailedSrc] = useState("");
 
@@ -246,7 +195,7 @@ function CoverThumb({
   if (showFallback) {
     return (
       <div
-        className={`flex items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center text-sm text-slate-400 ${className}`.trim()}
+        className={`flex items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center text-sm text-slate-500 ${className}`.trim()}
       >
         {fallbackText}
       </div>
@@ -254,193 +203,171 @@ function CoverThumb({
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      onError={() => setFailedSrc(src)}
-      className={`rounded-2xl object-cover ${className}`.trim()}
-    />
-  );
-}
-
-function FieldCounter({ current, helper }) {
-  return (
-    <p className="mt-2 flex justify-end text-xs text-slate-400">
-      <span>
-        {helper} {current}
-      </span>
-    </p>
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        onError={() => setFailedSrc(src)}
+        className={`rounded-2xl object-cover ${className}`.trim()}
+      />
+    </>
   );
 }
 
 function ToggleSwitch({ checked, onChange, label, description }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{label}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
-        </div>
-
-        <button
-          type="button"
-          aria-pressed={checked}
-          onClick={() => onChange(!checked)}
-          className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${checked ? "bg-emerald-600" : "bg-slate-300"
-            }`}
-        >
-          <span
-            className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${checked ? "left-6" : "left-1"
-              }`}
-          />
-        </button>
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+      <div>
+        <p className="text-sm font-semibold text-slate-900">{label}</p>
+        <p className="mt-1 text-xs text-slate-500">{description}</p>
       </div>
+
+      <button
+        type="button"
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition ${checked ? "bg-emerald-600" : "bg-slate-300"
+          }`}
+      >
+        <span
+          className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${checked ? "left-6" : "left-1"
+            }`}
+        />
+      </button>
     </div>
   );
 }
 
+function IconBold() {
+  return <span className="text-sm font-black">B</span>;
+}
+
+function IconItalic() {
+  return <span className="text-sm font-semibold italic">I</span>;
+}
+
+function IconUnderline() {
+  return <span className="text-sm font-semibold underline">U</span>;
+}
+
+function IconH2() {
+  return <span className="text-[10px] font-bold">H2</span>;
+}
+
+function IconH3() {
+  return <span className="text-[10px] font-bold">H3</span>;
+}
+
 function IconAlignLeft() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path d="M3 5h14M3 8h9M3 11h14M3 14h9" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 6h14" />
+      <path d="M4 10h10" />
+      <path d="M4 14h14" />
+      <path d="M4 18h10" />
     </svg>
   );
 }
 
 function IconAlignCenter() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path d="M3 5h14M5.5 8h9M3 11h14M5.5 14h9" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M5 6h14" />
+      <path d="M7 10h10" />
+      <path d="M5 14h14" />
+      <path d="M7 18h10" />
     </svg>
   );
 }
 
 function IconAlignRight() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path d="M3 5h14M8 8h9M3 11h14M8 14h9" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M6 6h14" />
+      <path d="M10 10h10" />
+      <path d="M6 14h14" />
+      <path d="M10 18h10" />
     </svg>
   );
 }
 
 function IconJustify() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path d="M3 5h14M3 8h14M3 11h14M3 14h14" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 6h16" />
+      <path d="M4 10h16" />
+      <path d="M4 14h16" />
+      <path d="M4 18h16" />
     </svg>
   );
 }
 
 function IconQuote() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path d="M6.5 6H4.8A1.8 1.8 0 0 0 3 7.8V10h3.5v4H3v-3.2C3 7 4.8 5 7.2 5h-.7Zm8 0h-1.7A1.8 1.8 0 0 0 11 7.8V10h3.5v4H11v-3.2C11 7 12.8 5 15.2 5h-.7Z" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+      <path d="M9.2 6C6.7 6.8 5 9 5 11.6V18h6v-6H8.1c.1-1.6 1.2-3 2.9-3.6L9.2 6Zm9 0C15.7 6.8 14 9 14 11.6V18h6v-6h-2.9c.1-1.6 1.2-3 2.9-3.6L18.2 6Z" />
     </svg>
   );
 }
 
-function IconBulletList() {
+function IconBullet() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <circle cx="4" cy="5" r="1" fill="currentColor" />
-      <circle cx="4" cy="10" r="1" fill="currentColor" />
-      <circle cx="4" cy="15" r="1" fill="currentColor" />
-      <path d="M8 5h9M8 10h9M8 15h9" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="5" cy="7" r="1.5" fill="currentColor" />
+      <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="5" cy="17" r="1.5" fill="currentColor" />
+      <path d="M9 7h10" />
+      <path d="M9 12h10" />
+      <path d="M9 17h10" />
     </svg>
   );
 }
 
-function IconNumberList() {
+function IconNumber() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path
-        d="M3.2 5h1.4v3M3 8h2M3.2 11.3c.2-.4.7-.8 1.3-.8.7 0 1.2.4 1.2 1s-.3.9-.8 1.2l-1.5.8H6M8 5h9M8 10h9M8 15h9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 7h1.5V4.5" />
+      <path d="M4 4.5h2v5" />
+      <path d="M4 14.5c0-1.1.9-2 2-2s2 .9 2 2c0 .7-.4 1.3-1 1.7L4 19.5h4" />
+      <path d="M10 7h10" />
+      <path d="M10 12h10" />
+      <path d="M10 17h10" />
     </svg>
   );
 }
 
 function IconLink() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path
-        d="M8 12l4-4M6.5 13.5l-1 1a2.5 2.5 0 1 1-3.5-3.5l3-3A2.5 2.5 0 0 1 8.5 8M13.5 6.5l1-1a2.5 2.5 0 1 1 3.5 3.5l-3 3A2.5 2.5 0 0 1 11.5 12"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 0 1 7 7L17 13" />
+      <path d="M14 11a5 5 0 0 1 0 7L12.5 19.5a5 5 0 0 1-7-7L7 11" />
     </svg>
   );
 }
 
-function IconClearFormat() {
+function IconClear() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-4 w-4 fill-none stroke-current"
-      strokeWidth="1.8"
-    >
-      <path
-        d="M4 5h8M6 5l4 9M14.5 5l-9 10"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 20h16" />
+      <path d="M8 4h8l2 2-8 8-4-4 2-6Z" />
+      <path d="M13 13l5 5" />
     </svg>
   );
 }
 
-async function readJsonSafely(response) {
-  const raw = await response.text();
-
-  if (!raw) return {};
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    console.error("Raw response from galeri endpoint:", raw);
-
-    if (raw.includes("<!DOCTYPE") || raw.includes("<html")) {
-      throw new Error(
-        "Endpoint galeri belum terbaca oleh Next.js. Cek path file route, error import di route.js, lalu restart npm run dev.",
-      );
-    }
-
-    throw new Error(raw);
-  }
+function ToolbarButton({ title, onClick, children }) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onClick}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function AdminBeritaManager() {
@@ -448,26 +375,9 @@ export default function AdminBeritaManager() {
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
-  const [gallerySendingId, setGallerySendingId] = useState(null);
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  const [openForm, setOpenForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
-  const [dirty, setDirty] = useState(false);
-
-  const [openGalleryForm, setOpenGalleryForm] = useState(false);
-  const [galleryForm, setGalleryForm] = useState({
-    berita_id: "",
-    title: "",
-    slug: "",
-    image_url: "",
-    link_url: "",
-    published_at: "",
-  });
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -475,10 +385,22 @@ export default function AdminBeritaManager() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [openForm, setOpenForm] = useState(false);
   const [form, setForm] = useState({
     ...emptyForm,
     published_at: toDateTimeLocal(new Date().toISOString()),
   });
+  const [editingId, setEditingId] = useState(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
+
+  const [openGalleryForm, setOpenGalleryForm] = useState(false);
+  const [galleryForm, setGalleryForm] = useState(emptyGalleryForm);
+  const [gallerySendingId, setGallerySendingId] = useState(null);
+  const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
 
   async function loadItems() {
     try {
@@ -490,15 +412,16 @@ export default function AdminBeritaManager() {
         cache: "no-store",
       });
 
-      const data = await response.json();
+      const data = await readJsonSafely(response);
 
       if (!response.ok) {
-        throw new Error(data?.message || "Gagal memuat data berita.");
+        throw new Error(data?.message || "Gagal memuat daftar berita.");
       }
 
       setItems(Array.isArray(data?.items) ? data.items : []);
     } catch (err) {
-      setError(err.message || "Gagal memuat data berita.");
+      setError(err.message || "Gagal memuat daftar berita.");
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -510,24 +433,11 @@ export default function AdminBeritaManager() {
 
   useEffect(() => {
     if (!openForm || !editorRef.current) return;
-
     const nextHtml = form.content || "";
     if (editorRef.current.innerHTML !== nextHtml) {
       editorRef.current.innerHTML = nextHtml;
     }
   }, [openForm, form.content]);
-
-  useEffect(() => {
-    if (!openForm || !dirty) return;
-
-    function handleBeforeUnload(event) {
-      event.preventDefault();
-      event.returnValue = "";
-    }
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [openForm, dirty]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -537,37 +447,25 @@ export default function AdminBeritaManager() {
     setMonthFilter("all");
   }, [yearFilter]);
 
-  const titleForm = useMemo(() => {
-    return editingId ? "Edit berita" : "Tambah berita";
-  }, [editingId]);
-
   const stats = useMemo(() => {
     const total = items.length;
     const published = items.filter((item) => Boolean(item.is_published)).length;
     const draft = total - published;
     const views = items.reduce((acc, item) => acc + Number(item.views || 0), 0);
 
-    return {
-      total,
-      published,
-      draft,
-      views,
-    };
+    return { total, published, draft, views };
   }, [items]);
 
-  const yearlyPublishedSummary = useMemo(() => {
-    const summaryMap = new Map();
+  const yearOptions = useMemo(() => {
+    const map = new Map();
 
     items.forEach((item) => {
-      if (!item?.is_published) return;
-
-      const yearKey = getYearKey(item.published_at);
-      if (!yearKey) return;
-
-      summaryMap.set(yearKey, (summaryMap.get(yearKey) || 0) + 1);
+      const key = getYearKey(item?.published_at || item?.created_at);
+      if (!key) return;
+      map.set(key, (map.get(key) || 0) + 1);
     });
 
-    return Array.from(summaryMap.entries())
+    return Array.from(map.entries())
       .sort((a, b) => b[0].localeCompare(a[0]))
       .map(([key, count]) => ({
         key,
@@ -576,22 +474,21 @@ export default function AdminBeritaManager() {
       }));
   }, [items]);
 
-  const monthlyPublishedSummary = useMemo(() => {
-    const summaryMap = new Map();
+  const monthOptions = useMemo(() => {
+    const map = new Map();
 
     items.forEach((item) => {
-      if (!item?.is_published) return;
-
-      const yearKey = getYearKey(item.published_at);
-      const monthKey = getMonthKey(item.published_at);
+      const baseDate = item?.published_at || item?.created_at;
+      const yearKey = getYearKey(baseDate);
+      const monthKey = getMonthKey(baseDate);
 
       if (!monthKey) return;
       if (yearFilter !== "all" && yearKey !== yearFilter) return;
 
-      summaryMap.set(monthKey, (summaryMap.get(monthKey) || 0) + 1);
+      map.set(monthKey, (map.get(monthKey) || 0) + 1);
     });
 
-    return Array.from(summaryMap.entries())
+    return Array.from(map.entries())
       .sort((a, b) => b[0].localeCompare(a[0]))
       .map(([key, count]) => ({
         key,
@@ -604,21 +501,17 @@ export default function AdminBeritaManager() {
     const keyword = query.trim().toLowerCase();
 
     return items.filter((item) => {
+      const baseDate = item?.published_at || item?.created_at;
+      const itemYear = getYearKey(baseDate);
+      const itemMonth = getMonthKey(baseDate);
+
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "published" && Boolean(item.is_published)) ||
         (statusFilter === "draft" && !Boolean(item.is_published));
 
-      const itemYearKey = getYearKey(item.published_at);
-      const itemMonthKey = getMonthKey(item.published_at);
-
-      const matchesYear =
-        yearFilter === "all" ||
-        (Boolean(item.is_published) && itemYearKey === yearFilter);
-
-      const matchesMonth =
-        monthFilter === "all" ||
-        (Boolean(item.is_published) && itemMonthKey === monthFilter);
+      const matchesYear = yearFilter === "all" || itemYear === yearFilter;
+      const matchesMonth = monthFilter === "all" || itemMonth === monthFilter;
 
       const haystack = [item.title, item.slug, item.category]
         .join(" ")
@@ -632,47 +525,41 @@ export default function AdminBeritaManager() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+    Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
   );
 
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
-
   const paginatedItems = filteredItems.slice(
     startIndex,
-    startIndex + ITEMS_PER_PAGE,
+    startIndex + ITEMS_PER_PAGE
   );
-
   const paginationItems = buildPagination(totalPages, safeCurrentPage);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
 
   const wordCount = useMemo(() => countWords(form.content), [form.content]);
   const readingTime = useMemo(
     () => estimateReadingTime(form.content),
-    [form.content],
+    [form.content]
   );
-
-  const previewCover = useMemo(
-    () => normalizeCoverImageUrl(form.cover_image || ""),
-    [form.cover_image],
-  );
-
-  const coverPreviewUrl = useMemo(() => {
-    return toCoverPreviewUrl(previewCover);
-  }, [previewCover]);
 
   const previewSlug = useMemo(() => {
     return (form.slug || slugPreview(form.title) || "judul-berita").trim();
   }, [form.slug, form.title]);
 
-  const galleryPreviewUrl = useMemo(() => {
-    return toCoverPreviewUrl(normalizeCoverImageUrl(galleryForm.image_url || ""));
-  }, [galleryForm.image_url]);
+  const coverPreviewSrc = useMemo(() => {
+    if (form.cover_upload_base64) return form.cover_upload_base64;
+    return toCoverPreviewUrl(form.cover_image);
+  }, [form.cover_upload_base64, form.cover_image]);
+
+  const galleryPreviewSrc = useMemo(() => {
+    const uploadedPreview = String(galleryForm.gallery_upload_base64 || "").trim();
+    if (uploadedPreview) return uploadedPreview;
+
+    const savedGalleryImage = String(galleryForm.image_url || "").trim();
+    if (savedGalleryImage) return toCoverPreviewUrl(savedGalleryImage);
+
+    return "";
+  }, [galleryForm.gallery_upload_base64, galleryForm.image_url]);
 
   function resetForm() {
     setForm({
@@ -701,37 +588,36 @@ export default function AdminBeritaManager() {
     setEditingId(item.id);
     setSlugManuallyEdited(true);
 
-    const normalizedCoverImage = normalizeCoverImageUrl(item.cover_image || "");
-
     setForm({
       title: item.title || "",
       slug: item.slug || "",
       category: item.category || "Umum",
       content: item.content || "",
-      cover_image: normalizedCoverImage,
+      cover_image: item.cover_image || "",
+      cover_upload_base64: "",
+      cover_upload_name: "",
+      cover_upload_size_kb: 0,
       is_published: Boolean(item.is_published),
-      published_at: toDateTimeLocal(item.published_at),
+      published_at: toDateTimeLocal(item.published_at || item.created_at),
     });
 
     setDirty(false);
     setOpenForm(true);
   }
 
-  function confirmDiscardChanges() {
-    if (!dirty) return true;
-
-    return window.confirm(
-      "Perubahan belum disimpan.\nTutup form dan buang perubahan?",
-    );
-  }
-
   function handleCloseForm() {
-    if (!confirmDiscardChanges()) return;
+    if (dirty) {
+      const confirmed = window.confirm(
+        "Perubahan belum disimpan. Tutup form dan buang perubahan?"
+      );
+      if (!confirmed) return;
+    }
+
     setOpenForm(false);
     resetForm();
   }
 
-  function handleOpenGalleryForm(item) {
+  async function handleOpenGalleryForm(item) {
     setError("");
     setMessage("");
 
@@ -739,24 +625,47 @@ export default function AdminBeritaManager() {
       berita_id: item.id,
       title: item.title || "",
       slug: item.slug || "",
-      image_url: normalizeCoverImageUrl(item.cover_image || ""),
+      image_url: item.cover_image || "",
+      gallery_upload_base64: "",
+      gallery_upload_name: "",
+      gallery_upload_size_kb: 0,
       link_url: `/berita/${item.slug}`,
-      published_at: item.published_at || "",
+      published_at: item.published_at || item.created_at || "",
     });
 
     setOpenGalleryForm(true);
+
+    try {
+      const response = await fetch(
+        `/api/admin/galeri/from-berita?berita_id=${encodeURIComponent(item.id)}`,
+        {
+          method: "GET",
+          cache: "no-store",
+        }
+      );
+
+      const data = await readJsonSafely(response);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal mengambil data galeri.");
+      }
+
+      if (data?.item) {
+        setGalleryForm((prev) => ({
+          ...prev,
+          image_url: data.item.image_url || prev.image_url || "",
+          link_url: data.item.link_url || prev.link_url || "",
+          published_at: data.item.published_at || prev.published_at || "",
+        }));
+      }
+    } catch (err) {
+      console.error("Prefill galeri gagal:", err);
+    }
   }
 
   function handleCloseGalleryForm() {
     setOpenGalleryForm(false);
-    setGalleryForm({
-      berita_id: "",
-      title: "",
-      slug: "",
-      image_url: "",
-      link_url: "",
-      published_at: "",
-    });
+    setGalleryForm(emptyGalleryForm);
   }
 
   function handleChange(event) {
@@ -765,7 +674,6 @@ export default function AdminBeritaManager() {
     setForm((prev) => {
       if (name === "title") {
         const nextTitle = value;
-
         return {
           ...prev,
           title: nextTitle,
@@ -824,9 +732,7 @@ export default function AdminBeritaManager() {
       typeof document === "undefined" ||
       typeof document.execCommand !== "function"
     ) {
-      setError(
-        "Toolbar editor tidak didukung browser ini. Anda masih bisa menulis isi berita secara manual.",
-      );
+      setError("Toolbar editor tidak didukung browser ini.");
       return;
     }
 
@@ -840,40 +746,103 @@ export default function AdminBeritaManager() {
   }
 
   function handleInsertLink() {
-    const url = window.prompt(
-      "Tempel tautan yang ingin dimasukkan:",
-      "https://",
-    );
-
+    const url = window.prompt("Tempel tautan:", "https://");
     if (!url) return;
-
     runEditorCommand("createLink", url);
   }
 
-  function handleCoverLinkChange(event) {
-    const normalizedUrl = normalizeCoverImageUrl(event.target.value);
+  async function handleCoverFileChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    setForm((prev) => ({
-      ...prev,
-      cover_image: normalizedUrl,
-    }));
+    try {
+      setUploadingCover(true);
+      setError("");
+      setMessage("");
 
-    setDirty(true);
+      const compressed = await compressImageToBase64(file, {
+        targetSizeKB: 150,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      });
+
+      setForm((prev) => ({
+        ...prev,
+        cover_upload_base64: compressed.base64,
+        cover_upload_name: compressed.fileName,
+        cover_upload_size_kb: compressed.sizeKB,
+      }));
+
+      setDirty(true);
+      setMessage(
+        `Cover berita berhasil dikompresi dari ${compressed.originalSizeKB} KB menjadi ${compressed.sizeKB} KB.`
+      );
+    } catch (err) {
+      setError(err.message || "Gagal memproses cover berita.");
+    } finally {
+      setUploadingCover(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleGalleryFileChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingGalleryImage(true);
+      setError("");
+      setMessage("");
+
+      const compressed = await compressImageToBase64(file, {
+        targetSizeKB: 150,
+        maxWidth: 1400,
+        maxHeight: 1800,
+      });
+
+      setGalleryForm((prev) => ({
+        ...prev,
+        gallery_upload_base64: compressed.base64,
+        gallery_upload_name: compressed.fileName,
+        gallery_upload_size_kb: compressed.sizeKB,
+      }));
+
+      setMessage(
+        `Gambar galeri berhasil dikompresi dari ${compressed.originalSizeKB} KB menjadi ${compressed.sizeKB} KB.`
+      );
+    } catch (err) {
+      setError(err.message || "Gagal memproses gambar galeri.");
+    } finally {
+      setUploadingGalleryImage(false);
+      event.target.value = "";
+    }
   }
 
   function clearCoverImage() {
     setForm((prev) => ({
       ...prev,
       cover_image: "",
+      cover_upload_base64: "",
+      cover_upload_name: "",
+      cover_upload_size_kb: 0,
     }));
     setDirty(true);
   }
 
+  function clearGalleryImage() {
+    setGalleryForm((prev) => ({
+      ...prev,
+      image_url: "",
+      gallery_upload_base64: "",
+      gallery_upload_name: "",
+      gallery_upload_size_kb: 0,
+    }));
+  }
+
   function buildPayload(nextPublishedState = form.is_published) {
-    const currentContent = syncEditorToState();
-    const normalizedCoverImage = normalizeCoverImageUrl(form.cover_image);
+    const currentContent = editorRef.current?.innerHTML || form.content || "";
     const finalSlug = (form.slug || slugPreview(form.title)).trim();
-    const autoExcerpt = buildExcerptFromHtml(currentContent || form.content, 180);
+    const autoExcerpt = buildExcerptFromHtml(currentContent, 180);
 
     if (!form.title.trim()) {
       setError("Judul berita wajib diisi.");
@@ -885,15 +854,13 @@ export default function AdminBeritaManager() {
       return null;
     }
 
-    if (!isMeaningfulHtml(currentContent || form.content)) {
+    if (!isMeaningfulHtml(currentContent)) {
       setError("Isi berita wajib diisi.");
       return null;
     }
 
-    if (normalizedCoverImage && !isAllowedCoverUrl(normalizedCoverImage)) {
-      setError(
-        "Link cover hanya mendukung Google Drive, domain website sendiri, atau Supabase Storage publik.",
-      );
+    if (!form.cover_image && !form.cover_upload_base64) {
+      setError("Cover berita wajib diupload.");
       return null;
     }
 
@@ -911,13 +878,14 @@ export default function AdminBeritaManager() {
     }
 
     return {
-      ...form,
       title: form.title.trim(),
       slug: finalSlug,
       category: form.category || "Umum",
       excerpt: autoExcerpt,
-      content: currentContent || form.content || "",
-      cover_image: normalizedCoverImage,
+      content: currentContent,
+      cover_image: form.cover_image || "",
+      cover_upload_base64: form.cover_upload_base64 || "",
+      cover_upload_name: form.cover_upload_name || "",
       is_published: Boolean(nextPublishedState),
       published_at: publishedAtIso,
     };
@@ -940,10 +908,10 @@ export default function AdminBeritaManager() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
-        },
+        }
       );
 
-      const data = await response.json();
+      const data = await readJsonSafely(response);
 
       if (!response.ok) {
         throw new Error(data?.message || "Gagal menyimpan berita.");
@@ -963,7 +931,7 @@ export default function AdminBeritaManager() {
 
   async function handleDelete(item) {
     const confirmed = window.confirm(
-      `Hapus berita "${item.title}"?\nTindakan ini tidak bisa dibatalkan.`,
+      `Hapus berita "${item.title}"?\nTindakan ini tidak bisa dibatalkan.`
     );
 
     if (!confirmed) return;
@@ -977,7 +945,7 @@ export default function AdminBeritaManager() {
         method: "DELETE",
       });
 
-      const data = await response.json();
+      const data = await readJsonSafely(response);
 
       if (!response.ok) {
         throw new Error(data?.message || "Gagal menghapus berita.");
@@ -993,15 +961,8 @@ export default function AdminBeritaManager() {
   }
 
   async function handleSubmitGallery() {
-    if (!galleryForm.image_url.trim()) {
-      setError("Cover portrait untuk galeri wajib diisi.");
-      return;
-    }
-
-    if (!isAllowedCoverUrl(galleryForm.image_url)) {
-      setError(
-        "Link cover galeri hanya mendukung Google Drive, domain website sendiri, atau Supabase Storage publik.",
-      );
+    if (!galleryForm.image_url && !galleryForm.gallery_upload_base64) {
+      setError("Gambar galeri wajib diupload.");
       return;
     }
 
@@ -1025,7 +986,7 @@ export default function AdminBeritaManager() {
       }
 
       setMessage(
-        data?.message || "Item galeri berhasil disimpan dari data berita.",
+        data?.message || "Item galeri berhasil disimpan dari data berita."
       );
       handleCloseGalleryForm();
     } catch (err) {
@@ -1037,242 +998,232 @@ export default function AdminBeritaManager() {
 
   return (
     <>
-      <section className="space-y-6">
-        {(message || error) && (
-          <div
-            className={`rounded-2xl border px-4 py-3 text-sm ${error
-              ? "border-rose-200 bg-rose-50 text-rose-700"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700"
-              }`}
-          >
-            {error || message}
-          </div>
-        )}
+      {(message || error) && (
+        <div
+          className={`mb-6 rounded-2xl border px-4 py-3 text-sm ${error
+            ? "border-rose-200 bg-rose-50 text-rose-700"
+            : "border-emerald-200 bg-emerald-50 text-emerald-700"
+            }`}
+        >
+          {error || message}
+        </div>
+      )}
 
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="space-y-6">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-700">
-              Panel admin
-            </p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+              Panel Admin
+            </span>
+            <h2 className="mt-3 text-3xl font-bold text-slate-900">
               Kelola Berita
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Workflow editorial berita, status publikasi, filter rilis per tahun
-              dan bulan, serta pengiriman ke galeri dalam satu panel kerja.
-            </p>
           </div>
-
-          <button
-            type="button"
-            onClick={handleOpenCreate}
-            className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
-          >
-            + Tambah berita
-          </button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label="Total berita"
             value={stats.total}
-            helper="Seluruh berita yang tersimpan."
+            helper="Semua artikel pada panel admin"
           />
           <StatCard
             label="Tayang"
             value={stats.published}
-            helper="Berita yang aktif tampil di website."
+            helper="Berita yang sudah dipublikasikan"
           />
           <StatCard
             label="Draft"
             value={stats.draft}
-            helper="Berita yang belum dipublikasikan."
+            helper="Berita yang belum tayang"
           />
           <StatCard
             label="Total pembaca"
             value={stats.views}
-            helper="Akumulasi views dari seluruh berita."
+            helper="Akumulasi view seluruh berita"
           />
         </div>
 
-        <div className="rounded-4xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-5 py-5 md:px-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-700">
-                  Berita
-                </p>
-                <h3 className="mt-2 text-2xl font-bold text-slate-900">
-                  Daftar berita admin
-                </h3>
-                <p className="mt-2 text-sm text-slate-500">
-                  Kelola artikel, cari data lebih cepat, pantau jumlah rilis per
-                  tahun dan bulan, lalu buka form editor dengan workflow yang
-                  lebih rapi.
-                </p>
-              </div>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                Berita
+              </p>
+              <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                Daftar berita
+              </h3>
             </div>
 
-            <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px_180px_220px]">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Cari berita
-                </label>
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Cari judul, slug, atau kategori..."
-                  className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Filter status
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-                  className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                >
-                  <option value="all">Semua status</option>
-                  <option value="published">Tayang</option>
-                  <option value="draft">Draft</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Tahun rilis
-                </label>
-                <select
-                  value={yearFilter}
-                  onChange={(event) => setYearFilter(event.target.value)}
-                  className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                >
-                  <option value="all">Semua tahun</option>
-                  {yearlyPublishedSummary.map((year) => (
-                    <option key={year.key} value={year.key}>
-                      {year.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Bulan rilis
-                </label>
-                <select
-                  value={monthFilter}
-                  onChange={(event) => setMonthFilter(event.target.value)}
-                  className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                >
-                  <option value="all">Semua bulan</option>
-                  {monthlyPublishedSummary.map((month) => (
-                    <option key={month.key} value={month.key}>
-                      {month.label} ({month.count})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <p className="mt-4 text-sm text-slate-500">
-              Menampilkan {filteredItems.length} dari {items.length} berita.
-            </p>
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              + Tambah berita
+            </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/70">
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 md:px-6">
-                    No
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 md:px-6">
-                    Judul
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 md:px-6">
-                    Kategori
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 md:px-6">
-                    Dibaca
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 md:px-6">
-                    Status
-                  </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 md:px-6">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2.3fr)_minmax(180px,1fr)_minmax(180px,1fr)_minmax(180px,1fr)] xl:items-end">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Cari berita
+              </label>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Cari judul, slug, atau kategori..."
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+              />
+            </div>
 
-              <tbody>
-                {loading ? (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Filter status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+              >
+                <option value="all">Semua status</option>
+                <option value="published">Tayang</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Filter tahun
+              </label>
+              <select
+                value={yearFilter}
+                onChange={(event) => setYearFilter(event.target.value)}
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+              >
+                <option value="all">Semua tahun</option>
+                {yearOptions.map((item) => (
+                  <option key={item.key} value={item.key}>
+                    {item.label} ({item.count})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Filter bulan
+              </label>
+              <select
+                value={monthFilter}
+                onChange={(event) => setMonthFilter(event.target.value)}
+                className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+              >
+                <option value="all">Semua bulan</option>
+                {monthOptions.map((item) => (
+                  <option key={item.key} value={item.key}>
+                    {item.label} ({item.count})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 text-sm text-slate-500">
+            Menampilkan {filteredItems.length} dari {items.length} berita.
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200">
+            <div className="overflow-x-auto">
+              <table className="min-w-300 w-full border-collapse bg-white">
+                <colgroup>
+                  <col style={{ width: "6%" }} />
+                  <col style={{ width: "54%" }} />
+                  <col style={{ width: "11%" }} />
+                  <col style={{ width: "8%" }} />
+                  <col style={{ width: "9%" }} />
+                  <col style={{ width: "12%" }} />
+                </colgroup>
+
+                <thead className="bg-slate-50">
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="px-6 py-12 text-center text-sm text-slate-500"
-                    >
-                      Memuat data berita...
-                    </td>
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      No
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Judul
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Kategori
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Dibaca
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Status
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Aksi
+                    </th>
                   </tr>
-                ) : paginatedItems.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-6 py-12 text-center text-sm text-slate-500"
-                    >
-                      Belum ada data yang cocok.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedItems.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-slate-100 last:border-b-0"
-                    >
-                      <td className="px-5 py-5 align-top text-sm text-slate-500 md:px-6">
-                        {startIndex + index + 1}
-                      </td>
+                </thead>
 
-                      <td className="px-5 py-5 align-top md:px-6">
-                        <div className="min-w-65">
-                          <p className="text-base font-semibold leading-7 text-slate-900">
-                            {item.title}
-                          </p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            /berita/{item.slug}
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-slate-500">
-                            {truncateText(
-                              item.excerpt ||
-                              buildExcerptFromHtml(item.content || "", 120) ||
-                              "Belum ada ringkasan otomatis.",
-                              120,
-                            )}
-                          </p>
-                          <p className="mt-2 text-xs text-slate-400">
-                            {formatDate(item.published_at)}
-                          </p>
-                        </div>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-4 py-10 text-center text-sm text-slate-500"
+                      >
+                        Memuat data berita...
                       </td>
-
-                      <td className="px-5 py-5 align-top text-sm font-medium text-slate-700 md:px-6">
-                        {item.category || "-"}
+                    </tr>
+                  ) : paginatedItems.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-4 py-10 text-center text-sm text-slate-500"
+                      >
+                        Belum ada data yang cocok.
                       </td>
+                    </tr>
+                  ) : (
+                    paginatedItems.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="border-t border-slate-100 align-top"
+                      >
+                        <td className="px-4 py-4 text-sm text-slate-600">
+                          {startIndex + index + 1}
+                        </td>
 
-                      <td className="px-5 py-5 align-top text-sm font-medium text-slate-700 md:px-6">
-                        {Number(item.views || 0)}
-                      </td>
+                        <td className="px-4 py-4">
+                          <div className="pr-10">
+                            <p className="text-base font-semibold leading-7 text-slate-900">
+                              {item.title}
+                            </p>
+                            <p className="mt-1 wrap-break-word text-xs text-slate-500">
+                              /berita/{item.slug}
+                            </p>
+                            <p className="mt-2 text-xs text-slate-500">
+                              {formatDate(item.published_at || item.created_at)}
+                            </p>
+                          </div>
+                        </td>
 
-                      <td className="px-5 py-5 align-top md:px-6">
-                        <StatusPill published={Boolean(item.is_published)} />
-                      </td>
+                        <td className="px-4 py-4 text-sm text-slate-700">
+                          {item.category || "-"}
+                        </td>
 
-                      <td className="px-5 py-5 align-top md:px-6">
-                        <div className="flex flex-wrap gap-2">
+                        <td className="px-4 py-4 text-sm text-slate-700">
+                          {Number(item.views || 0)}
+                        </td>
+
+                        <td className="px-4 py-4">
+                          <StatusPill published={Boolean(item.is_published)} />
+                        </td>
+
+                        <td className="px-4 py-4">
                           <div className="flex flex-wrap gap-2">
                             <button
                               type="button"
@@ -1299,21 +1250,21 @@ export default function AdminBeritaManager() {
                               Kirim / Edit galeri
                             </button>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4 border-t border-slate-200 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-6">
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-500">
               Halaman {safeCurrentPage} dari {totalPages}
             </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
@@ -1327,7 +1278,7 @@ export default function AdminBeritaManager() {
                 item === "..." ? (
                   <span
                     key={`ellipsis-${index}`}
-                    className="inline-flex items-center px-2 text-sm text-slate-400"
+                    className="px-2 text-sm text-slate-400"
                   >
                     ...
                   </span>
@@ -1343,7 +1294,7 @@ export default function AdminBeritaManager() {
                   >
                     {item}
                   </button>
-                ),
+                )
               )}
 
               <button
@@ -1362,52 +1313,50 @@ export default function AdminBeritaManager() {
       </section>
 
       {openForm ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/45 p-4 md:p-8">
-          <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 md:px-8">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4">
+          <div className="mx-auto flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl bg-slate-50 shadow-2xl">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 bg-white px-6 py-5">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-700">
+                <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
                   Form berita
                 </p>
-                <h3 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                  {titleForm}
+                <h3 className="mt-1 text-2xl font-bold text-slate-900">
+                  {editingId ? "Edit berita" : "Tambah berita"}
                 </h3>
                 <p className="mt-2 text-sm text-slate-500">
-                  Form siap disimpan.
+                  {dirty
+                    ? "Ada perubahan yang belum disimpan."
+                    : "Form siap disimpan."}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleCloseForm}
-                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-700"
               >
                 Tutup
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 md:px-8">
-              <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
-                <div className="min-w-0">
-                  <div className="space-y-5">
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Judul berita
-                      </label>
-                      <input
-                        name="title"
-                        value={form.title}
-                        onChange={handleChange}
-                        placeholder="Masukkan judul berita"
-                        className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                      />
-                      <FieldCounter
-                        current={form.title.trim().length}
-                        helper="Usahakan judul tetap padat dan jelas."
-                      />
-                    </div>
+            <div className="min-h-0 overflow-y-auto p-6">
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+                <div className="space-y-5">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6">
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <div className="md:col-span-2">
+                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                          Judul berita
+                        </label>
+                        <input
+                          name="title"
+                          value={form.title}
+                          onChange={handleChange}
+                          placeholder="Masukkan judul berita"
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                        />
+                      </div>
 
-                    <div className="grid gap-5 lg:grid-cols-2">
                       <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700">
                           Slug
@@ -1419,10 +1368,9 @@ export default function AdminBeritaManager() {
                           placeholder="slug-berita"
                           className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
                         />
-                        <FieldCounter
-                          current={previewSlug.length}
-                          helper={`/berita/${previewSlug}`}
-                        />
+                        <p className="mt-2 text-xs text-slate-500">
+                          Preview URL: /berita/{previewSlug}
+                        </p>
                       </div>
 
                       <div>
@@ -1442,394 +1390,315 @@ export default function AdminBeritaManager() {
                           ))}
                         </select>
                       </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">
+                          Tanggal publish
+                        </label>
+                        <input
+                          type="datetime-local"
+                          name="published_at"
+                          value={form.published_at}
+                          onChange={handleChange}
+                          className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
+                        />
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="max-w-sm">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Tanggal publish
-                      </label>
-                      <input
-                        type="datetime-local"
-                        name="published_at"
-                        value={form.published_at}
-                        onChange={handleChange}
-                        className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                      />
-                    </div>
-
-                    <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-4 md:p-5">
-                      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            Editor isi berita
-                          </p>
-                          <p className="mt-1 text-sm text-slate-500">
-                            Fokus pada struktur yang rapi, heading seperlunya,
-                            dan isi yang enak dibaca.
-                          </p>
-                        </div>
-
-                        <p className="text-xs text-slate-400">
-                          {wordCount} kata • {readingTime} menit baca
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6">
+                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <h4 className="text-lg font-bold text-slate-900">
+                          Editor isi berita
+                        </h4>
+                        <p className="text-sm text-slate-500">
+                          Fokus pada struktur yang rapi dan mudah dibaca.
                         </p>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <ToolbarButton
-                          title="Bold"
-                          onClick={() => runEditorCommand("bold")}
-                        >
-                          <span className="text-sm font-black">B</span>
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Italic"
-                          onClick={() => runEditorCommand("italic")}
-                        >
-                          <span className="text-sm font-semibold italic">I</span>
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Underline"
-                          onClick={() => runEditorCommand("underline")}
-                        >
-                          <span className="text-sm font-semibold underline">
-                            U
-                          </span>
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Heading 2"
-                          onClick={() => runEditorCommand("formatBlock", "h2")}
-                        >
-                          <span className="text-[11px] font-bold">H2</span>
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Heading 3"
-                          onClick={() => runEditorCommand("formatBlock", "h3")}
-                        >
-                          <span className="text-[11px] font-bold">H3</span>
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Rata kiri"
-                          onClick={() => runEditorCommand("justifyLeft")}
-                        >
-                          <IconAlignLeft />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Rata tengah"
-                          onClick={() => runEditorCommand("justifyCenter")}
-                        >
-                          <IconAlignCenter />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Rata kanan"
-                          onClick={() => runEditorCommand("justifyRight")}
-                        >
-                          <IconAlignRight />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Justify"
-                          onClick={() => runEditorCommand("justifyFull")}
-                        >
-                          <IconJustify />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Quote"
-                          onClick={() =>
-                            runEditorCommand("formatBlock", "blockquote")
-                          }
-                        >
-                          <IconQuote />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Bullet list"
-                          onClick={() =>
-                            runEditorCommand("insertUnorderedList")
-                          }
-                        >
-                          <IconBulletList />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Numbered list"
-                          onClick={() => runEditorCommand("insertOrderedList")}
-                        >
-                          <IconNumberList />
-                        </ToolbarButton>
-
-                        <ToolbarButton title="Tautan" onClick={handleInsertLink}>
-                          <IconLink />
-                        </ToolbarButton>
-
-                        <ToolbarButton
-                          title="Reset format"
-                          onClick={() => runEditorCommand("removeFormat")}
-                        >
-                          <IconClearFormat />
-                        </ToolbarButton>
+                      <div className="rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-600">
+                        {wordCount} kata • {readingTime} menit baca
                       </div>
-
-                      <div
-                        ref={editorRef}
-                        contentEditable
-                        suppressContentEditableWarning
-                        onInput={handleEditorInput}
-                        className="prose prose-slate mt-4 h-105 max-h-105 overflow-y-auto rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 outline-none focus:border-emerald-500"
-                      />
                     </div>
+
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      <ToolbarButton title="Bold" onClick={() => runEditorCommand("bold")}>
+                        <IconBold />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Italic" onClick={() => runEditorCommand("italic")}>
+                        <IconItalic />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Underline" onClick={() => runEditorCommand("underline")}>
+                        <IconUnderline />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Heading 2" onClick={() => runEditorCommand("formatBlock", "h2")}>
+                        <IconH2 />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Heading 3" onClick={() => runEditorCommand("formatBlock", "h3")}>
+                        <IconH3 />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Rata kiri" onClick={() => runEditorCommand("justifyLeft")}>
+                        <IconAlignLeft />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Tengah" onClick={() => runEditorCommand("justifyCenter")}>
+                        <IconAlignCenter />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Rata kanan" onClick={() => runEditorCommand("justifyRight")}>
+                        <IconAlignRight />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Rata penuh" onClick={() => runEditorCommand("justifyFull")}>
+                        <IconJustify />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Quote" onClick={() => runEditorCommand("formatBlock", "blockquote")}>
+                        <IconQuote />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Bullet list" onClick={() => runEditorCommand("insertUnorderedList")}>
+                        <IconBullet />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Number list" onClick={() => runEditorCommand("insertOrderedList")}>
+                        <IconNumber />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Insert link" onClick={handleInsertLink}>
+                        <IconLink />
+                      </ToolbarButton>
+
+                      <ToolbarButton title="Clear format" onClick={() => runEditorCommand("removeFormat")}>
+                        <IconClear />
+                      </ToolbarButton>
+                    </div>
+
+                    <div
+                      ref={editorRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onInput={handleEditorInput}
+                      className="h-125 overflow-y-auto rounded-2xl border border-slate-300 bg-white px-4 py-4 text-sm leading-7 text-slate-800 outline-none focus:border-emerald-500"
+                    />
                   </div>
                 </div>
 
-                <aside className="space-y-4">
-                  <ToggleSwitch
-                    checked={form.is_published}
-                    onChange={handlePublishedToggle}
-                    label="Tayangkan setelah disimpan"
-                    description="Aktifkan untuk langsung menampilkan berita di website publik."
-                  />
+                <div className="space-y-4">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6">
+                    <h4 className="text-lg font-bold text-slate-900">Status</h4>
 
-                  <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
-                    <p className="text-sm font-semibold text-slate-900">Status</p>
-
-                    <div className="mt-4 space-y-3 text-sm text-slate-600">
-                      <div className="flex items-start justify-between gap-4">
-                        <span>Status</span>
-                        <span className="font-semibold text-slate-900">
-                          {form.is_published ? "Tayang" : "Draft"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4">
-                        <span>Kategori</span>
-                        <span className="font-semibold text-slate-900">
-                          {form.category}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4">
-                        <span>Jumlah kata</span>
-                        <span className="font-semibold text-slate-900">
-                          {wordCount}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4">
-                        <span>Estimasi baca</span>
-                        <span className="font-semibold text-slate-900">
-                          {readingTime} menit
-                        </span>
-                      </div>
+                    <div className="mt-4">
+                      <ToggleSwitch
+                        checked={form.is_published}
+                        onChange={handlePublishedToggle}
+                        label={`Status ${form.is_published ? "Tayang" : "Draft"}`}
+                        description="Atur apakah berita langsung dipublikasikan atau disimpan sebagai draft."
+                      />
                     </div>
                   </div>
 
-                  <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-slate-900">
-                        Cover image
-                      </p>
+                  <div className="rounded-3xl border border-slate-200 bg-white p-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <h4 className="text-lg font-bold text-slate-900">Cover image</h4>
 
-                      {form.cover_image ? (
+                      {(form.cover_image || form.cover_upload_base64) && (
                         <button
                           type="button"
                           onClick={clearCoverImage}
-                          className="text-xs font-semibold text-rose-600 transition hover:text-rose-700"
+                          className="text-sm font-semibold text-rose-700 transition hover:text-rose-800"
                         >
                           Hapus cover
                         </button>
-                      ) : null}
+                      )}
                     </div>
 
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      Gunakan link gambar publik dari Google Drive, Supabase
-                      Storage, atau domain website sendiri.
-                    </p>
+                    <div className="mt-4 space-y-4">
+                      <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-dashed border-emerald-300 bg-emerald-50 px-4 py-6 text-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleCoverFileChange}
+                        />
+                        <div>
+                          <p className="text-sm font-semibold text-emerald-700">
+                            {uploadingCover ? "Memproses cover..." : "Upload cover berita"}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            JPG, PNG, atau WEBP. Sistem kompres otomatis mendekati 150 KB.
+                          </p>
+                        </div>
+                      </label>
 
-                    <input
-                      value={form.cover_image}
-                      onChange={handleCoverLinkChange}
-                      placeholder="https://drive.google.com/..."
-                      className="mt-4 h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
-                    />
-
-                    <div className="mt-4">
                       <CoverThumb
-                        src={coverPreviewUrl}
-                        className="h-36 w-full"
-                        fallbackText="Preview cover akan tampil di sini"
+                        src={coverPreviewSrc}
+                        alt="Preview cover berita"
+                        className="h-56 w-full"
                       />
                     </div>
-
-                    {form.cover_image ? (
-                      <p className="mt-3 break-all text-xs leading-5 text-slate-400">
-                        {form.cover_image}
-                      </p>
-                    ) : null}
                   </div>
-                </aside>
+
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                    <div className="flex flex-col gap-3">
+                      <button
+                        type="button"
+                        onClick={handleCloseForm}
+                        className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      >
+                        Batal
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => saveForm(false)}
+                        disabled={saving || uploadingCover}
+                        className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {saving ? "Menyimpan..." : "Simpan sebagai draft"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => saveForm(true)}
+                        disabled={saving || uploadingCover}
+                        className="rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {saving ? "Menyimpan..." : "Simpan & tayangkan"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 md:flex-row md:items-center md:justify-end md:px-8">
-              <button
-                type="button"
-                onClick={handleCloseForm}
-                disabled={saving}
-                className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Batal
-              </button>
-
-              <button
-                type="button"
-                onClick={() => saveForm(false)}
-                disabled={saving}
-                className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving ? "Menyimpan..." : "Simpan sebagai draft"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => saveForm(true)}
-                disabled={saving}
-                className="rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving ? "Menyimpan..." : "Simpan & tayangkan"}
-              </button>
             </div>
           </div>
         </div>
       ) : null}
 
       {openGalleryForm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-6">
-          <div className="w-full max-w-5xl rounded-4xl bg-white shadow-2xl ring-1 ring-slate-200">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 sm:px-8">
+        <div className="fixed inset-0 z-60 overflow-y-auto bg-slate-950/50 p-4">
+          <div className="mx-auto w-full max-w-3xl rounded-3xl bg-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4 rounded-t-3xl border-b border-slate-200 px-6 py-5">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-sky-600">
+                <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
                   Form galeri
                 </p>
-                <h3 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
+                <h3 className="mt-1 text-2xl font-bold text-slate-900">
                   Kirim ke galeri
                 </h3>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Gunakan cover portrait khusus untuk item galeri yang terhubung ke
-                  berita.
+                <p className="mt-2 text-sm text-slate-500">
+                  Upload cover galeri dengan kompres otomatis.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleCloseGalleryForm}
-                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-sky-300 hover:text-sky-700"
+                className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-700"
               >
                 Tutup
               </button>
             </div>
 
-            <div className="px-6 py-6 sm:px-8">
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1.15fr)_400px]">
-                <div className="space-y-5">
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Judul berita
-                    </label>
-                    <input
-                      type="text"
-                      value={galleryForm.title}
-                      readOnly
-                      className="h-12 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Link berita
-                    </label>
-                    <input
-                      type="text"
-                      value={galleryForm.link_url}
-                      readOnly
-                      className="h-12 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      URL cover portrait
-                    </label>
-                    <input
-                      type="url"
-                      value={galleryForm.image_url}
-                      onChange={(event) =>
-                        setGalleryForm((prev) => ({
-                          ...prev,
-                          image_url: normalizeCoverImageUrl(event.target.value),
-                        }))
-                      }
-                      placeholder="https://drive.google.com/..."
-                      className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-sky-500"
-                    />
-                    <p className="mt-2 text-xs leading-5 text-slate-500">
-                      Gunakan gambar portrait/banner khusus galeri dari Google Drive
-                      publik.
-                    </p>
-                  </div>
+            <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+              <div className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Judul berita
+                  </label>
+                  <input
+                    value={galleryForm.title}
+                    readOnly
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-600"
+                  />
                 </div>
 
-                <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-4">
-                  <p className="mb-3 text-sm font-semibold text-slate-700">
-                    Preview cover
-                  </p>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                    Link berita
+                  </label>
+                  <input
+                    value={galleryForm.link_url}
+                    readOnly
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-600"
+                  />
+                </div>
 
-                  <div className="flex min-h-105 items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white p-4">
-                    {galleryPreviewUrl ? (
-                      <div className="relative h-95 w-full max-w-65 overflow-hidden rounded-2xl">
-                        <Image
-                          src={galleryPreviewUrl}
-                          alt={galleryForm.title || "Preview cover galeri"}
-                          fill
-                          className="object-contain"
-                          sizes="260px"
-                          unoptimized
-                        />
-                      </div>
-                    ) : (
-                      <div className="text-center text-sm leading-6 text-slate-400">
-                        Preview cover akan muncul di sini.
-                      </div>
-                    )}
+                <div className="space-y-4">
+                  <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-dashed border-sky-300 bg-sky-50 px-4 py-6 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleGalleryFileChange}
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-sky-700">
+                        {uploadingGalleryImage
+                          ? "Memproses gambar galeri..."
+                          : "Upload cover galeri"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Poster atau banner galeri akan dikompresi otomatis.
+                      </p>
+                    </div>
+                  </label>
+
+                  {(galleryForm.image_url || galleryForm.gallery_upload_base64) && (
+                    <button
+                      type="button"
+                      onClick={clearGalleryImage}
+                      className="text-sm font-semibold text-rose-700 transition hover:text-rose-800"
+                    >
+                      Hapus gambar galeri
+                    </button>
+                  )}
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleCloseGalleryForm}
+                      className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    >
+                      Batal
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSubmitGallery}
+                      disabled={
+                        gallerySendingId === galleryForm.berita_id ||
+                        uploadingGalleryImage
+                      }
+                      className="rounded-2xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {gallerySendingId === galleryForm.berita_id
+                        ? "Mengirim..."
+                        : "Kirim ke galeri"}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-5 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleCloseGalleryForm}
-                  className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Batal
-                </button>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">
+                  Preview cover galeri
+                </p>
 
-                <button
-                  type="button"
-                  onClick={handleSubmitGallery}
-                  disabled={gallerySendingId === galleryForm.berita_id}
-                  className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {gallerySendingId === galleryForm.berita_id
-                    ? "Mengirim..."
-                    : "Kirim ke galeri"}
-                </button>
+                <div className="mt-4">
+                  <CoverThumb
+                    src={galleryPreviewSrc}
+                    alt="Preview cover galeri"
+                    className="h-80 w-full"
+                    fallbackText="Preview gambar galeri akan muncul di sini."
+                  />
+                </div>
               </div>
             </div>
           </div>

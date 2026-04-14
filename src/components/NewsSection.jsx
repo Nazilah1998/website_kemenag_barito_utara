@@ -1,56 +1,79 @@
 import Link from "next/link";
 import { getLatestBerita } from "../lib/berita";
 
-export default function NewsSection() {
-  const latestNews = getLatestBerita(3);
+export default async function NewsSection() {
+  const latestNews = await getLatestBerita(3);
 
   return (
-    <section className="py-10">
-      <div className="mb-8 flex items-end justify-between gap-4">
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
             Berita Terbaru
-          </p>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
+          </span>
+
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Informasi dan Kegiatan Terkini
           </h2>
+
+          <p className="mt-3 max-w-2xl text-base text-slate-600">
+            Ikuti pembaruan kegiatan, layanan, dan publikasi resmi Kemenag
+            Barito Utara.
+          </p>
         </div>
 
         <Link
           href="/berita"
-          className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+          className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
         >
           Lihat Semua Berita
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {latestNews.map((item) => (
-          <article
-            key={item.slug}
-            className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition-colors dark:bg-slate-900 dark:ring-slate-800"
-          >
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {item.date} · {item.category}
-            </p>
-
-            <h3 className="mt-3 text-xl font-bold text-slate-900 dark:text-slate-100">
-              {item.title}
-            </h3>
-
-            <p className="mt-3 leading-7 text-slate-600 dark:text-slate-400">
-              {item.excerpt}
-            </p>
-
-            <Link
-              href={`/berita/${item.slug}`}
-              className="mt-5 inline-flex text-sm font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+      {latestNews.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <h3 className="text-xl font-semibold text-slate-900">
+            Belum ada berita terbaru
+          </h3>
+          <p className="mt-2 text-sm text-slate-600">
+            Berita yang sudah dipublikasikan akan tampil otomatis di bagian ini.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {latestNews.map((item) => (
+            <article
+              key={item.id ?? item.slug}
+              className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
-              Baca selengkapnya →
-            </Link>
-          </article>
-        ))}
-      </div>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+                  {item.category || "Umum"}
+                </span>
+                <span>{item.date || "-"}</span>
+              </div>
+
+              <h3 className="mt-4 text-xl font-bold text-slate-900 transition group-hover:text-emerald-700">
+                {item.title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {item.excerpt || "Klik untuk membaca berita selengkapnya."}
+              </p>
+
+              <Link
+                href={`/berita/${item.slug}`}
+                className="mt-6 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+              >
+                Baca selengkapnya
+                <span className="ml-1" aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

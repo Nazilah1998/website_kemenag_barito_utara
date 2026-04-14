@@ -11,6 +11,18 @@ function normalizeRole(role) {
   return role.trim().toLowerCase();
 }
 
+function isMissingSessionError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  const code = String(error?.code || "").toLowerCase();
+
+  return (
+    message.includes("auth session missing") ||
+    message.includes("session missing") ||
+    code.includes("session") ||
+    code === "auth_session_missing"
+  );
+}
+
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
@@ -25,7 +37,7 @@ export async function createServerSupabaseClient() {
             cookieStore.set(name, value, options);
           });
         } catch {
-          // aman untuk context yang tidak mengizinkan set cookie
+          // aman pada context yang tidak mengizinkan set cookie
         }
       },
     },
@@ -37,6 +49,13 @@ async function getAdminMfaContext(supabase) {
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
   if (error) {
+    if (isMissingSessionError(error)) {
+      return {
+        currentLevel: null,
+        nextLevel: null,
+        isVerified: false,
+      };
+    }
     throw error;
   }
 
@@ -56,6 +75,22 @@ export async function getCurrentSessionContext() {
   } = await supabase.auth.getUser();
 
   if (userError) {
+    if (isMissingSessionError(userError)) {
+      return {
+        isAuthenticated: false,
+        claims: null,
+        user: null,
+        profile: null,
+        role: null,
+        isAdmin: false,
+        isEditor: false,
+        aal: null,
+        nextAal: null,
+        isMfaVerified: false,
+        mfaErrorMessage: null,
+      };
+    }
+
     throw userError;
   }
 

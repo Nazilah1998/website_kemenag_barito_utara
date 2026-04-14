@@ -1,12 +1,16 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { normalizeCoverImageUrl } from "@/lib/cover-image";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
+import {
+  removeStorageFileByPublicUrl,
+  uploadBase64Image,
+} from "@/lib/storage-media";
 
 export const dynamic = "force-dynamic";
 
 const table = "berita";
+
 const selectFields = `
   id,
   slug,
@@ -30,7 +34,7 @@ function createHttpError(message, status = 400) {
 }
 
 function stripHtml(html = "") {
-  return String(html)
+  return String(html || "")
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -43,19 +47,54 @@ function buildExcerptFromHtml(html = "", maxLength = 180) {
   return `${plain.slice(0, maxLength - 3).trim()}...`;
 }
 
-function buildPayload(body) {
+async function resolveCoverImage({
+  supabase,
+  body,
+  currentUrl = null,
+  slugSeed = "",
+}) {
+  const uploadBase64 = cleanString(body?.cover_upload_base64);
+  const uploadName = cleanString(body?.cover_upload_name) || "cover.webp";
+  const currentCover = cleanString(body?.cover_image) || currentUrl || null;
+
+  if (!uploadBase64) {
+    return currentCover;
+  }
+
+  const uploaded = await uploadBase64Image({
+    supabase,
+    dataUrl: uploadBase64,
+    folder: "berita",
+    fileNameStem: slugSeed || uploadName,
+  });
+
+  if (currentUrl && currentUrl !== uploaded.publicUrl) {
+    try {
+      await removeStorageFileByPublicUrl(supabase, currentUrl);
+    } catch (error) {
+      console.error("Gagal menghapus cover lama berita:", error);
+    }
+  }
+
+  return uploaded.publicUrl;
+}
+
+async function buildPayload(supabase, body, currentCoverUrl = null) {
   const title = cleanString(body?.title);
   const content = cleanString(body?.content);
   const excerpt =
     cleanString(body?.excerpt) || buildExcerptFromHtml(content, 180);
   const category = cleanString(body?.category) || "Umum";
-  const coverImage =
-    normalizeCoverImageUrl(cleanString(body?.cover_image)) || null;
   const is_published = Boolean(body?.is_published);
   const publishedAtInput = cleanString(body?.published_at);
 
-  if (!title) throw createHttpError("Judul berita wajib diisi.", 400);
-  if (!content) throw createHttpError("Isi berita wajib diisi.", 400);
+  if (!title) {
+    throw createHttpError("Judul berita wajib diisi.", 400);
+  }
+
+  if (!content) {
+    throw createHttpError("Isi berita wajib diisi.", 400);
+  }
 
   const publishedAt = publishedAtInput
     ? new Date(publishedAtInput)
@@ -63,6 +102,17 @@ function buildPayload(body) {
 
   if (Number.isNaN(publishedAt.getTime())) {
     throw createHttpError("Tanggal publish tidak valid.", 400);
+  }
+
+  const coverImage = await resolveCoverImage({
+    supabase,
+    body,
+    currentUrl: currentCoverUrl,
+    slugSeed: cleanString(body?.slug) || title,
+  });
+
+  if (!coverImage) {
+    throw createHttpError("Cover berita wajib diupload.", 400);
   }
 
   return {
@@ -82,6 +132,7 @@ export async function GET() {
 
   try {
     const supabase = createAdminClient();
+
     const { data, error } = await supabase
       .from(table)
       .select(selectFields)
@@ -90,11 +141,17 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ items: data ?? [] });
+    return NextResponse.json({
+      items: data ?? [],
+    });
   } catch (error) {
     return NextResponse.json(
-      { message: error.message || "Gagal mengambil daftar berita." },
-      { status: error.status || 500 },
+      {
+        message: error.message || "Gagal mengambil daftar berita.",
+      },
+      {
+        status: error.status || 500,
+      },
     );
   }
 }
@@ -106,7 +163,8 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const supabase = createAdminClient();
-    const payload = buildPayload(body);
+
+    const payload = await buildPayload(supabase, body);
 
     const slug = await ensureUniqueSlug(
       supabase,
@@ -120,7 +178,7 @@ export async function POST(request) {
       .insert({
         ...payload,
         slug,
-        author_id: auth.session.profile?.id ?? null,
+        author_id: auth.session?.profile?.id ?? null,
       })
       .select(selectFields)
       .single();
@@ -137,12 +195,18 @@ export async function POST(request) {
         message: "Berita berhasil ditambahkan.",
         item: data,
       },
-      { status: 201 },
+      {
+        status: 201,
+      },
     );
   } catch (error) {
     return NextResponse.json(
-      { message: error.message || "Gagal menambahkan berita." },
-      { status: error.status || 500 },
+      {
+        message: error.message || "Gagal menambahkan berita.",
+      },
+      {
+        status: error.status || 500,
+      },
     );
   }
 }

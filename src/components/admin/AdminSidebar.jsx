@@ -2,99 +2,123 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
-const menuItems = [
-  { href: "/admin", label: "Dashboard", icon: "🏠" },
-  { href: "/admin/berita", label: "Berita", icon: "📰" },
-];
-
-function NavLinks({ pathname, onClose }) {
+function DashboardIcon() {
   return (
-    <nav className="mt-4 space-y-2">
-      {menuItems.map((item) => {
-        const active =
-          item.href === "/admin"
-            ? pathname === "/admin"
-            : pathname.startsWith(item.href);
-
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onClose}
-            className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${active
-              ? "bg-emerald-600 text-white shadow-sm"
-              : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-          >
-            <span className="text-base" aria-hidden="true">
-              {item.icon}
-            </span>
-            <span>{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M4 13h6V4H4v9Z" />
+      <path d="M14 20h6v-6h-6v6Z" />
+      <path d="M14 10h6V4h-6v6Z" />
+      <path d="M4 20h6v-3H4v3Z" />
+    </svg>
   );
 }
 
-export default function AdminSidebar({ mobileOpen, onClose }) {
+function NewsIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M5 5h14v14H5z" />
+      <path d="M8 9h8" />
+      <path d="M8 13h8" />
+      <path d="M8 17h5" />
+    </svg>
+  );
+}
+
+function NavLink({ href, label, icon, active, onNavigate }) {
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${active
+        ? "bg-emerald-700 text-white shadow-sm"
+        : "text-slate-700 hover:bg-slate-100"
+        }`}
+    >
+      <span className={active ? "text-white" : "text-slate-500"}>{icon}</span>
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+export default function AdminSidebar({ profile, onNavigate }) {
   const pathname = usePathname();
 
+  const compactName =
+    String(profile?.full_name || "").trim() ||
+    String(profile?.email || "").split("@")[0] ||
+    "Admin";
+
   return (
-    <>
-      {mobileOpen ? (
-        <button
-          type="button"
-          aria-label="Tutup sidebar"
-          onClick={onClose}
-          className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm lg:hidden"
-        />
-      ) : null}
+    <div className="flex h-full flex-col">
+      <div className="border-b border-slate-200 px-5 py-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
+          Admin CMS
+        </p>
+        <h2 className="mt-2 text-xl font-bold text-slate-900">
+          Kemenag Barito Utara
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Kelola konten website publik dengan panel yang ringkas dan fokus.
+        </p>
+      </div>
 
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[288px] flex-col border-r border-slate-200 bg-white px-4 py-5 transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-      >
-        <div className="rounded-[28px] bg-emerald-600 px-5 py-6 text-white shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-50/90">
-            Admin Panel
-          </p>
-
-          <h2 className="mt-3 text-2xl font-bold leading-tight">
-            Kemenag Barito Utara
-          </h2>
-
-          <p className="mt-4 text-sm leading-7 text-emerald-50/95">
-            Kelola konten website publik dari satu panel yang lebih rapi dan
-            fokus.
-          </p>
-        </div>
-
-        <div className="mt-5">
-          <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">
+      <div className="flex-1 overflow-y-auto px-4 py-5">
+        <div>
+          <p className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400">
             Navigasi
           </p>
 
-          <NavLinks pathname={pathname} onClose={onClose} />
+          <div className="space-y-2">
+            <NavLink
+              href="/admin"
+              label="Dashboard"
+              icon={<DashboardIcon />}
+              active={pathname === "/admin"}
+              onNavigate={onNavigate}
+            />
+
+            <NavLink
+              href="/admin/berita"
+              label="Berita"
+              icon={<NewsIcon />}
+              active={pathname.startsWith("/admin/berita")}
+              onNavigate={onNavigate}
+            />
+          </div>
         </div>
+      </div>
 
-        <div className="mt-auto rounded-3xl border border-slate-200 bg-slate-50 px-4 py-5">
-          <p className="text-sm font-semibold text-slate-900">Akses cepat</p>
-
-          <p className="mt-2 text-sm leading-7 text-slate-500">
-            Buka website publik untuk melihat hasil perubahan yang sudah tayang.
+      <div className="border-t border-slate-200 px-4 py-4">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+            Login sebagai
           </p>
-
-          <Link
-            href="/"
-            onClick={onClose}
-            className="mt-4 inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700"
-          >
-            Kembali ke website
-          </Link>
+          <p className="mt-2 wrap-break-word text-sm font-semibold text-slate-900">
+            {compactName}
+          </p>
+          <p className="mt-1 break-all text-xs text-slate-500">
+            {profile?.email || "-"}
+          </p>
         </div>
-      </aside>
-    </>
+
+        <div className="mt-4">
+          <AdminLogoutButton />
+        </div>
+      </div>
+    </div>
   );
 }
