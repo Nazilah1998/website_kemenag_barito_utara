@@ -12,6 +12,7 @@ const ThemeContext = createContext(null);
 
 const STORAGE_KEY = "site-theme";
 const DEFAULT_THEME = "light";
+const VALID_THEMES = new Set(["light", "dark"]);
 
 const themeListeners = new Set();
 
@@ -19,20 +20,35 @@ function emitThemeChange() {
   themeListeners.forEach((listener) => listener());
 }
 
-function getThemeSnapshot() {
-  if (typeof window === "undefined") {
-    return DEFAULT_THEME;
-  }
-
+function getStoredTheme() {
+  if (typeof window === "undefined") return null;
   const savedTheme = window.localStorage.getItem(STORAGE_KEY);
+  return VALID_THEMES.has(savedTheme) ? savedTheme : null;
+}
 
-  if (savedTheme === "light" || savedTheme === "dark") {
-    return savedTheme;
-  }
-
+function getSystemTheme() {
+  if (typeof window === "undefined") return DEFAULT_THEME;
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
+}
+
+function getResolvedTheme() {
+  return getStoredTheme() || getSystemTheme();
+}
+
+function applyTheme(theme) {
+  if (typeof document === "undefined") return;
+
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.classList.toggle("dark", theme === "dark");
+  root.style.colorScheme = theme;
+}
+
+function getThemeSnapshot() {
+  if (typeof window === "undefined") return DEFAULT_THEME;
+  return getResolvedTheme();
 }
 
 function getThemeServerSnapshot() {
@@ -57,20 +73,28 @@ function subscribeTheme(listener) {
   };
 
   const onMediaChange = () => {
-    const savedTheme = window.localStorage.getItem(STORAGE_KEY);
-
-    if (!savedTheme) {
+    if (!getStoredTheme()) {
       listener();
     }
   };
 
   window.addEventListener("storage", onStorage);
-  mediaQuery.addEventListener("change", onMediaChange);
+
+  if (typeof mediaQuery.addEventListener === "function") {
+    mediaQuery.addEventListener("change", onMediaChange);
+  } else {
+    mediaQuery.addListener(onMediaChange);
+  }
 
   return () => {
     themeListeners.delete(listener);
     window.removeEventListener("storage", onStorage);
-    mediaQuery.removeEventListener("change", onMediaChange);
+
+    if (typeof mediaQuery.removeEventListener === "function") {
+      mediaQuery.removeEventListener("change", onMediaChange);
+    } else {
+      mediaQuery.removeListener(onMediaChange);
+    }
   };
 }
 
@@ -82,35 +106,42 @@ export function ThemeProvider({ children }) {
   );
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    root.style.colorScheme = theme;
+    applyTheme(theme);
   }, [theme]);
-
-  const setTheme = (nextTheme) => {
-    if (typeof window === "undefined") return;
-    if (nextTheme !== "light" && nextTheme !== "dark") return;
-
-    window.localStorage.setItem(STORAGE_KEY, nextTheme);
-    emitThemeChange();
-  };
 
   const value = useMemo(
     () => ({
       theme,
       isDark: theme === "dark",
-      setTheme,
-      toggleTheme: () =>
-        setTheme(theme === "dark" ? "light" : "dark"),
+      setTheme: (nextTheme) => {
+        if (typeof window === "undefined") return;
+        if (!VALID_THEMES.has(nextTheme)) return;
+
+        window.localStorage.setItem(STORAGE_KEY, nextTheme);
+        applyTheme(nextTheme);
+        emitThemeChange();
+      },
+      toggleTheme: () => {
+        const nextTheme = theme === "dark" ? "light" : "dark";
+        if (typeof window === "undefined") return;
+
+        window.localStorage.setItem(STORAGE_KEY, nextTheme);
+        applyTheme(nextTheme);
+        emitThemeChange();
+      },
+      clearThemePreference: () => {
+        if (typeof window === "undefined") return;
+
+        window.localStorage.removeItem(STORAGE_KEY);
+        const nextTheme = getResolvedTheme();
+        applyTheme(nextTheme);
+        emitThemeChange();
+      },
     }),
     [theme],
   );
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

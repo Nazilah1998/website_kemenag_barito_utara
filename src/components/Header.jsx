@@ -209,7 +209,7 @@ function HeaderSearchForm({
 function UtilityPill({ children, className = "" }) {
   return (
     <div
-      className={`flex items-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm ${className}`}
+      className={`theme-surface-soft theme-border flex items-center gap-1 rounded-full border px-1 py-1 ${className}`}
     >
       {children}
     </div>
@@ -356,20 +356,19 @@ export default function Header() {
 
   const desktopLinkClass = (active) =>
     active
-      ? "inline-flex h-10 items-center gap-1 rounded-full bg-emerald-50 px-3 text-[14px] font-black text-emerald-700 shadow-sm whitespace-nowrap"
-      : "inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 whitespace-nowrap";
+      ? "theme-nav-link-active inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] font-black whitespace-nowrap transition"
+      : "theme-nav-link inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] font-bold whitespace-nowrap transition";
 
   const mobileLinkClass = (active) =>
     active
-      ? "flex items-center justify-between rounded-3xl bg-emerald-50 px-4 py-3.5 text-sm font-black text-emerald-700"
-      : "flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700";
-
+      ? "theme-nav-link-active flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-black transition"
+      : "theme-nav-link flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-bold transition";
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/92 shadow-[0_10px_40px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+    <header className="theme-header sticky top-0 z-50 border-b backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 py-4">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-emerald-50 p-2 ring-1 ring-emerald-100 shadow-sm">
+            <span className="theme-accent-soft flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border p-2 shadow-sm">
               <Image
                 src={siteInfo.logoSrc}
                 alt={siteInfo.shortName}
@@ -419,7 +418,7 @@ export default function Header() {
         <div className="hidden pb-4 lg:block">
           <div
             ref={desktopDropdownRef}
-            className="rounded-[30px] border border-slate-200 bg-white/90 px-4 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.06)] backdrop-blur"
+            className="theme-header-nav rounded-[30px] px-4 py-2 backdrop-blur"
           >
             <div className="flex items-center gap-4">
               <div className="relative min-w-0 flex-1 overflow-visible">
@@ -450,8 +449,8 @@ export default function Header() {
                           </button>
 
                           {isOpen ? (
-                            <div className="absolute left-0 top-full z-50 mt-3 w-80 rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_20px_60px_rgba(15,23,42,0.14)]">
-                              <p className="px-3 py-2 text-xs font-black uppercase tracking-[0.25em] text-slate-400">
+                            <div className="theme-dropdown absolute left-0 top-full z-50 mt-3 w-80 rounded-[28px] p-3">
+                              <p className="theme-text-soft px-3 py-2 text-xs font-black uppercase tracking-[0.25em]">
                                 Menu {item.label}
                               </p>
 
@@ -506,8 +505,8 @@ export default function Header() {
                     type="button"
                     onClick={() => setLocale("id")}
                     className={`rounded-full px-3 py-1.5 text-[12px] font-black transition ${locale === "id"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                      ? "theme-chip-active"
+                      : "theme-chip"
                       }`}
                   >
                     ID
@@ -516,8 +515,8 @@ export default function Header() {
                     type="button"
                     onClick={() => setLocale("en")}
                     className={`rounded-full px-3 py-1.5 text-[12px] font-black transition ${locale === "en"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                      ? "theme-chip-active"
+                      : "theme-chip"
                       }`}
                   >
                     EN
@@ -530,8 +529,8 @@ export default function Header() {
                     onClick={setLightTheme}
                     aria-label="Tema terang"
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition ${theme !== "dark"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                      ? "theme-chip-active"
+                      : "theme-chip"
                       }`}
                   >
                     <SunIcon className="h-4 w-4" />
@@ -603,7 +602,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={closeMobileMenu}
-                className="ml-3 shrink-0 rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm"
+                className="theme-surface-strong theme-border ml-3 shrink-0 rounded-full border p-2 shadow-sm"
                 aria-label="Tutup menu"
               >
                 <CloseIcon className="h-5 w-5" />
@@ -627,8 +626,8 @@ export default function Header() {
                     type="button"
                     onClick={() => setLocale("id")}
                     className={`rounded-full px-3 py-2 text-xs font-black transition ${locale === "id"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                      ? "theme-chip-active"
+                      : "theme-chip"
                       }`}
                   >
                     Indonesia
@@ -637,8 +636,8 @@ export default function Header() {
                     type="button"
                     onClick={() => setLocale("en")}
                     className={`rounded-full px-3 py-2 text-xs font-black transition ${locale === "en"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                      ? "theme-chip-active"
+                      : "theme-chip"
                       }`}
                   >
                     English
@@ -650,9 +649,7 @@ export default function Header() {
                     type="button"
                     onClick={setLightTheme}
                     aria-label="Tema terang"
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme !== "dark"
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme !== "dark" ? "theme-icon-button-active" : "theme-icon-button"
                       }`}
                   >
                     <SunIcon className="h-4 w-4" />
@@ -662,9 +659,7 @@ export default function Header() {
                     type="button"
                     onClick={setDarkTheme}
                     aria-label="Tema gelap"
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "dark"
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "dark" ? "theme-icon-button-active-dark" : "theme-icon-button"
                       }`}
                   >
                     <MoonIcon className="h-4 w-4" />

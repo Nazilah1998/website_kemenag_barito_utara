@@ -6,6 +6,26 @@ import { siteInfo } from "@/data/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const themeInitScript = `
+(() => {
+  try {
+    const STORAGE_KEY = "site-theme";
+    const root = document.documentElement;
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    const theme =
+      saved === "light" || saved === "dark"
+        ? saved
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+
+    root.dataset.theme = theme;
+    root.classList.toggle("dark", theme === "dark");
+    root.style.colorScheme = theme;
+  } catch (_) {}
+})();
+`;
+
 export const metadata = {
   metadataBase: new URL(siteInfo.siteUrl),
   title: {
@@ -43,8 +63,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id" className={inter.className}>
-      <body>
+    <html lang="id" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className={`${inter.className} antialiased`}>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

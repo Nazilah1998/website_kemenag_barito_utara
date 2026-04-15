@@ -18,10 +18,9 @@ function FooterLink({ href, children }) {
   return (
     <Link
       href={href}
-      className="group inline-flex items-center gap-2 text-sm text-slate-300 transition hover:text-emerald-300"
+      className="theme-footer-link text-sm font-semibold transition"
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/70 transition group-hover:bg-emerald-300" />
-      <span>{children}</span>
+      {children}
     </Link>
   );
 }
@@ -30,18 +29,18 @@ function FooterInfoItem({ label, value, href }) {
   const renderValue = Array.isArray(value) ? (
     <div className="mt-1 space-y-1">
       {value.map((item, index) => (
-        <p key={index} className="text-sm leading-6 text-slate-200">
+        <p key={`${label}-${index}`} className="theme-footer-muted text-sm leading-6">
           {item}
         </p>
       ))}
     </div>
   ) : (
-    <p className="mt-1 text-sm leading-6 text-slate-200">{value}</p>
+    <p className="theme-footer-muted mt-1 text-sm leading-6">{value}</p>
   );
 
   const content = (
     <>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-white/80">
         {label}
       </p>
       {renderValue}
@@ -63,55 +62,53 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-slate-950 text-white">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.10),transparent_24%),linear-gradient(to_bottom,#020617,#020817,#0f172a)]" />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[28px_28px] opacity-[0.08]" />
+    <footer className="theme-footer relative overflow-hidden border-t">
+      <div className="absolute inset-0 opacity-90 [background:radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_24%)]" />
 
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.7fr_0.7fr_1fr]">
-          <div className="max-w-md">
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">
+          <div>
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-400/20 bg-white/5 shadow-[0_10px_30px_rgba(16,185,129,0.12)] backdrop-blur">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 p-3 ring-1 ring-white/10">
                 <Image
                   src={siteInfo.logoSrc}
                   alt={siteInfo.shortName}
-                  width={38}
-                  height={38}
-                  className="h-9 w-9 object-contain"
+                  width={54}
+                  height={54}
+                  className="object-contain"
                 />
               </div>
 
               <div>
-                <p className="text-lg font-extrabold tracking-[0.02em] text-white">
+                <p className="text-sm font-black uppercase tracking-[0.26em] text-emerald-300">
                   {siteInfo.shortName}
                 </p>
-                <p className="mt-1 text-sm text-slate-400">{siteInfo.tagline}</p>
+                <p className="mt-1 text-sm text-white/80">{siteInfo.tagline}</p>
               </div>
             </div>
 
             <div className="mt-6">
-              <span className="inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+              <p className="text-xs font-black uppercase tracking-[0.28em] text-white/70">
                 Portal Resmi Informasi dan Layanan
-              </span>
+              </p>
+              <p className="theme-footer-muted mt-4 max-w-xl text-sm leading-7">
+                Website resmi Kantor Kementerian Agama Kabupaten Barito Utara
+                sebagai media informasi publik, publikasi kelembagaan, dan akses
+                layanan yang lebih rapi, modern, dan mudah digunakan.
+              </p>
             </div>
-
-            <p className="mt-5 text-sm leading-7 text-slate-300">
-              Website resmi Kantor Kementerian Agama Kabupaten Barito Utara
-              sebagai media informasi publik, publikasi kelembagaan, dan akses
-              layanan yang lebih rapi, modern, dan mudah digunakan.
-            </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/kontak"
-                className="inline-flex items-center rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                className="theme-primary-button inline-flex items-center rounded-full px-5 py-2.5 text-sm font-black transition"
               >
                 Hubungi Kami
               </Link>
 
               <Link
                 href="/profil"
-                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-emerald-400/20 hover:text-emerald-300"
+                className="theme-footer-panel inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-emerald-400/20 hover:text-emerald-300"
               >
                 Lihat Profil
               </Link>
@@ -143,11 +140,11 @@ export default function Footer() {
               ))}
             </div>
 
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="theme-footer-panel mt-6 rounded-2xl p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">
                 Catatan
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
+              <p className="theme-footer-muted mt-2 text-sm leading-6">
                 Agenda, Galeri, dan Dokumen Publik sedang dalam proses
                 pengembangan.
               </p>
@@ -165,18 +162,15 @@ export default function Footer() {
                 value={siteInfo.email}
                 href={siteLinks.emailHref}
               />
-
               <FooterInfoItem
                 label="Telepon"
                 value={siteInfo.phone}
                 href={siteLinks.phoneHref}
               />
-
               <FooterInfoItem
                 label="Jam Layanan"
                 value={siteInfo.officeHours}
               />
-
               <FooterInfoItem
                 label="Wilayah"
                 value="Kabupaten Barito Utara, Kalimantan Tengah"
@@ -186,16 +180,16 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t border-white/10 pt-6">
-          <div className="flex flex-col gap-3 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
-            <p>
+          <div className="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
+            <p className="theme-footer-muted">
               © {year} {siteInfo.shortName}. Hak Cipta Dilindungi.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+              <span className="theme-footer-badge-accent inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold">
                 Resmi
               </span>
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">
+              <span className="theme-footer-badge inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold">
                 Informasi Publik
               </span>
             </div>
