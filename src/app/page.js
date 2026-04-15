@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { siteInfo } from "../data/site";
-import { getLatestBerita } from "../lib/berita";
+import { getLatestBeritaHome } from "../lib/berita-home";
 import { toCoverPreviewUrl } from "../lib/cover-image";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata = {
   title: "Kementerian Agama Kabupaten Barito Utara",
@@ -42,7 +42,7 @@ function getBeritaCover(item) {
 }
 
 export default async function HomePage() {
-  const latestBerita = await getLatestBerita(3);
+  const latestBerita = await getLatestBeritaHome();
 
   return (
     <main className="theme-page min-h-screen">
@@ -246,7 +246,7 @@ export default async function HomePage() {
 
         {latestBerita.length > 0 ? (
           <div className="mt-7 grid gap-4 md:grid-cols-3">
-            {latestBerita.map((item) => (
+            {latestBerita.map((item, index) => (
               <article
                 key={item.slug}
                 className="theme-news-card group overflow-hidden rounded-3xl transition hover:-translate-y-1"
@@ -258,20 +258,20 @@ export default async function HomePage() {
                       alt={item.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 33vw"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
+                      quality={index === 0 ? 75 : 70}
+                      decoding="async"
                       className={
                         item.coverImage
                           ? "object-cover transition duration-500 group-hover:scale-105"
                           : "object-contain p-10 transition duration-500 group-hover:scale-105"
                       }
-                      unoptimized
                     />
-
                     <div className="absolute inset-0 [background:var(--news-overlay)]" />
-
                     <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-black text-emerald-700 shadow-sm dark:bg-slate-900/90 dark:text-emerald-300">
                       {item.category}
                     </div>
-
                     <div className="absolute bottom-4 left-4 right-4">
                       <p className="text-xs font-bold text-white/80">
                         {item.date}
