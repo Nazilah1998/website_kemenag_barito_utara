@@ -44,7 +44,7 @@ function FooterLink({ href, children }) {
   return (
     <Link
       href={href}
-      className="theme-footer-link text-sm font-semibold transition"
+      className="theme-footer-link text-sm font-semibold transition hover:translate-x-0.5"
     >
       {children}
     </Link>
@@ -55,7 +55,10 @@ function FooterInfoItem({ label, value, href }) {
   const renderValue = Array.isArray(value) ? (
     <div className="mt-1 space-y-1">
       {value.map((item, index) => (
-        <p key={`${label}-${index}`} className="theme-footer-muted text-sm leading-6">
+        <p
+          key={`${label}-${index}`}
+          className="theme-footer-muted text-sm leading-6"
+        >
           {item}
         </p>
       ))}
@@ -66,7 +69,10 @@ function FooterInfoItem({ label, value, href }) {
 
   const content = (
     <>
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-white/80">
+      <p
+        className="text-xs font-black uppercase tracking-[0.2em]"
+        style={{ color: "var(--footer-fg)" }}
+      >
         {label}
       </p>
       {renderValue}
@@ -92,7 +98,7 @@ function SocialIconLink({ label, href, icon: Icon }) {
       rel="noreferrer"
       aria-label={label}
       title={label}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-300 transition hover:-translate-y-0.5 hover:text-emerald-300"
+      className="theme-footer-panel inline-flex h-10 w-10 items-center justify-center rounded-full text-(--footer-muted) transition hover:-translate-y-0.5 hover:text-(--primary-strong)"
     >
       <Icon className="h-5 w-5" />
     </a>
@@ -104,13 +110,13 @@ export default function Footer() {
 
   return (
     <footer className="theme-footer relative overflow-hidden border-t">
-      <div className="absolute inset-0 opacity-90 [background:radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_24%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(circle_at_top_left,rgba(16,185,129,0.1),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.04),transparent_24%)] dark:[background:radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_24%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_1fr_0.9fr]">
           <div>
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 p-3 ring-1 ring-white/10">
+              <div className="theme-footer-panel flex h-16 w-16 items-center justify-center rounded-3xl p-3">
                 <Image
                   src={siteInfo.logoSrc}
                   alt={siteInfo.shortName}
@@ -121,15 +127,20 @@ export default function Footer() {
               </div>
 
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.26em] text-emerald-300">
+                <p className="text-sm font-black uppercase tracking-[0.26em] text-(--primary-strong)">
                   {siteInfo.shortName}
                 </p>
-                <p className="mt-1 text-sm text-white/80">{siteInfo.tagline}</p>
+                <p className="theme-footer-muted mt-1 text-sm">
+                  {siteInfo.tagline}
+                </p>
               </div>
             </div>
 
             <div className="mt-6">
-              <p className="text-xs font-black uppercase tracking-[0.28em] text-white/70">
+              <p
+                className="text-xs font-black uppercase tracking-[0.28em]"
+                style={{ color: "var(--footer-fg)" }}
+              >
                 Portal Resmi Informasi dan Layanan
               </p>
 
@@ -150,7 +161,8 @@ export default function Footer() {
 
               <Link
                 href="/profil"
-                className="theme-footer-panel inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-emerald-400/20 hover:text-emerald-300"
+                className="theme-footer-panel inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:text-(--primary-strong)"
+                style={{ color: "var(--footer-fg)" }}
               >
                 Lihat Profil
               </Link>
@@ -158,7 +170,10 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-white/90">
+            <p
+              className="text-sm font-bold uppercase tracking-[0.18em]"
+              style={{ color: "var(--footer-fg)" }}
+            >
               Menu Utama
             </p>
 
@@ -172,7 +187,10 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-white/90">
+            <p
+              className="text-sm font-bold uppercase tracking-[0.18em]"
+              style={{ color: "var(--footer-fg)" }}
+            >
               Kontak Resmi
             </p>
 
@@ -202,7 +220,10 @@ export default function Footer() {
           </div>
 
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-white/90">
+            <p
+              className="text-sm font-bold uppercase tracking-[0.18em]"
+              style={{ color: "var(--footer-fg)" }}
+            >
               Ikuti Kami
             </p>
 
@@ -219,7 +240,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-white/10 pt-6">
+        <div className="mt-10 border-t border-(--border) pt-6">
           <div className="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
             <p className="theme-footer-muted">
               © {year} {siteInfo.shortName}. Hak Cipta Dilindungi.

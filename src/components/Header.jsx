@@ -171,10 +171,10 @@ function HeaderSearchForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition focus-within:border-emerald-300 focus-within:shadow-[0_12px_36px_rgba(16,185,129,0.12)]"
+      className="flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition focus-within:border-emerald-300 focus-within:shadow-[0_12px_36px_rgba(16,185,129,0.12)] dark:border-slate-800 dark:bg-slate-950/90 dark:shadow-[0_12px_32px_rgba(2,6,23,0.35)] dark:focus-within:border-emerald-500/40 dark:focus-within:shadow-[0_14px_36px_rgba(16,185,129,0.10)]"
     >
       <div className="flex flex-1 items-center gap-2 px-3">
-        <SearchIcon className="h-4 w-4 text-slate-400" />
+        <SearchIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
         <input
           data-1p-ignore
           type="search"
@@ -183,7 +183,7 @@ function HeaderSearchForm({
           placeholder={placeholder}
           autoComplete="off"
           spellCheck={false}
-          className="header-search-input w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400"
+          className="header-search-input w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           style={{
             border: "none",
             outline: "none",
@@ -191,7 +191,7 @@ function HeaderSearchForm({
             WebkitAppearance: "none",
             appearance: "none",
             backgroundColor: "transparent",
-            caretColor: "#047857",
+            caretColor: "#10b981",
           }}
         />
       </div>
@@ -209,7 +209,7 @@ function HeaderSearchForm({
 function UtilityPill({ children, className = "" }) {
   return (
     <div
-      className={`theme-surface-soft theme-border flex items-center gap-1 rounded-full border px-1 py-1 ${className}`}
+      className={`flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-1 py-1 dark:border-slate-800 dark:bg-slate-900/80 ${className}`}
     >
       {children}
     </div>
@@ -356,19 +356,20 @@ export default function Header() {
 
   const desktopLinkClass = (active) =>
     active
-      ? "theme-nav-link-active inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] font-black whitespace-nowrap transition"
-      : "theme-nav-link inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] font-bold whitespace-nowrap transition";
+      ? "inline-flex h-10 items-center gap-1 rounded-full bg-emerald-50 px-3 text-[14px] font-black whitespace-nowrap text-emerald-700 transition dark:bg-emerald-500/15 dark:text-emerald-300"
+      : "inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] font-bold whitespace-nowrap text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800/70 dark:hover:text-emerald-300";
 
   const mobileLinkClass = (active) =>
     active
-      ? "theme-nav-link-active flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-black transition"
-      : "theme-nav-link flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-bold transition";
+      ? "flex items-center justify-between rounded-3xl bg-emerald-50 px-4 py-3.5 text-sm font-black text-emerald-700 transition dark:bg-emerald-500/15 dark:text-emerald-300"
+      : "flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800/70 dark:hover:text-emerald-300";
+
   return (
-    <header className="theme-header sticky top-0 z-50 border-b backdrop-blur-xl">
+    <header className="theme-header sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 py-4">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <span className="theme-accent-soft flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border p-2 shadow-sm">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl border border-emerald-100 bg-emerald-50 p-2 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
               <Image
                 src={siteInfo.logoSrc}
                 alt={siteInfo.shortName}
@@ -380,10 +381,10 @@ export default function Header() {
             </span>
 
             <div className="min-w-0">
-              <p className="truncate text-base font-black uppercase tracking-wide text-emerald-800 sm:text-xl">
+              <p className="truncate text-base font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300 sm:text-xl">
                 {siteInfo.shortName}
               </p>
-              <p className="mt-0.5 text-xs font-medium text-slate-600 sm:text-sm">
+              <p className="mt-0.5 text-xs font-medium text-slate-600 dark:text-slate-400 sm:text-sm">
                 {siteInfo.tagline}
               </p>
             </div>
@@ -402,7 +403,7 @@ export default function Header() {
           <button
             type="button"
             onClick={toggleMobileMenu}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50 lg:hidden"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950/90 dark:text-slate-100 dark:hover:bg-slate-900 lg:hidden"
             aria-expanded={isMobileMenuOpen}
             aria-label="Buka menu"
           >
@@ -418,7 +419,7 @@ export default function Header() {
         <div className="hidden pb-4 lg:block">
           <div
             ref={desktopDropdownRef}
-            className="theme-header-nav rounded-[30px] px-4 py-2 backdrop-blur"
+            className="theme-header-nav rounded-[30px] border border-slate-200/80 bg-white/80 px-4 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.05)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_18px_42px_rgba(2,6,23,0.30)]"
           >
             <div className="flex items-center gap-4">
               <div className="relative min-w-0 flex-1 overflow-visible">
@@ -449,8 +450,8 @@ export default function Header() {
                           </button>
 
                           {isOpen ? (
-                            <div className="theme-dropdown absolute left-0 top-full z-50 mt-3 w-80 rounded-[28px] p-3">
-                              <p className="theme-text-soft px-3 py-2 text-xs font-black uppercase tracking-[0.25em]">
+                            <div className="theme-dropdown absolute left-0 top-full z-50 mt-3 w-80 rounded-[28px] border border-slate-200 bg-white/95 p-3 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-[0_18px_44px_rgba(2,6,23,0.38)]">
+                              <p className="px-3 py-2 text-xs font-black uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
                                 Menu {item.label}
                               </p>
 
@@ -470,8 +471,8 @@ export default function Header() {
                                       }
                                       className={
                                         childActive
-                                          ? "group flex items-center justify-between rounded-3xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700"
-                                          : "group flex items-center justify-between rounded-3xl px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700"
+                                          ? "group flex items-center justify-between rounded-3xl bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                                          : "group flex items-center justify-between rounded-3xl px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800/70 dark:hover:text-emerald-300"
                                       }
                                     >
                                       <span>{child.label}</span>
@@ -499,14 +500,14 @@ export default function Header() {
                 </nav>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2 border-l border-slate-200 pl-4">
+              <div className="flex shrink-0 items-center gap-2 border-l border-slate-200 pl-4 dark:border-slate-800">
                 <UtilityPill>
                   <button
                     type="button"
                     onClick={() => setLocale("id")}
                     className={`rounded-full px-3 py-1.5 text-[12px] font-black transition ${locale === "id"
                       ? "theme-chip-active"
-                      : "theme-chip"
+                      : "theme-chip dark:text-slate-200"
                       }`}
                   >
                     ID
@@ -516,7 +517,7 @@ export default function Header() {
                     onClick={() => setLocale("en")}
                     className={`rounded-full px-3 py-1.5 text-[12px] font-black transition ${locale === "en"
                       ? "theme-chip-active"
-                      : "theme-chip"
+                      : "theme-chip dark:text-slate-200"
                       }`}
                   >
                     EN
@@ -530,7 +531,7 @@ export default function Header() {
                     aria-label="Tema terang"
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition ${theme !== "dark"
                       ? "theme-chip-active"
-                      : "theme-chip"
+                      : "theme-chip dark:text-slate-200"
                       }`}
                   >
                     <SunIcon className="h-4 w-4" />
@@ -541,8 +542,8 @@ export default function Header() {
                     onClick={setDarkTheme}
                     aria-label="Tema gelap"
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition ${theme === "dark"
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700"
+                      ? "bg-slate-900 text-white shadow-sm dark:bg-emerald-500 dark:text-slate-950"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-emerald-300"
                       }`}
                   >
                     <MoonIcon className="h-4 w-4" />
@@ -552,7 +553,7 @@ export default function Header() {
                 {adminState.loaded && adminState.isAdmin ? (
                   <Link
                     href="/admin"
-                    className="inline-flex h-10 items-center rounded-full bg-slate-900 px-4 text-sm font-black text-white transition hover:bg-slate-800"
+                    className="inline-flex h-10 items-center rounded-full bg-slate-900 px-4 text-sm font-black text-white transition hover:bg-slate-800 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
                   >
                     Admin
                   </Link>
@@ -564,7 +565,7 @@ export default function Header() {
       </div>
 
       {isMobileMenuOpen ? (
-        <div className="fixed inset-0 z-70 bg-slate-950/45 backdrop-blur-[3px] lg:hidden">
+        <div className="fixed inset-0 z-70 bg-slate-950/60 backdrop-blur-[3px] lg:hidden">
           <button
             type="button"
             onClick={closeMobileMenu}
@@ -572,14 +573,14 @@ export default function Header() {
             aria-label="Tutup menu"
           />
 
-          <aside className="fixed inset-x-4 top-4 z-72 flex h-[calc(100dvh-32px)] flex-col overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.28)]">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <aside className="fixed inset-x-4 top-4 z-72 flex h-[calc(100dvh-32px)] flex-col overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.28)] dark:border-slate-800 dark:bg-slate-950/96 dark:shadow-[0_30px_80px_rgba(2,6,23,0.55)]">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
               <Link
                 href="/"
                 onClick={closeMobileMenu}
                 className="flex min-w-0 items-center gap-3"
               >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 p-2 ring-1 ring-emerald-100">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 p-2 ring-1 ring-emerald-100 dark:bg-emerald-500/10 dark:ring-emerald-500/20">
                   <Image
                     src={siteInfo.logoSrc}
                     alt={siteInfo.shortName}
@@ -590,10 +591,10 @@ export default function Header() {
                 </span>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black uppercase tracking-wide text-emerald-800">
+                  <p className="truncate text-sm font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
                     {siteInfo.shortName}
                   </p>
-                  <p className="mt-1 line-clamp-2 text-xs font-medium text-slate-500">
+                  <p className="mt-1 line-clamp-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                     {siteInfo.tagline}
                   </p>
                 </div>
@@ -602,14 +603,14 @@ export default function Header() {
               <button
                 type="button"
                 onClick={closeMobileMenu}
-                className="theme-surface-strong theme-border ml-3 shrink-0 rounded-full border p-2 shadow-sm"
+                className="ml-3 shrink-0 rounded-full border border-slate-200 bg-slate-50 p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100"
                 aria-label="Tutup menu"
               >
                 <CloseIcon className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="border-b border-slate-100 px-5 py-4">
+            <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
               <HeaderSearchForm
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
@@ -619,7 +620,7 @@ export default function Header() {
               />
             </div>
 
-            <div className="border-b border-slate-100 px-5 py-4">
+            <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
               <div className="grid grid-cols-2 gap-3">
                 <UtilityPill className="justify-center">
                   <button
@@ -627,7 +628,7 @@ export default function Header() {
                     onClick={() => setLocale("id")}
                     className={`rounded-full px-3 py-2 text-xs font-black transition ${locale === "id"
                       ? "theme-chip-active"
-                      : "theme-chip"
+                      : "theme-chip dark:text-slate-200"
                       }`}
                   >
                     Indonesia
@@ -637,7 +638,7 @@ export default function Header() {
                     onClick={() => setLocale("en")}
                     className={`rounded-full px-3 py-2 text-xs font-black transition ${locale === "en"
                       ? "theme-chip-active"
-                      : "theme-chip"
+                      : "theme-chip dark:text-slate-200"
                       }`}
                   >
                     English
@@ -649,7 +650,9 @@ export default function Header() {
                     type="button"
                     onClick={setLightTheme}
                     aria-label="Tema terang"
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme !== "dark" ? "theme-icon-button-active" : "theme-icon-button"
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme !== "dark"
+                      ? "theme-icon-button-active"
+                      : "theme-icon-button dark:text-slate-200"
                       }`}
                   >
                     <SunIcon className="h-4 w-4" />
@@ -659,7 +662,9 @@ export default function Header() {
                     type="button"
                     onClick={setDarkTheme}
                     aria-label="Tema gelap"
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "dark" ? "theme-icon-button-active-dark" : "theme-icon-button"
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition ${theme === "dark"
+                      ? "theme-icon-button-active-dark"
+                      : "theme-icon-button dark:text-slate-200 dark:hover:bg-slate-800/70"
                       }`}
                   >
                     <MoonIcon className="h-4 w-4" />
@@ -692,7 +697,7 @@ export default function Header() {
                         </button>
 
                         {isOpen ? (
-                          <div className="ml-3 space-y-1 border-l border-slate-100 pl-3">
+                          <div className="ml-3 space-y-1 border-l border-slate-100 pl-3 dark:border-slate-800">
                             {item.children.map((child) => {
                               const childActive = isPathActive(
                                 pathname,
@@ -706,8 +711,8 @@ export default function Header() {
                                   onClick={closeMobileMenu}
                                   className={
                                     childActive
-                                      ? "flex items-center justify-between rounded-3xl bg-emerald-50 px-4 py-3.5 text-sm font-black text-emerald-700"
-                                      : "flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700"
+                                      ? "flex items-center justify-between rounded-3xl bg-emerald-50 px-4 py-3.5 text-sm font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                                      : "flex items-center justify-between rounded-3xl px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-slate-800/70 dark:hover:text-emerald-300"
                                   }
                                 >
                                   <span>{child.label}</span>
@@ -737,7 +742,7 @@ export default function Header() {
                   <Link
                     href="/admin"
                     onClick={closeMobileMenu}
-                    className="flex items-center justify-center rounded-3xl bg-slate-900 px-4 py-3.5 text-sm font-black text-white"
+                    className="flex items-center justify-center rounded-3xl bg-slate-900 px-4 py-3.5 text-sm font-black text-white dark:bg-emerald-500 dark:text-slate-950"
                   >
                     Admin
                   </Link>

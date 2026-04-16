@@ -3,8 +3,8 @@ import { heroData } from "../data/hero";
 
 export default function Hero() {
   return (
-    <section className="w-full bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-700">
-      <div className="mx-auto grid max-w-[1400px] gap-8 px-6 py-16 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-24 xl:px-10">
+    <section className="w-full bg-linear-to-r from-emerald-950 via-emerald-900 to-teal-700">
+      <div className="mx-auto grid max-w-350 gap-8 px-6 py-16 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-24 xl:px-10">
         <div>
           <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white">
             {heroData.badge}
@@ -51,9 +51,8 @@ export default function Hero() {
           {heroData.cards.map((card, index) => (
             <div
               key={index}
-              className={`rounded-3xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-sm ${
-                card.wide ? "sm:col-span-2" : ""
-              }`}
+              className={`rounded-3xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-sm ${card.wide ? "sm:col-span-2" : ""
+                }`}
             >
               <h3 className="text-2xl font-bold">{card.title}</h3>
               <p className="mt-3 text-sm leading-7 text-white/85">
