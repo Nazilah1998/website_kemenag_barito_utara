@@ -159,6 +159,28 @@ async function readJsonSafely(response) {
   }
 }
 
+function getItemPublishedState(item) {
+  return Boolean(item?.is_published ?? item?.isPublished);
+}
+
+function getItemBaseDate(item) {
+  return (
+    item?.published_at ||
+    item?.publishedAt ||
+    item?.created_at ||
+    item?.createdAt ||
+    ""
+  );
+}
+
+function sanitizeSlugInput(value = "") {
+  return slugPreview(value);
+}
+
+function getDefaultPublishedAt() {
+  return toDateTimeLocal(new Date().toISOString());
+}
+
 function StatCard({ label, value, helper }) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -195,7 +217,7 @@ function CoverThumb({
   if (showFallback) {
     return (
       <div
-        className={`flex items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center text-sm text-slate-500 ${className}`.trim()}
+        className={`flex items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-sm text-slate-500 ${className}`.trim()}
       >
         {fallbackText}
       </div>
@@ -260,7 +282,13 @@ function IconH3() {
 
 function IconAlignLeft() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M4 6h14" />
       <path d="M4 10h10" />
       <path d="M4 14h14" />
@@ -271,7 +299,13 @@ function IconAlignLeft() {
 
 function IconAlignCenter() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M5 6h14" />
       <path d="M7 10h10" />
       <path d="M5 14h14" />
@@ -282,7 +316,13 @@ function IconAlignCenter() {
 
 function IconAlignRight() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M6 6h14" />
       <path d="M10 10h10" />
       <path d="M6 14h14" />
@@ -293,7 +333,13 @@ function IconAlignRight() {
 
 function IconJustify() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M4 6h16" />
       <path d="M4 10h16" />
       <path d="M4 14h16" />
@@ -312,7 +358,13 @@ function IconQuote() {
 
 function IconBullet() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <circle cx="5" cy="7" r="1.5" fill="currentColor" />
       <circle cx="5" cy="12" r="1.5" fill="currentColor" />
       <circle cx="5" cy="17" r="1.5" fill="currentColor" />
@@ -325,7 +377,13 @@ function IconBullet() {
 
 function IconNumber() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M4 7h1.5V4.5" />
       <path d="M4 4.5h2v5" />
       <path d="M4 14.5c0-1.1.9-2 2-2s2 .9 2 2c0 .7-.4 1.3-1 1.7L4 19.5h4" />
@@ -338,7 +396,13 @@ function IconNumber() {
 
 function IconLink() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 0 1 7 7L17 13" />
       <path d="M14 11a5 5 0 0 1 0 7L12.5 19.5a5 5 0 0 1-7-7L7 11" />
     </svg>
@@ -347,7 +411,13 @@ function IconLink() {
 
 function IconClear() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M4 20h16" />
       <path d="M8 4h8l2 2-8 8-4-4 2-6Z" />
       <path d="M13 13l5 5" />
@@ -372,6 +442,7 @@ function ToolbarButton({ title, onClick, children }) {
 
 export default function AdminBeritaManager() {
   const editorRef = useRef(null);
+  const galleryPrefillRequestRef = useRef(0);
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -388,7 +459,7 @@ export default function AdminBeritaManager() {
   const [openForm, setOpenForm] = useState(false);
   const [form, setForm] = useState({
     ...emptyForm,
-    published_at: toDateTimeLocal(new Date().toISOString()),
+    published_at: getDefaultPublishedAt(),
   });
   const [editingId, setEditingId] = useState(null);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -401,6 +472,7 @@ export default function AdminBeritaManager() {
   const [galleryForm, setGalleryForm] = useState(emptyGalleryForm);
   const [gallerySendingId, setGallerySendingId] = useState(null);
   const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
+  const [galleryPrefillLoading, setGalleryPrefillLoading] = useState(false);
 
   async function loadItems() {
     try {
@@ -449,7 +521,7 @@ export default function AdminBeritaManager() {
 
   const stats = useMemo(() => {
     const total = items.length;
-    const published = items.filter((item) => Boolean(item.is_published)).length;
+    const published = items.filter((item) => getItemPublishedState(item)).length;
     const draft = total - published;
     const views = items.reduce((acc, item) => acc + Number(item.views || 0), 0);
 
@@ -460,7 +532,7 @@ export default function AdminBeritaManager() {
     const map = new Map();
 
     items.forEach((item) => {
-      const key = getYearKey(item?.published_at || item?.created_at);
+      const key = getYearKey(getItemBaseDate(item));
       if (!key) return;
       map.set(key, (map.get(key) || 0) + 1);
     });
@@ -478,7 +550,7 @@ export default function AdminBeritaManager() {
     const map = new Map();
 
     items.forEach((item) => {
-      const baseDate = item?.published_at || item?.created_at;
+      const baseDate = getItemBaseDate(item);
       const yearKey = getYearKey(baseDate);
       const monthKey = getMonthKey(baseDate);
 
@@ -501,19 +573,19 @@ export default function AdminBeritaManager() {
     const keyword = query.trim().toLowerCase();
 
     return items.filter((item) => {
-      const baseDate = item?.published_at || item?.created_at;
+      const baseDate = getItemBaseDate(item);
       const itemYear = getYearKey(baseDate);
       const itemMonth = getMonthKey(baseDate);
 
       const matchesStatus =
         statusFilter === "all" ||
-        (statusFilter === "published" && Boolean(item.is_published)) ||
-        (statusFilter === "draft" && !Boolean(item.is_published));
+        (statusFilter === "published" && getItemPublishedState(item)) ||
+        (statusFilter === "draft" && !getItemPublishedState(item));
 
       const matchesYear = yearFilter === "all" || itemYear === yearFilter;
       const matchesMonth = monthFilter === "all" || itemMonth === monthFilter;
 
-      const haystack = [item.title, item.slug, item.category]
+      const haystack = [item.title, item.slug, item.category, item.excerpt]
         .join(" ")
         .toLowerCase();
 
@@ -552,7 +624,9 @@ export default function AdminBeritaManager() {
   }, [form.cover_upload_base64, form.cover_image]);
 
   const galleryPreviewSrc = useMemo(() => {
-    const uploadedPreview = String(galleryForm.gallery_upload_base64 || "").trim();
+    const uploadedPreview = String(
+      galleryForm.gallery_upload_base64 || ""
+    ).trim();
     if (uploadedPreview) return uploadedPreview;
 
     const savedGalleryImage = String(galleryForm.image_url || "").trim();
@@ -564,7 +638,7 @@ export default function AdminBeritaManager() {
   function resetForm() {
     setForm({
       ...emptyForm,
-      published_at: toDateTimeLocal(new Date().toISOString()),
+      published_at: getDefaultPublishedAt(),
     });
     setEditingId(null);
     setSlugManuallyEdited(false);
@@ -573,6 +647,14 @@ export default function AdminBeritaManager() {
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
+  }
+
+  function resetGalleryForm() {
+    galleryPrefillRequestRef.current += 1;
+    setGalleryPrefillLoading(false);
+    setGalleryForm(emptyGalleryForm);
+    setGallerySendingId(null);
+    setUploadingGalleryImage(false);
   }
 
   function handleOpenCreate() {
@@ -597,8 +679,10 @@ export default function AdminBeritaManager() {
       cover_upload_base64: "",
       cover_upload_name: "",
       cover_upload_size_kb: 0,
-      is_published: Boolean(item.is_published),
-      published_at: toDateTimeLocal(item.published_at || item.created_at),
+      is_published: getItemPublishedState(item),
+      published_at: toDateTimeLocal(
+        getItemBaseDate(item) || new Date().toISOString()
+      ),
     });
 
     setDirty(false);
@@ -621,16 +705,23 @@ export default function AdminBeritaManager() {
     setError("");
     setMessage("");
 
+    const requestId = galleryPrefillRequestRef.current + 1;
+    galleryPrefillRequestRef.current = requestId;
+
+    const basePublishedAt = getItemBaseDate(item) || new Date().toISOString();
+    const baseLinkUrl = `/berita/${item.slug}`;
+
+    setGalleryPrefillLoading(true);
     setGalleryForm({
       berita_id: item.id,
       title: item.title || "",
       slug: item.slug || "",
-      image_url: item.cover_image || "",
+      image_url: "",
       gallery_upload_base64: "",
       gallery_upload_name: "",
       gallery_upload_size_kb: 0,
-      link_url: `/berita/${item.slug}`,
-      published_at: item.published_at || item.created_at || "",
+      link_url: baseLinkUrl,
+      published_at: basePublishedAt,
     });
 
     setOpenGalleryForm(true);
@@ -646,6 +737,8 @@ export default function AdminBeritaManager() {
 
       const data = await readJsonSafely(response);
 
+      if (galleryPrefillRequestRef.current !== requestId) return;
+
       if (!response.ok) {
         throw new Error(data?.message || "Gagal mengambil data galeri.");
       }
@@ -653,19 +746,39 @@ export default function AdminBeritaManager() {
       if (data?.item) {
         setGalleryForm((prev) => ({
           ...prev,
-          image_url: data.item.image_url || prev.image_url || "",
-          link_url: data.item.link_url || prev.link_url || "",
+          image_url: data.item.image_url || item.cover_image || "",
+          link_url: data.item.link_url || prev.link_url || baseLinkUrl,
           published_at: data.item.published_at || prev.published_at || "",
+        }));
+      } else {
+        setGalleryForm((prev) => ({
+          ...prev,
+          image_url: item.cover_image || "",
+          link_url: prev.link_url || baseLinkUrl,
+          published_at: prev.published_at || basePublishedAt,
         }));
       }
     } catch (err) {
+      if (galleryPrefillRequestRef.current !== requestId) return;
+
       console.error("Prefill galeri gagal:", err);
+
+      setGalleryForm((prev) => ({
+        ...prev,
+        image_url: item.cover_image || "",
+        link_url: prev.link_url || baseLinkUrl,
+        published_at: prev.published_at || basePublishedAt,
+      }));
+    } finally {
+      if (galleryPrefillRequestRef.current === requestId) {
+        setGalleryPrefillLoading(false);
+      }
     }
   }
 
   function handleCloseGalleryForm() {
     setOpenGalleryForm(false);
-    setGalleryForm(emptyGalleryForm);
+    resetGalleryForm();
   }
 
   function handleChange(event) {
@@ -684,7 +797,7 @@ export default function AdminBeritaManager() {
       if (name === "slug") {
         return {
           ...prev,
-          slug: value,
+          slug: sanitizeSlugInput(value),
         };
       }
 
@@ -705,6 +818,10 @@ export default function AdminBeritaManager() {
     setForm((prev) => ({
       ...prev,
       is_published: nextValue,
+      published_at:
+        nextValue && !prev.published_at
+          ? getDefaultPublishedAt()
+          : prev.published_at,
     }));
     setDirty(true);
   }
@@ -761,9 +878,11 @@ export default function AdminBeritaManager() {
       setMessage("");
 
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 150,
-        maxWidth: 1600,
-        maxHeight: 1600,
+        targetSizeKB: 90,
+        hardMaxSizeKB: 100,
+        throwIfOverHardLimit: true,
+        maxWidth: 1280,
+        maxHeight: 1280,
       });
 
       setForm((prev) => ({
@@ -775,7 +894,7 @@ export default function AdminBeritaManager() {
 
       setDirty(true);
       setMessage(
-        `Cover berita berhasil dikompresi dari ${compressed.originalSizeKB} KB menjadi ${compressed.sizeKB} KB.`
+        `Cover berita berhasil dikompresi dari ${compressed.originalSizeKB} KB menjadi ${compressed.sizeKB} KB.`,
       );
     } catch (err) {
       setError(err.message || "Gagal memproses cover berita.");
@@ -795,9 +914,11 @@ export default function AdminBeritaManager() {
       setMessage("");
 
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 150,
-        maxWidth: 1400,
-        maxHeight: 1800,
+        targetSizeKB: 90,
+        hardMaxSizeKB: 100,
+        throwIfOverHardLimit: true,
+        maxWidth: 1200,
+        maxHeight: 1600,
       });
 
       setGalleryForm((prev) => ({
@@ -841,7 +962,7 @@ export default function AdminBeritaManager() {
 
   function buildPayload(nextPublishedState = form.is_published) {
     const currentContent = editorRef.current?.innerHTML || form.content || "";
-    const finalSlug = (form.slug || slugPreview(form.title)).trim();
+    const finalSlug = sanitizeSlugInput(form.slug || slugPreview(form.title));
     const autoExcerpt = buildExcerptFromHtml(currentContent, 180);
 
     if (!form.title.trim()) {
@@ -961,12 +1082,27 @@ export default function AdminBeritaManager() {
   }
 
   async function handleSubmitGallery() {
+    if (!galleryForm.berita_id) {
+      setError("ID berita untuk galeri tidak ditemukan.");
+      return;
+    }
+
+    if (galleryPrefillLoading) {
+      setError("Tunggu data galeri selesai dimuat terlebih dahulu.");
+      return;
+    }
+
     if (!galleryForm.image_url && !galleryForm.gallery_upload_base64) {
       setError("Gambar galeri wajib diupload.");
       return;
     }
 
     try {
+      const payload = {
+        ...galleryForm,
+        published_at: galleryForm.published_at || new Date().toISOString(),
+      };
+
       setGallerySendingId(galleryForm.berita_id);
       setError("");
       setMessage("");
@@ -976,7 +1112,7 @@ export default function AdminBeritaManager() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(galleryForm),
+        body: JSON.stringify(payload),
       });
 
       const data = await readJsonSafely(response);
@@ -1072,7 +1208,7 @@ export default function AdminBeritaManager() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Cari judul, slug, atau kategori..."
+                placeholder="Cari judul, slug, kategori, atau ringkasan..."
                 className="h-12 w-full rounded-2xl border border-slate-300 px-4 text-sm outline-none focus:border-emerald-500"
               />
             </div>
@@ -1206,7 +1342,7 @@ export default function AdminBeritaManager() {
                               /berita/{item.slug}
                             </p>
                             <p className="mt-2 text-xs text-slate-500">
-                              {formatDate(item.published_at || item.created_at)}
+                              {formatDate(getItemBaseDate(item))}
                             </p>
                           </div>
                         </td>
@@ -1220,7 +1356,7 @@ export default function AdminBeritaManager() {
                         </td>
 
                         <td className="px-4 py-4">
-                          <StatusPill published={Boolean(item.is_published)} />
+                          <StatusPill published={getItemPublishedState(item)} />
                         </td>
 
                         <td className="px-4 py-4">
@@ -1423,59 +1559,103 @@ export default function AdminBeritaManager() {
                     </div>
 
                     <div className="mb-4 flex flex-wrap gap-2">
-                      <ToolbarButton title="Bold" onClick={() => runEditorCommand("bold")}>
+                      <ToolbarButton
+                        title="Bold"
+                        onClick={() => runEditorCommand("bold")}
+                      >
                         <IconBold />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Italic" onClick={() => runEditorCommand("italic")}>
+                      <ToolbarButton
+                        title="Italic"
+                        onClick={() => runEditorCommand("italic")}
+                      >
                         <IconItalic />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Underline" onClick={() => runEditorCommand("underline")}>
+                      <ToolbarButton
+                        title="Underline"
+                        onClick={() => runEditorCommand("underline")}
+                      >
                         <IconUnderline />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Heading 2" onClick={() => runEditorCommand("formatBlock", "h2")}>
+                      <ToolbarButton
+                        title="Heading 2"
+                        onClick={() => runEditorCommand("formatBlock", "h2")}
+                      >
                         <IconH2 />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Heading 3" onClick={() => runEditorCommand("formatBlock", "h3")}>
+                      <ToolbarButton
+                        title="Heading 3"
+                        onClick={() => runEditorCommand("formatBlock", "h3")}
+                      >
                         <IconH3 />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Rata kiri" onClick={() => runEditorCommand("justifyLeft")}>
+                      <ToolbarButton
+                        title="Rata kiri"
+                        onClick={() => runEditorCommand("justifyLeft")}
+                      >
                         <IconAlignLeft />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Tengah" onClick={() => runEditorCommand("justifyCenter")}>
+                      <ToolbarButton
+                        title="Tengah"
+                        onClick={() => runEditorCommand("justifyCenter")}
+                      >
                         <IconAlignCenter />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Rata kanan" onClick={() => runEditorCommand("justifyRight")}>
+                      <ToolbarButton
+                        title="Rata kanan"
+                        onClick={() => runEditorCommand("justifyRight")}
+                      >
                         <IconAlignRight />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Rata penuh" onClick={() => runEditorCommand("justifyFull")}>
+                      <ToolbarButton
+                        title="Rata penuh"
+                        onClick={() => runEditorCommand("justifyFull")}
+                      >
                         <IconJustify />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Quote" onClick={() => runEditorCommand("formatBlock", "blockquote")}>
+                      <ToolbarButton
+                        title="Quote"
+                        onClick={() =>
+                          runEditorCommand("formatBlock", "blockquote")
+                        }
+                      >
                         <IconQuote />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Bullet list" onClick={() => runEditorCommand("insertUnorderedList")}>
+                      <ToolbarButton
+                        title="Bullet list"
+                        onClick={() => runEditorCommand("insertUnorderedList")}
+                      >
                         <IconBullet />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Number list" onClick={() => runEditorCommand("insertOrderedList")}>
+                      <ToolbarButton
+                        title="Number list"
+                        onClick={() => runEditorCommand("insertOrderedList")}
+                      >
                         <IconNumber />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Insert link" onClick={handleInsertLink}>
+                      <ToolbarButton
+                        title="Insert link"
+                        onClick={handleInsertLink}
+                      >
                         <IconLink />
                       </ToolbarButton>
 
-                      <ToolbarButton title="Clear format" onClick={() => runEditorCommand("removeFormat")}>
+                      <ToolbarButton
+                        title="Clear format"
+                        onClick={() => runEditorCommand("removeFormat")}
+                      >
                         <IconClear />
                       </ToolbarButton>
                     </div>
@@ -1498,7 +1678,8 @@ export default function AdminBeritaManager() {
                       <ToggleSwitch
                         checked={form.is_published}
                         onChange={handlePublishedToggle}
-                        label={`Status ${form.is_published ? "Tayang" : "Draft"}`}
+                        label={`Status ${form.is_published ? "Tayang" : "Draft"
+                          }`}
                         description="Atur apakah berita langsung dipublikasikan atau disimpan sebagai draft."
                       />
                     </div>
@@ -1506,7 +1687,9 @@ export default function AdminBeritaManager() {
 
                   <div className="rounded-3xl border border-slate-200 bg-white p-6">
                     <div className="flex items-center justify-between gap-4">
-                      <h4 className="text-lg font-bold text-slate-900">Cover image</h4>
+                      <h4 className="text-lg font-bold text-slate-900">
+                        Cover image
+                      </h4>
 
                       {(form.cover_image || form.cover_upload_base64) && (
                         <button
@@ -1529,15 +1712,18 @@ export default function AdminBeritaManager() {
                         />
                         <div>
                           <p className="text-sm font-semibold text-emerald-700">
-                            {uploadingCover ? "Memproses cover..." : "Upload cover berita"}
+                            {uploadingCover
+                              ? "Memproses cover..."
+                              : "Upload cover berita"}
                           </p>
                           <p className="mt-1 text-xs text-slate-500">
-                            JPG, PNG, atau WEBP. Sistem kompres otomatis mendekati 150 KB.
+                            JPG, PNG, atau WEBP. Sistem Kompres Otomatis Maksimal 100 KB.
                           </p>
                         </div>
                       </label>
 
                       <CoverThumb
+                        key={coverPreviewSrc || "cover-empty"}
                         src={coverPreviewSrc}
                         alt="Preview cover berita"
                         className="h-56 w-full"
@@ -1645,20 +1831,27 @@ export default function AdminBeritaManager() {
                           : "Upload cover galeri"}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        Poster atau banner galeri akan dikompresi otomatis.
+                        Poster atau Banner Galeri akan Dikompresi Otomatis Maksimal 100 KB.
                       </p>
                     </div>
                   </label>
 
-                  {(galleryForm.image_url || galleryForm.gallery_upload_base64) && (
-                    <button
-                      type="button"
-                      onClick={clearGalleryImage}
-                      className="text-sm font-semibold text-rose-700 transition hover:text-rose-800"
-                    >
-                      Hapus gambar galeri
-                    </button>
-                  )}
+                  {galleryPrefillLoading ? (
+                    <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+                      Memuat data galeri yang sudah ada...
+                    </div>
+                  ) : null}
+
+                  {(galleryForm.image_url ||
+                    galleryForm.gallery_upload_base64) && (
+                      <button
+                        type="button"
+                        onClick={clearGalleryImage}
+                        className="text-sm font-semibold text-rose-700 transition hover:text-rose-800"
+                      >
+                        Hapus gambar galeri
+                      </button>
+                    )}
 
                   <div className="flex flex-wrap gap-3">
                     <button
@@ -1674,13 +1867,16 @@ export default function AdminBeritaManager() {
                       onClick={handleSubmitGallery}
                       disabled={
                         gallerySendingId === galleryForm.berita_id ||
-                        uploadingGalleryImage
+                        uploadingGalleryImage ||
+                        galleryPrefillLoading
                       }
                       className="rounded-2xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {gallerySendingId === galleryForm.berita_id
-                        ? "Mengirim..."
-                        : "Kirim ke galeri"}
+                      {galleryPrefillLoading
+                        ? "Memuat..."
+                        : gallerySendingId === galleryForm.berita_id
+                          ? "Mengirim..."
+                          : "Kirim ke galeri"}
                     </button>
                   </div>
                 </div>
@@ -1693,10 +1889,15 @@ export default function AdminBeritaManager() {
 
                 <div className="mt-4">
                   <CoverThumb
+                    key={galleryPreviewSrc || "gallery-empty"}
                     src={galleryPreviewSrc}
                     alt="Preview cover galeri"
                     className="h-80 w-full"
-                    fallbackText="Preview gambar galeri akan muncul di sini."
+                    fallbackText={
+                      galleryPrefillLoading
+                        ? "Memuat preview galeri..."
+                        : "Preview gambar galeri akan muncul di sini."
+                    }
                   />
                 </div>
               </div>

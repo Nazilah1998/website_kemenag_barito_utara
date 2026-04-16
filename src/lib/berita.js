@@ -2,6 +2,21 @@ import { unstable_noStore as noStore } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeCoverImageUrl } from "@/lib/cover-image";
 
+const BERITA_SELECT_FIELDS = `
+  id,
+  slug,
+  title,
+  excerpt,
+  category,
+  content,
+  cover_image,
+  is_published,
+  published_at,
+  views,
+  created_at,
+  updated_at
+`;
+
 function formatDateIndonesia(value) {
   if (!value) return "-";
 
@@ -33,20 +48,33 @@ function getTimeValue(value) {
   return Number.isNaN(time) ? 0 : time;
 }
 
-function normalizeBerita(item) {
+function normalizeBerita(item = {}) {
+  const publishedAt = item.published_at || null;
+  const createdAt = item.created_at || null;
+  const updatedAt = item.updated_at || null;
+  const isoDate = publishedAt || createdAt;
+  const rawCoverImage = item.cover_image || "";
+  const isPublished = Boolean(item.is_published);
+
   return {
     id: item.id,
     slug: item.slug,
-    title: item.title,
+    title: item.title || "",
     excerpt: item.excerpt || "",
     category: item.category || "Umum",
-    date: formatDateIndonesia(item.published_at || item.created_at),
-    isoDate: item.published_at || item.created_at,
-    coverImage: normalizeCoverImageUrl(item.cover_image || ""),
+    date: formatDateIndonesia(isoDate),
+    isoDate,
+    coverImage: normalizeCoverImageUrl(rawCoverImage),
+    cover_image: rawCoverImage,
     content: item.content || "",
-    isPublished: Boolean(item.is_published),
-    createdAt: item.created_at || null,
-    updatedAt: item.updated_at || null,
+    isPublished,
+    is_published: isPublished,
+    publishedAt,
+    published_at: publishedAt,
+    createdAt,
+    created_at: createdAt,
+    updatedAt,
+    updated_at: updatedAt,
     views: Number(item.views || 0),
   };
 }
@@ -94,7 +122,6 @@ export function filterAndSortBerita(items = [], filters = {}) {
     if (sort === "popular") {
       const viewsDiff = Number(b.views || 0) - Number(a.views || 0);
       if (viewsDiff !== 0) return viewsDiff;
-
       return getTimeValue(b.isoDate) - getTimeValue(a.isoDate);
     }
 
@@ -102,31 +129,24 @@ export function filterAndSortBerita(items = [], filters = {}) {
   });
 }
 
-export async function getAllBerita() {
+export async function getAllBerita(options = {}) {
+  const { includeDrafts = false } = options;
+
   noStore();
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+
+  let query = supabase
     .from("berita")
-    .select(
-      `
-      id,
-      slug,
-      title,
-      excerpt,
-      category,
-      content,
-      cover_image,
-      is_published,
-      published_at,
-      views,
-      created_at,
-      updated_at
-    `,
-    )
-    .eq("is_published", true)
+    .select(BERITA_SELECT_FIELDS)
     .order("published_at", { ascending: false })
     .order("created_at", { ascending: false });
+
+  if (!includeDrafts) {
+    query = query.eq("is_published", true);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("getAllBerita error:", error);
@@ -137,35 +157,31 @@ export async function getAllBerita() {
 }
 
 export async function getLatestBerita(limit = 3) {
+  const safeLimit = Math.max(1, Number(limit) || 3);
   const items = await getAllBerita();
-  return items.slice(0, limit);
+  return items.slice(0, safeLimit);
 }
 
-export async function getBeritaBySlug(slug) {
+export async function getBeritaBySlug(slug, options = {}) {
+  const { includeDrafts = false } = options;
+  const safeSlug = String(slug || "").trim();
+
+  if (!safeSlug) return null;
+
   noStore();
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+
+  let query = supabase
     .from("berita")
-    .select(
-      `
-      id,
-      slug,
-      title,
-      excerpt,
-      category,
-      content,
-      cover_image,
-      is_published,
-      published_at,
-      views,
-      created_at,
-      updated_at
-    `,
-    )
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .maybeSingle();
+    .select(BERITA_SELECT_FIELDS)
+    .eq("slug", safeSlug);
+
+  if (!includeDrafts) {
+    query = query.eq("is_published", true);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     console.error("getBeritaBySlug error:", error);
@@ -191,10 +207,12 @@ export function estimateReadingTime(value = "", wordsPerMinute = 200) {
     : 0;
 
   if (totalWords === 0) return 1;
+
   return Math.max(1, Math.ceil(totalWords / wordsPerMinute));
 }
 
 export async function getRelatedBerita(currentSlug, category, limit = 3) {
+  const safeLimit = Math.max(1, Number(limit) || 3);
   const items = await getAllBerita();
 
   const sameCategory = items.filter(
@@ -205,7 +223,7 @@ export async function getRelatedBerita(currentSlug, category, limit = 3) {
     (item) => item.slug !== currentSlug && item.category !== category,
   );
 
-  return [...sameCategory, ...fallback].slice(0, limit);
+  return [...sameCategory, ...fallback].slice(0, safeLimit);
 }
 
 export async function getAdjacentBerita(slug) {

@@ -63,7 +63,7 @@ export const homeQuickLinks = [
     title: "Dokumen Publik",
     description:
       "Akses dokumen, informasi terbuka, dan kebutuhan publik lainnya.",
-    href: "/dokumen",
+    href: "/informasi",
   },
   {
     title: "Hubungi Kami",

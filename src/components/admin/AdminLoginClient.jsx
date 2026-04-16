@@ -274,10 +274,10 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                 </div>
 
                 <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
-                  Masuk ke panel admin
+                  Masuk ke Panel Admin
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Gunakan akun admin Supabase yang sudah terdaftar. Setelah
+                  Gunakan akun Admin yang sudah terdaftar. Setelah
                   login, akun admin akan dicek status MFA-nya sebelum masuk ke
                   dashboard.
                 </p>
@@ -296,7 +296,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="nama@kemenag.go.id"
+                    placeholder="nama@gmail.com"
                     autoComplete="username"
                     className={inputClassName(false)}
                     required

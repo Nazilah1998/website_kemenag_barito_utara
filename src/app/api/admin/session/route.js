@@ -3,11 +3,22 @@ import { getCurrentSessionContext } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+function createNoStoreResponse(data, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+    },
+  });
+}
+
 export async function GET() {
   try {
     const session = await getCurrentSessionContext();
 
-    return NextResponse.json({
+    return createNoStoreResponse({
       authenticated: session.isAuthenticated,
       user: session.isAuthenticated
         ? {
@@ -30,23 +41,20 @@ export async function GET() {
       },
     });
   } catch {
-    return NextResponse.json(
-      {
-        authenticated: false,
-        user: null,
-        permissions: {
-          isAdmin: false,
-          isEditor: false,
-          role: null,
-        },
-        mfa: {
-          currentLevel: null,
-          nextLevel: null,
-          isVerified: false,
-          errorMessage: null,
-        },
+    return createNoStoreResponse({
+      authenticated: false,
+      user: null,
+      permissions: {
+        isAdmin: false,
+        isEditor: false,
+        role: null,
       },
-      { status: 200 },
-    );
+      mfa: {
+        currentLevel: null,
+        nextLevel: null,
+        isVerified: false,
+        errorMessage: null,
+      },
+    });
   }
 }

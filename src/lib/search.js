@@ -24,20 +24,59 @@ function normalizeText(value = "") {
     .trim();
 }
 
+function toSearchText(value) {
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) => {
+        if (typeof item === "string") return item;
+        if (item == null) return [];
+        if (typeof item === "object") {
+          return Object.values(item).filter(
+            (entry) => typeof entry === "string" || typeof entry === "number",
+          );
+        }
+        return String(item);
+      })
+      .join(" ");
+  }
+
+  if (value == null) return "";
+
+  if (typeof value === "object") {
+    return Object.values(value)
+      .filter((entry) => typeof entry === "string" || typeof entry === "number")
+      .join(" ");
+  }
+
+  return String(value);
+}
+
+function buildKeywords(...parts) {
+  return parts
+    .map((part) => toSearchText(part))
+    .filter(Boolean)
+    .join(" ");
+}
+
+function safeHref(value, fallback = "/") {
+  const href = String(value || "").trim();
+  return href || fallback;
+}
+
 const searchIndex = [
-  ...beritaList.map((item) => ({
+  ...beritaItems.map((item) => ({
     id: `berita-${item.slug}`,
     title: item.title,
     description: item.excerpt,
     section: "Berita",
     category: item.category,
     href: `/berita/${item.slug}`,
-    keywords: [
+    keywords: buildKeywords(
       item.title,
       item.excerpt,
       item.category,
-      ...(item.content || []),
-    ].join(" "),
+      item.content,
+    ),
   })),
 
   ...publicDocuments.map((item, index) => ({
@@ -46,13 +85,16 @@ const searchIndex = [
     description: item.description,
     section: "Dokumen",
     category: item.category,
-    href: item.isAvailable ? item.href : "/dokumen",
-    keywords: [
+    href:
+      item.isAvailable && item.href
+        ? safeHref(item.href, "/informasi")
+        : "/informasi",
+    keywords: buildKeywords(
       item.title,
       item.description,
       item.category,
       item.fileLabel,
-    ].join(" "),
+    ),
   })),
 
   ...agendaList.map((item) => ({
@@ -61,8 +103,8 @@ const searchIndex = [
     description: `${item.description} • ${item.date} • ${item.location}`,
     section: "Agenda",
     category: item.category,
-    href: "/agenda",
-    keywords: [
+    href: safeHref(item.href, "/berita"),
+    keywords: buildKeywords(
       item.title,
       item.description,
       item.date,
@@ -70,7 +112,7 @@ const searchIndex = [
       item.location,
       item.status,
       item.category,
-    ].join(" "),
+    ),
   })),
 
   ...serviceHighlights.map((item, index) => ({
@@ -79,8 +121,8 @@ const searchIndex = [
     description: item.description,
     section: "Layanan",
     category: item.category,
-    href: item.href || "/layanan",
-    keywords: [item.title, item.description, item.category].join(" "),
+    href: safeHref(item.href, "/layanan"),
+    keywords: buildKeywords(item.title, item.description, item.category),
   })),
 
   ...serviceCategories.map((item, index) => ({
@@ -90,17 +132,17 @@ const searchIndex = [
     section: "Layanan",
     category: "Kategori",
     href: "/layanan",
-    keywords: [item.title, item.description, ...(item.items || [])].join(" "),
+    keywords: buildKeywords(item.title, item.description, item.items),
   })),
 
   ...serviceRequirements.map((item, index) => ({
     id: `layanan-syarat-${index}`,
     title: item.title,
-    description: (item.items || []).join(" • "),
+    description: toSearchText(item.items).split(",").join(" • "),
     section: "Layanan",
     category: "Persyaratan",
-    href: "/layanan/persyaratan",
-    keywords: [item.title, ...(item.items || [])].join(" "),
+    href: "/layanan",
+    keywords: buildKeywords(item.title, item.items),
   })),
 
   ...serviceFlow.map((item) => ({
@@ -109,8 +151,8 @@ const searchIndex = [
     description: item.description,
     section: "Layanan",
     category: "Alur",
-    href: "/layanan/alur",
-    keywords: [item.step, item.title, item.description].join(" "),
+    href: "/layanan",
+    keywords: buildKeywords(item.step, item.title, item.description),
   })),
 
   ...serviceFaqs.map((item, index) => ({
@@ -119,8 +161,8 @@ const searchIndex = [
     description: item.answer,
     section: "Layanan",
     category: "FAQ",
-    href: "/layanan/faq",
-    keywords: [item.question, item.answer].join(" "),
+    href: "/layanan",
+    keywords: buildKeywords(item.question, item.answer),
   })),
 
   {
@@ -130,13 +172,13 @@ const searchIndex = [
     section: "Profil",
     category: "Instansi",
     href: "/profil",
-    keywords: [
+    keywords: buildKeywords(
       profileOverview.title,
       profileOverview.description,
-      ...(profileOverview.highlights || []).map(
+      (profileOverview.highlights || []).map(
         (item) => `${item.title} ${item.description}`,
       ),
-    ].join(" "),
+    ),
   },
 
   {
@@ -146,11 +188,11 @@ const searchIndex = [
     section: "Profil",
     category: "Visi & Misi",
     href: "/profil/visi-misi",
-    keywords: [
+    keywords: buildKeywords(
       visionMission.vision,
-      ...(visionMission.missions || []),
-      ...(visionMission.values || []),
-    ].join(" "),
+      visionMission.missions,
+      visionMission.values,
+    ),
   },
 
   ...leadershipProfiles.map((item, index) => ({
@@ -159,8 +201,8 @@ const searchIndex = [
     description: `${item.position} • ${item.description}`,
     section: "Profil",
     category: "Pimpinan",
-    href: "/profil/pimpinan",
-    keywords: [item.name, item.position, item.description].join(" "),
+    href: "/informasi/profil-pejabat",
+    keywords: buildKeywords(item.name, item.position, item.description),
   })),
 
   ...galleryList.map((item) => ({
@@ -170,18 +212,21 @@ const searchIndex = [
     section: "Galeri",
     category: item.category,
     href: "/galeri",
-    keywords: [item.title, item.subtitle, item.category].join(" "),
+    keywords: buildKeywords(item.title, item.subtitle, item.category),
   })),
 ];
 
 export function searchSite(rawQuery = "") {
   const query = normalizeText(rawQuery);
+
   if (!query) return [];
 
   const terms = query.split(" ").filter(Boolean);
 
   return searchIndex
     .map((item) => {
+      const normalizedTitle = normalizeText(item.title);
+      const normalizedCategory = normalizeText(item.category);
       const haystack = normalizeText(
         [
           item.title,
@@ -195,12 +240,15 @@ export function searchSite(rawQuery = "") {
       let score = 0;
 
       for (const term of terms) {
-        if (normalizeText(item.title).includes(term)) score += 5;
-        if (normalizeText(item.category).includes(term)) score += 3;
+        if (normalizedTitle.includes(term)) score += 5;
+        if (normalizedCategory.includes(term)) score += 3;
         if (haystack.includes(term)) score += 2;
       }
 
-      return { ...item, score };
+      return {
+        ...item,
+        score,
+      };
     })
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));

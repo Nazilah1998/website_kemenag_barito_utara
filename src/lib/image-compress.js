@@ -1,7 +1,9 @@
 export async function compressImageToBase64(
   file,
   {
-    targetSizeKB = 95,
+    targetSizeKB = 90,
+    hardMaxSizeKB = 100,
+    throwIfOverHardLimit = true,
     maxWidth = 1600,
     maxHeight = 1600,
     initialQuality = 0.82,
@@ -22,8 +24,9 @@ export async function compressImageToBase64(
     throw new Error("File harus berupa gambar.");
   }
 
-  const originalSizeKB = Math.round(file.size / 1024);
+  const originalSizeKB = Math.ceil(file.size / 1024);
   const targetBytes = Math.max(1, Math.round(targetSizeKB * 1024));
+  const hardMaxBytes = Math.max(targetBytes, Math.round(hardMaxSizeKB * 1024));
 
   const image = await loadImageFromFile(file);
 
@@ -73,19 +76,18 @@ export async function compressImageToBase64(
       }
 
       if (attemptResult.blob.size <= targetBytes) {
-        const base64 = await blobToDataUrl(attemptResult.blob);
-
-        return {
-          base64,
-          mimeType: outputType,
-          sizeBytes: attemptResult.blob.size,
-          sizeKB: Math.round(attemptResult.blob.size / 1024),
+        return finalizeCompressedResult({
+          blob: attemptResult.blob,
+          file,
+          outputType,
           originalSizeKB,
           width,
           height,
           quality: attemptResult.quality,
-          fileName: replaceFileExtension(file.name, "webp"),
-        };
+          hardMaxBytes,
+          hardMaxSizeKB,
+          throwIfOverHardLimit,
+        });
       }
     }
 
@@ -112,17 +114,52 @@ export async function compressImageToBase64(
     throw new Error("Kompresi gambar gagal.");
   }
 
-  const fallbackBase64 = await blobToDataUrl(bestBlob);
-
-  return {
-    base64: fallbackBase64,
-    mimeType: outputType,
-    sizeBytes: bestBlob.size,
-    sizeKB: Math.round(bestBlob.size / 1024),
+  return finalizeCompressedResult({
+    blob: bestBlob,
+    file,
+    outputType,
     originalSizeKB,
     width: bestWidth,
     height: bestHeight,
     quality: bestQuality,
+    hardMaxBytes,
+    hardMaxSizeKB,
+    throwIfOverHardLimit,
+  });
+}
+
+async function finalizeCompressedResult({
+  blob,
+  file,
+  outputType,
+  originalSizeKB,
+  width,
+  height,
+  quality,
+  hardMaxBytes,
+  hardMaxSizeKB,
+  throwIfOverHardLimit,
+}) {
+  const sizeBytes = blob.size;
+  const sizeKB = Math.ceil(sizeBytes / 1024);
+
+  if (throwIfOverHardLimit && sizeBytes > hardMaxBytes) {
+    throw new Error(
+      `Ukuran gambar setelah kompresi masih ${sizeKB} KB. Maksimal yang diizinkan adalah ${hardMaxSizeKB} KB. Gunakan gambar dengan resolusi lebih kecil atau crop lebih dulu.`,
+    );
+  }
+
+  const base64 = await blobToDataUrl(blob);
+
+  return {
+    base64,
+    mimeType: outputType,
+    sizeBytes,
+    sizeKB,
+    originalSizeKB,
+    width,
+    height,
+    quality,
     fileName: replaceFileExtension(file.name, "webp"),
   };
 }
