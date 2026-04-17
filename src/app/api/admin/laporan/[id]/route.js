@@ -1,160 +1,221 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { cleanString } from "@/lib/validation";
+import { requireAdminAccess } from "@/lib/admin-guard";
+import { validateDocumentPayload } from "@/lib/laporan-upload-validation";
+import { logError, logInfo, logWarn } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-function noStoreJson(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, max-age=0",
-    },
-  });
-}
-
-function revalidateLaporanPaths(slug) {
-  revalidatePath("/admin");
-  revalidatePath("/admin/laporan");
-  if (slug) {
-    revalidatePath(`/admin/laporan/${slug}`);
-    revalidatePath(`/laporan/${slug}`);
-  }
-  revalidatePath("/laporan");
-}
-
-function normalizeYear(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const year = Number(String(value).trim());
-  if (!Number.isFinite(year) || year < 2000 || year > 2100) {
-    throw new Error("Tahun dokumen tidak valid.");
-  }
-  return year;
-}
-
-async function getSafeId(paramsPromise) {
-  const params = await paramsPromise;
-  const id = cleanString(params?.id, 120);
-
-  if (!id) {
-    throw new Error("ID dokumen tidak valid.");
-  }
-
-  return id;
-}
-
 export async function PUT(request, context) {
-  await requireAdmin({ requireMfa: true });
+  const guard = await requireAdminAccess();
+
+  if (!guard.ok) {
+    logWarn("admin_laporan_update_denied", {
+      status: guard.status,
+      reason: guard.message,
+    });
+
+    return NextResponse.json(
+      { message: guard.message },
+      { status: guard.status },
+    );
+  }
 
   try {
-    const id = await getSafeId(context.params);
-    const body = await request.json();
-    const supabase = createAdminClient();
+    const { id } = await context.params;
+    const payload = await request.json();
 
-    const payload = {
-      title: cleanString(body?.title, 180),
-      description: cleanString(body?.description, 1000),
-      year: normalizeYear(body?.year),
-      is_published: Boolean(body?.is_published),
+    if (!id) {
+      logWarn("admin_laporan_update_invalid_id", {
+        adminUserId: guard.user?.id || null,
+      });
+
+      return NextResponse.json(
+        { message: "ID dokumen tidak valid." },
+        { status: 400 },
+      );
+    }
+
+    const validation = validateDocumentPayload(payload);
+
+    if (!validation.ok) {
+      logWarn("admin_laporan_update_invalid_payload", {
+        adminUserId: guard.user?.id || null,
+        documentId: id,
+        reason: validation.message,
+      });
+
+      return NextResponse.json(
+        { message: validation.message },
+        { status: 400 },
+      );
+    }
+
+    const { data: existing, error: existingError } = await guard.supabase
+      .from("laporan_documents")
+      .select("id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (existingError || !existing) {
+      logWarn("admin_laporan_update_not_found", {
+        adminUserId: guard.user?.id || null,
+        documentId: id,
+      });
+
+      return NextResponse.json(
+        { message: "Dokumen tidak ditemukan." },
+        { status: 404 },
+      );
+    }
+
+    const updatePayload = {
+      ...validation.data,
+      updated_by: guard.user.id,
       updated_at: new Date().toISOString(),
     };
 
-    if (!payload.title) {
-      return noStoreJson({ message: "Judul dokumen wajib diisi." }, 400);
-    }
-
-    const { data, error } = await supabase
-      .from("report_documents")
-      .update(payload)
+    const { data: document, error: updateError } = await guard.supabase
+      .from("laporan_documents")
+      .update(updatePayload)
       .eq("id", id)
-      .select(
-        `
-        id,
-        title,
-        description,
-        year,
-        file_name,
-        file_path,
-        file_url,
-        mime_type,
-        file_size,
-        is_published,
-        updated_at,
-        category:report_categories(slug)
-      `,
-      )
+      .select("*")
       .single();
 
-    if (error) throw error;
+    if (updateError) {
+      logError("admin_laporan_update_query_error", {
+        adminUserId: guard.user?.id || null,
+        documentId: id,
+        message: updateError.message,
+      });
 
-    const slug = data?.category?.slug || null;
-    revalidateLaporanPaths(slug);
+      return NextResponse.json(
+        { message: "Gagal memperbarui dokumen." },
+        { status: 500 },
+      );
+    }
 
-    return noStoreJson({
+    logInfo("admin_laporan_update_success", {
+      adminUserId: guard.user?.id || null,
+      documentId: id,
+      isPublished: document?.is_published ?? null,
+    });
+
+    return NextResponse.json({
       message: "Dokumen berhasil diperbarui.",
-      document: {
-        id: data?.id,
-        title: data?.title || "Dokumen",
-        description: data?.description || "",
-        year: data?.year || null,
-        file_name: data?.file_name || "",
-        file_path: data?.file_path || "",
-        file_url: data?.file_url || "",
-        mime_type: data?.mime_type || "application/pdf",
-        file_size: Number(data?.file_size || 0),
-        is_published:
-          typeof data?.is_published === "boolean" ? data.is_published : false,
-      },
+      document,
     });
   } catch (error) {
-    return noStoreJson(
-      { message: error?.message || "Gagal memperbarui dokumen." },
-      500,
+    logError("admin_laporan_update_unhandled_error", {
+      adminUserId: guard.user?.id || null,
+      message: error?.message || "Unknown error",
+    });
+
+    return NextResponse.json(
+      { message: error?.message || "Terjadi kesalahan saat update dokumen." },
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(_request, context) {
-  await requireAdmin({ requireMfa: true });
+  const guard = await requireAdminAccess();
+
+  if (!guard.ok) {
+    logWarn("admin_laporan_delete_denied", {
+      status: guard.status,
+      reason: guard.message,
+    });
+
+    return NextResponse.json(
+      { message: guard.message },
+      { status: guard.status },
+    );
+  }
 
   try {
-    const id = await getSafeId(context.params);
-    const supabase = createAdminClient();
+    const { id } = await context.params;
 
-    const { data: doc, error: fetchError } = await supabase
-      .from("report_documents")
-      .select("id, file_path, category:report_categories(slug)")
+    if (!id) {
+      logWarn("admin_laporan_delete_invalid_id", {
+        adminUserId: guard.user?.id || null,
+      });
+
+      return NextResponse.json(
+        { message: "ID dokumen tidak valid." },
+        { status: 400 },
+      );
+    }
+
+    const { data: existing, error: existingError } = await guard.supabase
+      .from("laporan_documents")
+      .select("id, file_path")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !doc) {
-      return noStoreJson({ message: "Dokumen tidak ditemukan." }, 404);
+    if (existingError || !existing) {
+      logWarn("admin_laporan_delete_not_found", {
+        adminUserId: guard.user?.id || null,
+        documentId: id,
+      });
+
+      return NextResponse.json(
+        { message: "Dokumen tidak ditemukan." },
+        { status: 404 },
+      );
     }
 
-    if (doc.file_path) {
-      const removeStorage = await supabase.storage
-        .from("laporan-documents")
-        .remove([doc.file_path]);
+    if (existing.file_path) {
+      const { error: storageDeleteError } = await guard.supabase.storage
+        .from("documents")
+        .remove([existing.file_path]);
 
-      if (removeStorage.error) throw removeStorage.error;
+      if (storageDeleteError) {
+        logWarn("admin_laporan_delete_storage_warning", {
+          adminUserId: guard.user?.id || null,
+          documentId: id,
+          filePath: existing.file_path,
+          message: storageDeleteError.message,
+        });
+      }
     }
 
-    const { error } = await supabase
-      .from("report_documents")
+    const { error: deleteError } = await guard.supabase
+      .from("laporan_documents")
       .delete()
       .eq("id", id);
 
-    if (error) throw error;
+    if (deleteError) {
+      logError("admin_laporan_delete_query_error", {
+        adminUserId: guard.user?.id || null,
+        documentId: id,
+        message: deleteError.message,
+      });
 
-    revalidateLaporanPaths(doc?.category?.slug || null);
+      return NextResponse.json(
+        { message: "Gagal menghapus dokumen." },
+        { status: 500 },
+      );
+    }
 
-    return noStoreJson({ message: "Dokumen berhasil dihapus." });
+    logInfo("admin_laporan_delete_success", {
+      adminUserId: guard.user?.id || null,
+      documentId: id,
+    });
+
+    return NextResponse.json({
+      message: "Dokumen berhasil dihapus.",
+    });
   } catch (error) {
-    return noStoreJson(
-      { message: error?.message || "Gagal menghapus dokumen." },
-      500,
+    logError("admin_laporan_delete_unhandled_error", {
+      adminUserId: guard.user?.id || null,
+      message: error?.message || "Unknown error",
+    });
+
+    return NextResponse.json(
+      {
+        message: error?.message || "Terjadi kesalahan saat menghapus dokumen.",
+      },
+      { status: 500 },
     );
   }
 }

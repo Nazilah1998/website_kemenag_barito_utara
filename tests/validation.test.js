@@ -5,8 +5,12 @@ import {
   cleanHtml,
   requireFields,
   oneOf,
+  toBool,
   toDateISO,
+  toSafeNumber,
+  toDocumentYear,
   isHttpsUrl,
+  isPdfFile,
 } from "@/lib/validation";
 
 describe("cleanString", () => {
@@ -25,6 +29,7 @@ describe("cleanHtml", () => {
   it("strips script tags and inline handlers", () => {
     const dirty = `<p onclick="bad()">Halo</p><script>alert(1)</script>`;
     const clean = cleanHtml(dirty);
+
     expect(clean).not.toContain("<script>");
     expect(clean).not.toContain("onclick");
     expect(clean).toContain("Halo");
@@ -33,6 +38,7 @@ describe("cleanHtml", () => {
   it("keeps basic formatting tags", () => {
     const dirty = "<p><strong>tebal</strong> dan <em>miring</em></p>";
     const clean = cleanHtml(dirty);
+
     expect(clean).toContain("<strong>");
     expect(clean).toContain("<em>");
   });
@@ -40,6 +46,22 @@ describe("cleanHtml", () => {
   it("removes javascript: URIs", () => {
     const dirty = `<a href="javascript:alert(1)">klik</a>`;
     expect(cleanHtml(dirty)).not.toMatch(/javascript\s*:/i);
+  });
+});
+
+describe("toBool", () => {
+  it("converts common truthy values", () => {
+    expect(toBool(true)).toBe(true);
+    expect(toBool(1)).toBe(true);
+    expect(toBool("true")).toBe(true);
+    expect(toBool("on")).toBe(true);
+  });
+
+  it("converts falsy values", () => {
+    expect(toBool(false)).toBe(false);
+    expect(toBool(0)).toBe(false);
+    expect(toBool("no")).toBe(false);
+    expect(toBool(null)).toBe(false);
   });
 });
 
@@ -60,9 +82,7 @@ describe("requireFields", () => {
 
   it("does not throw when valid", () => {
     expect(() =>
-      requireFields({}, [
-        { field: "nama", value: "Andi", min: 3, max: 50 },
-      ]),
+      requireFields({}, [{ field: "nama", value: "Andi", min: 3, max: 50 }]),
     ).not.toThrow();
   });
 });
@@ -80,6 +100,50 @@ describe("oneOf", () => {
 
   it("returns null for empty value", () => {
     expect(oneOf("", ["a", "b"], { field: "kategori" })).toBeNull();
+  });
+});
+
+describe("toSafeNumber", () => {
+  it("returns parsed number", () => {
+    expect(toSafeNumber("25")).toBe(25);
+  });
+
+  it("returns null when optional and empty", () => {
+    expect(toSafeNumber("")).toBeNull();
+    expect(toSafeNumber(null)).toBeNull();
+  });
+
+  it("throws when invalid", () => {
+    expect(() => toSafeNumber("abc", { field: "angka" })).toThrow(
+      ValidationError,
+    );
+  });
+
+  it("throws when integer required but float provided", () => {
+    expect(() =>
+      toSafeNumber("12.5", { field: "jumlah", integer: true }),
+    ).toThrow(ValidationError);
+  });
+
+  it("throws when below minimum", () => {
+    expect(() => toSafeNumber("1", { field: "jumlah", min: 5 })).toThrow(
+      ValidationError,
+    );
+  });
+});
+
+describe("toDocumentYear", () => {
+  it("accepts valid document year", () => {
+    expect(toDocumentYear("2025")).toBe(2025);
+  });
+
+  it("returns null for empty optional year", () => {
+    expect(toDocumentYear("")).toBeNull();
+  });
+
+  it("throws for out-of-range year", () => {
+    expect(() => toDocumentYear("1800")).toThrow(ValidationError);
+    expect(() => toDocumentYear("2200")).toThrow(ValidationError);
   });
 });
 
@@ -118,9 +182,39 @@ describe("isHttpsUrl", () => {
         allowedHosts: ["drive.google.com"],
       }),
     ).toBe(true);
+
     expect(
       isHttpsUrl("https://evil.com", {
         allowedHosts: ["drive.google.com"],
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("isPdfFile", () => {
+  it("accepts valid pdf by mime type", () => {
+    expect(
+      isPdfFile({
+        type: "application/pdf",
+        name: "laporan.docx",
+      }),
+    ).toBe(true);
+  });
+
+  it("accepts valid pdf by file extension", () => {
+    expect(
+      isPdfFile({
+        type: "",
+        name: "dokumen.PDF",
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects non pdf file", () => {
+    expect(
+      isPdfFile({
+        type: "image/png",
+        name: "gambar.png",
       }),
     ).toBe(false);
   });

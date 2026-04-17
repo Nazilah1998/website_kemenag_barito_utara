@@ -33,37 +33,56 @@ function mergeResults(localResults, remoteResults) {
 export default function SearchResultsClient({ initialQuery = "" }) {
   const { t } = useLanguage();
   const query = initialQuery.trim();
+
   const localResults = useMemo(() => searchSite(query), [query]);
 
   const [remoteResults, setRemoteResults] = useState([]);
-  const [loadingRemote, setLoadingRemote] = useState(false);
+  const [remoteStatus, setRemoteStatus] = useState("idle");
 
   useEffect(() => {
     if (!query) {
-      setRemoteResults([]);
-      return;
+      return undefined;
     }
 
     const controller = new AbortController();
-    setLoadingRemote(true);
+    let cancelled = false;
+
+    Promise.resolve().then(() => {
+      if (!cancelled) {
+        setRemoteStatus("loading");
+      }
+    });
 
     fetch(`/api/search?q=${encodeURIComponent(query)}&limit=15`, {
       signal: controller.signal,
+      cache: "no-store",
     })
       .then((res) => (res.ok ? res.json() : { items: [] }))
       .then((data) => {
+        if (cancelled) return;
         setRemoteResults(Array.isArray(data?.items) ? data.items : []);
+        setRemoteStatus("success");
       })
-      .catch(() => setRemoteResults([]))
-      .finally(() => setLoadingRemote(false));
+      .catch(() => {
+        if (cancelled) return;
+        setRemoteResults([]);
+        setRemoteStatus("error");
+      });
 
-    return () => controller.abort();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [query]);
 
-  const results = useMemo(
-    () => mergeResults(localResults, remoteResults),
-    [localResults, remoteResults],
-  );
+  const results = useMemo(() => {
+    const remote = query ? remoteResults : [];
+    return mergeResults(localResults, remote);
+  }, [query, localResults, remoteResults]);
+
+  const loadingRemote = query && remoteStatus === "loading";
+  const showEmptyState =
+    query && results.length === 0 && remoteStatus !== "loading";
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-10">
@@ -76,6 +95,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
                 “{query}”
               </span>
             </p>
+
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               {results.length} {t("searchPage.resultCount")}
               {loadingRemote ? " • memuat konten dinamis..." : ""}
@@ -88,7 +108,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
         )}
       </div>
 
-      {query && results.length === 0 && !loadingRemote ? (
+      {showEmptyState ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
           {t("common.noResults")}
         </div>

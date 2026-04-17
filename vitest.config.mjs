@@ -2,19 +2,20 @@ import { defineConfig } from "vitest/config";
 import path from "node:path";
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@": path.resolve(process.cwd(), "src"),
-    },
-  },
   test: {
-    environment: "node",
+    environment: "happy-dom",
     globals: true,
-    include: ["tests/**/*.test.{js,jsx,mjs}"],
+    setupFiles: ["./vitest.setup.js"],
+    css: true,
+    include: ["tests/**/*.test.{js,jsx}"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["src/lib/**/*.js"],
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(process.cwd(), "./src"),
     },
   },
 });

@@ -1,37 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Website Kemenag Barito Utara
 
-## Getting Started
+Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js App Router** dengan halaman publik, panel admin, integrasi Supabase, PWA, dan pengujian menggunakan Vitest.
 
-First, run the development server:
+## Teknologi utama
+
+- Next.js 16
+- React 19
+- Supabase
+- Tailwind CSS 4
+- Vitest
+- Vercel Analytics
+- Vercel Speed Insights
+
+## Struktur folder utama
+
+```bash
+.
+├── docs/                 # dokumentasi teknis dan skema database
+├── public/               # aset statis, manifest, service worker, offline page
+├── src/
+│   ├── app/              # routing App Router, halaman publik, admin, API route
+│   ├── components/       # komponen UI publik dan admin
+│   ├── context/          # global context, seperti tema dan bahasa
+│   ├── data/             # data statis / fallback
+│   └── lib/              # business logic, auth, validasi, helper domain, Supabase
+├── tests/                # unit test & domain test
+└── docs/schema.sql       # skema basis data
+```
+
+## Menjalankan proyek secara lokal
+
+1. Install dependency:
+
+```bash
+npm install
+```
+
+2. Buat file `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+3. Jalankan development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Buka browser ke:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run lint:fix
+npm run typecheck
+npm run test
+npm run test:watch
+npm run test:coverage
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Prinsip arsitektur proyek
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Semua business logic dipusatkan di `src/lib`
+- Semua halaman admin wajib melalui auth dan permission yang konsisten
+- Data dinamis tidak boleh dijadikan source utama di `src/data`
+- Perubahan database harus terdokumentasi dan terversi
+- Fitur kritikal wajib memiliki test dasar
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Modul penting
 
-## Deploy on Vercel
+### Halaman publik
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Melayani informasi resmi instansi seperti profil, layanan, berita, galeri, laporan, ppid, kontak, dan zona integritas.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# website_masadepan_kemenag
+### Panel admin
+
+Digunakan untuk mengelola konten dinamis seperti berita, halaman, dokumen laporan, audit, dan autentikasi admin.
+
+### Integrasi database
+
+Menggunakan Supabase untuk penyimpanan data dan storage dokumen, dengan fallback data statis pada beberapa modul tertentu.
+
+## Prioritas refactor berikutnya
+
+- Merapikan modul admin laporan menjadi lebih modular
+- Menyatukan source-of-truth data antara `src/data` dan database
+- Menambah cakupan test untuk auth, laporan, dan route admin
+- Menjadikan skema database lebih disiplin melalui migration terstruktur
+
+## Catatan
+
+Repository ini dikembangkan sebagai website institusi pemerintah, sehingga fokus utama bukan hanya tampilan, tetapi juga:
+
+- kejelasan informasi,
+- kestabilan data,
+- kemudahan pengelolaan admin,
+- aksesibilitas,
+- dan kesiapan pengembangan jangka panjang.

@@ -5,11 +5,22 @@ export async function GET() {
   try {
     const session = await getCurrentSessionContext();
 
-    if (!session.isAuthenticated) {
+    if (!session?.isAuthenticated) {
       return NextResponse.json(
         {
           ok: false,
           message: "Belum login.",
+          user: null,
+          permissions: {
+            isAdmin: false,
+            isEditor: false,
+          },
+          mfa: {
+            currentLevel: null,
+            nextLevel: null,
+            isVerified: false,
+            errorMessage: null,
+          },
         },
         { status: 401 },
       );
@@ -18,19 +29,19 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       user: {
-        id: session.claims?.sub ?? null,
-        email: session.profile?.email || null,
+        id: session.claims?.sub ?? session.user?.id ?? null,
+        email: session.profile?.email || session.user?.email || null,
         full_name: session.profile?.full_name || null,
         role: session.role ?? null,
       },
       permissions: {
-        isAdmin: session.isAdmin,
-        isEditor: session.isEditor,
+        isAdmin: Boolean(session.isAdmin),
+        isEditor: Boolean(session.isEditor),
       },
       mfa: {
         currentLevel: session.aal ?? null,
         nextLevel: session.nextAal ?? null,
-        isVerified: session.isMfaVerified ?? false,
+        isVerified: Boolean(session.isMfaVerified),
         errorMessage: session.mfaErrorMessage ?? null,
       },
     });
@@ -38,7 +49,18 @@ export async function GET() {
     return NextResponse.json(
       {
         ok: false,
-        message: error.message || "Gagal membaca session admin.",
+        message: error?.message || "Gagal membaca session admin.",
+        user: null,
+        permissions: {
+          isAdmin: false,
+          isEditor: false,
+        },
+        mfa: {
+          currentLevel: null,
+          nextLevel: null,
+          isVerified: false,
+          errorMessage: null,
+        },
       },
       { status: 500 },
     );

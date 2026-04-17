@@ -4,6 +4,7 @@ export const CMS_MEDIA_BUCKET =
   process.env.NEXT_PUBLIC_SUPABASE_CMS_BUCKET || "cms-media";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const DEFAULT_FILE_SIZE_LIMIT = 2 * 1024 * 1024;
 
 export async function ensureCmsBucket(supabase = createAdminClient()) {
   const { data, error } = await supabase.storage.getBucket(CMS_MEDIA_BUCKET);
@@ -15,13 +16,13 @@ export async function ensureCmsBucket(supabase = createAdminClient()) {
   const { data: created, error: createError } =
     await supabase.storage.createBucket(CMS_MEDIA_BUCKET, {
       public: true,
-      fileSizeLimit: 2097152,
+      fileSizeLimit: DEFAULT_FILE_SIZE_LIMIT,
       allowedMimeTypes: ALLOWED_MIME_TYPES,
     });
 
   if (
     createError &&
-    !String(createError.message || "")
+    !String(createError?.message || "")
       .toLowerCase()
       .includes("already")
   ) {
@@ -66,7 +67,7 @@ export async function uploadBase64Image({
 
   return {
     path,
-    publicUrl: publicUrlData.publicUrl,
+    publicUrl: publicUrlData?.publicUrl || null,
     mimeType: parsed.mimeType,
     sizeBytes: parsed.buffer.length,
   };
@@ -79,10 +80,18 @@ export async function removeStorageFileByPublicUrl(
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {
-    return;
+    return false;
   }
 
-  await supabase.storage.from(CMS_MEDIA_BUCKET).remove([path]);
+  const { error } = await supabase.storage
+    .from(CMS_MEDIA_BUCKET)
+    .remove([path]);
+
+  if (error) {
+    throw error;
+  }
+
+  return true;
 }
 
 export function isCmsStoragePublicUrl(value = "") {
@@ -106,12 +115,14 @@ function parseDataUrl(dataUrl = "") {
 function mimeTypeToExt(mimeType = "") {
   if (mimeType === "image/jpeg") return "jpg";
   if (mimeType === "image/png") return "png";
-  return "webp";
+  if (mimeType === "image/webp") return "webp";
+  throw new Error("Mime type gambar tidak didukung.");
 }
 
 function sanitizeSegment(value = "") {
   return String(value || "")
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9-_]/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");

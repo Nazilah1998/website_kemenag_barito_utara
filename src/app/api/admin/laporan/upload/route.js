@@ -1,202 +1,225 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/auth";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { cleanString } from "@/lib/validation";
+import { requireAdminAccess } from "@/lib/admin-guard";
+import {
+  buildSafePdfFilename,
+  validateDocumentPayload,
+  validatePdfFile,
+} from "@/lib/laporan-upload-validation";
+import { logError, logInfo, logWarn } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const PDF_MIME = "application/pdf";
-
-function noStoreJson(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store, max-age=0" },
-  });
-}
-
-function isValidUuid(value) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-    String(value || ""),
-  );
-}
-
-function getSafeFileName(name = "") {
-  const safe = String(name)
-    .trim()
-    .toLowerCase()
-    .replace(/\.pdf$/i, "")
-    .replace(/[^a-z0-9-_]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-  return `${safe || "dokumen"}.pdf`;
-}
-
-function normalizeYear(value) {
-  const year = Number(String(value || "").trim());
-  if (!year) return null;
-  if (year < 2000 || year > 2100) throw new Error("Tahun dokumen tidak valid.");
-  return year;
-}
-
-function revalidateLaporanPaths(slug) {
-  revalidatePath("/admin");
-  revalidatePath("/admin/laporan");
-  revalidatePath("/laporan");
-  if (slug) {
-    revalidatePath(`/admin/laporan/${slug}`);
-    revalidatePath(`/laporan/${slug}`);
-  }
-}
-
-async function resolveCategory(supabase, categoryId, categorySlug) {
-  if (categoryId && isValidUuid(categoryId)) {
-    const byId = await supabase
-      .from("report_categories")
-      .select("id, slug, title")
-      .eq("id", categoryId)
-      .maybeSingle();
-
-    if (byId.error) throw byId.error;
-    if (byId.data) return byId.data;
-  }
-
-  const slugToTry = categorySlug || categoryId;
-
-  if (slugToTry) {
-    const bySlug = await supabase
-      .from("report_categories")
-      .select("id, slug, title")
-      .eq("slug", slugToTry)
-      .maybeSingle();
-
-    if (bySlug.error) throw bySlug.error;
-    if (bySlug.data) return bySlug.data;
-  }
-
-  return null;
-}
-
 export async function POST(request) {
-  const session = await requireAdmin({ requireMfa: true });
+  const guard = await requireAdminAccess();
+
+  if (!guard.ok) {
+    logWarn("admin_laporan_upload_denied", {
+      status: guard.status,
+      reason: guard.message,
+    });
+
+    return NextResponse.json(
+      { message: guard.message },
+      { status: guard.status },
+    );
+  }
 
   try {
     const formData = await request.formData();
-    const supabase = createAdminClient();
 
     const file = formData.get("file");
-    const categoryId = cleanString(formData.get("categoryId"), 120);
-    const categorySlug = cleanString(formData.get("categorySlug"), 160);
-    const title = cleanString(formData.get("title"), 180);
-    const description = cleanString(formData.get("description"), 1000);
-    const year = normalizeYear(formData.get("year"));
-    const isPublished = String(formData.get("is_published")) === "true";
+    const categoryId = String(formData.get("categoryId") || "").trim();
+    const categorySlug = String(formData.get("categorySlug") || "").trim();
 
-    if (!categoryId && !categorySlug) {
-      return noStoreJson({ message: "Kategori laporan wajib dipilih." }, 400);
-    }
+    const payloadValidation = validateDocumentPayload({
+      title: formData.get("title"),
+      description: formData.get("description"),
+      year: formData.get("year"),
+      is_published: formData.get("is_published") === "true",
+    });
 
-    if (!title) {
-      return noStoreJson({ message: "Judul dokumen wajib diisi." }, 400);
-    }
+    if (!payloadValidation.ok) {
+      logWarn("admin_laporan_upload_invalid_payload", {
+        adminUserId: guard.user?.id || null,
+        categoryId: categoryId || null,
+        categorySlug: categorySlug || null,
+        reason: payloadValidation.message,
+      });
 
-    if (!file || typeof file === "string") {
-      return noStoreJson({ message: "File PDF wajib dipilih." }, 400);
-    }
-
-    if (Number(file.size || 0) > MAX_FILE_SIZE) {
-      return noStoreJson({ message: "Ukuran file melebihi 10 MB." }, 400);
-    }
-
-    const isPdf =
-      file.type === PDF_MIME || /\.pdf$/i.test(String(file.name || ""));
-
-    if (!isPdf) {
-      return noStoreJson({ message: "Hanya file PDF yang diizinkan." }, 400);
-    }
-
-    const category = await resolveCategory(supabase, categoryId, categorySlug);
-
-    if (!category) {
-      return noStoreJson(
-        {
-          message:
-            "Kategori laporan tidak ditemukan. Pastikan seed data 7 kategori sudah dijalankan di Supabase.",
-        },
-        404,
+      return NextResponse.json(
+        { message: payloadValidation.message },
+        { status: 400 },
       );
     }
 
-    const safeName = getSafeFileName(file.name || "dokumen.pdf");
-    const filePath = `laporan/${category.slug}/${Date.now()}-${safeName}`;
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const fileValidation = validatePdfFile(file);
 
-    const uploadResult = await supabase.storage
+    if (!fileValidation.ok) {
+      logWarn("admin_laporan_upload_invalid_file", {
+        adminUserId: guard.user?.id || null,
+        categoryId: categoryId || null,
+        categorySlug: categorySlug || null,
+        reason: fileValidation.message,
+        fileName: file?.name || null,
+        fileType: file?.type || null,
+        fileSize: file?.size || null,
+      });
+
+      return NextResponse.json(
+        { message: fileValidation.message },
+        { status: 400 },
+      );
+    }
+
+    if (!categoryId && !categorySlug) {
+      logWarn("admin_laporan_upload_missing_category", {
+        adminUserId: guard.user?.id || null,
+      });
+
+      return NextResponse.json(
+        { message: "Kategori dokumen tidak valid." },
+        { status: 400 },
+      );
+    }
+
+    let category = null;
+
+    if (categoryId) {
+      const { data, error } = await guard.supabase
+        .from("report_categories")
+        .select("id, slug, title, is_active")
+        .eq("id", categoryId)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (error) {
+        console.error("[upload] category lookup by id error:", error);
+      }
+
+      if (data) {
+        category = data;
+      }
+    }
+
+    if (!category && categorySlug) {
+      const { data, error } = await guard.supabase
+        .from("report_categories")
+        .select("id, slug, title, is_active")
+        .eq("slug", categorySlug)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (error) {
+        console.error("[upload] category lookup by slug error:", error);
+      }
+
+      if (data) {
+        category = data;
+      }
+    }
+
+    if (!category) {
+      console.error("[upload] category not found", {
+        categoryId,
+        categorySlug,
+      });
+
+      return NextResponse.json(
+        { message: "Kategori dokumen tidak ditemukan." },
+        { status: 404 },
+      );
+    }
+
+    const filename = buildSafePdfFilename(file.name, category.slug);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const storagePath = `laporan/${category.slug}/${filename}`;
+
+    const { error: uploadError } = await guard.supabase.storage
       .from("laporan-documents")
-      .upload(filePath, buffer, {
-        contentType: PDF_MIME,
+      .upload(storagePath, buffer, {
+        contentType: "application/pdf",
         upsert: false,
       });
 
-    if (uploadResult.error) {
-      throw uploadResult.error;
+    if (uploadError) {
+      logError("admin_laporan_upload_storage_error", {
+        adminUserId: guard.user?.id || null,
+        categoryId: category.id,
+        storagePath,
+        message: uploadError.message,
+      });
+
+      return NextResponse.json(
+        { message: "Gagal mengupload file dokumen." },
+        { status: 500 },
+      );
     }
 
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = guard.supabase.storage
       .from("laporan-documents")
-      .getPublicUrl(filePath);
+      .getPublicUrl(storagePath);
 
-    const fileUrl = publicUrlData?.publicUrl || null;
+    const insertPayload = {
+      id: crypto.randomUUID(),
+      category_id: category.id,
+      title: payloadValidation.data.title,
+      description: payloadValidation.data.description,
+      year: payloadValidation.data.year,
+      is_published: payloadValidation.data.is_published,
+      file_name: filename,
+      file_path: storagePath,
+      file_url: publicUrlData?.publicUrl || "",
+      file_size: file.size,
+      mime_type: "application/pdf",
+      sort_order: 0,
+      created_by: guard.user.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      view_count: 0,
+    };
 
-    const insertResult = await supabase
+    const { data: document, error: insertError } = await guard.supabase
       .from("report_documents")
-      .insert({
-        category_id: category.id,
-        title,
-        description,
-        year,
-        file_name: file.name,
-        file_path: filePath,
-        file_url: fileUrl,
-        mime_type: PDF_MIME,
-        file_size: Number(file.size || 0),
-        is_published: isPublished,
-        created_by: session?.profile?.id || null,
-      })
-      .select(
-        `
-        id,
-        title,
-        description,
-        year,
-        file_name,
-        file_path,
-        file_url,
-        mime_type,
-        file_size,
-        is_published
-      `,
-      )
+      .insert(insertPayload)
+      .select("*")
       .single();
 
-    if (insertResult.error) {
-      await supabase.storage.from("laporan-documents").remove([filePath]);
-      throw insertResult.error;
+    if (insertError) {
+      logError("admin_laporan_upload_insert_error", {
+        adminUserId: guard.user?.id || null,
+        categoryId: category.id,
+        storagePath,
+        message: insertError.message,
+      });
+
+      return NextResponse.json(
+        { message: "Gagal menyimpan metadata dokumen." },
+        { status: 500 },
+      );
     }
 
-    revalidateLaporanPaths(category.slug);
+    logInfo("admin_laporan_upload_success", {
+      adminUserId: guard.user?.id || null,
+      categoryId: category.id,
+      documentId: document?.id || null,
+      fileSize: file.size,
+      storagePath,
+    });
 
-    return noStoreJson({
-      message: `Dokumen berhasil diupload ke kategori ${category.title}.`,
-      document: insertResult.data,
-      category,
+    return NextResponse.json({
+      message: "Dokumen berhasil diupload.",
+      document,
     });
   } catch (error) {
-    return noStoreJson(
-      { message: error?.message || "Gagal mengupload dokumen laporan." },
-      500,
+    logError("admin_laporan_upload_unhandled_error", {
+      adminUserId: guard.user?.id || null,
+      message: error?.message || "Unknown error",
+    });
+
+    return NextResponse.json(
+      { message: error?.message || "Terjadi kesalahan pada proses upload." },
+      { status: 500 },
     );
   }
 }

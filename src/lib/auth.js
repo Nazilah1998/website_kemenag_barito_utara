@@ -4,11 +4,13 @@ import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
-const EDITOR_ROLES = new Set(["admin", "super_admin", "editor"]);
+const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
 
-function normalizeRole(role) {
+export function normalizeRole(role) {
   if (!role || typeof role !== "string") return null;
-  return role.trim().toLowerCase();
+
+  const normalized = role.trim().toLowerCase();
+  return normalized || null;
 }
 
 function isMissingSessionError(error) {
@@ -21,6 +23,10 @@ function isMissingSessionError(error) {
     code.includes("session") ||
     code === "auth_session_missing"
   );
+}
+
+function buildForbiddenUrl(message, fallback = "/error") {
+  return `${fallback}?message=${encodeURIComponent(message)}`;
 }
 
 export async function createServerSupabaseClient() {
@@ -37,7 +43,7 @@ export async function createServerSupabaseClient() {
             cookieStore.set(name, value, options);
           });
         } catch {
-          // aman pada context yang tidak mengizinkan set cookie
+          // Tidak semua context mengizinkan set cookie
         }
       },
     },
@@ -45,25 +51,66 @@ export async function createServerSupabaseClient() {
 }
 
 async function getAdminMfaContext(supabase) {
-  const { data, error } =
-    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  try {
+    const { data, error } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
-  if (error) {
-    if (isMissingSessionError(error)) {
+    if (error) {
+      if (isMissingSessionError(error)) {
+        return {
+          currentLevel: null,
+          nextLevel: null,
+          isVerified: false,
+          errorMessage: null,
+        };
+      }
+
       return {
         currentLevel: null,
         nextLevel: null,
         isVerified: false,
+        errorMessage: error.message || "Gagal membaca status MFA.",
       };
     }
-    throw error;
+
+    return {
+      currentLevel: data?.currentLevel ?? null,
+      nextLevel: data?.nextLevel ?? null,
+      isVerified: data?.currentLevel === "aal2",
+      errorMessage: null,
+    };
+  } catch (error) {
+    return {
+      currentLevel: null,
+      nextLevel: null,
+      isVerified: false,
+      errorMessage: error?.message || "Gagal membaca status MFA.",
+    };
+  }
+}
+
+async function getUserProfile(supabase, userId) {
+  if (!userId) return null;
+
+  const candidates = ["profiles", "admin_users", "users"];
+
+  for (const table of candidates) {
+    try {
+      const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data;
+      }
+    } catch {
+      // lanjut ke kandidat berikutnya
+    }
   }
 
-  return {
-    currentLevel: data?.currentLevel ?? null,
-    nextLevel: data?.nextLevel ?? null,
-    isVerified: data?.currentLevel === "aal2",
-  };
+  return null;
 }
 
 export async function getCurrentSessionContext() {
@@ -74,33 +121,18 @@ export async function getCurrentSessionContext() {
     error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError) {
-    if (isMissingSessionError(userError)) {
-      return {
-        isAuthenticated: false,
-        claims: null,
-        user: null,
-        profile: null,
-        role: null,
-        isAdmin: false,
-        isEditor: false,
-        aal: null,
-        nextAal: null,
-        isMfaVerified: false,
-        mfaErrorMessage: null,
-      };
-    }
-
+  if (userError && !isMissingSessionError(userError)) {
     throw userError;
   }
 
   if (!user) {
     return {
-      isAuthenticated: false,
-      claims: null,
+      supabase,
       user: null,
       profile: null,
+      claims: {},
       role: null,
+      isAuthenticated: false,
       isAdmin: false,
       isEditor: false,
       aal: null,
@@ -110,86 +142,67 @@ export async function getCurrentSessionContext() {
     };
   }
 
-  let profile = null;
+  const profile = await getUserProfile(supabase, user.id);
+  const role = normalizeRole(
+    profile?.role ||
+      user?.app_metadata?.role ||
+      user?.user_metadata?.role ||
+      null,
+  );
 
-  const { data: profileData, error: profileError } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profileError && profileError.code !== "PGRST116") {
-    throw profileError;
-  }
-
-  profile = profileData ?? {
-    id: user.id,
-    email: user.email ?? null,
-    full_name:
-      user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-    role: user.app_metadata?.role ?? user.user_metadata?.role ?? null,
-  };
-
-  const role = normalizeRole(profile?.role);
-  const isAdmin = ADMIN_ROLES.has(role);
-  const isEditor = EDITOR_ROLES.has(role);
-
-  let aal = null;
-  let nextAal = null;
-  let isMfaVerified = !isAdmin;
-  let mfaErrorMessage = null;
-
-  if (isAdmin) {
-    try {
-      const mfa = await getAdminMfaContext(supabase);
-      aal = mfa.currentLevel;
-      nextAal = mfa.nextLevel;
-      isMfaVerified = mfa.isVerified;
-    } catch (error) {
-      isMfaVerified = false;
-      mfaErrorMessage = error?.message || "Gagal memeriksa status MFA admin.";
-    }
-  }
+  const mfa = await getAdminMfaContext(supabase);
 
   return {
-    isAuthenticated: true,
-    claims: {
-      sub: user.id,
-      email: user.email ?? null,
-    },
+    supabase,
     user,
     profile,
+    claims: user?.app_metadata || {},
     role,
-    isAdmin,
-    isEditor,
-    aal,
-    nextAal,
-    isMfaVerified,
-    mfaErrorMessage,
+    isAuthenticated: true,
+    isAdmin: ADMIN_ROLES.has(role),
+    isEditor: EDITOR_ROLES.has(role),
+    aal: mfa.currentLevel,
+    nextAal: mfa.nextLevel,
+    isMfaVerified: mfa.isVerified,
+    mfaErrorMessage: mfa.errorMessage,
   };
 }
 
-export async function requireAdmin(options = {}) {
-  const {
-    loginRedirect = "/admin/login",
-    forbiddenRedirect = "/error?message=" +
-      encodeURIComponent("Akun ini tidak memiliki hak akses admin."),
-    mfaRedirect = "/admin/mfa",
-    requireMfa = true,
-  } = options;
-
+export async function requireAuth({ loginRedirect = "/login" } = {}) {
   const session = await getCurrentSessionContext();
 
   if (!session.isAuthenticated) {
     redirect(loginRedirect);
   }
 
-  if (!session.isAdmin) {
+  return session;
+}
+
+export async function requireEditor({
+  loginRedirect = "/admin/login",
+  forbiddenRedirect = buildForbiddenUrl(
+    "Akun ini tidak memiliki hak akses editor.",
+  ),
+} = {}) {
+  const session = await requireAuth({ loginRedirect });
+
+  if (!session.isEditor) {
     redirect(forbiddenRedirect);
   }
 
-  if (requireMfa && !session.isMfaVerified) {
-    redirect(mfaRedirect);
+  return session;
+}
+
+export async function requireAdmin({
+  loginRedirect = "/admin/login",
+  forbiddenRedirect = buildForbiddenUrl(
+    "Akun ini tidak memiliki hak akses admin.",
+  ),
+} = {}) {
+  const session = await requireAuth({ loginRedirect });
+
+  if (!session.isAdmin) {
+    redirect(forbiddenRedirect);
   }
 
   return session;

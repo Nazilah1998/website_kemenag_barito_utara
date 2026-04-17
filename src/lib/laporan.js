@@ -1,67 +1,103 @@
 import { laporanCategories } from "@/data/laporan";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-function sortDocuments(items = []) {
+function toNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toText(value, fallback = "") {
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
+function isPublishedDocument(doc) {
+  if (typeof doc?.is_published === "boolean") return doc.is_published;
+  if (typeof doc?.isPublished === "boolean") return doc.isPublished;
+  return true;
+}
+
+function buildDocumentMeta({ year, href, mimeType, fileSize }) {
+  const metaParts = [];
+
+  if (year) metaParts.push(String(year));
+  if (mimeType || String(href).toLowerCase().includes(".pdf"))
+    metaParts.push("PDF");
+  if (fileSize > 0) metaParts.push(`${Math.round(fileSize / 1024)} KB`);
+
+  return metaParts.join(" • ");
+}
+
+export function normalizeLaporanDocument(doc = {}) {
+  const href = toText(doc?.file_url || doc?.href || "#", "#");
+  const year = doc?.year ? toNumber(doc.year, null) : null;
+  const fileSize = toNumber(doc?.file_size, 0);
+  const viewCount = toNumber(doc?.view_count, 0);
+  const mimeType = toText(doc?.mime_type, "application/pdf");
+  const title = toText(doc?.title, "Dokumen");
+  const description = toText(doc?.description, "");
+
+  return {
+    id: doc?.id || `${title}-${href}`,
+    title,
+    description,
+    href,
+    meta: buildDocumentMeta({
+      year,
+      href,
+      mimeType,
+      fileSize,
+    }),
+    year,
+    file_url: toText(doc?.file_url || href, href),
+    file_name: toText(doc?.file_name, ""),
+    file_path: toText(doc?.file_path, ""),
+    mime_type: mimeType,
+    file_size: fileSize,
+    view_count: viewCount,
+    is_published: isPublishedDocument(doc),
+    created_at: doc?.created_at || null,
+    updated_at: doc?.updated_at || null,
+    sort_order: toNumber(doc?.sort_order, 0),
+  };
+}
+
+export function sortLaporanDocuments(items = []) {
   return [...items].sort((a, b) => {
-    const yearA = Number(a?.year || 0);
-    const yearB = Number(b?.year || 0);
+    const yearA = toNumber(a?.year, 0);
+    const yearB = toNumber(b?.year, 0);
     if (yearA !== yearB) return yearB - yearA;
 
-    const viewsA = Number(a?.view_count || 0);
-    const viewsB = Number(b?.view_count || 0);
+    const orderA = toNumber(a?.sort_order, 0);
+    const orderB = toNumber(b?.sort_order, 0);
+    if (orderA !== orderB) return orderA - orderB;
+
+    const viewsA = toNumber(a?.view_count, 0);
+    const viewsB = toNumber(b?.view_count, 0);
     if (viewsA !== viewsB) return viewsB - viewsA;
 
     return String(a?.title || "").localeCompare(String(b?.title || ""), "id");
   });
 }
 
-function normalizeDocument(doc) {
-  const href = doc?.file_url || doc?.href || "#";
-  const year = doc?.year ? String(doc.year) : "";
-  const fileSize = Number(doc?.file_size || 0);
-  const viewCount = Number(doc?.view_count || 0);
-  const metaParts = [];
-
-  if (year) metaParts.push(year);
-  if (doc?.mime_type || href.toLowerCase().includes(".pdf"))
-    metaParts.push("PDF");
-  if (fileSize > 0) metaParts.push(`${Math.round(fileSize / 1024)} KB`);
-
+export function normalizeLaporanCategory(category = {}, documents = []) {
   return {
-    id: doc?.id || `${doc?.title || "dokumen"}-${href}`,
-    title: doc?.title || "Dokumen",
-    description: doc?.description || "",
-    href,
-    meta: metaParts.join(" • "),
-    year: doc?.year || null,
-    file_url: doc?.file_url || href,
-    file_name: doc?.file_name || "",
-    file_path: doc?.file_path || "",
-    mime_type: doc?.mime_type || "application/pdf",
-    file_size: fileSize,
-    view_count: viewCount,
-    is_published:
-      typeof doc?.is_published === "boolean" ? doc.is_published : true,
-    created_at: doc?.created_at || null,
-    updated_at: doc?.updated_at || null,
+    id: category?.id || category?.slug || "",
+    slug: toText(category?.slug, ""),
+    title: toText(category?.title, "Tanpa Judul"),
+    description: toText(category?.description, ""),
+    intro: toText(category?.intro, ""),
+    sort_order: toNumber(category?.sort_order, 0),
+    is_active:
+      typeof category?.is_active === "boolean" ? category.is_active : true,
+    documents: sortLaporanDocuments(
+      Array.isArray(documents) ? documents.map(normalizeLaporanDocument) : [],
+    ),
   };
 }
 
 function normalizeFallbackCategory(item) {
-  return {
-    id: item.slug,
-    slug: item.slug,
-    title: item.title,
-    description: item.description,
-    intro: item.intro,
-    sort_order: 0,
-    is_active: true,
-    documents: sortDocuments(
-      Array.isArray(item.documents)
-        ? item.documents.map(normalizeDocument)
-        : [],
-    ),
-  };
+  return normalizeLaporanCategory(item, item?.documents || []);
 }
 
 export async function getAllLaporanCategories() {
@@ -76,14 +112,12 @@ export async function getAllLaporanCategories() {
       .order("title", { ascending: true });
 
     if (error) throw error;
+
     if (!Array.isArray(data) || data.length === 0) {
       return laporanCategories.map(normalizeFallbackCategory);
     }
 
-    return data.map((item) => ({
-      ...item,
-      documents: [],
-    }));
+    return data.map((item) => normalizeLaporanCategory(item, []));
   } catch {
     return laporanCategories.map(normalizeFallbackCategory);
   }
@@ -129,19 +163,11 @@ export async function getLaporanDetailBySlug(slug) {
     if (error) throw error;
     if (!data) return null;
 
-    return {
-      ...data,
-      documents: Array.isArray(data.documents)
-        ? sortDocuments(
-            data.documents
-              .filter(
-                (item) =>
-                  item?.is_published !== false || item?.is_published === true,
-              )
-              .map(normalizeDocument),
-          )
-        : [],
-    };
+    const documents = Array.isArray(data?.documents)
+      ? data.documents.filter((item) => isPublishedDocument(item))
+      : [];
+
+    return normalizeLaporanCategory(data, documents);
   } catch {
     const fallback = laporanCategories.find((item) => item.slug === slug);
     if (!fallback) return null;
@@ -191,12 +217,9 @@ export async function getAdminLaporanCategories(slug = "") {
 
     if (error) throw error;
 
-    return (data || []).map((item) => ({
-      ...item,
-      documents: Array.isArray(item.documents)
-        ? sortDocuments(item.documents.map(normalizeDocument))
-        : [],
-    }));
+    return (data || []).map((item) =>
+      normalizeLaporanCategory(item, item?.documents || []),
+    );
   } catch {
     if (slug) {
       const fallback = laporanCategories.find((item) => item.slug === slug);

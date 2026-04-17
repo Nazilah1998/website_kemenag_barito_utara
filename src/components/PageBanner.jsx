@@ -99,15 +99,6 @@ export default function PageBanner({
             ) : null}
           </div>
 
-          <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
-              Akses Cepat
-            </p>
-            <p className="mt-3 text-sm leading-6 text-white/85">
-              Telusuri informasi secara terbuka, terstruktur, dan mudah diakses oleh
-              masyarakat melalui halaman ini.
-            </p>
-          </div>
         </div>
       </div>
     </section>

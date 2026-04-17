@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import AppShell from "@/components/AppShell";
+import ThemeInitializer from "@/components/ThemeInitializer";
 import { siteInfo } from "@/data/site";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import VercelSpeedInsights from "@/components/VercelSpeedInsights";
@@ -10,26 +11,6 @@ import JsonLd from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 
 const inter = Inter({ subsets: ["latin"] });
-
-const themeInitScript = `
-(() => {
-  try {
-    const STORAGE_KEY = "site-theme";
-    const root = document.documentElement;
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    const theme =
-      saved === "light" || saved === "dark"
-        ? saved
-        : window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-
-    root.dataset.theme = theme;
-    root.classList.toggle("dark", theme === "dark");
-    root.style.colorScheme = theme;
-  } catch (_) {}
-})();
-`;
 
 export const metadata = {
   metadataBase: new URL(siteInfo.siteUrl),
@@ -85,11 +66,8 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
-
       <body className={`${inter.className} antialiased`}>
+        <ThemeInitializer />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
 
         <Providers>

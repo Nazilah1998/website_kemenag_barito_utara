@@ -1,8 +1,8 @@
-// Helper validasi ringan untuk API admin.
-// Tidak bergantung pada library eksternal agar ringan dan mudah dirawat.
-
 export class ValidationError extends Error {
-  constructor(message, { status = 400, errors = [], code = "VALIDATION_ERROR" } = {}) {
+  constructor(
+    message,
+    { status = 400, errors = [], code = "VALIDATION_ERROR" } = {},
+  ) {
     super(message);
     this.name = "ValidationError";
     this.status = status;
@@ -19,14 +19,14 @@ export function cleanString(value, max = 5000) {
 
 export function cleanHtml(value, max = 50_000) {
   if (typeof value !== "string") return "";
+
   let html = value.trim().replace(/\u0000/g, "");
 
-  // Hilangkan script, iframe berbahaya, dan handler inline.
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
   html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
   html = html.replace(/<iframe[\s\S]*?<\/iframe>/gi, "");
-  html = html.replace(/on[a-z]+\s*=\s*"[^"]*"/gi, "");
-  html = html.replace(/on[a-z]+\s*=\s*'[^']*'/gi, "");
+  html = html.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, "");
+  html = html.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, "");
   html = html.replace(/javascript\s*:/gi, "");
 
   return html.length > max ? html.slice(0, max) : html;
@@ -35,11 +35,74 @@ export function cleanHtml(value, max = 50_000) {
 export function toBool(value) {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
+
   if (typeof value === "string") {
-    const v = value.trim().toLowerCase();
-    return ["true", "1", "yes", "on"].includes(v);
+    const normalized = value.trim().toLowerCase();
+    return ["true", "1", "yes", "on"].includes(normalized);
   }
+
   return false;
+}
+
+export function toSafeNumber(
+  value,
+  {
+    field = "nilai",
+    required = false,
+    min = null,
+    max = null,
+    integer = false,
+  } = {},
+) {
+  if (value === undefined || value === null || value === "") {
+    if (required) {
+      throw new ValidationError("Validasi gagal.", {
+        errors: [{ field, message: `${field} wajib diisi.` }],
+      });
+    }
+    return null;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed)) {
+    throw new ValidationError("Validasi gagal.", {
+      errors: [{ field, message: `${field} harus berupa angka yang valid.` }],
+    });
+  }
+
+  if (integer && !Number.isInteger(parsed)) {
+    throw new ValidationError("Validasi gagal.", {
+      errors: [{ field, message: `${field} harus berupa bilangan bulat.` }],
+    });
+  }
+
+  if (min !== null && parsed < min) {
+    throw new ValidationError("Validasi gagal.", {
+      errors: [{ field, message: `${field} minimal ${min}.` }],
+    });
+  }
+
+  if (max !== null && parsed > max) {
+    throw new ValidationError("Validasi gagal.", {
+      errors: [{ field, message: `${field} maksimal ${max}.` }],
+    });
+  }
+
+  return parsed;
+}
+
+export function toDocumentYear(
+  value,
+  { required = false, field = "tahun" } = {},
+) {
+  return toSafeNumber(value, {
+    field,
+    required,
+    min: 2000,
+    max: 2100,
+    integer: true,
+  });
 }
 
 export function toDateISO(value, { required = false, field = "tanggal" } = {}) {
@@ -55,6 +118,7 @@ export function toDateISO(value, { required = false, field = "tanggal" } = {}) {
   }
 
   const parsed = new Date(raw);
+
   if (Number.isNaN(parsed.getTime())) {
     throw new ValidationError("Validasi gagal.", {
       errors: [{ field, message: `${field} tidak valid.` }],
@@ -64,14 +128,19 @@ export function toDateISO(value, { required = false, field = "tanggal" } = {}) {
   return parsed.toISOString();
 }
 
-export function requireFields(obj, fields) {
+export function requireFields(_obj, fields) {
   const errors = [];
-  for (const f of fields) {
-    const { field, value, label, min, max, type = "string" } = f;
+
+  for (const item of fields) {
+    const { field, value, label, min, max, type = "string" } = item;
+
     const displayLabel = label || field;
 
     if (value === undefined || value === null || value === "") {
-      errors.push({ field, message: `${displayLabel} wajib diisi.` });
+      errors.push({
+        field,
+        message: `${displayLabel} wajib diisi.`,
+      });
       continue;
     }
 
@@ -82,6 +151,7 @@ export function requireFields(obj, fields) {
           message: `${displayLabel} minimal ${min} karakter.`,
         });
       }
+
       if (max && value.length > max) {
         errors.push({
           field,
@@ -98,7 +168,9 @@ export function requireFields(obj, fields) {
 
 export function oneOf(value, allowed, { field = "nilai", label } = {}) {
   if (value === undefined || value === null || value === "") return null;
+
   const normalized = String(value).trim();
+
   if (!allowed.includes(normalized)) {
     throw new ValidationError("Validasi gagal.", {
       errors: [
@@ -109,29 +181,42 @@ export function oneOf(value, allowed, { field = "nilai", label } = {}) {
       ],
     });
   }
+
   return normalized;
 }
 
 export function isHttpsUrl(value, { allowedHosts = [] } = {}) {
   try {
     const url = new URL(String(value || "").trim());
+
     if (url.protocol !== "https:") return false;
+
     if (allowedHosts.length > 0 && !allowedHosts.includes(url.hostname)) {
       return false;
     }
+
     return true;
   } catch {
     return false;
   }
 }
 
+export function isPdfFile(file) {
+  if (!file) return false;
+
+  const type = String(file?.type || "").toLowerCase();
+  const name = String(file?.name || "").toLowerCase();
+
+  return type === "application/pdf" || name.endsWith(".pdf");
+}
+
 export function validationErrorResponse(error) {
   return {
     body: {
-      message: error.message || "Validasi gagal.",
-      code: error.code || "VALIDATION_ERROR",
-      errors: error.errors || [],
+      message: error?.message || "Validasi gagal.",
+      code: error?.code || "VALIDATION_ERROR",
+      errors: error?.errors || [],
     },
-    status: error.status || 400,
+    status: error?.status || 400,
   };
 }
