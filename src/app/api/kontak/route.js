@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +10,8 @@ const MAX_SUBJEK = 160;
 const MAX_PESAN = 4000;
 const MIN_PESAN = 10;
 
-// Rate limit sederhana berbasis memori (per proses server).
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
-const rateBucket = new Map();
 
 function cleanString(value, max = 1000) {
   if (typeof value !== "string") return "";
@@ -24,32 +23,6 @@ function isValidEmail(email) {
   if (!email) return false;
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   return re.test(email);
-}
-
-function getClientIp(request) {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return request.headers.get("x-real-ip") || "unknown";
-}
-
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const entry = rateBucket.get(ip);
-
-  if (!entry || now - entry.startedAt > RATE_LIMIT_WINDOW_MS) {
-    rateBucket.set(ip, { startedAt: now, count: 1 });
-    return { ok: true };
-  }
-
-  if (entry.count >= RATE_LIMIT_MAX) {
-    const retryAfter = Math.ceil(
-      (RATE_LIMIT_WINDOW_MS - (now - entry.startedAt)) / 1000,
-    );
-    return { ok: false, retryAfter };
-  }
-
-  entry.count += 1;
-  return { ok: true };
 }
 
 function jsonResponse(data, status = 200) {
@@ -81,7 +54,11 @@ async function saveToSupabase(payload) {
 
 export async function POST(request) {
   const ip = getClientIp(request);
-  const limit = checkRateLimit(ip);
+  const limit = await rateLimit({
+    key: `kontak:${ip}`,
+    limit: RATE_LIMIT_MAX,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+  });
 
   if (!limit.ok) {
     return jsonResponse(

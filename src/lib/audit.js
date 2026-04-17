@@ -18,6 +18,7 @@ export const AUDIT_ENTITIES = {
   BERITA: "berita",
   AGENDA: "agenda",
   PENGUMUMAN: "pengumuman",
+  HALAMAN: "halaman",
   GALERI: "galeri",
   KONTAK: "kontak",
   USER: "user",

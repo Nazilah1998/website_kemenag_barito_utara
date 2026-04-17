@@ -5,6 +5,7 @@ import AppShell from "@/components/AppShell";
 import { siteInfo } from "@/data/site";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import VercelSpeedInsights from "@/components/VercelSpeedInsights";
+import PwaRegister from "@/components/PwaRegister";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,6 +42,13 @@ export const metadata = {
   icons: {
     icon: "/kemenag.svg",
   },
+  manifest: "/manifest.webmanifest",
+  applicationName: siteInfo.shortName,
+  appleWebApp: {
+    capable: true,
+    title: siteInfo.shortName,
+    statusBarStyle: "default",
+  },
   openGraph: {
     type: "website",
     locale: "id_ID",
@@ -63,6 +71,15 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#059669" },
+    { media: "(prefers-color-scheme: dark)", color: "#047857" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="id" suppressHydrationWarning>
@@ -77,6 +94,7 @@ export default function RootLayout({ children }) {
 
         <VercelAnalytics />
         <VercelSpeedInsights />
+        <PwaRegister />
       </body>
     </html>
   );

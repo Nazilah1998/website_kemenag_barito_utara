@@ -47,6 +47,22 @@ export const messages = {
       emptyState: "Masukkan kata kunci dari kolom pencarian di header.",
       resultCount: "hasil ditemukan",
     },
+    footer: {
+      quickLinks: "Tautan Cepat",
+      officeHours: "Jam Layanan",
+      followUs: "Ikuti Kami",
+      copyright: "Hak cipta dilindungi",
+    },
+    actions: {
+      readMore: "Selengkapnya",
+      viewAll: "Lihat Semua",
+      back: "Kembali",
+      submit: "Kirim",
+      cancel: "Batal",
+      save: "Simpan",
+      send: "Kirim",
+      loading: "Memuat...",
+    },
   },
 
   en: {
@@ -96,6 +112,22 @@ export const messages = {
       resultFor: "Search results for",
       emptyState: "Type a keyword from the header search box.",
       resultCount: "results found",
+    },
+    footer: {
+      quickLinks: "Quick Links",
+      officeHours: "Office Hours",
+      followUs: "Follow Us",
+      copyright: "All rights reserved",
+    },
+    actions: {
+      readMore: "Read More",
+      viewAll: "View All",
+      back: "Back",
+      submit: "Submit",
+      cancel: "Cancel",
+      save: "Save",
+      send: "Send",
+      loading: "Loading...",
     },
   },
 };

@@ -98,3 +98,62 @@ create index if not exists idx_berita_schedule
 create index if not exists idx_pengumuman_schedule
   on public.pengumuman (is_published, published_at)
   where is_published = false and published_at is not null;
+
+-- 4) Tabel halaman statis (CMS)
+create table if not exists public.static_pages (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  description text,
+  content text not null,
+  is_published boolean not null default false,
+  author_id uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_static_pages_published
+  on public.static_pages (is_published, updated_at desc);
+
+alter table public.static_pages enable row level security;
+
+drop policy if exists "static_pages_select_public"
+  on public.static_pages;
+
+-- Publik boleh membaca halaman yang sudah dipublikasikan.
+create policy "static_pages_select_public"
+  on public.static_pages
+  for select
+  to anon, authenticated
+  using (is_published = true);
+
+drop policy if exists "static_pages_select_admin"
+  on public.static_pages;
+
+create policy "static_pages_select_admin"
+  on public.static_pages
+  for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.profiles p
+      where p.id = auth.uid()
+        and lower(p.role) in ('admin', 'super_admin', 'editor')
+    )
+  );
+
+-- 5) Tabel kategori/regulasi dokumen (future)
+create table if not exists public.documents (
+  id uuid primary key default gen_random_uuid(),
+  category text not null,
+  title text not null,
+  description text,
+  file_url text,
+  file_name text,
+  is_published boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_documents_category
+  on public.documents (category, created_at desc);

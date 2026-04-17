@@ -1,0 +1,33 @@
+{
+  "name": "Kementerian Agama Kabupaten Barito Utara",
+  "short_name": "Kemenag Barut",
+  "description": "Portal resmi layanan informasi Kementerian Agama Kabupaten Barito Utara.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "orientation": "portrait-primary",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/kemenag.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Berita Terbaru",
+      "short_name": "Berita",
+      "url": "/berita",
+      "description": "Lihat berita dan publikasi terkini."
+    },
+    {
+      "name": "Hubungi Kami",
+      "short_name": "Kontak",
+      "url": "/kontak",
+      "description": "Informasi kontak dan form pesan."
+    }
+  ]
+}

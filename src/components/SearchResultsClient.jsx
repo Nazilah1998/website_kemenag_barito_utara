@@ -1,14 +1,69 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { searchSite } from "../lib/search";
 import { useLanguage } from "../context/LanguageContext";
+
+function mergeResults(localResults, remoteResults) {
+  const seen = new Set();
+  const merged = [];
+
+  for (const item of remoteResults) {
+    const key = `${item.href}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push({
+      ...item,
+      category: item.category || "Konten Dinamis",
+      score: 99,
+    });
+  }
+
+  for (const item of localResults) {
+    const key = `${item.href}-${item.title}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+  }
+
+  return merged;
+}
 
 export default function SearchResultsClient({ initialQuery = "" }) {
   const { t } = useLanguage();
   const query = initialQuery.trim();
-  const results = useMemo(() => searchSite(query), [query]);
+  const localResults = useMemo(() => searchSite(query), [query]);
+
+  const [remoteResults, setRemoteResults] = useState([]);
+  const [loadingRemote, setLoadingRemote] = useState(false);
+
+  useEffect(() => {
+    if (!query) {
+      setRemoteResults([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    setLoadingRemote(true);
+
+    fetch(`/api/search?q=${encodeURIComponent(query)}&limit=15`, {
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.json() : { items: [] }))
+      .then((data) => {
+        setRemoteResults(Array.isArray(data?.items) ? data.items : []);
+      })
+      .catch(() => setRemoteResults([]))
+      .finally(() => setLoadingRemote(false));
+
+    return () => controller.abort();
+  }, [query]);
+
+  const results = useMemo(
+    () => mergeResults(localResults, remoteResults),
+    [localResults, remoteResults],
+  );
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-10">
@@ -23,6 +78,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
             </p>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               {results.length} {t("searchPage.resultCount")}
+              {loadingRemote ? " • memuat konten dinamis..." : ""}
             </p>
           </>
         ) : (
@@ -32,7 +88,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
         )}
       </div>
 
-      {query && results.length === 0 ? (
+      {query && results.length === 0 && !loadingRemote ? (
         <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
           {t("common.noResults")}
         </div>
@@ -49,16 +105,18 @@ export default function SearchResultsClient({ initialQuery = "" }) {
               <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
                 {item.section}
               </span>
-              <span>{item.category}</span>
+              {item.category ? <span>{item.category}</span> : null}
             </div>
 
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {item.title}
             </h3>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
-              {item.description}
-            </p>
+            {item.description ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                {item.description}
+              </p>
+            ) : null}
           </Link>
         ))}
       </div>

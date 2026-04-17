@@ -530,3 +530,28 @@ summary {
     transition: none !important;
   }
 }
+
+/* Aksesibilitas: fokus yang konsisten dan terlihat */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #059669;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Hindari fokus halo default ganda di browser tertentu */
+:where(a, button, input, select, textarea):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Sr-only utility (Tailwind sudah menyediakan, tapi pastikan tersedia bebas konflik) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
