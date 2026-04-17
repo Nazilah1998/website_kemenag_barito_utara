@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PageBanner from "../../components/PageBanner";
+import KontakForm from "../../components/KontakForm";
 import {
   buildWhatsAppLink,
   contactUnits,
@@ -276,6 +277,12 @@ export default function KontakPage() {
             </div>
           </div>
 
+          <div>
+            <KontakForm />
+          </div>
+        </section>
+
+        <section className="mt-10">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
               Kontak per Unit

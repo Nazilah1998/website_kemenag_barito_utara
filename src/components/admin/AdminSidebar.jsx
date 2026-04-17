@@ -38,6 +38,21 @@ function NewsIcon() {
   );
 }
 
+function AuditIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M9 11l3 3 5-5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V6z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function NavLink({ href, label, icon, active, onNavigate }) {
   return (
     <Link
@@ -96,6 +111,14 @@ export default function AdminSidebar({ profile, onNavigate }) {
               label="Berita"
               icon={<NewsIcon />}
               active={pathname.startsWith("/admin/berita")}
+              onNavigate={onNavigate}
+            />
+
+            <NavLink
+              href="/admin/audit"
+              label="Audit Log"
+              icon={<AuditIcon />}
+              active={pathname.startsWith("/admin/audit")}
               onNavigate={onNavigate}
             />
           </div>

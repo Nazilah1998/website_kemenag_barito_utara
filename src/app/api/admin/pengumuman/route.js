@@ -2,10 +2,25 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
+import {
+  ValidationError,
+  cleanHtml,
+  requireFields,
+  validationErrorResponse,
+} from "@/lib/validation";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import { PERMISSIONS } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
 
 const table = "pengumuman";
+
+const LIMITS = {
+  title: { min: 3, max: 200 },
+  excerpt: { min: 10, max: 500 },
+  content: { min: 10, max: 40_000 },
+  category: { max: 80 },
+};
 
 const selectFields = `
   id,
@@ -77,25 +92,38 @@ function normalizeAttachment(body) {
 }
 
 function buildPayload(body) {
-  const title = cleanString(body.title);
-  const excerpt = cleanString(body.excerpt);
-  const content = cleanString(body.content);
-  const category = cleanString(body.category) || "Informasi";
+  const title = cleanString(body.title).slice(0, LIMITS.title.max);
+  const excerpt = cleanString(body.excerpt).slice(0, LIMITS.excerpt.max);
+  const rawContent = typeof body?.content === "string" ? body.content : "";
+  const content = cleanHtml(rawContent, LIMITS.content.max);
+  const category =
+    cleanString(body.category).slice(0, LIMITS.category.max) || "Informasi";
   const isImportant = Boolean(body.is_important);
   const isPublished = Boolean(body.is_published);
   const publishedAtInput = cleanString(body.published_at);
 
-  if (!title) {
-    throw createHttpError("Judul pengumuman wajib diisi.");
-  }
-
-  if (!excerpt) {
-    throw createHttpError("Ringkasan pengumuman wajib diisi.");
-  }
-
-  if (!content) {
-    throw createHttpError("Isi pengumuman wajib diisi.");
-  }
+  requireFields({}, [
+    {
+      field: "title",
+      label: "Judul pengumuman",
+      value: title,
+      min: LIMITS.title.min,
+      max: LIMITS.title.max,
+    },
+    {
+      field: "excerpt",
+      label: "Ringkasan pengumuman",
+      value: excerpt,
+      min: LIMITS.excerpt.min,
+      max: LIMITS.excerpt.max,
+    },
+    {
+      field: "content",
+      label: "Isi pengumuman",
+      value: content.replace(/<[^>]*>/g, " ").trim(),
+      min: LIMITS.content.min,
+    },
+  ]);
 
   const publishedAt = publishedAtInput
     ? new Date(publishedAtInput)
@@ -128,7 +156,10 @@ function revalidatePengumumanPaths(slug) {
 }
 
 export async function GET() {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.PENGUMUMAN_VIEW,
+  });
 
   if (!auth.ok) {
     return auth.response;
@@ -158,7 +189,10 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.PENGUMUMAN_CREATE,
+  });
 
   if (!auth.ok) {
     return auth.response;
@@ -192,6 +226,16 @@ export async function POST(request) {
 
     revalidatePengumumanPaths(data?.slug);
 
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.CREATE,
+      entity: AUDIT_ENTITIES.PENGUMUMAN,
+      entityId: data?.id,
+      summary: `Menambah pengumuman \"${data?.title || payload.title}\"`,
+      after: { slug: data?.slug, is_published: data?.is_published },
+      request,
+    });
+
     return NextResponse.json(
       {
         message: "Pengumuman berhasil ditambahkan.",
@@ -200,6 +244,10 @@ export async function POST(request) {
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof ValidationError) {
+      const resp = validationErrorResponse(error);
+      return NextResponse.json(resp.body, { status: resp.status });
+    }
     return NextResponse.json(
       { message: error.message || "Gagal menambahkan pengumuman." },
       { status: error.status || 500 },

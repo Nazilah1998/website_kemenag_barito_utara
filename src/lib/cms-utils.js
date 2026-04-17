@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentSessionContext } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 
 export function cleanString(value) {
   if (typeof value !== "string") {
@@ -56,7 +57,7 @@ export async function ensureUniqueSlug(
 }
 
 export async function validateAdmin(options = {}) {
-  const { requireMfa = true } = options;
+  const { requireMfa = true, permission = null, allowEditor = false } = options;
 
   const session = await getCurrentSessionContext();
 
@@ -73,7 +74,9 @@ export async function validateAdmin(options = {}) {
     };
   }
 
-  if (!session?.isAdmin) {
+  const isEditorAllowed = allowEditor && session?.isEditor;
+
+  if (!session?.isAdmin && !isEditorAllowed) {
     return {
       ok: false,
       response: NextResponse.json(
@@ -86,7 +89,21 @@ export async function validateAdmin(options = {}) {
     };
   }
 
-  if (requireMfa && !session?.isMfaVerified) {
+  if (permission && !hasPermission(session?.role, permission)) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        {
+          message: "Anda tidak memiliki izin untuk tindakan ini.",
+          code: "PERMISSION_DENIED",
+          required: permission,
+        },
+        { status: 403 },
+      ),
+    };
+  }
+
+  if (requireMfa && session?.isAdmin && !session?.isMfaVerified) {
     return {
       ok: false,
       response: NextResponse.json(

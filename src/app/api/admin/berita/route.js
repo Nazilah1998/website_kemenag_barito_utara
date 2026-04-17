@@ -6,6 +6,22 @@ import {
   removeStorageFileByPublicUrl,
   uploadBase64Image,
 } from "@/lib/storage-media";
+import {
+  ValidationError,
+  cleanHtml,
+  requireFields,
+  validationErrorResponse,
+} from "@/lib/validation";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+
+const LIMITS = {
+  title: { min: 3, max: 200 },
+  slug: { max: 220 },
+  excerpt: { max: 500 },
+  category: { max: 60 },
+  content: { min: 20, max: 60_000 },
+};
 
 export const dynamic = "force-dynamic";
 
@@ -114,9 +130,21 @@ function resolvePublishedAt({
   publishedAtInput,
   currentPublishedAt = null,
 }) {
-  if (!isPublished) return null;
+  // Jika user memberikan tanggal publish, hormati itu (mendukung scheduled publish).
+  if (publishedAtInput) {
+    const parsedDate = new Date(publishedAtInput);
+    if (Number.isNaN(parsedDate.getTime())) {
+      throw createHttpError("Tanggal publish tidak valid.", 400);
+    }
+    return parsedDate.toISOString();
+  }
 
-  const sourceValue = publishedAtInput || currentPublishedAt || new Date();
+  if (!isPublished) {
+    // Draft tanpa jadwal -> kosongkan.
+    return currentPublishedAt || null;
+  }
+
+  const sourceValue = currentPublishedAt || new Date();
   const parsedDate = new Date(sourceValue);
 
   if (Number.isNaN(parsedDate.getTime())) {
@@ -180,21 +208,32 @@ async function buildPayload(
     currentPublishedAt = null,
   } = {},
 ) {
-  const title = cleanString(body?.title);
-  const content = cleanString(body?.content);
-  const excerpt =
-    cleanString(body?.excerpt) || buildExcerptFromHtml(content, 180);
-  const category = cleanString(body?.category) || "Umum";
+  const title = cleanString(body?.title).slice(0, LIMITS.title.max);
+  const rawContent = typeof body?.content === "string" ? body.content : "";
+  const content = cleanHtml(rawContent, LIMITS.content.max);
+  const excerpt = (
+    cleanString(body?.excerpt) || buildExcerptFromHtml(content, 180)
+  ).slice(0, LIMITS.excerpt.max);
+  const category =
+    cleanString(body?.category).slice(0, LIMITS.category.max) || "Umum";
   const is_published = toBoolean(body?.is_published);
   const publishedAtInput = cleanString(body?.published_at);
 
-  if (!title) {
-    throw createHttpError("Judul berita wajib diisi.", 400);
-  }
-
-  if (!content) {
-    throw createHttpError("Isi berita wajib diisi.", 400);
-  }
+  requireFields({}, [
+    {
+      field: "title",
+      label: "Judul berita",
+      value: title,
+      min: LIMITS.title.min,
+      max: LIMITS.title.max,
+    },
+    {
+      field: "content",
+      label: "Isi berita",
+      value: stripHtml(content),
+      min: LIMITS.content.min,
+    },
+  ]);
 
   const coverImage = await resolveCoverImage({
     supabase,
@@ -238,7 +277,10 @@ function revalidateBeritaPaths(slug) {
 }
 
 export async function GET() {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.BERITA_VIEW,
+  });
   if (!auth.ok) return auth.response;
 
   try {
@@ -267,7 +309,10 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.BERITA_CREATE,
+  });
   if (!auth.ok) return auth.response;
 
   try {
@@ -275,6 +320,15 @@ export async function POST(request) {
     const supabase = createAdminClient();
 
     const payload = await buildPayload(supabase, body);
+
+    // Editor tidak boleh langsung publish tanpa izin.
+    if (
+      payload.is_published &&
+      !hasPermission(auth.session?.role, PERMISSIONS.BERITA_PUBLISH)
+    ) {
+      payload.is_published = false;
+      payload.published_at = null;
+    }
 
     const slug = await ensureUniqueSlug(
       supabase,
@@ -297,6 +351,16 @@ export async function POST(request) {
 
     revalidateBeritaPaths(data?.slug);
 
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.CREATE,
+      entity: AUDIT_ENTITIES.BERITA,
+      entityId: data?.id,
+      summary: `Menambah berita \"${data?.title || payload.title}\"`,
+      after: { slug: data?.slug, is_published: data?.is_published },
+      request,
+    });
+
     return createNoStoreResponse(
       {
         message: `Berita berhasil ditambahkan. Ukuran cover tersimpan ${data?.cover_size_kb || payload.cover_size_kb} KB.`,
@@ -305,6 +369,10 @@ export async function POST(request) {
       201,
     );
   } catch (error) {
+    if (error instanceof ValidationError) {
+      const resp = validationErrorResponse(error);
+      return createNoStoreResponse(resp.body, resp.status);
+    }
     return createNoStoreResponse(
       {
         message: error.message || "Gagal menambahkan berita.",
