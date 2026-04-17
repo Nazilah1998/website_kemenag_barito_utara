@@ -16,8 +16,6 @@ export const AUDIT_ACTIONS = {
 
 export const AUDIT_ENTITIES = {
   BERITA: "berita",
-  AGENDA: "agenda",
-  PENGUMUMAN: "pengumuman",
   HALAMAN: "halaman",
   GALERI: "galeri",
   KONTAK: "kontak",
@@ -64,8 +62,7 @@ export async function recordAudit({
     const supabase = createAdminClient();
 
     const actorId = session?.profile?.id || session?.user?.id || null;
-    const actorEmail =
-      session?.profile?.email || session?.user?.email || null;
+    const actorEmail = session?.profile?.email || session?.user?.email || null;
     const actorRole = session?.role || null;
 
     const record = {
@@ -93,7 +90,11 @@ export async function recordAudit({
   }
 }
 
-export async function listAudit({ limit = 50, entity = null, action = null } = {}) {
+export async function listAudit({
+  limit = 50,
+  entity = null,
+  action = null,
+} = {}) {
   try {
     const supabase = createAdminClient();
     let query = supabase

@@ -13,14 +13,6 @@ const titleMap = {
     title: "Kelola Berita",
     subtitle: "Workflow editorial berita, status tayang, dan kontrol konten publik.",
   },
-  "/admin/pengumuman": {
-    title: "Kelola Pengumuman",
-    subtitle: "Atur pengumuman resmi agar tetap rapi dan mudah ditemukan.",
-  },
-  "/admin/agenda": {
-    title: "Kelola Agenda",
-    subtitle: "Kelola jadwal kegiatan instansi dan publikasinya.",
-  },
   "/admin/dokumen": {
     title: "Kelola Dokumen",
     subtitle: "Pusat kontrol dokumen publik dan arsip unggahan.",
@@ -72,8 +64,6 @@ export default function AdminHeader({ onOpenSidebar }) {
   const pageInfo = useMemo(() => {
     if (titleMap[pathname]) return titleMap[pathname];
     if (pathname.startsWith("/admin/berita")) return titleMap["/admin/berita"];
-    if (pathname.startsWith("/admin/pengumuman")) return titleMap["/admin/pengumuman"];
-    if (pathname.startsWith("/admin/agenda")) return titleMap["/admin/agenda"];
     if (pathname.startsWith("/admin/dokumen")) return titleMap["/admin/dokumen"];
 
     return {

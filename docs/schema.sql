@@ -95,10 +95,6 @@ create index if not exists idx_berita_schedule
   on public.berita (is_published, published_at)
   where is_published = false and published_at is not null;
 
-create index if not exists idx_pengumuman_schedule
-  on public.pengumuman (is_published, published_at)
-  where is_published = false and published_at is not null;
-
 -- 4) Tabel halaman statis (CMS)
 create table if not exists public.static_pages (
   id uuid primary key default gen_random_uuid(),

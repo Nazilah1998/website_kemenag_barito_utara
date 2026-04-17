@@ -96,24 +96,6 @@ const searchIndex = [
     ),
   })),
 
-  ...agendaList.map((item) => ({
-    id: `agenda-${item.slug}`,
-    title: item.title,
-    description: `${item.description} • ${item.date} • ${item.location}`,
-    section: "Agenda",
-    category: item.category,
-    href: safeHref(item.href, "/berita"),
-    keywords: buildKeywords(
-      item.title,
-      item.description,
-      item.date,
-      item.time,
-      item.location,
-      item.status,
-      item.category,
-    ),
-  })),
-
   ...serviceHighlights.map((item, index) => ({
     id: `layanan-highlight-${index}`,
     title: item.title,

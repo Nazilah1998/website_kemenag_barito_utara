@@ -56,43 +56,8 @@ export async function getDashboardStats({ days = 14 } = {}) {
   }).length;
 
   // Hitung agenda & pengumuman (jika tabel tersedia).
-  let totalAgenda = 0;
-  let totalAgendaUpcoming = 0;
-  let totalPengumuman = 0;
-  let totalPengumumanImportant = 0;
   let totalKontak = 0;
   let kontakBaru = 0;
-
-  try {
-    const { count } = await supabase
-      .from("agenda")
-      .select("id", { count: "exact", head: true });
-    totalAgenda = count || 0;
-
-    const nowIso = new Date().toISOString();
-    const upcoming = await supabase
-      .from("agenda")
-      .select("id", { count: "exact", head: true })
-      .gte("start_at", nowIso);
-    totalAgendaUpcoming = upcoming.count || 0;
-  } catch {
-    // tabel belum ada — biarkan 0.
-  }
-
-  try {
-    const { count } = await supabase
-      .from("pengumuman")
-      .select("id", { count: "exact", head: true });
-    totalPengumuman = count || 0;
-
-    const important = await supabase
-      .from("pengumuman")
-      .select("id", { count: "exact", head: true })
-      .eq("is_important", true);
-    totalPengumumanImportant = important.count || 0;
-  } catch {
-    // abaikan
-  }
 
   try {
     const { count } = await supabase
@@ -161,10 +126,6 @@ export async function getDashboardStats({ days = 14 } = {}) {
       totalDraft,
       totalViews,
       recent7,
-      totalAgenda,
-      totalAgendaUpcoming,
-      totalPengumuman,
-      totalPengumumanImportant,
       totalKontak,
       kontakBaru,
     },

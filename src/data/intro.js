@@ -9,10 +9,6 @@ export const introData = {
       description: "Menampilkan artikel dan kegiatan terbaru.",
     },
     {
-      title: "Pengumuman",
-      description: "Memuat informasi penting untuk masyarakat.",
-    },
-    {
       title: "Kontak",
       description: "Menyediakan alamat, email, dan nomor layanan.",
     },

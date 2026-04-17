@@ -55,10 +55,6 @@ export default async function AdminDashboardPage() {
     totalDraft: 0,
     totalViews: 0,
     recent7: 0,
-    totalAgenda: 0,
-    totalAgendaUpcoming: 0,
-    totalPengumuman: 0,
-    totalPengumumanImportant: 0,
     totalKontak: 0,
     kontakBaru: 0,
   };
@@ -119,16 +115,6 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Agenda Aktif"
-          value={numberFmt(summary.totalAgendaUpcoming)}
-          helper={`Total agenda: ${numberFmt(summary.totalAgenda)}`}
-        />
-        <StatCard
-          label="Pengumuman"
-          value={numberFmt(summary.totalPengumuman)}
-          helper={`${numberFmt(summary.totalPengumumanImportant)} bertanda penting.`}
-        />
         <StatCard
           label="Pesan Kontak"
           value={numberFmt(summary.totalKontak)}

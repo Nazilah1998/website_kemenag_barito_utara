@@ -45,38 +45,8 @@ async function runScheduledPublish() {
     }
   }
 
-  // Pengumuman dengan published_at <= sekarang tapi belum publish.
-  let pengumumanPublished = 0;
-  try {
-    const { data: pengPending } = await supabase
-      .from("pengumuman")
-      .select("id, slug")
-      .eq("is_published", false)
-      .not("published_at", "is", null)
-      .lte("published_at", nowIso);
-
-    if (pengPending && pengPending.length > 0) {
-      const ids = pengPending.map((p) => p.id);
-      const { error } = await supabase
-        .from("pengumuman")
-        .update({ is_published: true })
-        .in("id", ids);
-
-      if (!error) {
-        pengumumanPublished = ids.length;
-        revalidatePath("/");
-        for (const p of pengPending) {
-          if (p.slug) revalidatePath(`/pengumuman/${p.slug}`);
-        }
-      }
-    }
-  } catch {
-    // tabel belum siap
-  }
-
   return {
     beritaPublished,
-    pengumumanPublished,
     ranAt: nowIso,
   };
 }

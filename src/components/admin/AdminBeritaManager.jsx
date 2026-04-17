@@ -11,8 +11,6 @@ const BERITA_CATEGORIES = [
   "Kegiatan",
   "Madrasah",
   "Pelayanan",
-  "Pengumuman",
-  "Agenda",
   "Pendidikan",
   "Keagamaan",
 ];

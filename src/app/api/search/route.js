@@ -112,35 +112,30 @@ export async function GET(request) {
         hrefBase: "/berita",
       },
       {
-        table: "pengumuman",
-        columns: ["title", "excerpt", "content"],
-        section: "Pengumuman",
-        hrefBase: "/berita",
-      },
-      {
         table: "static_pages",
         columns: ["title", "description", "content"],
         section: "Halaman",
         hrefBase: "/halaman",
       },
-      {
-        table: "agenda",
-        columns: ["title", "description"],
-        section: "Agenda",
-        hrefBase: "/berita",
-      },
     ];
 
     const results = await Promise.all(
       tables.map((t) =>
-        searchTable(supabase, { table: t.table, columns: t.columns, q, limit: pageLimit })
+        searchTable(supabase, {
+          table: t.table,
+          columns: t.columns,
+          q,
+          limit: pageLimit,
+        })
           .then((rows) =>
             rows.map((r) => ({
               id: `${t.table}-${r.id}`,
               section: t.section,
               title: r.title,
               description: r.excerpt
-                ? String(r.excerpt).replace(/<[^>]+>/g, "").slice(0, 260)
+                ? String(r.excerpt)
+                    .replace(/<[^>]+>/g, "")
+                    .slice(0, 260)
                 : null,
               href: r.slug ? `${t.hrefBase}/${r.slug}` : t.hrefBase,
               updated_at: r.updated_at,
@@ -152,7 +147,9 @@ export async function GET(request) {
 
     const items = results
       .flat()
-      .sort((a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")));
+      .sort((a, b) =>
+        String(b.updated_at || "").localeCompare(String(a.updated_at || "")),
+      );
 
     return NextResponse.json({ items, q });
   } catch (error) {

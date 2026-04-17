@@ -26,7 +26,7 @@ Sistem CMS sederhana untuk halaman statis yang dapat dikelola dari admin.
 ### 3. Pencarian Full-Text
 
 - API baru: `/api/search?q=...&limit=10`
-- Query tabel: `berita`, `pengumuman`, `static_pages`, `agenda`
+- Query tabel: `berita`, `static_pages`,
 - Pakai `ilike` di kolom title/excerpt/content/description
 - Client di `/pencarian` menggabungkan hasil lokal (data statis) dengan hasil API
 
@@ -95,9 +95,9 @@ Total 29 test, semua lulus.
 
 ## Env Baru
 
-| Env | Wajib | Fungsi |
-| --- | --- | --- |
-| `UPSTASH_REDIS_REST_URL` | opsional | Rate limit terpusat |
+| Env                        | Wajib    | Fungsi              |
+| -------------------------- | -------- | ------------------- |
+| `UPSTASH_REDIS_REST_URL`   | opsional | Rate limit terpusat |
 | `UPSTASH_REDIS_REST_TOKEN` | opsional | Rate limit terpusat |
 
 Jika tidak diset, rate limit fallback ke memori lokal.
