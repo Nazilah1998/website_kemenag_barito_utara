@@ -6,6 +6,8 @@ import { siteInfo } from "@/data/site";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import VercelSpeedInsights from "@/components/VercelSpeedInsights";
 import PwaRegister from "@/components/PwaRegister";
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -88,6 +90,8 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${inter.className} antialiased`}>
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
+
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

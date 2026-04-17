@@ -9,6 +9,12 @@ import {
   getBeritaBySlug,
   getRelatedBerita,
 } from "../../../lib/berita";
+import JsonLd from "@/components/seo/JsonLd";
+import {
+  breadcrumbSchema,
+  newsArticleSchema,
+} from "@/lib/structured-data";
+import { siteInfo } from "@/data/site";
 
 const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
 
@@ -125,6 +131,62 @@ function AdjacentArticleLink({ label, item, align = "left" }) {
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const berita = await getBeritaBySlug(slug).catch(() => null);
+
+  if (!berita) {
+    return {
+      title: "Berita tidak ditemukan",
+      description: "Artikel yang Anda cari tidak tersedia.",
+      robots: { index: false, follow: true },
+    };
+  }
+
+  const description = truncateText(
+    berita.excerpt || stripTags(berita.content) || siteInfo.description,
+    180,
+  );
+  const url = `/berita/${berita.slug}`;
+  const image = berita.coverImage || `${siteInfo.siteUrl}${siteInfo.logoSrc}`;
+  const publishedTime = berita.publishedAt || berita.isoDate || berita.createdAt;
+  const modifiedTime = berita.updatedAt || publishedTime;
+
+  return {
+    title: berita.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      locale: "id_ID",
+      url,
+      siteName: siteInfo.shortName,
+      title: berita.title,
+      description,
+      images: [{ url: image, alt: berita.title }],
+      publishedTime: toIso(publishedTime),
+      modifiedTime: toIso(modifiedTime),
+      section: berita.category,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: berita.title,
+      description,
+      images: [image],
+    },
+  };
+}
+
+function stripTags(value = "") {
+  return String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function toIso(value) {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
 export default async function DetailBeritaPage({ params }) {
   const { slug } = await params;
   const berita = await getBeritaBySlug(slug);
@@ -132,6 +194,15 @@ export default async function DetailBeritaPage({ params }) {
   if (!berita) {
     notFound();
   }
+
+  const jsonLd = [
+    newsArticleSchema(berita),
+    breadcrumbSchema([
+      { name: "Beranda", url: "/" },
+      { name: "Berita", url: "/berita" },
+      { name: berita.title, url: `/berita/${berita.slug}` },
+    ]),
+  ];
 
   const [relatedItems, adjacent] = await Promise.all([
     getRelatedBerita(berita.slug, berita.category, 3),
@@ -143,6 +214,7 @@ export default async function DetailBeritaPage({ params }) {
 
   return (
     <>
+      <JsonLd data={jsonLd} />
       <PageBanner
         title={berita.title}
         breadcrumb={[

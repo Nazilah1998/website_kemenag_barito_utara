@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import PageBanner from "@/components/PageBanner";
 import { getStaticPageBySlug } from "@/lib/static-pages";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbSchema } from "@/lib/structured-data";
+import { siteInfo } from "@/data/site";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -15,10 +18,27 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const description =
+    page.description || `${page.title} - ${siteInfo.shortName}.`;
+  const url = `/halaman/${page.slug}`;
+
   return {
     title: page.title,
-    description:
-      page.description || "Halaman Kemenag Kabupaten Barito Utara.",
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      locale: "id_ID",
+      url,
+      siteName: siteInfo.shortName,
+      title: page.title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title: page.title,
+      description,
+    },
   };
 }
 
@@ -30,8 +50,14 @@ export default async function HalamanDetailPage({ params }) {
     notFound();
   }
 
+  const jsonLd = breadcrumbSchema([
+    { name: "Beranda", url: "/" },
+    { name: page.title, url: `/halaman/${page.slug}` },
+  ]);
+
   return (
     <>
+      <JsonLd data={jsonLd} />
       <PageBanner
         title={page.title}
         description={page.description || undefined}
