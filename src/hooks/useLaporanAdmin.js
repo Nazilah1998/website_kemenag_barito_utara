@@ -1,18 +1,20 @@
+// src/hooks/useLaporanAdmin.js
 "use client";
 
 import { useEffect, useMemo, useReducer, useRef } from "react";
-import { useRouter } from "next/navigation";
 import {
   createLaporanAdminInitialState,
   laporanAdminReducer,
   prependDocumentToList,
   removeDocumentFromList,
   replaceDocumentInList,
+  ITEMS_PER_PAGE,
 } from "@/lib/laporan-admin";
 import {
   fetchCategoryDocuments,
   uploadLaporanDocument,
   updateLaporanDocument,
+  updateLaporanDocumentWithFile,
   deleteLaporanDocument,
 } from "@/lib/laporan-api";
 
@@ -44,7 +46,6 @@ function createInitialState({ initialCategory, categories }) {
 }
 
 export function useLaporanAdmin({ initialCategory, categories = [] }) {
-  const router = useRouter();
   const uploadTimerRef = useRef(null);
   const actionTimerRef = useRef(null);
 
@@ -81,10 +82,27 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
   const filteredDocuments = useMemo(() => {
     if (!state.yearFilter) return allDocuments;
+
     return allDocuments.filter(
       (doc) => String(doc?.year || "") === String(state.yearFilter),
     );
   }, [allDocuments, state.yearFilter]);
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE));
+  }, [filteredDocuments]);
+
+  const paginatedDocuments = useMemo(() => {
+    const safePage = Math.min(state.currentPage, totalPages);
+    const start = (safePage - 1) * ITEMS_PER_PAGE;
+    return filteredDocuments.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredDocuments, state.currentPage, totalPages]);
+
+  useEffect(() => {
+    if (state.currentPage > totalPages) {
+      dispatch({ type: "SET_CURRENT_PAGE", payload: totalPages });
+    }
+  }, [state.currentPage, totalPages]);
 
   useEffect(() => {
     if (!state.uploadFeedback?.message) return;
@@ -132,8 +150,16 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     dispatch({ type: "SET_YEAR_FILTER", payload: value });
   }
 
+  function setCurrentPage(page) {
+    dispatch({ type: "SET_CURRENT_PAGE", payload: page });
+  }
+
   function setEditForm(payload) {
     dispatch({ type: "SET_EDIT_FORM", payload });
+  }
+
+  function setEditFile(file) {
+    dispatch({ type: "SET_EDIT_FILE", payload: file });
   }
 
   function resetForm() {
@@ -148,7 +174,11 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     dispatch({ type: "SET_ACTIVE_SLUG", payload: slug });
     dispatch({ type: "RESET_VIEW_STATE" });
 
-    if (Array.isArray(state.docsBySlug?.[slug])) return;
+    const cachedDocs = state.docsBySlug?.[slug];
+    if (Array.isArray(cachedDocs)) {
+      dispatch({ type: "SET_LOADING_SLUG", payload: null });
+      return;
+    }
 
     dispatch({ type: "SET_LOADING_SLUG", payload: slug });
 
@@ -253,7 +283,7 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
         },
       });
 
-      router.refresh();
+      dispatch({ type: "SET_CURRENT_PAGE", payload: 1 });
     } catch (error) {
       dispatch({
         type: "SET_UPLOAD_FEEDBACK",
@@ -273,6 +303,11 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
   function cancelEdit() {
     dispatch({ type: "CANCEL_EDIT" });
+
+    const fileInput = document.getElementById(
+      `pdf-edit-input-${state.editingId}`,
+    );
+    if (fileInput) fileInput.value = "";
   }
 
   async function saveEdit(id) {
@@ -281,12 +316,17 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     dispatch({ type: "SET_SAVING_EDIT_ID", payload: id });
 
     try {
-      const json = await updateLaporanDocument(id, {
+      const payload = {
         title: state.editForm.title.trim(),
         description: state.editForm.description.trim(),
         year: state.editForm.year,
         is_published: state.editForm.is_published,
-      });
+        file: state.editFile,
+      };
+
+      const json = state.editFile
+        ? await updateLaporanDocumentWithFile(id, payload)
+        : await updateLaporanDocument(id, payload);
 
       if (json?.document) {
         dispatch({
@@ -308,7 +348,6 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
       });
 
       dispatch({ type: "CANCEL_EDIT" });
-      router.refresh();
     } catch (error) {
       dispatch({
         type: "SET_ACTION_FEEDBACK",
@@ -353,8 +392,6 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
           message: json?.message || "Status publikasi berhasil diperbarui.",
         },
       });
-
-      router.refresh();
     } catch (error) {
       dispatch({
         type: "SET_ACTION_FEEDBACK",
@@ -376,13 +413,15 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     try {
       const json = await deleteLaporanDocument(id);
 
+      const nextDocuments = removeDocumentFromList(
+        state.docsBySlug?.[activeCategory.slug] || [],
+        id,
+      );
+
       dispatch({
         type: "SET_DOCS_FOR_SLUG",
         slug: activeCategory.slug,
-        documents: removeDocumentFromList(
-          state.docsBySlug?.[activeCategory.slug] || [],
-          id,
-        ),
+        documents: nextDocuments,
       });
 
       dispatch({
@@ -392,8 +431,6 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
           message: json?.message || "Dokumen berhasil dihapus.",
         },
       });
-
-      router.refresh();
     } catch (error) {
       dispatch({
         type: "SET_ACTION_FEEDBACK",
@@ -411,24 +448,37 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     activeSlug: state.activeSlug,
     activeCategory,
     loadingSlug: state.loadingSlug,
+
     docForm: state.docForm,
     selectedFile: state.selectedFile,
     savingDocument: state.savingDocument,
     uploadFeedback: state.uploadFeedback,
+
     actionFeedback: state.actionFeedback,
+
     yearFilter: state.yearFilter,
+    setYearFilter,
+
+    currentPage: state.currentPage,
+    totalPages,
+    paginatedDocuments,
+    filteredDocuments,
+    yearOptions,
+    setCurrentPage,
+
     editingId: state.editingId,
     editForm: state.editForm,
+    editFile: state.editFile,
+    setEditForm,
+    setEditFile,
+
     publishingId: state.publishingId,
     savingEditId: state.savingEditId,
     deletingId: state.deletingId,
-    filteredDocuments,
-    yearOptions,
+
     handleSwitchCategory,
     setDocForm,
     setSelectedFile,
-    setYearFilter,
-    setEditForm,
     resetForm,
     handleUpload,
     startEdit,

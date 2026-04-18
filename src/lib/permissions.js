@@ -11,6 +11,9 @@ export const ALL_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.EDITOR];
 
 // Daftar izin granular.
 export const PERMISSIONS = {
+  // Dashboard
+  DASHBOARD_VIEW: "dashboard:view",
+
   // Berita
   BERITA_VIEW: "berita:view",
   BERITA_CREATE: "berita:create",
@@ -26,15 +29,18 @@ export const PERMISSIONS = {
   KONTAK_VIEW: "kontak:view",
   KONTAK_RESPOND: "kontak:respond",
 
-  // Halaman statis (CMS)
+  // Halaman statis
   HALAMAN_VIEW: "halaman:view",
   HALAMAN_CREATE: "halaman:create",
   HALAMAN_UPDATE: "halaman:update",
   HALAMAN_DELETE: "halaman:delete",
   HALAMAN_PUBLISH: "halaman:publish",
 
-  // Dashboard & audit
-  DASHBOARD_VIEW: "dashboard:view",
+  // Laporan
+  LAPORAN_VIEW: "laporan:view",
+  LAPORAN_MANAGE: "laporan:manage",
+
+  // Audit
   AUDIT_VIEW: "audit:view",
 
   // Manajemen pengguna
@@ -47,9 +53,8 @@ export const PERMISSIONS = {
   SETTINGS_MANAGE: "settings:manage",
 };
 
-// Permission matrix: peran -> izin.
 const ROLE_PERMISSIONS = {
-  [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS), // Semua izin.
+  [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
 
   [ROLES.ADMIN]: [
     PERMISSIONS.DASHBOARD_VIEW,
@@ -72,21 +77,17 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.HALAMAN_UPDATE,
     PERMISSIONS.HALAMAN_DELETE,
     PERMISSIONS.HALAMAN_PUBLISH,
+
+    PERMISSIONS.LAPORAN_VIEW,
+    PERMISSIONS.LAPORAN_MANAGE,
+
+    PERMISSIONS.USER_VIEW,
   ],
 
   [ROLES.EDITOR]: [
+    // Default role editor dibuat minimal.
+    // Nanti akses final editor mengikuti approval + tabel user_permissions.
     PERMISSIONS.DASHBOARD_VIEW,
-
-    PERMISSIONS.BERITA_VIEW,
-    PERMISSIONS.BERITA_CREATE,
-    PERMISSIONS.BERITA_UPDATE,
-    // Editor TIDAK boleh delete atau publish tanpa review.
-
-    PERMISSIONS.HALAMAN_VIEW,
-    PERMISSIONS.HALAMAN_CREATE,
-    PERMISSIONS.HALAMAN_UPDATE,
-
-    PERMISSIONS.GALERI_VIEW,
   ],
 };
 

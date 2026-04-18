@@ -51,20 +51,31 @@ export default function AdminLaporanPageClient() {
     const initialCategory = categories[0] || null;
 
     return (
-        <main className="mx-auto max-w-6xl px-4 py-8">
-            <h1 className="mb-6 text-xl font-bold text-slate-900 dark:text-slate-100">
-                Manajemen Dokumen Laporan
-            </h1>
+        <section className="space-y-6">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700 dark:text-emerald-400">
+                    Modul Laporan
+                </p>
+                <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                    Manajemen Dokumen Laporan
+                </h1>
+                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                    Kelola kategori, upload dokumen PDF, ubah metadata, dan atur publikasi
+                    dokumen laporan instansi secara terpusat.
+                </p>
+            </div>
 
             {loading ? (
-                <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <p className="text-sm font-medium text-slate-600">
+                <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                         Memuat data kategori laporan…
                     </p>
                 </section>
             ) : error ? (
-                <section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
-                    <p className="text-sm font-semibold text-rose-700">{error}</p>
+                <section className="rounded-[28px] border border-rose-200 bg-rose-50 p-6 shadow-sm dark:border-rose-900 dark:bg-rose-950/30">
+                    <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+                        {error}
+                    </p>
                 </section>
             ) : (
                 <AdminLaporanCategoryManager
@@ -72,6 +83,6 @@ export default function AdminLaporanPageClient() {
                     categories={categories}
                 />
             )}
-        </main>
+        </section>
     );
 }

@@ -1,17 +1,26 @@
+// src/lib/laporan-admin.js
+
 export const EMPTY_DOC_FORM = {
   title: "",
   description: "",
-  year: "",
+  year: String(new Date().getFullYear()),
   is_published: true,
 };
 
-export function normalizeCategoryMap(category) {
-  if (!category?.slug) return {};
-  return {
-    [category.slug]: Array.isArray(category.documents)
+export const ITEMS_PER_PAGE = 4;
+
+export function normalizeCategoryMap(categories = []) {
+  if (!Array.isArray(categories)) return {};
+
+  return categories.reduce((acc, category) => {
+    if (!category?.slug) return acc;
+
+    acc[category.slug] = Array.isArray(category.documents)
       ? category.documents
-      : [],
-  };
+      : [];
+
+    return acc;
+  }, {});
 }
 
 export function normalizeDocUrl(doc) {
@@ -28,8 +37,12 @@ export function formatBytes(size) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-export function replaceDocumentInList(list = [], id, nextDocument) {
-  return list.map((item) => (item.id === id ? nextDocument : item));
+export function replaceDocumentInList(list = [], nextDocument) {
+  if (!nextDocument?.id) return list;
+
+  return list.map((item) =>
+    item.id === nextDocument.id ? nextDocument : item,
+  );
 }
 
 export function removeDocumentFromList(list = [], id) {
@@ -37,6 +50,7 @@ export function removeDocumentFromList(list = [], id) {
 }
 
 export function prependDocumentToList(list = [], document) {
+  if (!document?.id) return list;
   return [document, ...list];
 }
 
@@ -48,10 +62,10 @@ export function createLaporanAdminInitialState({
 
   return {
     activeSlug: initialSlug,
-    docsBySlug: normalizeCategoryMap(initialCategory),
+    docsBySlug: normalizeCategoryMap(categories),
     loadingSlug: null,
 
-    docForm: EMPTY_DOC_FORM,
+    docForm: { ...EMPTY_DOC_FORM },
     selectedFile: null,
     savingDocument: false,
 
@@ -66,8 +80,11 @@ export function createLaporanAdminInitialState({
     },
 
     yearFilter: "",
+    currentPage: 1,
+
     editingId: null,
-    editForm: EMPTY_DOC_FORM,
+    editForm: { ...EMPTY_DOC_FORM },
+    editFile: null,
 
     publishingId: null,
     savingEditId: null,
@@ -88,7 +105,9 @@ export function laporanAdminReducer(state, action) {
         ...state,
         docsBySlug: {
           ...state.docsBySlug,
-          [action.slug]: action.documents,
+          [action.slug]: Array.isArray(action.documents)
+            ? action.documents
+            : [],
         },
       };
 
@@ -104,13 +123,13 @@ export function laporanAdminReducer(state, action) {
         docForm:
           typeof action.payload === "function"
             ? action.payload(state.docForm)
-            : action.payload,
+            : { ...state.docForm, ...action.payload },
       };
 
     case "RESET_DOC_FORM":
       return {
         ...state,
-        docForm: EMPTY_DOC_FORM,
+        docForm: { ...EMPTY_DOC_FORM },
         selectedFile: null,
       };
 
@@ -142,12 +161,34 @@ export function laporanAdminReducer(state, action) {
       return {
         ...state,
         yearFilter: action.payload,
+        currentPage: 1,
       };
 
-    case "SET_EDITING_ID":
+    case "SET_CURRENT_PAGE":
       return {
         ...state,
-        editingId: action.payload,
+        currentPage: action.payload,
+      };
+
+    case "START_EDIT":
+      return {
+        ...state,
+        editingId: action.payload?.id || null,
+        editFile: null,
+        editForm: {
+          title: action.payload?.title || "",
+          description: action.payload?.description || "",
+          year: String(action.payload?.year || ""),
+          is_published: Boolean(action.payload?.is_published),
+        },
+      };
+
+    case "CANCEL_EDIT":
+      return {
+        ...state,
+        editingId: null,
+        editFile: null,
+        editForm: { ...EMPTY_DOC_FORM },
       };
 
     case "SET_EDIT_FORM":
@@ -156,7 +197,13 @@ export function laporanAdminReducer(state, action) {
         editForm:
           typeof action.payload === "function"
             ? action.payload(state.editForm)
-            : action.payload,
+            : { ...state.editForm, ...action.payload },
+      };
+
+    case "SET_EDIT_FILE":
+      return {
+        ...state,
+        editFile: action.payload,
       };
 
     case "SET_PUBLISHING_ID":
@@ -181,7 +228,9 @@ export function laporanAdminReducer(state, action) {
       return {
         ...state,
         yearFilter: "",
+        currentPage: 1,
         editingId: null,
+        editFile: null,
         actionFeedback: { type: "", message: "" },
       };
 

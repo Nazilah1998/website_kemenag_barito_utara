@@ -8,7 +8,7 @@ const SORT_OPTIONS = [
 
 function FilterChip({ children }) {
     return (
-        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 sm:text-sm">
+        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 sm:text-sm dark:border-emerald-900/60 dark:bg-emerald-900/30 dark:text-emerald-300">
             {children}
         </span>
     );
@@ -18,7 +18,7 @@ function FieldLabel({ htmlFor, children }) {
     return (
         <label
             htmlFor={htmlFor}
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300"
         >
             {children}
         </label>
@@ -26,7 +26,7 @@ function FieldLabel({ htmlFor, children }) {
 }
 
 function InputClassName() {
-    return "h-11 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100";
+    return "h-11 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-emerald-400 dark:focus:ring-emerald-900/40";
 }
 
 export default function BeritaFilters({
@@ -52,23 +52,23 @@ export default function BeritaFilters({
     const inputClassName = InputClassName();
 
     return (
-        <section className="mb-8 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:mb-10 sm:rounded-[28px] sm:p-6 lg:p-7">
+        <section className="mb-8 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition-colors sm:mb-10 sm:rounded-[28px] sm:p-6 lg:p-7 dark:border-slate-800 dark:bg-slate-900">
             <div className="flex flex-col gap-4 sm:gap-5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-700 sm:text-xs">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400 sm:text-xs">
                             Sistem Filter Berita
                         </p>
-                        <h2 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+                        <h2 className="mt-2 text-2xl font-bold leading-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
                             Cari arsip berita dengan lebih cepat
                         </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
                             Gunakan kata kunci, kategori, periode bulan, dan urutan tampilan.
                         </p>
                     </div>
 
                     <div className="shrink-0">
-                        <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 sm:text-sm">
+                        <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 sm:text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                             {Number(totalResults || 0).toLocaleString("id-ID")} berita ditemukan
                         </span>
                     </div>
@@ -142,14 +142,14 @@ export default function BeritaFilters({
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                         <button
                             type="submit"
-                            className="inline-flex h-11 items-center justify-center rounded-2xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                            className="inline-flex h-11 items-center justify-center rounded-2xl bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                         >
                             Terapkan filter
                         </button>
 
                         <Link
                             href="/berita"
-                            className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                            className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                         >
                             Reset filter
                         </Link>
@@ -157,7 +157,7 @@ export default function BeritaFilters({
                 </form>
 
                 {hasActiveFilters ? (
-                    <div className="border-t border-slate-100 pt-4">
+                    <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
                         <div className="flex flex-wrap items-center gap-2">
                             {q ? <FilterChip>Kata kunci: {q}</FilterChip> : null}
                             {category ? <FilterChip>Kategori: {category}</FilterChip> : null}

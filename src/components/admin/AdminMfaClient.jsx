@@ -34,15 +34,35 @@ function mapMfaError(error) {
     return message;
 }
 
+function ShieldIcon() {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+    );
+}
+
 export default function AdminMfaClient() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const supabase = useMemo(() => createClient(), []);
 
     const requestedMode = searchParams.get("mode");
+    const nextParam = searchParams.get("next");
 
     const [loading, setLoading] = useState(true);
-    const [mode, setMode] = useState("detect"); // detect | enroll | verify
+    const [mode, setMode] = useState("detect");
 
     const [adminEmail, setAdminEmail] = useState("");
     const [aal, setAal] = useState({
@@ -60,6 +80,12 @@ export default function AdminMfaClient() {
     const [error, setError] = useState("");
     const [initializing, setInitializing] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+
+    const resolvedNext = useMemo(() => {
+        const raw = nextParam ? String(nextParam) : "";
+        if (raw.startsWith("/")) return raw;
+        return "/admin";
+    }, [nextParam]);
 
     useEffect(() => {
         let active = true;
@@ -98,13 +124,10 @@ export default function AdminMfaClient() {
                 const currentLevel = aalData?.currentLevel ?? null;
                 const nextLevel = aalData?.nextLevel ?? null;
 
-                setAal({
-                    currentLevel,
-                    nextLevel,
-                });
+                setAal({ currentLevel, nextLevel });
 
                 if (currentLevel === "aal2") {
-                    router.replace("/admin");
+                    router.replace(resolvedNext);
                     router.refresh();
                     return;
                 }
@@ -134,7 +157,9 @@ export default function AdminMfaClient() {
                     }
 
                     setFactorId(totpFactor.id);
-                    setFriendlyName(totpFactor.friendly_name || "Authenticator Admin");
+                    setFriendlyName(
+                        totpFactor.friendly_name || "Authenticator Admin"
+                    );
                 }
             } catch (err) {
                 console.error("boot MFA error:", err);
@@ -153,7 +178,7 @@ export default function AdminMfaClient() {
         return () => {
             active = false;
         };
-    }, [requestedMode, router, supabase]);
+    }, [requestedMode, resolvedNext, router, supabase]);
 
     async function handleStartEnrollment() {
         setInitializing(true);
@@ -234,7 +259,7 @@ export default function AdminMfaClient() {
                 throw verify.error;
             }
 
-            router.replace("/admin");
+            router.replace(resolvedNext);
             router.refresh();
         } catch (err) {
             console.error("verify MFA error:", err);
@@ -270,273 +295,202 @@ export default function AdminMfaClient() {
 
     return (
         <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-            <div className="relative w-full max-w-6xl overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-2xl">
-                <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
-                    <div className="hidden lg:flex flex-col justify-between bg-slate-950 px-10 py-10 text-white">
-                        <div>
-                            <div className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                                <Image
-                                    src={siteInfo.logoSrc}
-                                    alt={siteInfo.shortName}
-                                    width={42}
-                                    height={42}
-                                    priority
-                                />
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">
-                                        Keamanan Admin
-                                    </p>
-                                    <h2 className="mt-1 text-lg font-bold">
-                                        {siteInfo.shortName}
-                                    </h2>
-                                </div>
-                            </div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.10),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.08),transparent_30%)]" />
 
-                            <div className="mt-10 max-w-lg">
-                                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-300">
-                                    MFA Authenticator
+            <div className="relative w-full max-w-md">
+                <div className="rounded-4xl border border-slate-200 bg-white p-6 shadow-2xl sm:p-8">
+                    <div className="flex items-center justify-between gap-4">
+                        <Link href="/" className="inline-flex items-center gap-3">
+                            <Image
+                                src={siteInfo.logoSrc}
+                                alt={siteInfo.shortName}
+                                width={44}
+                                height={44}
+                                priority
+                            />
+                            <div>
+                                <p className="text-sm font-bold text-slate-900">
+                                    {siteInfo.shortName}
                                 </p>
-                                <h1 className="mt-4 text-4xl font-bold leading-tight">
-                                    Lindungi panel admin dengan verifikasi dua langkah.
-                                </h1>
-                                <p className="mt-5 text-base leading-8 text-slate-300">
-                                    Setelah password benar, akun admin wajib menyelesaikan
-                                    verifikasi kode dari aplikasi authenticator sebelum dapat masuk
-                                    ke panel internal.
-                                </p>
+                                <p className="text-xs text-slate-500">Panel Admin</p>
                             </div>
-                        </div>
+                        </Link>
 
-                        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                            <p className="text-sm font-semibold text-white">Status login</p>
-                            <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-300">
-                                <li>
-                                    Current AAL:{" "}
-                                    <span className="font-semibold text-white">
-                                        {aal.currentLevel ?? "-"}
-                                    </span>
-                                </li>
-                                <li>
-                                    Next AAL:{" "}
-                                    <span className="font-semibold text-white">
-                                        {aal.nextLevel ?? "-"}
-                                    </span>
-                                </li>
-                                <li>
-                                    Mode halaman:{" "}
-                                    <span className="font-semibold text-white">{mode}</span>
-                                </li>
-                                <li>
-                                    Faktor:{" "}
-                                    <span className="font-semibold text-white">
-                                        {friendlyName || "-"}
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
+                        <Link
+                            href="/admin/login"
+                            className="inline-flex items-center rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                            ← Login
+                        </Link>
                     </div>
 
-                    <div className="px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
-                        <div className="mx-auto w-full max-w-md">
-                            <Link href="/" className="inline-flex items-center gap-3">
-                                <Image
-                                    src={siteInfo.logoSrc}
-                                    alt={siteInfo.shortName}
-                                    width={44}
-                                    height={44}
-                                    priority
-                                />
-                                <div>
-                                    <p className="text-sm font-bold text-slate-900">
-                                        {siteInfo.shortName}
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        MFA khusus panel admin
-                                    </p>
-                                </div>
-                            </Link>
+                    <div className="mt-8">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                            <ShieldIcon />
+                            <span>{mode === "verify" ? "Verifikasi MFA" : "Aktifkan MFA"}</span>
+                        </div>
 
-                            <div className="mt-8">
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <p className="text-sm font-semibold uppercase tracking-[0.26em] text-emerald-700">
-                                        Admin MFA
-                                    </p>
+                        <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950">
+                            {mode === "verify"
+                                ? "Masukkan kode authenticator"
+                                : "Aktifkan authenticator admin"}
+                        </h1>
 
-                                    <Link
-                                        href="/admin/login"
-                                        className="inline-flex items-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                                    >
-                                        ← Kembali ke Login
-                                    </Link>
-                                </div>
+                        <p className="mt-3 text-sm leading-7 text-slate-600">
+                            {mode === "verify"
+                                ? "Masukkan 6 digit kode dari aplikasi authenticator Anda untuk menyelesaikan login atau melanjutkan aksi sensitif."
+                                : "Scan QR code dengan Google Authenticator, Authy, atau aplikasi TOTP lain untuk mengaktifkan MFA."}
+                        </p>
+                    </div>
 
-                                <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
-                                    {mode === "verify"
-                                        ? "Masukkan kode authenticator"
-                                        : "Aktifkan authenticator admin"}
-                                </h2>
+                    {error ? (
+                        <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                            {error}
+                        </div>
+                    ) : null}
 
-                                <p className="mt-3 text-sm leading-7 text-slate-600">
-                                    {mode === "verify"
-                                        ? "Akun Anda sudah memiliki MFA. Masukkan 6 digit kode dari aplikasi authenticator."
-                                        : "Scan QR code dengan Google Authenticator, Microsoft Authenticator, Authy, atau aplikasi TOTP lain untuk mengaktifkan MFA admin."}
-                                </p>
-                            </div>
-
-                            {error ? (
-                                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                                    {error}
-                                </div>
-                            ) : null}
-
-                            {mode === "enroll" ? (
-                                <div className="mt-6 space-y-5">
-                                    {!qrCode ? (
-                                        <button
-                                            type="button"
-                                            onClick={handleStartEnrollment}
-                                            disabled={initializing}
-                                            className="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-                                        >
-                                            {initializing ? "Membuat QR..." : "Buat QR MFA Admin"}
-                                        </button>
-                                    ) : (
-                                        <>
-                                            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                                <p className="text-sm font-semibold text-slate-900">
-                                                    1. Scan QR code berikut
-                                                </p>
-
-                                                <div className="mt-4 flex justify-center">
-                                                    <div className="rounded-2xl bg-white p-4 shadow-sm">
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img
-                                                            src={qrCode}
-                                                            alt={uri || "QR Code MFA Admin"}
-                                                            className="h-56 w-56"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {secret ? (
-                                                    <div className="mt-4">
-                                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                                            Secret manual
-                                                        </p>
-                                                        <div className="mt-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm break-all text-slate-700">
-                                                            {secret}
-                                                        </div>
-                                                    </div>
-                                                ) : null}
-
-                                                <p className="mt-4 text-xs leading-6 text-slate-500">
-                                                    Jika QR gagal dipindai, masukkan secret manual ke aplikasi
-                                                    authenticator Anda.
-                                                </p>
-                                            </div>
-
-                                            <form onSubmit={handleVerify} className="space-y-4">
-                                                <div>
-                                                    <label
-                                                        htmlFor="mfa-code-enroll"
-                                                        className="mb-2 block text-sm font-semibold text-slate-800"
-                                                    >
-                                                        2. Masukkan 6 digit kode
-                                                    </label>
-                                                    <input
-                                                        id="mfa-code-enroll"
-                                                        type="text"
-                                                        inputMode="numeric"
-                                                        pattern="[0-9]{6}"
-                                                        maxLength={6}
-                                                        value={verifyCode}
-                                                        onChange={(event) =>
-                                                            setVerifyCode(
-                                                                event.target.value.replace(/\D/g, "").slice(0, 6)
-                                                            )
-                                                        }
-                                                        placeholder="123456"
-                                                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                                                        required
-                                                    />
-                                                </div>
-
-                                                <button
-                                                    type="submit"
-                                                    disabled={submitting || verifyCode.length !== 6}
-                                                    className="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-                                                >
-                                                    {submitting ? "Memverifikasi..." : "Aktifkan MFA"}
-                                                </button>
-                                            </form>
-                                        </>
-                                    )}
-                                </div>
-                            ) : (
-                                <form onSubmit={handleVerify} className="mt-8 space-y-5">
-                                    <div>
-                                        <label
-                                            htmlFor="mfa-code-verify"
-                                            className="mb-2 block text-sm font-semibold text-slate-800"
-                                        >
-                                            Kode Authenticator
-                                        </label>
-                                        <input
-                                            id="mfa-code-verify"
-                                            type="text"
-                                            inputMode="numeric"
-                                            pattern="[0-9]{6}"
-                                            maxLength={6}
-                                            value={verifyCode}
-                                            onChange={(event) =>
-                                                setVerifyCode(
-                                                    event.target.value.replace(/\D/g, "").slice(0, 6)
-                                                )
-                                            }
-                                            placeholder="123456"
-                                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500"
-                                            required
-                                        />
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={submitting || verifyCode.length !== 6}
-                                        className="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
-                                    >
-                                        {submitting ? "Memverifikasi..." : "Verifikasi MFA"}
-                                    </button>
-                                </form>
-                            )}
-
-                            <div className="mt-6 flex gap-3">
+                    {mode === "enroll" ? (
+                        <div className="mt-6 space-y-5">
+                            {!qrCode ? (
                                 <button
                                     type="button"
-                                    onClick={handleLogout}
-                                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    onClick={handleStartEnrollment}
+                                    disabled={initializing}
+                                    className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                                 >
-                                    Logout
+                                    {initializing ? "Membuat QR..." : "Buat QR Code MFA"}
                                 </button>
+                            ) : (
+                                <>
+                                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                        <p className="text-sm font-semibold text-slate-800">
+                                            1. Scan QR code ini
+                                        </p>
 
-                                <Link
-                                    href="/"
-                                    className="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                                >
-                                    Website Utama
-                                </Link>
-                            </div>
+                                        <div className="mt-4 flex justify-center">
+                                            <div className="rounded-2xl bg-white p-4 shadow-sm">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={qrCode}
+                                                    alt={uri || "QR Code MFA Admin"}
+                                                    className="h-52 w-52"
+                                                />
+                                            </div>
+                                        </div>
 
-                            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                <p className="text-sm font-semibold text-slate-900">
-                                    Catatan keamanan
-                                </p>
-                                <p className="mt-2 text-sm leading-7 text-slate-600">
-                                    Simpan authenticator admin hanya pada perangkat yang benar-benar
-                                    dikuasai admin terkait. Jangan gunakan perangkat bersama.
-                                </p>
-                            </div>
+                                        {secret ? (
+                                            <div className="mt-4">
+                                                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                                    Atau masukkan secret manual
+                                                </p>
+                                                <div className="mt-2 break-all rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-mono text-slate-700">
+                                                    {secret}
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                    </div>
+
+                                    <form onSubmit={handleVerify} className="space-y-4">
+                                        <div>
+                                            <label
+                                                htmlFor="mfa-code-enroll"
+                                                className="mb-2 block text-sm font-semibold text-slate-800"
+                                            >
+                                                2. Masukkan 6 digit kode
+                                            </label>
+                                            <input
+                                                id="mfa-code-enroll"
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]{6}"
+                                                maxLength={6}
+                                                value={verifyCode}
+                                                onChange={(event) =>
+                                                    setVerifyCode(
+                                                        event.target.value.replace(/\D/g, "").slice(0, 6)
+                                                    )
+                                                }
+                                                placeholder="123 456"
+                                                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-center text-2xl font-bold tracking-[0.4em] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                                                required
+                                                autoComplete="one-time-code"
+                                            />
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={submitting || verifyCode.length !== 6}
+                                            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                                        >
+                                            {submitting ? "Mengaktifkan..." : "Aktifkan MFA"}
+                                        </button>
+                                    </form>
+                                </>
+                            )}
                         </div>
+                    ) : (
+                        <form onSubmit={handleVerify} className="mt-7 space-y-5">
+                            <div>
+                                <label
+                                    htmlFor="mfa-code-verify"
+                                    className="mb-2 block text-sm font-semibold text-slate-800"
+                                >
+                                    Kode 6 digit
+                                </label>
+                                <input
+                                    id="mfa-code-verify"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]{6}"
+                                    maxLength={6}
+                                    value={verifyCode}
+                                    onChange={(event) =>
+                                        setVerifyCode(
+                                            event.target.value.replace(/\D/g, "").slice(0, 6)
+                                        )
+                                    }
+                                    placeholder="123 456"
+                                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-center text-2xl font-bold tracking-[0.4em] text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                                    required
+                                    autoFocus
+                                    autoComplete="one-time-code"
+                                />
+                                <p className="mt-2 text-xs text-slate-500">
+                                    Buka aplikasi authenticator Anda dan masukkan kode yang tampil.
+                                </p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={submitting || verifyCode.length !== 6}
+                                className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                            >
+                                {submitting ? "Memverifikasi..." : "Lanjutkan"}
+                            </button>
+                        </form>
+                    )}
+
+                    <div className="mt-5 flex gap-3">
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="inline-flex h-11 flex-1 items-center justify-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
+                            Logout
+                        </button>
+
+                        <Link
+                            href="/"
+                            className="inline-flex h-11 flex-1 items-center justify-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
+                            Website Utama
+                        </Link>
                     </div>
+
+                    <p className="mt-6 text-xs leading-6 text-slate-500">
+                        Simpan authenticator hanya pada perangkat yang dikuasai admin terkait.
+                        Jangan gunakan perangkat bersama.
+                    </p>
                 </div>
             </div>
         </section>

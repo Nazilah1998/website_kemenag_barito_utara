@@ -1,14 +1,20 @@
+// src/lib/admin-guard.js
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-function isAdminRole(role) {
-  return (
+// Semua role yang boleh masuk panel admin
+const ALLOWED_ROLES = new Set(["admin", "super_admin", "editor"]);
+
+function isAllowedRole(role) {
+  return ALLOWED_ROLES.has(
     String(role || "")
       .trim()
-      .toLowerCase() === "admin"
+      .toLowerCase(),
   );
 }
 
 export async function requireAdminAccess() {
+  // Pakai server client (dengan session user) untuk auth check
   const supabase = await createClient();
 
   const {
@@ -20,27 +26,29 @@ export async function requireAdminAccess() {
     return {
       ok: false,
       status: 401,
-      message: "Authentication required.",
-      supabase,
+      message: "Sesi tidak ditemukan. Silakan login kembali.",
+      supabase: null,
       user: null,
       profile: null,
     };
   }
 
-  const { data: profile, error: profileError } = await supabase
+  // Pakai admin client (service role) untuk query profiles agar tidak kena RLS
+  const adminSupabase = createAdminClient();
+
+  const { data: profile, error: profileError } = await adminSupabase
     .from("profiles")
     .select("id, full_name, email, role, unit_name, avatar_url, is_active")
     .eq("id", user.id)
     .maybeSingle();
 
   if (profileError) {
-    console.error("[admin-guard] profiles query error:", profileError);
-
+    console.error("[admin-guard] profiles query error:", profileError.message);
     return {
       ok: false,
       status: 500,
       message: "Gagal memverifikasi profil pengguna.",
-      supabase,
+      supabase: adminSupabase,
       user,
       profile: null,
     };
@@ -51,7 +59,7 @@ export async function requireAdminAccess() {
       ok: false,
       status: 403,
       message: "Profil admin tidak ditemukan.",
-      supabase,
+      supabase: adminSupabase,
       user,
       profile: null,
     };
@@ -62,18 +70,18 @@ export async function requireAdminAccess() {
       ok: false,
       status: 403,
       message: "Akun admin tidak aktif.",
-      supabase,
+      supabase: adminSupabase,
       user,
       profile,
     };
   }
 
-  if (!isAdminRole(profile.role)) {
+  if (!isAllowedRole(profile.role)) {
     return {
       ok: false,
       status: 403,
-      message: "Admin access required.",
-      supabase,
+      message: "Anda tidak memiliki hak akses ke panel admin.",
+      supabase: adminSupabase,
       user,
       profile,
     };
@@ -83,8 +91,10 @@ export async function requireAdminAccess() {
     ok: true,
     status: 200,
     message: "OK",
-    supabase,
+    // Kembalikan adminSupabase agar semua query di route.js bypass RLS
+    supabase: adminSupabase,
     user,
     profile,
+    role: profile.role,
   };
 }

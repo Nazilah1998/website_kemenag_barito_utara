@@ -98,8 +98,8 @@ export default function NewsPagination({
                 href={pageHref(Math.max(1, currentPage - 1))}
                 aria-disabled={currentPage === 1}
                 className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-slate-700 transition ${currentPage === 1
-                    ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400"
-                    : "border-slate-300 bg-white hover:border-emerald-300 hover:text-emerald-700"
+                    ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-600"
+                    : "border-slate-300 bg-white hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
                     }`}
             >
                 <ChevronLeftIcon />
@@ -109,7 +109,7 @@ export default function NewsPagination({
                 item === "..." ? (
                     <span
                         key={`ellipsis-${index}`}
-                        className="inline-flex h-11 min-w-11 items-center justify-center px-2 text-sm font-semibold text-slate-500"
+                        className="inline-flex h-11 min-w-11 items-center justify-center px-2 text-sm font-semibold text-slate-500 dark:text-slate-400"
                     >
                         ...
                     </span>
@@ -119,8 +119,8 @@ export default function NewsPagination({
                         href={pageHref(item)}
                         aria-current={item === currentPage ? "page" : undefined}
                         className={`inline-flex h-11 min-w-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition ${item === currentPage
-                            ? "border-emerald-700 bg-emerald-700 text-white"
-                            : "border-slate-300 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700"
+                            ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-600 dark:bg-emerald-600"
+                            : "border-slate-300 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
                             }`}
                     >
                         {item}
@@ -132,8 +132,8 @@ export default function NewsPagination({
                 href={pageHref(Math.min(totalPages, currentPage + 1))}
                 aria-disabled={currentPage === totalPages}
                 className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-slate-700 transition ${currentPage === totalPages
-                    ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400"
-                    : "border-slate-300 bg-white hover:border-emerald-300 hover:text-emerald-700"
+                    ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-600"
+                    : "border-slate-300 bg-white hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
                     }`}
             >
                 <ChevronRightIcon />

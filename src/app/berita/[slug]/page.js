@@ -10,10 +10,7 @@ import {
   getRelatedBerita,
 } from "../../../lib/berita";
 import JsonLd from "@/components/seo/JsonLd";
-import {
-  breadcrumbSchema,
-  newsArticleSchema,
-} from "@/lib/structured-data";
+import { breadcrumbSchema, newsArticleSchema } from "@/lib/structured-data";
 import { siteInfo } from "@/data/site";
 
 const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
@@ -53,10 +50,10 @@ function RelatedCard({ item }) {
   const imageSrc = item.coverImage || FALLBACK_IMAGE;
 
   return (
-    <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+    <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <Link
         href={`/berita/${item.slug}`}
-        className="relative block aspect-16/10 bg-slate-100"
+        className="relative block aspect-16/10 bg-slate-100 dark:bg-slate-800"
       >
         <Image
           src={imageSrc}
@@ -68,22 +65,22 @@ function RelatedCard({ item }) {
       </Link>
 
       <div className="p-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
           <span>{item.date}</span>
           <span>•</span>
           <span>{item.category}</span>
         </div>
 
-        <h3 className="mt-3 text-lg font-bold leading-snug text-slate-900">
+        <h3 className="mt-3 text-lg font-bold leading-snug text-slate-900 dark:text-slate-100">
           <Link
             href={`/berita/${item.slug}`}
-            className="transition hover:text-emerald-700"
+            className="transition hover:text-emerald-700 dark:hover:text-emerald-400"
           >
             {item.title}
           </Link>
         </h3>
 
-        <p className="mt-3 text-sm leading-6 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
           {truncateText(
             item.excerpt || "Klik untuk membaca berita selengkapnya.",
             120,
@@ -92,7 +89,7 @@ function RelatedCard({ item }) {
 
         <Link
           href={`/berita/${item.slug}`}
-          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
         >
           Baca artikel
           <span aria-hidden="true">→</span>
@@ -108,20 +105,20 @@ function AdjacentArticleLink({ label, item, align = "left" }) {
   return (
     <Link
       href={`/berita/${item.slug}`}
-      className="block rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50"
+      className="block rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700 dark:hover:bg-slate-800"
     >
       <p
-        className={`text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 ${align === "right" ? "text-right" : ""}`}
+        className={`text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400 ${align === "right" ? "text-right" : ""}`}
       >
         {label}
       </p>
       <h3
-        className={`mt-3 text-base font-bold leading-7 text-slate-900 ${align === "right" ? "text-right" : ""}`}
+        className={`mt-3 text-base font-bold leading-7 text-slate-900 dark:text-slate-100 ${align === "right" ? "text-right" : ""}`}
       >
         {item.title}
       </h3>
       <p
-        className={`mt-2 text-sm text-slate-500 ${align === "right" ? "text-right" : ""}`}
+        className={`mt-2 text-sm text-slate-500 dark:text-slate-400 ${align === "right" ? "text-right" : ""}`}
       >
         {item.date}
       </p>
@@ -149,7 +146,8 @@ export async function generateMetadata({ params }) {
   );
   const url = `/berita/${berita.slug}`;
   const image = berita.coverImage || `${siteInfo.siteUrl}${siteInfo.logoSrc}`;
-  const publishedTime = berita.publishedAt || berita.isoDate || berita.createdAt;
+  const publishedTime =
+    berita.publishedAt || berita.isoDate || berita.createdAt;
   const modifiedTime = berita.updatedAt || publishedTime;
 
   return {
@@ -178,7 +176,10 @@ export async function generateMetadata({ params }) {
 }
 
 function stripTags(value = "") {
-  return String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return String(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function toIso(value) {
@@ -224,147 +225,150 @@ export default async function DetailBeritaPage({ params }) {
         ]}
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
-        <Link
-          href="/berita"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
-        >
-          <span aria-hidden="true">←</span>
-          Kembali ke halaman berita
-        </Link>
+      <main className="bg-slate-50 transition-colors dark:bg-slate-950">
+        <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
+          <Link
+            href="/berita"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+          >
+            <span aria-hidden="true">←</span>
+            Kembali ke halaman berita
+          </Link>
 
-        <article className="mt-6 space-y-8">
-          <div className="overflow-hidden rounded-4xl border border-slate-200 bg-slate-900 shadow-xl">
-            <a
-              href={coverImageDownloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative block min-h-80 cursor-pointer overflow-hidden md:min-h-115"
-              title="Buka atau unduh cover image"
-            >
-              <Image
-                src={coverImage}
-                alt={berita.title}
-                fill
-                priority
-                className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                sizes="100vw"
-              />
+          <article className="mt-6 space-y-8">
+            <div className="overflow-hidden rounded-4xl border border-slate-200 bg-slate-900 shadow-xl dark:border-slate-800">
+              <a
+                href={coverImageDownloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative block min-h-80 cursor-pointer overflow-hidden md:min-h-115"
+                title="Buka atau unduh cover image"
+              >
+                <Image
+                  src={coverImage}
+                  alt={berita.title}
+                  fill
+                  priority
+                  className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                  sizes="100vw"
+                />
 
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
 
-              <div className="absolute left-6 top-6 md:left-10 md:top-10">
-                <div className="inline-flex rounded-full border border-white/15 bg-emerald-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
-                  {berita.category}
+                <div className="absolute left-6 top-6 md:left-10 md:top-10">
+                  <div className="inline-flex rounded-full border border-white/15 bg-emerald-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+                    {berita.category}
+                  </div>
                 </div>
-              </div>
 
-              <div className="absolute inset-x-0 bottom-0 p-6 md:p-10">
-                <div className="flex flex-wrap gap-3">
-                  <MetaPill>Dipublikasikan {berita.date}</MetaPill>
-                  <MetaPill>
-                    <BeritaViewCounter
-                      slug={berita.slug}
-                      initialViews={berita.views}
-                    />
-                  </MetaPill>
+                <div className="absolute inset-x-0 bottom-0 p-6 md:p-10">
+                  <div className="flex flex-wrap gap-3">
+                    <MetaPill>Dipublikasikan {berita.date}</MetaPill>
+                    <MetaPill>
+                      <BeritaViewCounter
+                        slug={berita.slug}
+                        initialViews={berita.views}
+                      />
+                    </MetaPill>
+                  </div>
                 </div>
-              </div>
-            </a>
-          </div>
-
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_300px]">
-            <div className="min-w-0">
-              <article
-                className="prose prose-slate max-w-none rounded-4xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:p-10"
-                dangerouslySetInnerHTML={{ __html: berita.content || "" }}
-              />
+              </a>
             </div>
 
-            <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-              <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-sm font-semibold text-slate-900">
-                  Info artikel
-                </p>
-
-                <div className="mt-4 space-y-3 text-sm text-slate-600">
-                  <div className="flex items-start justify-between gap-4">
-                    <span>Kategori</span>
-                    <span className="font-semibold text-slate-900">
-                      {berita.category}
-                    </span>
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <span>Tanggal tayang</span>
-                    <span className="text-right font-semibold text-slate-900">
-                      {berita.date}
-                    </span>
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <span>Jumlah pembaca</span>
-                    <span className="text-right font-semibold text-slate-900">
-                      {berita.views ?? 0} kali
-                    </span>
-                  </div>
-                </div>
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="min-w-0">
+                <article
+                  className="prose prose-slate max-w-none rounded-4xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:p-10 dark:border-slate-800 dark:bg-slate-900 dark:prose-invert dark:prose-headings:text-slate-100 dark:prose-p:text-slate-300 dark:prose-strong:text-slate-100 dark:prose-a:text-emerald-400 dark:prose-a:no-underline hover:dark:prose-a:text-emerald-300 dark:prose-li:text-slate-300 dark:prose-blockquote:text-slate-300 dark:prose-figcaption:text-slate-400 dark:prose-hr:border-slate-700 dark:prose-code:text-emerald-300 dark:prose-pre:bg-slate-950"
+                  dangerouslySetInnerHTML={{ __html: berita.content || "" }}
+                />
               </div>
 
-              <BeritaDetailActions
-                title={berita.title}
-                path={`/berita/${berita.slug}`}
-              />
-
-              {adjacent?.newer || adjacent?.older ? (
-                <div className="space-y-4 rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
-                  <p className="text-sm font-semibold text-slate-900">
-                    Lanjutkan membaca
+              <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+                <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    Info artikel
                   </p>
 
-                  <div className="space-y-3">
-                    <AdjacentArticleLink
-                      label="Artikel lebih baru"
-                      item={adjacent?.newer}
-                    />
-                    <AdjacentArticleLink
-                      label="Artikel berikutnya"
-                      item={adjacent?.older}
-                      align="right"
-                    />
+                  <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                    <div className="flex items-start justify-between gap-4">
+                      <span>Kategori</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
+                        {berita.category}
+                      </span>
+                    </div>
+                    <div className="flex items-start justify-between gap-4">
+                      <span>Tanggal tayang</span>
+                      <span className="text-right font-semibold text-slate-900 dark:text-slate-100">
+                        {berita.date}
+                      </span>
+                    </div>
+                    <div className="flex items-start justify-between gap-4">
+                      <span>Jumlah pembaca</span>
+                      <span className="text-right font-semibold text-slate-900 dark:text-slate-100">
+                        {berita.views ?? 0} kali
+                      </span>
+                    </div>
                   </div>
                 </div>
-              ) : null}
-            </aside>
-          </div>
-        </article>
 
-        {relatedItems.length > 0 ? (
-          <section className="mt-14">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">
-                  Berita Terkait
+                <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    Aksi cepat artikel
+                  </p>
+
+                  <div className="mt-4">
+                    <BeritaDetailActions berita={berita} />
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </article>
+
+          {adjacent?.prev || adjacent?.next ? (
+            <section className="mt-12">
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">
+                  Lanjutkan membaca
                 </p>
-                <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                  Artikel lain yang masih relevan
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  Jelajahi artikel lainnya
                 </h2>
               </div>
 
-              <Link
-                href="/berita"
-                className="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
-              >
-                Lihat semua berita
-              </Link>
-            </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <AdjacentArticleLink
+                  label="Artikel sebelumnya"
+                  item={adjacent?.prev}
+                />
+                <AdjacentArticleLink
+                  label="Artikel berikutnya"
+                  item={adjacent?.next}
+                  align="right"
+                />
+              </div>
+            </section>
+          ) : null}
 
-            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {relatedItems.map((item) => (
-                <RelatedCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </section>
+          {relatedItems?.length > 0 ? (
+            <section className="mt-12">
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">
+                  Rekomendasi bacaan
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  Berita terkait
+                </h2>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {relatedItems.map((item) => (
+                  <RelatedCard key={item.id} item={item} />
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </section>
+      </main>
     </>
   );
 }

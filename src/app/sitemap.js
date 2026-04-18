@@ -1,13 +1,9 @@
 import { siteInfo } from "@/data/site";
-import { getAllBerita } from "@/lib/berita";
-import { listPublishedStaticPages } from "@/lib/static-pages";
 import { laporanCategories } from "@/data/laporan";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-/**
- * Sitemap dinamis Next.js (app/sitemap.js).
- * Menggabungkan route statis, halaman CMS, laporan, dan berita.
- * Akan otomatis di-serve di /sitemap.xml.
- */
+export const revalidate = 300;
+
 export default async function sitemap() {
   const base = siteInfo.siteUrl.replace(/\/$/, "");
   const now = new Date();
@@ -63,39 +59,56 @@ export default async function sitemap() {
   }));
 
   let beritaRoutes = [];
-  try {
-    const beritaList = await getAllBerita();
-    beritaRoutes = beritaList.map((item) => ({
-      url: `${base}/berita/${item.slug}`,
-      lastModified: safeDate(
-        item.updatedAt || item.publishedAt || item.isoDate || item.createdAt,
-      ),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
-  } catch (err) {
-    console.error("[sitemap] berita fetch error:", err?.message || err);
-  }
-
   let halamanRoutes = [];
+
   try {
-    const staticPages = await listPublishedStaticPages({ limit: 200 });
-    halamanRoutes = staticPages.map((page) => ({
-      url: `${base}/halaman/${page.slug}`,
-      lastModified: safeDate(page.updated_at),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    }));
+    const supabase = createAdminClient();
+
+    const [
+      { data: beritaList, error: beritaError },
+      { data: staticPages, error: halamanError },
+    ] = await Promise.all([
+      supabase
+        .from("berita")
+        .select("slug, updated_at, published_at, created_at, status")
+        .eq("status", "published")
+        .order("published_at", { ascending: false }),
+      supabase
+        .from("static_pages")
+        .select("slug, updated_at, status")
+        .eq("status", "published")
+        .order("updated_at", { ascending: false })
+        .limit(200),
+    ]);
+
+    if (beritaError) {
+      console.error("[sitemap] berita fetch error:", beritaError.message);
+    } else {
+      beritaRoutes = (beritaList || []).map((item) => ({
+        url: `${base}/berita/${item.slug}`,
+        lastModified: safeDate(
+          item.updated_at || item.published_at || item.created_at,
+        ),
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }));
+    }
+
+    if (halamanError) {
+      console.error("[sitemap] halaman fetch error:", halamanError.message);
+    } else {
+      halamanRoutes = (staticPages || []).map((page) => ({
+        url: `${base}/halaman/${page.slug}`,
+        lastModified: safeDate(page.updated_at),
+        changeFrequency: "monthly",
+        priority: 0.6,
+      }));
+    }
   } catch (err) {
-    console.error("[sitemap] halaman fetch error:", err?.message || err);
+    console.error("[sitemap] general fetch error:", err?.message || err);
   }
 
-  return [
-    ...staticRoutes,
-    ...laporanRoutes,
-    ...halamanRoutes,
-    ...beritaRoutes,
-  ];
+  return [...staticRoutes, ...laporanRoutes, ...halamanRoutes, ...beritaRoutes];
 }
 
 function safeDate(value) {

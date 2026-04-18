@@ -111,9 +111,9 @@ export default async function GaleriPage() {
         breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Galeri" }]}
       />
 
-      <div className="bg-slate-50">
+      <main className="bg-slate-50 transition-colors dark:bg-slate-950">
         <GaleriPageClient items={items} />
-      </div>
+      </main>
     </>
   );
 }

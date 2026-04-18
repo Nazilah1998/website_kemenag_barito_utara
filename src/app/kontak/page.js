@@ -103,7 +103,9 @@ function getOfficeStatus() {
   };
 }
 
-function OfficeHoursBlock({ className = "text-sm leading-6 text-slate-700" }) {
+function OfficeHoursBlock({
+  className = "text-sm leading-6 text-slate-700 dark:text-slate-300",
+}) {
   const officeHoursList = Array.isArray(siteInfo.officeHours)
     ? siteInfo.officeHours
     : [siteInfo.officeHours];
@@ -139,189 +141,214 @@ export default function KontakPage() {
         breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Kontak" }]}
       />
 
-      <main className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-                  Status Layanan
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900">
-                  {officeStatus.label}
-                </h2>
+      <main className="bg-slate-50 transition-colors dark:bg-slate-950">
+        <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                    Status Layanan
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                    {officeStatus.label}
+                  </h2>
+                </div>
+
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    officeStatus.isOpen
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                      : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                  }`}
+                >
+                  {officeStatus.isOpen ? "Online" : "Offline"}
+                </span>
               </div>
 
-              <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                  officeStatus.isOpen
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-700"
-                }`}
-              >
-                {officeStatus.isOpen ? "Online" : "Offline"}
-              </span>
-            </div>
+              <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
+                {officeStatus.detail}
+              </p>
 
-            <p className="mt-4 text-sm text-slate-600">{officeStatus.detail}</p>
+              <div className="mt-6 grid gap-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-300">
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Waktu kantor saat ini
+                  </p>
+                  <p className="mt-1">{officeStatus.nowText}</p>
+                </div>
 
-            <div className="mt-6 grid gap-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Waktu kantor saat ini
-                </p>
-                <p className="mt-1">{officeStatus.nowText}</p>
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">Jam layanan</p>
-                <div className="mt-2">
-                  <OfficeHoursBlock />
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Jam layanan
+                  </p>
+                  <div className="mt-2">
+                    <OfficeHoursBlock />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-              Kontak Utama
-            </p>
-
-            <div className="mt-5 space-y-4 text-sm text-slate-700">
-              <div>
-                <p className="font-semibold text-slate-900">Nama Instansi</p>
-                <p className="mt-1">{siteInfo.name}</p>
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">Alamat</p>
-                <p className="mt-1 leading-6">{siteInfo.address}</p>
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">WhatsApp</p>
-                <a
-                  href={siteLinks.whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-block text-emerald-700 hover:text-emerald-800"
-                >
-                  {siteInfo.whatsapp}
-                </a>
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">Telepon</p>
-                <a
-                  href={siteLinks.phoneHref}
-                  className="mt-1 inline-block text-emerald-700 hover:text-emerald-800"
-                >
-                  {siteInfo.phone}
-                </a>
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">Email</p>
-                <a
-                  href={siteLinks.emailHref}
-                  className="mt-1 inline-block text-emerald-700 hover:text-emerald-800"
-                >
-                  {siteInfo.email}
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-10 grid gap-6 lg:grid-cols-[1fr_1fr]">
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 p-6">
-              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-                Lokasi Kantor
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                Kontak Utama
               </p>
-              <h2 className="mt-2 text-2xl font-bold text-slate-900">
-                Temukan kami di peta
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Gunakan peta di bawah ini untuk melihat lokasi kantor, lalu buka
-                petunjuk arah jika ingin datang langsung.
-              </p>
-            </div>
 
-            <iframe
-              src={siteLinks.mapEmbedUrl}
-              title="Peta lokasi kantor"
-              className="h-90 w-full"
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-
-            <div className="flex flex-wrap gap-3 p-6">
-              <a
-                href={siteLinks.mapDirectionUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
-              >
-                Petunjuk Arah
-              </a>
-              <a
-                href={siteLinks.mapDirectionUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-              >
-                Buka di Google Maps
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <KontakForm />
-          </div>
-        </section>
-
-        <section className="mt-10">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-              Kontak per Unit
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">
-              Pilih jalur komunikasi yang paling sesuai
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Semua tombol di bawah tetap mengarah ke kanal resmi yang sama,
-              tetapi dengan pesan awal yang sudah disesuaikan agar lebih mudah
-              diproses oleh admin.
-            </p>
-
-            <div className="mt-6 space-y-4">
-              {contactUnits.map((unit) => (
-                <div
-                  key={unit.title}
-                  className="rounded-2xl border border-slate-200 p-5 transition hover:border-emerald-300"
-                >
-                  <h3 className="text-base font-bold text-slate-900">
-                    {unit.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {unit.description}
+              <div className="mt-5 space-y-4 text-sm text-slate-700 dark:text-slate-300">
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Nama Instansi
                   </p>
+                  <p className="mt-1">{siteInfo.name}</p>
+                </div>
 
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Alamat
+                  </p>
+                  <p className="mt-1 leading-6">{siteInfo.address}</p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    WhatsApp
+                  </p>
                   <a
-                    href={buildWhatsAppLink(siteInfo.whatsappRaw, unit.prompt)}
+                    href={siteLinks.whatsappHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-4 inline-flex rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                    className="mt-1 inline-block text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
                   >
-                    Hubungi Unit
+                    {siteInfo.whatsapp}
                   </a>
                 </div>
-              ))}
+
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Telepon
+                  </p>
+                  <a
+                    href={siteLinks.phoneHref}
+                    className="mt-1 inline-block text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                  >
+                    {siteInfo.phone}
+                  </a>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">
+                    Email
+                  </p>
+                  <a
+                    href={siteLinks.emailHref}
+                    className="mt-1 inline-block text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                  >
+                    {siteInfo.email}
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          <section className="mt-10 grid gap-6 lg:grid-cols-[1fr_1fr]">
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+              <div className="border-b border-slate-200 p-6 transition-colors dark:border-slate-800">
+                <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                  Lokasi Kantor
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  Temukan kami di peta
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Gunakan peta di bawah ini untuk melihat lokasi kantor, lalu
+                  buka petunjuk arah jika ingin datang langsung.
+                </p>
+              </div>
+
+              <iframe
+                src={siteLinks.mapEmbedUrl}
+                title="Peta lokasi kantor"
+                className="h-90 w-full"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+
+              <div className="flex flex-wrap gap-3 p-6">
+                <a
+                  href={siteLinks.mapDirectionUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                >
+                  Petunjuk Arah
+                </a>
+                <a
+                  href={siteLinks.mapDirectionUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  Buka di Google Maps
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <KontakForm />
+            </div>
+          </section>
+
+          <section className="mt-10">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                Kontak per Unit
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                Pilih jalur komunikasi yang paling sesuai
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Semua tombol di bawah tetap mengarah ke kanal resmi yang sama,
+                tetapi dengan pesan awal yang sudah disesuaikan agar lebih mudah
+                diproses oleh admin.
+              </p>
+
+              <div className="mt-6 space-y-4">
+                {contactUnits.map((unit) => (
+                  <div
+                    key={unit.title}
+                    className="rounded-2xl border border-slate-200 p-5 transition hover:border-emerald-300 dark:border-slate-800 dark:hover:border-emerald-700"
+                  >
+                    <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                      {unit.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {unit.description}
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <a
+                        href={buildWhatsAppLink(unit.message)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                      >
+                        Hubungi via WhatsApp
+                      </a>
+
+                      <a
+                        href={siteLinks.emailHref}
+                        className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        Kirim Email
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
     </>
   );

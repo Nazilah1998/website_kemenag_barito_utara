@@ -36,7 +36,7 @@ export default function BeritaViewCounter({ slug, initialViews = 0 }) {
   }, [slug]);
 
   return (
-    <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+    <div className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-300">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="18"

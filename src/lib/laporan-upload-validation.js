@@ -1,4 +1,6 @@
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+// src/lib/laporan-upload-validation.js
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_MIME_TYPES = ["application/pdf"];
 const ALLOWED_EXTENSIONS = [".pdf"];
 
@@ -19,28 +21,21 @@ export function hasAllowedPdfExtension(filename = "") {
 }
 
 export function validatePdfFile(file) {
-  if (!file) {
-    return { ok: false, message: "File PDF wajib dipilih." };
-  }
-
-  if (file.size > MAX_FILE_SIZE) {
+  if (!file) return { ok: false, message: "File PDF wajib dipilih." };
+  if (file.size === 0)
+    return { ok: false, message: "File tidak boleh kosong." };
+  if (file.size > MAX_FILE_SIZE)
     return { ok: false, message: "Ukuran file melebihi batas 10 MB." };
-  }
-
-  if (!hasAllowedPdfExtension(file.name)) {
+  if (!hasAllowedPdfExtension(file.name))
     return {
       ok: false,
       message: "Ekstensi file tidak valid. Hanya PDF yang diizinkan.",
     };
-  }
-
-  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+  if (!ALLOWED_MIME_TYPES.includes(file.type))
     return {
       ok: false,
       message: "Tipe file tidak valid. Hanya PDF yang diizinkan.",
     };
-  }
-
   return { ok: true };
 }
 
@@ -64,23 +59,25 @@ export function validateDocumentPayload(
   const description = String(payload.description || "").trim();
   const yearRaw = String(payload.year || "").trim();
 
-  if (requireTitle && !title) {
+  if (requireTitle && !title)
     return { ok: false, message: "Judul dokumen wajib diisi." };
-  }
 
-  if (title.length > 180) {
-    return { ok: false, message: "Judul dokumen terlalu panjang." };
-  }
+  if (title.length > 180)
+    return {
+      ok: false,
+      message: "Judul dokumen terlalu panjang (maks. 180 karakter).",
+    };
 
-  if (description.length > 2000) {
-    return { ok: false, message: "Deskripsi dokumen terlalu panjang." };
-  }
+  if (description.length > 2000)
+    return {
+      ok: false,
+      message: "Deskripsi dokumen terlalu panjang (maks. 2000 karakter).",
+    };
 
   if (yearRaw) {
     const year = Number(yearRaw);
-    if (!Number.isInteger(year) || year < 2000 || year > 2100) {
-      return { ok: false, message: "Tahun dokumen tidak valid." };
-    }
+    if (!Number.isInteger(year) || year < 2000 || year > 2100)
+      return { ok: false, message: "Tahun dokumen tidak valid (2000–2100)." };
   }
 
   return {

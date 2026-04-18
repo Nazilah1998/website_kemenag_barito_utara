@@ -1,3 +1,5 @@
+// src/lib/laporan.js
+
 import { laporanCategories } from "@/data/laporan";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -25,31 +27,34 @@ function buildDocumentMeta({ year, href, mimeType, fileSize }) {
     metaParts.push("PDF");
   if (fileSize > 0) metaParts.push(`${Math.round(fileSize / 1024)} KB`);
 
-  return metaParts.join(" • ");
+  return metaParts.join(" · ");
 }
 
 export function normalizeLaporanDocument(doc = {}) {
-  const href = toText(doc?.file_url || doc?.href || "#", "#");
+  const fileUrl = toText(doc?.file_url || doc?.href || "", "");
   const year = doc?.year ? toNumber(doc.year, null) : null;
   const fileSize = toNumber(doc?.file_size, 0);
   const viewCount = toNumber(doc?.view_count, 0);
   const mimeType = toText(doc?.mime_type, "application/pdf");
   const title = toText(doc?.title, "Dokumen");
   const description = toText(doc?.description, "");
+  const id = doc?.id || "";
+
+  const viewHref = id ? `/api/laporan/view/${id}` : fileUrl || "#";
 
   return {
-    id: doc?.id || `${title}-${href}`,
+    id,
     title,
     description,
-    href,
+    href: viewHref,
     meta: buildDocumentMeta({
       year,
-      href,
+      href: fileUrl,
       mimeType,
       fileSize,
     }),
     year,
-    file_url: toText(doc?.file_url || href, href),
+    file_url: fileUrl,
     file_name: toText(doc?.file_name, ""),
     file_path: toText(doc?.file_path, ""),
     mime_type: mimeType,
@@ -106,7 +111,33 @@ export async function getAllLaporanCategories() {
 
     const { data, error } = await supabase
       .from("report_categories")
-      .select("id, slug, title, description, intro, sort_order, is_active")
+      .select(
+        `
+        id,
+        slug,
+        title,
+        description,
+        intro,
+        sort_order,
+        is_active,
+        documents:report_documents (
+          id,
+          title,
+          description,
+          year,
+          file_name,
+          file_path,
+          file_url,
+          mime_type,
+          file_size,
+          view_count,
+          sort_order,
+          is_published,
+          created_at,
+          updated_at
+        )
+        `,
+      )
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .order("title", { ascending: true });
@@ -117,7 +148,12 @@ export async function getAllLaporanCategories() {
       return laporanCategories.map(normalizeFallbackCategory);
     }
 
-    return data.map((item) => normalizeLaporanCategory(item, []));
+    return data.map((item) =>
+      normalizeLaporanCategory(
+        item,
+        Array.isArray(item?.documents) ? item.documents : [],
+      ),
+    );
   } catch {
     return laporanCategories.map(normalizeFallbackCategory);
   }
@@ -154,7 +190,7 @@ export async function getLaporanDetailBySlug(slug) {
           created_at,
           updated_at
         )
-      `,
+        `,
       )
       .eq("slug", slug)
       .eq("is_active", true)
@@ -174,6 +210,9 @@ export async function getLaporanDetailBySlug(slug) {
     return normalizeFallbackCategory(fallback);
   }
 }
+
+// Alias agar konsisten dengan pemanggilan di halaman [slug]/page.js
+export const getLaporanCategoryBySlug = getLaporanDetailBySlug;
 
 export async function getAdminLaporanCategories(slug = "") {
   try {
@@ -204,7 +243,7 @@ export async function getAdminLaporanCategories(slug = "") {
         created_at,
         updated_at
       )
-    `,
+      `,
     );
 
     if (slug) {

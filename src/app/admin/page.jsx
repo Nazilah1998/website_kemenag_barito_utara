@@ -1,4 +1,5 @@
-import { requireAdmin } from "@/lib/auth";
+import { requirePermission } from "@/lib/user-permissions";
+import { PERMISSIONS } from "@/lib/permissions";
 import { getDashboardStats } from "@/lib/admin-stats";
 import DashboardCharts from "@/components/admin/DashboardCharts";
 
@@ -12,6 +13,7 @@ function StatCard({ label, value, helper, tone = "slate" }) {
     sky: "border-sky-200 bg-sky-50/80",
     rose: "border-rose-200 bg-rose-50/80",
   };
+
   const textTones = {
     slate: "text-slate-900",
     emerald: "text-emerald-900",
@@ -21,13 +23,9 @@ function StatCard({ label, value, helper, tone = "slate" }) {
   };
 
   return (
-    <div
-      className={`rounded-3xl border p-5 shadow-sm ${tones[tone] || tones.slate}`}
-    >
+    <div className={`rounded-3xl border p-5 shadow-sm ${tones[tone] || tones.slate}`}>
       <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p
-        className={`mt-2 text-3xl font-bold ${textTones[tone] || textTones.slate}`}
-      >
+      <p className={`mt-2 text-3xl font-bold ${textTones[tone] || textTones.slate}`}>
         {value}
       </p>
       <p className="mt-2 text-sm text-slate-500">{helper}</p>
@@ -40,15 +38,19 @@ function numberFmt(n) {
 }
 
 export default async function AdminDashboardPage() {
-  const session = await requireAdmin({
+  const { session } = await requirePermission(PERMISSIONS.DASHBOARD_VIEW, {
     loginRedirect: "/admin/login",
     forbiddenRedirect:
       "/error?message=" +
-      encodeURIComponent("Akun ini tidak memiliki hak akses admin."),
+      encodeURIComponent("Anda tidak memiliki akses ke dashboard admin."),
+    inactiveRedirect:
+      "/error?message=" +
+      encodeURIComponent("Akun editor Anda belum diverifikasi oleh super admin."),
   });
 
   const user = session.profile;
   const stats = await getDashboardStats({ days: 14 });
+
   const summary = stats.summary || {
     totalBerita: 0,
     totalPublished: 0,
@@ -114,30 +116,7 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Pesan Kontak"
-          value={numberFmt(summary.totalKontak)}
-          helper={`${numberFmt(summary.kontakBaru)} belum dibaca.`}
-          tone={summary.kontakBaru > 0 ? "rose" : "slate"}
-        />
-        <StatCard
-          label="Kesehatan Data"
-          value={stats.ok ? "Normal" : "Periksa"}
-          helper={
-            stats.ok
-              ? "Semua tabel dapat diakses."
-              : "Beberapa tabel belum siap. Periksa Supabase."
-          }
-          tone={stats.ok ? "emerald" : "rose"}
-        />
-      </div>
-
-      <DashboardCharts
-        trend={stats.trend || []}
-        topBerita={stats.topBerita || []}
-        recentActivity={stats.recentActivity || []}
-      />
+      <DashboardCharts stats={stats} />
     </section>
   );
 }

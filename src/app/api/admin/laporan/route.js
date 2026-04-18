@@ -1,3 +1,5 @@
+// src/app/api/admin/laporan/route.js
+
 import { NextResponse } from "next/server";
 import { requireAdminAccess } from "@/lib/admin-guard";
 import { logError, logInfo, logWarn } from "@/lib/logger";
@@ -12,16 +14,12 @@ function sanitizeSlug(value = "") {
 }
 
 function normalizeDocuments(documents = []) {
-  return documents.slice().sort((a, b) => {
+  return [...documents].sort((a, b) => {
     const yearA = Number(a?.year || 0);
     const yearB = Number(b?.year || 0);
 
     if (yearA !== yearB) return yearB - yearA;
-
-    const dateA = new Date(a?.created_at || 0).getTime();
-    const dateB = new Date(b?.created_at || 0).getTime();
-
-    return dateB - dateA;
+    return new Date(b?.created_at || 0) - new Date(a?.created_at || 0);
   });
 }
 
@@ -42,23 +40,12 @@ export async function GET(request) {
 
   try {
     const searchParams = request.nextUrl.searchParams;
-    const rawSlug = searchParams.get("slug") || "";
-    const slug = sanitizeSlug(rawSlug);
+    const slug = sanitizeSlug(searchParams.get("slug") || "");
 
     let categoriesQuery = guard.supabase
       .from("report_categories")
       .select(
-        `
-        id,
-        slug,
-        title,
-        description,
-        intro,
-        sort_order,
-        is_active,
-        created_at,
-        updated_at
-      `,
+        "id, slug, title, description, intro, sort_order, is_active, created_at, updated_at",
       )
       .order("sort_order", { ascending: true });
 
@@ -76,37 +63,19 @@ export async function GET(request) {
       });
 
       return NextResponse.json(
-        { message: "Gagal memuat kategori laporan admin." },
+        { message: "Gagal memuat kategori laporan." },
         { status: 500 },
       );
     }
 
     const categoryIds = (categories || []).map((item) => item.id);
-
     let documents = [];
 
     if (categoryIds.length > 0) {
       const { data: docsData, error: docsError } = await guard.supabase
         .from("report_documents")
         .select(
-          `
-          id,
-          category_id,
-          title,
-          description,
-          year,
-          file_name,
-          file_path,
-          file_url,
-          mime_type,
-          file_size,
-          sort_order,
-          is_published,
-          created_by,
-          created_at,
-          updated_at,
-          view_count
-        `,
+          "id, category_id, title, description, year, file_name, file_path, file_url, mime_type, file_size, sort_order, is_published, created_by, created_at, updated_at, view_count",
         )
         .in("category_id", categoryIds)
         .order("created_at", { ascending: false });
@@ -118,7 +87,7 @@ export async function GET(request) {
         });
 
         return NextResponse.json(
-          { message: "Gagal memuat dokumen laporan admin." },
+          { message: "Gagal memuat dokumen laporan." },
           { status: 500 },
         );
       }
@@ -128,11 +97,7 @@ export async function GET(request) {
 
     const docsByCategoryId = documents.reduce((acc, doc) => {
       const key = doc.category_id;
-
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-
+      if (!acc[key]) acc[key] = [];
       acc[key].push(doc);
       return acc;
     }, {});
@@ -146,6 +111,7 @@ export async function GET(request) {
       adminUserId: guard.user?.id || null,
       slug: slug || null,
       categoryCount: normalizedCategories.length,
+      documentCount: documents.length,
     });
 
     return NextResponse.json({
@@ -159,10 +125,7 @@ export async function GET(request) {
     });
 
     return NextResponse.json(
-      {
-        message:
-          error?.message || "Terjadi kesalahan saat memuat laporan admin.",
-      },
+      { message: error?.message || "Terjadi kesalahan saat memuat laporan." },
       { status: 500 },
     );
   }

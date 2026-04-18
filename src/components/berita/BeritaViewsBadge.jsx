@@ -1,7 +1,7 @@
 export default function BeritaViewsBadge({ views = 0, className = "" }) {
     return (
         <div
-            className={`inline-flex items-center gap-2 text-sm text-slate-500 ${className}`.trim()}
+            className={`inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 ${className}`.trim()}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"

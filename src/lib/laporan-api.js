@@ -1,14 +1,25 @@
-export async function fetchCategoryDocuments(slug) {
-  const response = await fetch(
-    `/api/admin/laporan?slug=${encodeURIComponent(slug)}`,
-    { cache: "no-store" },
-  );
+// src/lib/laporan-api.js
 
-  const json = await response.json();
+const BASE = "/api/admin/laporan";
+
+async function parseResponse(response) {
+  const json = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(json?.message || "Gagal memuat dokumen kategori.");
+    throw new Error(json?.message || `HTTP ${response.status}`);
   }
+
+  return json;
+}
+
+export async function fetchCategoryDocuments(slug) {
+  const response = await fetch(`${BASE}?slug=${encodeURIComponent(slug)}`, {
+    method: "GET",
+    cache: "no-store",
+    credentials: "include",
+  });
+
+  const json = await parseResponse(response);
 
   const categoryData = Array.isArray(json?.categories)
     ? json.categories.find((item) => item.slug === slug)
@@ -28,53 +39,65 @@ export async function uploadLaporanDocument({
 }) {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("categoryId", categoryId || "");
-  formData.append("categorySlug", categorySlug || "");
-  formData.append("title", title);
-  formData.append("description", description);
+  formData.append("categoryId", String(categoryId || ""));
+  formData.append("categorySlug", String(categorySlug || ""));
+  formData.append("title", String(title || "").trim());
+  formData.append("description", String(description || "").trim());
   formData.append("year", String(year || ""));
   formData.append("is_published", String(Boolean(is_published)));
 
-  const response = await fetch("/api/admin/laporan/upload", {
+  const response = await fetch(`${BASE}/upload`, {
     method: "POST",
     body: formData,
+    credentials: "include",
   });
 
-  const json = await response.json();
-
-  if (!response.ok) {
-    throw new Error(json?.message || "Upload dokumen gagal.");
-  }
-
-  return json;
+  return parseResponse(response);
 }
 
 export async function updateLaporanDocument(id, payload) {
-  const response = await fetch(`/api/admin/laporan/${id}`, {
+  const response = await fetch(`${BASE}/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      title: String(payload?.title || "").trim(),
+      description: String(payload?.description || "").trim(),
+      year: String(payload?.year || ""),
+      is_published: Boolean(payload?.is_published),
+    }),
   });
 
-  const json = await response.json();
+  return parseResponse(response);
+}
 
-  if (!response.ok) {
-    throw new Error(json?.message || "Gagal memperbarui dokumen.");
+export async function updateLaporanDocumentWithFile(id, payload) {
+  const formData = new FormData();
+  formData.append("title", String(payload?.title || "").trim());
+  formData.append("description", String(payload?.description || "").trim());
+  formData.append("year", String(payload?.year || ""));
+  formData.append("is_published", String(Boolean(payload?.is_published)));
+
+  if (payload?.file) {
+    formData.append("file", payload.file);
   }
 
-  return json;
+  const response = await fetch(`${BASE}/${id}`, {
+    method: "PUT",
+    body: formData,
+    credentials: "include",
+  });
+
+  return parseResponse(response);
 }
 
 export async function deleteLaporanDocument(id) {
-  const response = await fetch(`/api/admin/laporan/${id}`, {
+  const response = await fetch(`${BASE}/${id}`, {
     method: "DELETE",
+    credentials: "include",
   });
 
-  const json = await response.json();
-
-  if (!response.ok) {
-    throw new Error(json?.message || "Gagal menghapus dokumen.");
-  }
-
-  return json;
+  return parseResponse(response);
 }

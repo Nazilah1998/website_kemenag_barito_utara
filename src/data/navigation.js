@@ -1,3 +1,5 @@
+// src/data/navigation.js
+
 export function getNavigationItems() {
   return [
     {
@@ -41,6 +43,7 @@ export function getNavigationItems() {
 
     { label: "Survey", href: "/survey" },
     { label: "PPID", href: "/ppid" },
+
     {
       label: "Zona Integritas",
       href: "/zona-integritas",
@@ -59,25 +62,9 @@ export function getNavigationItems() {
         },
       ],
     },
-    {
-      label: "Laporan",
-      href: "/laporan",
-      children: [
-        {
-          label: "SOP dan Standar Pelayanan",
-          href: "/laporan/sop-dan-standar-pelayanan",
-        },
-        { label: "Renstra", href: "/laporan/renstra" },
-        { label: "Perjanjian Kinerja", href: "/laporan/perjanjian-kinerja" },
-        { label: "Rencana Kinerja", href: "/laporan/rencana-kinerja" },
-        { label: "Capaian Kinerja", href: "/laporan/capaian-kinerja" },
-        { label: "Laporan Kinerja", href: "/laporan/laporan-kinerja" },
-        {
-          label: "Rencana Kerja Tahunan",
-          href: "/laporan/rencana-kerja-tahunan",
-        },
-      ],
-    },
+
+    { label: "Laporan", href: "/laporan" },
+
     { label: "Galeri", href: "/galeri" },
     { label: "Kontak", href: "/kontak" },
   ];
