@@ -35,12 +35,6 @@ export async function GET() {
         hasAdminPanelAccess,
         role: session.role ?? null,
       },
-      mfa: {
-        currentLevel: session.aal ?? null,
-        nextLevel: session.nextAal ?? null,
-        isVerified: session.isMfaVerified ?? false,
-        errorMessage: session.mfaErrorMessage ?? null,
-      },
     });
   } catch {
     return createNoStoreResponse({
@@ -51,12 +45,6 @@ export async function GET() {
         isEditor: false,
         hasAdminPanelAccess: false,
         role: null,
-      },
-      mfa: {
-        currentLevel: null,
-        nextLevel: null,
-        isVerified: false,
-        errorMessage: null,
       },
     });
   }

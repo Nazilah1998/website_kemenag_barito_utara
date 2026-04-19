@@ -90,12 +90,6 @@ export async function POST(request) {
         isEditor: session.isEditor ?? false,
         hasAdminPanelAccess,
       },
-      mfa: {
-        currentLevel: session.aal ?? null,
-        nextLevel: session.nextAal ?? null,
-        isVerified: session.isMfaVerified ?? false,
-        errorMessage: session.mfaErrorMessage ?? null,
-      },
     });
   } catch (error) {
     return createNoStoreResponse(

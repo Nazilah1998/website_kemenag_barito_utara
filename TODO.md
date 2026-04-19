@@ -1,8 +1,9 @@
-# TODO - Full Admin Dark/Light Sync
-
-- [x] Confirm scope with user (full dark/light on all admin submenu content)
-- [x] Audit admin pages/components for light-only classes
-- [ ] Patch dark classes in: dashboard, berita + forms, galeri form, halaman statis, audit log, laporan, manajemen editor
-- [ ] Run tests (`npm run test`)
-- [ ] Runtime verify key admin routes in dev server
-- [ ] Summarize fixes and findings
+- [ ] Sinkronkan `src/components/ProfileSubnav.jsx` ke 6 link profil yang valid.
+- [ ] Update styling tema di `src/app/profil/page.js` agar konsisten light/dark mode.
+- [ ] Update styling tema di `src/app/profil/sejarah/page.js` agar konsisten light/dark mode.
+- [ ] Update styling tema di `src/app/profil/visi-misi/page.js` agar konsisten light/dark mode.
+- [ ] Update styling tema di `src/app/profil/tugas-fungsi/page.js` agar konsisten light/dark mode.
+- [ ] Update styling tema di `src/app/profil/nilai-budaya-kerja/page.js` agar konsisten light/dark mode.
+- [ ] Update styling tema di `src/app/profil/tujuan/page.js` agar konsisten light/dark mode.
+- [ ] Rapikan label konteks halaman profil agar pola “Profil > [Submenu]” konsisten.
+- [ ] Verifikasi cepat area yang diubah dan finalisasi.

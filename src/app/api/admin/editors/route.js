@@ -11,6 +11,12 @@ function json(data, status = 200) {
   });
 }
 
+function isValidUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    String(value || "").trim(),
+  );
+}
+
 export async function GET() {
   try {
     const session = await getCurrentSessionContext();
@@ -77,22 +83,46 @@ export async function GET() {
       }
     }
 
-    const editors = (requests || []).map((item) => ({
-      user_id: item.user_id,
-      full_name: item.full_name,
-      email: item.email,
-      unit_name: item.unit_name || "-",
-      status: item.status,
-      requested_at: item.requested_at,
-      reviewed_at: item.reviewed_at,
-      reviewed_by: item.reviewed_by,
-      review_notes: item.review_notes,
-      role: item.profiles?.role || "editor",
-      is_active: Boolean(item.profiles?.is_active),
-      permissions: permissionsMap.get(item.user_id) || [],
-    }));
+    const invalidMfaUserIds = {};
 
-    return json({ editors });
+    const editors = (requests || []).map((item) => {
+      const status = String(item.status || "").toLowerCase();
+      const rawSystemRole = String(item.profiles?.role || "").toLowerCase();
+      const normalizedRole =
+        rawSystemRole === "admin" || rawSystemRole === "editor"
+          ? rawSystemRole
+          : "editor";
+
+      const userId = String(item.user_id || "").trim();
+      const validUuid = isValidUuid(userId);
+
+      if (!validUuid) {
+        invalidMfaUserIds[userId || "(kosong)"] =
+          "ID auth belum UUID valid. Sinkronkan data editor sebelum setup MFA.";
+      }
+
+      return {
+        user_id: item.user_id,
+        full_name: item.full_name,
+        email: item.email,
+        unit_name: item.unit_name || "-",
+        status: item.status,
+        requested_at: item.requested_at,
+        reviewed_at: item.reviewed_at,
+        reviewed_by: item.reviewed_by,
+        review_notes: item.review_notes,
+        role: status === "approved" ? "editor" : normalizedRole,
+        system_role: rawSystemRole || "editor",
+        is_active: Boolean(item.profiles?.is_active),
+        permissions: permissionsMap.get(item.user_id) || [],
+        mfa_setup_disabled: !validUuid,
+        mfa_setup_reason: validUuid
+          ? ""
+          : "ID auth editor belum sinkron (bukan UUID valid).",
+      };
+    });
+
+    return json({ editors, invalidMfaUserIds });
   } catch (error) {
     return json(
       { message: error?.message || "Gagal memuat daftar editor." },

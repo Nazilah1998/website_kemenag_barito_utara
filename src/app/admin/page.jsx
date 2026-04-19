@@ -83,12 +83,6 @@ export default async function AdminDashboardPage() {
             {session.role || "tidak diketahui"}
           </span>
         </p>
-
-        <div className="mt-4 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-700/60 dark:bg-emerald-900/30 dark:text-emerald-300">
-          {session?.isMfaVerified
-            ? "MFA admin aktif"
-            : "MFA admin belum terverifikasi"}
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

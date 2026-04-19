@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { updateSession } from "./lib/supabase/proxy";
 
-const ADMIN_PUBLIC_PATHS = new Set(["/admin/login", "/admin/mfa"]);
+const ADMIN_PUBLIC_PATHS = new Set(["/admin/login"]);
 const ADMIN_API_PUBLIC = new Set([
   "/api/admin/login",
   "/api/admin/logout",

@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 
 const AUTH_PATHS = new Set([
   "/admin/login",
-  "/admin/mfa",
   "/admin/forgot-password",
   "/admin/register-editor",
 ]);

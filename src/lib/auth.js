@@ -5,6 +5,7 @@ import { env } from "@/lib/env";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
 const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
+const SUPER_ADMIN_EMAIL = "nazilahmuhammad1998@gmail.com";
 
 export function normalizeRole(role) {
   if (!role || typeof role !== "string") return null;
@@ -45,55 +46,21 @@ export async function createServerSupabaseClient() {
   });
 }
 
-async function getAdminMfaContext(supabase) {
-  try {
-    const { data, error } =
-      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
-    if (error) {
-      if (isMissingSessionError(error)) {
-        return {
-          currentLevel: null,
-          nextLevel: null,
-          isVerified: false,
-          errorMessage: null,
-        };
-      }
-      return {
-        currentLevel: null,
-        nextLevel: null,
-        isVerified: false,
-        errorMessage: error.message || "Gagal membaca status MFA.",
-      };
-    }
-
-    return {
-      currentLevel: data?.currentLevel ?? null,
-      nextLevel: data?.nextLevel ?? null,
-      isVerified: data?.currentLevel === "aal2",
-      errorMessage: null,
-    };
-  } catch (error) {
-    return {
-      currentLevel: null,
-      nextLevel: null,
-      isVerified: false,
-      errorMessage: error?.message || "Gagal membaca status MFA.",
-    };
-  }
-}
-
 async function getUserProfile(supabase, userId) {
   if (!userId) return null;
 
-  const candidates = ["profiles", "admin_users", "users"];
+  const candidates = [
+    { table: "profiles", column: "id" },
+    { table: "admin_users", column: "user_id" },
+    { table: "users", column: "id" },
+  ];
 
-  for (const table of candidates) {
+  for (const candidate of candidates) {
     try {
       const { data, error } = await supabase
-        .from(table)
+        .from(candidate.table)
         .select("*")
-        .eq("id", userId)
+        .eq(candidate.column, userId)
         .maybeSingle();
 
       if (!error && data) {
@@ -129,22 +96,43 @@ export async function getCurrentSessionContext() {
       isEditor: false,
       // TAMBAHAN: flag gabungan untuk akses panel admin
       hasAdminAccess: false,
-      aal: null,
-      nextAal: null,
-      isMfaVerified: false,
-      mfaErrorMessage: null,
     };
   }
 
   const profile = await getUserProfile(supabase, user.id);
+
+  const currentEmail = String(user?.email || profile?.email || "")
+    .trim()
+    .toLowerCase();
+
+  let profileRole = normalizeRole(profile?.role);
+
+  if (currentEmail === SUPER_ADMIN_EMAIL) {
+    profileRole = "super_admin";
+  } else {
+    try {
+      const { data: adminRow, error: adminRowError } = await supabase
+        .from("admin_users")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!adminRowError) {
+        const adminRole = normalizeRole(adminRow?.role);
+        if (adminRole) {
+          profileRole = adminRole;
+        }
+      }
+    } catch {}
+  }
+
   const role = normalizeRole(
-    profile?.role ||
+    profileRole ||
       user?.app_metadata?.role ||
       user?.user_metadata?.role ||
       null,
   );
 
-  const mfa = await getAdminMfaContext(supabase);
   const isAdmin = ADMIN_ROLES.has(role);
   const isEditor = EDITOR_ROLES.has(role);
 
@@ -159,10 +147,6 @@ export async function getCurrentSessionContext() {
     isEditor,
     // hasAdminAccess = true untuk semua role yang boleh masuk panel admin
     hasAdminAccess: isAdmin || isEditor,
-    aal: mfa.currentLevel,
-    nextAal: mfa.nextLevel,
-    isMfaVerified: mfa.isVerified,
-    mfaErrorMessage: mfa.errorMessage,
   };
 }
 

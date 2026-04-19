@@ -15,10 +15,7 @@ export default async function PencarianPage({ searchParams }) {
       <PageBanner
         title="Pencarian"
         description="Temukan berita, layanan, dokumen publik, dan informasi penting lainnya."
-        breadcrumb={[
-          { label: "Beranda", href: "/" },
-          { label: "Pencarian" },
-        ]}
+        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Pencarian" }]}
       />
       <SearchResultsClient initialQuery={query} />
     </>

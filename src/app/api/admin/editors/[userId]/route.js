@@ -3,6 +3,7 @@ import { getCurrentSessionContext } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
+const SUPER_ADMIN_EMAIL = "nazilahmuhammad1998@gmail.com";
 
 function json(data, status = 200) {
   return NextResponse.json(data, {
@@ -40,6 +41,7 @@ export async function PATCH(request, context) {
 
     const supabase = createAdminClient();
     const reviewerId = session?.profile?.id || session?.user?.id || null;
+    const currentUserId = session?.user?.id || null;
     const now = new Date().toISOString();
 
     if (action === "approve") {
@@ -55,10 +57,51 @@ export async function PATCH(request, context) {
 
       if (requestError) throw requestError;
 
+      return json({
+        message:
+          "Editor berhasil di-approve. Silakan tentukan role, permission, dan aktivasi akun.",
+      });
+    }
+
+    if (action === "set_role") {
+      const nextRole = String(body?.role || "")
+        .trim()
+        .toLowerCase();
+
+      if (nextRole !== "admin" && nextRole !== "editor") {
+        return json({ message: "Role hanya boleh admin atau editor." }, 400);
+      }
+
+      if (currentUserId && currentUserId === userId) {
+        return json(
+          { message: "Tidak bisa mengubah role akun Anda sendiri." },
+          400,
+        );
+      }
+
+      const { data: targetProfile, error: targetProfileError } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (targetProfileError) throw targetProfileError;
+
+      const targetEmail = String(targetProfile?.email || "")
+        .trim()
+        .toLowerCase();
+
+      if (targetEmail && targetEmail === SUPER_ADMIN_EMAIL) {
+        return json(
+          { message: "Role akun super admin dikunci dan tidak dapat diubah." },
+          403,
+        );
+      }
+
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
-          role: "editor",
+          role: nextRole,
           updated_at: now,
         })
         .eq("id", userId);
@@ -68,14 +111,71 @@ export async function PATCH(request, context) {
       const { error: adminUserError } = await supabase
         .from("admin_users")
         .update({
-          role: "editor",
+          role: nextRole,
           updated_at: now,
         })
         .eq("user_id", userId);
 
       if (adminUserError) throw adminUserError;
 
-      return json({ message: "Editor berhasil di-approve." });
+      return json({
+        message: `Role akun berhasil diubah menjadi ${nextRole}.`,
+      });
+    }
+
+    if (action === "delete") {
+      if (currentUserId && currentUserId === userId) {
+        return json(
+          { message: "Tidak bisa menghapus akun Anda sendiri." },
+          400,
+        );
+      }
+
+      const { data: targetProfile, error: targetProfileError } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (targetProfileError) throw targetProfileError;
+
+      const targetEmail = String(targetProfile?.email || "")
+        .trim()
+        .toLowerCase();
+
+      if (targetEmail && targetEmail === SUPER_ADMIN_EMAIL) {
+        return json({ message: "Akun super admin tidak dapat dihapus." }, 403);
+      }
+
+      const { error: permissionsError } = await supabase
+        .from("user_permissions")
+        .delete()
+        .eq("user_id", userId);
+
+      if (permissionsError) throw permissionsError;
+
+      const { error: requestDeleteError } = await supabase
+        .from("editor_requests")
+        .delete()
+        .eq("user_id", userId);
+
+      if (requestDeleteError) throw requestDeleteError;
+
+      const { error: adminDeleteError } = await supabase
+        .from("admin_users")
+        .delete()
+        .eq("user_id", userId);
+
+      if (adminDeleteError) throw adminDeleteError;
+
+      const { error: profileDeleteError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+      if (profileDeleteError) throw profileDeleteError;
+
+      return json({ message: "Akun editor berhasil dihapus." });
     }
 
     if (action === "reject") {

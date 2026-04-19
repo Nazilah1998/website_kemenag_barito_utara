@@ -82,38 +82,21 @@ export default function AdminUpdatePasswordClient() {
 
         async function checkRecoverySession() {
             try {
-                const { data, error } =
-                    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+                const {
+                    data: { user },
+                    error,
+                } = await supabase.auth.getUser();
 
                 if (!active) return;
 
-                if (error) {
-                    setError(error.message || "Gagal memeriksa status sesi reset password.");
+                if (error || !user) {
+                    setError("Sesi reset password tidak valid atau sudah kedaluwarsa.");
                     setChecking(false);
                     return;
                 }
 
-                const currentLevel = data?.currentLevel ?? null;
-                const nextLevel = data?.nextLevel ?? null;
-
-                if (currentLevel === "aal2") {
-                    setReady(true);
-                    setChecking(false);
-                    return;
-                }
-
-                if (nextLevel === "aal2") {
-                    router.replace("/admin/mfa?mode=verify&next=/update-password");
-                    return;
-                }
-
-                if (currentLevel === "aal1" && nextLevel !== "aal2") {
-                    setReady(true);
-                    setChecking(false);
-                    return;
-                }
-
-                setError("Sesi reset password tidak valid atau sudah kedaluwarsa.");
+                setReady(true);
+                setChecking(false);
             } catch (err) {
                 if (!active) return;
                 setError(
@@ -131,7 +114,7 @@ export default function AdminUpdatePasswordClient() {
         return () => {
             active = false;
         };
-    }, [router, supabase]);
+    }, [supabase]);
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -151,18 +134,6 @@ export default function AdminUpdatePasswordClient() {
         setSubmitting(true);
 
         try {
-            const { data: aalData, error: aalError } =
-                await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
-            if (aalError) {
-                throw aalError;
-            }
-
-            if (aalData?.currentLevel !== "aal2" && aalData?.nextLevel === "aal2") {
-                router.replace("/admin/mfa?mode=verify&next=/update-password");
-                return;
-            }
-
             const { error: updateError } = await supabase.auth.updateUser({
                 password,
             });
@@ -182,15 +153,6 @@ export default function AdminUpdatePasswordClient() {
             const message =
                 err?.message ||
                 "Gagal memperbarui password. Silakan ulangi dari email reset.";
-
-            if (
-                message.includes("AAL2 session is required") ||
-                message.includes("aal2")
-            ) {
-                router.replace("/admin/mfa?mode=verify&next=/update-password");
-                return;
-            }
-
             setError(message);
         } finally {
             setSubmitting(false);
@@ -250,8 +212,7 @@ export default function AdminUpdatePasswordClient() {
                             Buat password baru
                         </h1>
                         <p className="mt-3 text-sm leading-7 text-slate-600">
-                            Masukkan password baru untuk akun Anda. Jika MFA aktif, sistem akan
-                            meminta verifikasi tambahan terlebih dahulu.
+                            Masukkan password baru untuk akun Anda.
                         </p>
                     </div>
 
@@ -337,8 +298,7 @@ export default function AdminUpdatePasswordClient() {
                         </form>
                     ) : (
                         <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-700">
-                            Sesi reset password belum siap. Jika akun Anda memakai MFA, silakan
-                            lanjutkan verifikasi MFA terlebih dahulu.
+                            Sesi reset password belum siap. Silakan minta tautan reset baru.
                         </div>
                     )}
                 </div>

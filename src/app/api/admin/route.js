@@ -15,12 +15,6 @@ export async function GET() {
             isAdmin: false,
             isEditor: false,
           },
-          mfa: {
-            currentLevel: null,
-            nextLevel: null,
-            isVerified: false,
-            errorMessage: null,
-          },
         },
         { status: 401 },
       );
@@ -38,12 +32,6 @@ export async function GET() {
         isAdmin: Boolean(session.isAdmin),
         isEditor: Boolean(session.isEditor),
       },
-      mfa: {
-        currentLevel: session.aal ?? null,
-        nextLevel: session.nextAal ?? null,
-        isVerified: Boolean(session.isMfaVerified),
-        errorMessage: session.mfaErrorMessage ?? null,
-      },
     });
   } catch (error) {
     return NextResponse.json(
@@ -54,12 +42,6 @@ export async function GET() {
         permissions: {
           isAdmin: false,
           isEditor: false,
-        },
-        mfa: {
-          currentLevel: null,
-          nextLevel: null,
-          isVerified: false,
-          errorMessage: null,
         },
       },
       { status: 500 },

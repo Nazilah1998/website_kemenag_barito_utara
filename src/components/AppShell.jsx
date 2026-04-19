@@ -21,7 +21,7 @@ export default function AppShell({ children }) {
                 Lewati ke konten utama
             </a>
             <Header />
-            <main id="konten-utama" tabIndex="-1" className="min-h-screen">
+            <main id="konten-utama" tabIndex="-1" className="min-h-screen pt-24 lg:pt-30">
                 {children}
             </main>
             <Footer />

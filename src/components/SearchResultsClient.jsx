@@ -30,6 +30,23 @@ function mergeResults(localResults, remoteResults) {
   return merged;
 }
 
+function normalizeCategory(value = "") {
+  const text = String(value).toLowerCase();
+  if (text.includes("berita")) return "berita";
+  if (text.includes("layanan")) return "layanan";
+  if (text.includes("dokumen")) return "dokumen";
+  if (text.includes("halaman")) return "halaman";
+  return "lainnya";
+}
+
+const FILTERS = [
+  { key: "all", label: "Semua" },
+  { key: "berita", label: "Berita" },
+  { key: "halaman", label: "Halaman" },
+  { key: "layanan", label: "Layanan" },
+  { key: "dokumen", label: "Dokumen" },
+];
+
 export default function SearchResultsClient({ initialQuery = "" }) {
   const { t } = useLanguage();
   const query = initialQuery.trim();
@@ -38,6 +55,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
 
   const [remoteResults, setRemoteResults] = useState([]);
   const [remoteStatus, setRemoteStatus] = useState("idle");
+  const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
     if (!query) {
@@ -80,48 +98,99 @@ export default function SearchResultsClient({ initialQuery = "" }) {
     return mergeResults(localResults, remote);
   }, [query, localResults, remoteResults]);
 
+  const filteredResults = useMemo(() => {
+    const effectiveFilter = query ? activeFilter : "all";
+    if (effectiveFilter === "all") return results;
+
+    return results.filter((item) => {
+      const section = normalizeCategory(item?.section);
+      const category = normalizeCategory(item?.category);
+      return section === effectiveFilter || category === effectiveFilter;
+    });
+  }, [results, activeFilter, query]);
+
   const loadingRemote = query && remoteStatus === "loading";
   const showEmptyState =
-    query && results.length === 0 && remoteStatus !== "loading";
+    query && filteredResults.length === 0 && remoteStatus !== "loading";
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-10">
       <div className="mb-8">
         {query ? (
           <>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
               {t("searchPage.resultFor")}{" "}
               <span className="font-semibold text-slate-900 dark:text-slate-100">
                 “{query}”
               </span>
             </p>
 
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              {results.length} {t("searchPage.resultCount")}
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {filteredResults.length} {t("searchPage.resultCount")}
               {loadingRemote ? " • memuat konten dinamis..." : ""}
             </p>
           </>
         ) : (
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
             {t("searchPage.emptyState")}
           </p>
         )}
       </div>
 
+      {query ? (
+        <div
+          className="mb-6 flex flex-wrap gap-2"
+          role="tablist"
+          aria-label="Filter hasil pencarian"
+        >
+          {FILTERS.map((filter) => {
+            const active = activeFilter === filter.key;
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveFilter(filter.key)}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${active
+                  ? "border-emerald-600 bg-emerald-600 text-white"
+                  : "border-slate-300 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-400 dark:hover:text-emerald-300"
+                  }`}
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       {showEmptyState ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-          {t("common.noResults")}
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+          <p className="font-semibold">{t("common.noResults")}</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Coba gunakan kata kunci lain yang lebih umum atau buka halaman kontak
+            untuk bantuan lebih lanjut.
+          </p>
+          <div className="mt-4">
+            <Link
+              href="/kontak"
+              className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+            >
+              Hubungi Kami
+            </Link>
+          </div>
         </div>
       ) : null}
 
       <div className="space-y-4">
-        {results.map((item) => (
+        {filteredResults.map((item) => (
           <Link
             key={`${item.href}-${item.title}`}
             href={item.href}
-            className="block rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950"
+            className="block rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-950"
+            aria-label={`Buka hasil: ${item.title}`}
           >
-            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
               <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
                 {item.section}
               </span>
@@ -133,7 +202,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
             </h3>
 
             {item.description ? (
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+              <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
                 {item.description}
               </p>
             ) : null}

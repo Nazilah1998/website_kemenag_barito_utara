@@ -61,7 +61,7 @@ export async function ensureUniqueSlug(
 }
 
 export async function validateAdmin(options = {}) {
-  const { requireMfa = true, permission = null, allowEditor = true } = options;
+  const { permission = null, allowEditor = true } = options;
 
   const session = await getCurrentSessionContext();
 
@@ -78,35 +78,12 @@ export async function validateAdmin(options = {}) {
     };
   }
 
-  // Pastikan ada role yang valid
   const role = session?.role || null;
   const isEditor = session?.isEditor === true;
   const isAdmin = session?.isAdmin === true;
   const isSuperAdmin = role === "super_admin";
 
-  // Admin atau super_admin selalu boleh masuk
   if (isAdmin || isSuperAdmin) {
-    // Wajib MFA untuk admin/super_admin
-    if (requireMfa && !session?.isMfaVerified) {
-      return {
-        ok: false,
-        response: NextResponse.json(
-          {
-            message:
-              "MFA admin wajib diselesaikan sebelum mengakses endpoint ini.",
-            code: "MFA_REQUIRED",
-            mfa: {
-              currentLevel: session?.aal ?? null,
-              nextLevel: session?.nextAal ?? null,
-              isVerified: false,
-            },
-          },
-          { status: 403 },
-        ),
-      };
-    }
-
-    // Cek permission role admin
     if (permission && !hasPermission(role, permission)) {
       return {
         ok: false,
@@ -134,7 +111,6 @@ export async function validateAdmin(options = {}) {
     };
   }
 
-  // Editor
   if (isEditor && allowEditor) {
     const userId = session?.profile?.id || session?.user?.id || null;
     const email = session?.profile?.email || session?.user?.email || null;
@@ -145,7 +121,6 @@ export async function validateAdmin(options = {}) {
       email,
     });
 
-    // Editor belum disetujui
     if (!permissionContext.approved || !permissionContext.isActive) {
       return {
         ok: false,
@@ -159,7 +134,6 @@ export async function validateAdmin(options = {}) {
       };
     }
 
-    // Cek permission granular via user_permissions
     if (permission && !hasUserPermission(permissionContext, permission)) {
       return {
         ok: false,
@@ -181,7 +155,6 @@ export async function validateAdmin(options = {}) {
     };
   }
 
-  // Tidak ada akses sama sekali
   return {
     ok: false,
     response: NextResponse.json(

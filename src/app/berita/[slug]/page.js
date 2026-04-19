@@ -278,7 +278,8 @@ export default async function DetailBeritaPage({ params }) {
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_300px]">
               <div className="min-w-0">
                 <article
-                  className="prose prose-slate max-w-none rounded-4xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:p-10 dark:border-slate-800 dark:bg-slate-900 dark:prose-invert dark:prose-headings:text-slate-100 dark:prose-p:text-slate-300 dark:prose-strong:text-slate-100 dark:prose-a:text-emerald-400 dark:prose-a:no-underline hover:dark:prose-a:text-emerald-300 dark:prose-li:text-slate-300 dark:prose-blockquote:text-slate-300 dark:prose-figcaption:text-slate-400 dark:prose-hr:border-slate-700 dark:prose-code:text-emerald-300 dark:prose-pre:bg-slate-950"
+                  className="prose prose-slate max-w-none rounded-4xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm md:p-8 lg:p-10 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-white dark:prose-strong:text-white dark:prose-a:text-emerald-300 dark:prose-a:no-underline hover:dark:prose-a:text-emerald-200 dark:prose-li:text-white dark:prose-blockquote:text-white dark:prose-figcaption:text-slate-200 dark:prose-hr:border-slate-700 dark:prose-code:text-emerald-300 dark:prose-pre:bg-slate-950 **:text-inherit! [&_p]:text-inherit! [&_li]:text-inherit! [&_blockquote]:text-inherit! [&_span]:text-inherit!"
+                  style={{ color: "inherit" }}
                   dangerouslySetInnerHTML={{ __html: berita.content || "" }}
                 />
               </div>
