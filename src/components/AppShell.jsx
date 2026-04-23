@@ -21,10 +21,10 @@ export default function AppShell({ children }) {
                 Lewati ke konten utama
             </a>
             <Header />
-            <main id="konten-utama" tabIndex="-1" className="min-h-screen pt-24 lg:pt-30">
+            <main id="konten-utama" tabIndex="-1" className="min-h-screen pt-24 sm:pt-28 md:pt-32 lg:pt-36 xl:pt-40">
                 {children}
             </main>
             <Footer />
         </>
     );
-}
+}   

@@ -47,7 +47,7 @@ export default function PageBanner({
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_left,rgba(16,185,129,0.20),transparent_30%),radial-gradient(circle_at_bottom,rgba(255,255,255,0.08),transparent_30%)]" />
       <div className="absolute inset-0 -z-10 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-size-[28px_28px]" />
 
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:py-14 lg:px-8 lg:py-16">
+      <div className="w-full px-6 py-10 sm:px-10 md:py-14 lg:px-16 lg:py-16 xl:px-20">
         {breadcrumb.length > 0 ? (
           <nav
             aria-label="Breadcrumb"

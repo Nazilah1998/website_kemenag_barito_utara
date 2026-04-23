@@ -1,15 +1,18 @@
-- [ ] Sinkronkan `src/components/ProfileSubnav.jsx` ke 6 link profil yang valid.
-- [ ] Update styling tema di `src/app/profil/page.js` agar konsisten light/dark mode.
-- [ ] Update styling tema di `src/app/profil/sejarah/page.js` agar konsisten light/dark mode.
-- [ ] Update styling tema di `src/app/profil/visi-misi/page.js` agar konsisten light/dark mode.
-- [ ] Update styling tema di `src/app/profil/tugas-fungsi/page.js` agar konsisten light/dark mode.
-- [ ] Update styling tema di `src/app/profil/nilai-budaya-kerja/page.js` agar konsisten light/dark mode.
-- [ ] Update styling tema di `src/app/profil/tujuan/page.js` agar konsisten light/dark mode.
-- [ ] Rapikan label konteks halaman profil agar pola “Profil > [Submenu]” konsisten.
-- [ ] Verifikasi cepat area yang diubah dan finalisasi.
+# TODO - Homepage Slider + Admin CRUD
 
-- [x] Update alur register editor agar tanpa verifikasi email Supabase dan diarahkan ke login admin.
-- [x] Pastikan endpoint register editor mengembalikan pesan menunggu verifikasi super_admin.
-- [x] Ubah guard dashboard agar editor pending tetap bisa masuk dashboard saja.
-- [x] Pertahankan blokir permissions editor pending untuk halaman admin selain dashboard.
-- [ ] Verifikasi cepat flow register -> login -> dashboard pending.
+- [x] 1. Add DB schema for `homepage_slides` in `docs/schema.sql`
+- [x] 2. Create library `src/lib/homepage-slides.js` for public/admin queries
+- [x] 3. Create admin APIs:
+  - [x] `src/app/api/admin/homepage-slides/route.js`
+  - [x] `src/app/api/admin/homepage-slides/[id]/route.js`
+- [x] 4. Create admin UI:
+  - [x] `src/app/admin/homepage-slides/page.jsx`
+  - [x] `src/components/admin/AdminHomepageSlidesManager.jsx`
+- [x] 5. Update permissions and admin navigation:
+  - [x] `src/lib/permissions.js`
+  - [x] `src/components/admin/AdminSidebar.jsx`
+  - [x] `src/components/admin/AdminHeader.jsx`
+- [x] 6. Create homepage section slider:
+  - [x] `src/components/HomepageSlidesSection.jsx`
+  - [x] integrate into `src/app/page.js`
+- [ ] 7. Run critical-path testing and fix issues

@@ -1,6 +1,6 @@
 export default function BeritaLoading() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-12">
+    <main className="w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
       <section className="rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-700 px-6 py-12 text-white md:px-10">
         <div className="h-4 w-24 animate-pulse rounded bg-white/20" />
         <div className="mt-4 h-10 w-80 max-w-full animate-pulse rounded bg-white/20" />

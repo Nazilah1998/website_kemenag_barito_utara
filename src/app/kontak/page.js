@@ -142,7 +142,7 @@ export default function KontakPage() {
       />
 
       <main className="bg-slate-50 transition-colors dark:bg-slate-950">
-        <div className="mx-auto max-w-6xl px-6 py-12 lg:px-8">
+        <div className="w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
           <section className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-start justify-between gap-4">

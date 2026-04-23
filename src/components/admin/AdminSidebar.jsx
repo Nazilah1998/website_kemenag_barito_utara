@@ -57,26 +57,6 @@ function AuditIcon() {
   );
 }
 
-function PageIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path
-        d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
-        strokeLinejoin="round"
-      />
-      <path d="M14 3v6h6" strokeLinejoin="round" />
-      <path d="M8 13h8" strokeLinecap="round" />
-      <path d="M8 17h5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function FolderIcon() {
   return (
     <svg
@@ -89,6 +69,23 @@ function FolderIcon() {
       <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
       <path d="M8 12h8" />
       <path d="M8 16h5" />
+    </svg>
+  );
+}
+
+function SliderIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M7 9h10" />
+      <path d="M7 13h6" />
+      <circle cx="17.5" cy="13" r="1.5" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -152,10 +149,12 @@ export default function AdminSidebar({
     PERMISSIONS.DASHBOARD_VIEW
   );
   const canViewBerita = hasAccess(permissionContext, PERMISSIONS.BERITA_VIEW);
-  const canViewHalaman = hasAccess(permissionContext, PERMISSIONS.HALAMAN_VIEW);
   const canViewLaporan = hasAccess(permissionContext, PERMISSIONS.LAPORAN_VIEW);
+  const canViewHomepageSlides = hasAccess(
+    permissionContext,
+    PERMISSIONS.HOMEPAGE_SLIDES_VIEW
+  );
   const canViewAudit = hasAccess(permissionContext, PERMISSIONS.AUDIT_VIEW);
-  const canManageEditors = role === "super_admin";
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900">
@@ -198,16 +197,6 @@ export default function AdminSidebar({
               />
             ) : null}
 
-            {canViewHalaman ? (
-              <NavLink
-                href="/admin/halaman"
-                label="Halaman Statis"
-                icon={<PageIcon />}
-                active={pathname.startsWith("/admin/halaman")}
-                onNavigate={onNavigate}
-              />
-            ) : null}
-
             {canViewLaporan ? (
               <NavLink
                 href="/admin/laporan"
@@ -217,6 +206,16 @@ export default function AdminSidebar({
                   pathname === "/admin/laporan" ||
                   pathname.startsWith("/admin/laporan/")
                 }
+                onNavigate={onNavigate}
+              />
+            ) : null}
+
+            {canViewHomepageSlides ? (
+              <NavLink
+                href="/admin/homepage-slides"
+                label="Slider Beranda"
+                icon={<SliderIcon />}
+                active={pathname.startsWith("/admin/homepage-slides")}
                 onNavigate={onNavigate}
               />
             ) : null}

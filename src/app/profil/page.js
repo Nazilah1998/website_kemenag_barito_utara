@@ -48,7 +48,7 @@ export default function ProfilPage() {
           <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-emerald-300 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="relative w-full px-6 py-20 sm:px-10 lg:px-16 xl:px-20">
           <div className="max-w-3xl">
             <p className="text-sm font-bold uppercase tracking-[0.35em] text-emerald-200">
               Profil Instansi
@@ -68,7 +68,7 @@ export default function ProfilPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <section className="w-full px-6 py-14 sm:px-10 lg:px-16 xl:px-20">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-emerald-700">

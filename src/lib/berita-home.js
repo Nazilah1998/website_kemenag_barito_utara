@@ -34,6 +34,7 @@ function normalizeBerita(item) {
     date: formatDateIndonesia(item.published_at || item.created_at),
     isoDate: item.published_at || item.created_at,
     coverImage: normalizeCoverImageUrl(item.cover_image || ""),
+    viewCount: Number(item.views || 0),
   };
 }
 
@@ -50,13 +51,14 @@ const getCachedLatestBeritaHome = unstable_cache(
           category,
           cover_image,
           published_at,
-          created_at
+          created_at,
+          views
         `,
       )
       .eq("is_published", true)
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(3);
+      .limit(4);
 
     if (error) {
       console.error("getCachedLatestBeritaHome error:", error);

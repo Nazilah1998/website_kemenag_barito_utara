@@ -43,9 +43,13 @@ describe("hasPermission", () => {
     expect(hasPermission(ROLES.EDITOR, PERMISSIONS.BERITA_CREATE)).toBe(true);
   });
 
-  it("admin has halaman permissions", () => {
-    expect(hasPermission(ROLES.ADMIN, PERMISSIONS.HALAMAN_CREATE)).toBe(true);
-    expect(hasPermission(ROLES.ADMIN, PERMISSIONS.HALAMAN_PUBLISH)).toBe(true);
+  it("admin has homepage slides permissions", () => {
+    expect(hasPermission(ROLES.ADMIN, PERMISSIONS.HOMEPAGE_SLIDES_VIEW)).toBe(
+      true,
+    );
+    expect(hasPermission(ROLES.ADMIN, PERMISSIONS.HOMEPAGE_SLIDES_MANAGE)).toBe(
+      true,
+    );
   });
 });
 

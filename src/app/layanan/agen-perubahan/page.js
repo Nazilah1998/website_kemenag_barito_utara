@@ -12,7 +12,7 @@ export default function AgenPerubahanPage() {
 
   return (
     <main className="min-h-screen bg-linear-to-br from-emerald-50 via-slate-50 to-amber-50">
-      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+      <section className="grid w-full gap-8 px-6 py-14 sm:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-16 xl:px-20">
         <div className="rounded-4xl border border-white bg-white/95 p-8 shadow-xl">
           <div className="flex flex-wrap gap-3">
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-black uppercase tracking-[0.25em] text-emerald-700">

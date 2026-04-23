@@ -143,8 +143,8 @@ export default async function LaporanCategoryPage({ params }) {
       />
 
       <main className="bg-slate-50/60 dark:bg-slate-950">
-        <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
-          <div className="mb-6">
+        <section className="w-full px-6 py-10 sm:px-10 md:py-14 lg:px-16 xl:px-20">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/laporan"
               className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
@@ -152,24 +152,25 @@ export default async function LaporanCategoryPage({ params }) {
               <ArrowLeftIcon />
               <span>Kembali ke semua kategori</span>
             </Link>
+
+            <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300">
+              {documents.length} dokumen tersedia
+            </span>
           </div>
 
-          <div className="rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-              {category.title}
-            </h2>
+          <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.14),_transparent_42%)]" />
+            <div className="relative">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {category.title}
+              </h2>
 
-            {category.description ? (
-              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                {category.description}
-              </p>
-            ) : null}
-
-            {documents.length > 0 ? (
-              <p className="mt-3 text-xs font-semibold text-slate-400 dark:text-slate-500">
-                {documents.length} dokumen tersedia
-              </p>
-            ) : null}
+              {category.description ? (
+                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                  {category.description}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           {category.intro ? (
@@ -180,63 +181,65 @@ export default async function LaporanCategoryPage({ params }) {
             </div>
           ) : null}
 
-          <div className="mt-8 space-y-4">
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
             {documents.length > 0 ? (
-              documents.map((doc) => (
+              documents.map((doc, index) => (
                 <article
                   key={doc.id}
-                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
+                  className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700"
                 >
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start gap-3">
+                  <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.16),_transparent_42%)]" />
+                  <div className="relative">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
                         <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                           <FileIcon />
                         </span>
-
                         <div className="min-w-0">
-                          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                            Dokumen {String(index + 1).padStart(2, "0")}
+                          </p>
+                          <h3 className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
                             {doc.title}
                           </h3>
-
-                          {doc.description ? (
-                            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                              {doc.description}
-                            </p>
-                          ) : null}
-
-                          <div className="mt-3 flex flex-wrap items-center gap-2">
-                            {doc.year ? (
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                Tahun {doc.year}
-                              </span>
-                            ) : null}
-
-                            {doc.file_size > 0 ? (
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                {doc.meta}
-                              </span>
-                            ) : null}
-
-                            {typeof doc.view_count === "number" &&
-                            doc.view_count > 0 ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                <EyeIcon />
-                                {doc.view_count.toLocaleString("id-ID")} kali
-                                dilihat
-                              </span>
-                            ) : null}
-                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-2 md:flex-col md:items-end">
+                    {doc.description ? (
+                      <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {doc.description}
+                      </p>
+                    ) : null}
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      {doc.year ? (
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          Tahun {doc.year}
+                        </span>
+                      ) : null}
+
+                      {doc.file_size > 0 ? (
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          {doc.meta}
+                        </span>
+                      ) : null}
+
+                      {typeof doc.view_count === "number" &&
+                      doc.view_count > 0 ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <EyeIcon />
+                          {doc.view_count.toLocaleString("id-ID")} kali dilihat
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-5">
                       <a
                         href={doc.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
                       >
                         <DownloadIcon />
                         <span>Lihat Dokumen</span>
@@ -246,7 +249,7 @@ export default async function LaporanCategoryPage({ params }) {
                 </article>
               ))
             ) : (
-              <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
+              <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center lg:col-span-2 dark:border-slate-700 dark:bg-slate-900">
                 <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
                   <FileIcon />
                 </span>

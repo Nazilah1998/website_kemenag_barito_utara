@@ -73,7 +73,7 @@ export default function ZonaIntegritasPage() {
         ]}
       />
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <section className="w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-3xl border border-emerald-100 bg-white p-8 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
             <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-900/30 dark:text-emerald-300">
@@ -141,7 +141,7 @@ export default function ZonaIntegritasPage() {
       </section>
 
       <section className="bg-slate-50 py-12 dark:bg-slate-950/40">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-20">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
               Enam Area Perubahan

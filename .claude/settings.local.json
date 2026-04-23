@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next lint --quiet)",
+      "Bash(npx next lint)",
+      "Bash(npx next build)",
+      "Bash(powershell -Command \":*)",
+      "Bash(npm run build)"
+    ]
+  }
+}

@@ -112,56 +112,47 @@ export default function Footer() {
     <footer className="theme-footer relative overflow-hidden border-t">
       <div className="absolute inset-0 [background:radial-gradient(circle_at_top_left,rgba(16,185,129,0.1),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.04),transparent_24%)] dark:[background:radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_24%)]" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_1fr_0.9fr]">
+      <div className="relative w-full px-6 py-8 sm:px-10 lg:px-16 xl:px-20">
+        {/* Top: Brand + Nav + Contact + Social in horizontal layout */}
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.6fr_1fr_0.8fr]">
+          {/* Brand */}
           <div>
-            <div className="flex items-center gap-4">
-              <div className="theme-footer-panel flex h-16 w-16 items-center justify-center rounded-3xl p-3">
+            <div className="flex items-center gap-3">
+              <div className="theme-footer-panel flex h-12 w-12 items-center justify-center rounded-2xl p-2">
                 <Image
                   src={siteInfo.logoSrc}
                   alt={siteInfo.shortName}
-                  width={54}
-                  height={54}
+                  width={40}
+                  height={40}
                   className="object-contain"
                 />
               </div>
 
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.26em] text-(--primary-strong)">
+                <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong)">
                   {siteInfo.shortName}
                 </p>
-                <p className="theme-footer-muted mt-1 text-sm">
+                <p className="theme-footer-muted text-xs">
                   {siteInfo.tagline}
                 </p>
               </div>
             </div>
 
-            <div className="mt-6">
-              <p
-                className="text-xs font-black uppercase tracking-[0.28em]"
-                style={{ color: "var(--footer-fg)" }}
-              >
-                Portal Resmi Informasi dan Layanan
-              </p>
+            <p className="theme-footer-muted mt-4 max-w-md text-sm leading-6">
+              Portal resmi informasi publik, layanan, dan publikasi kelembagaan Kemenag Barito Utara.
+            </p>
 
-              <p className="theme-footer-muted mt-4 max-w-xl text-sm leading-7">
-                Website resmi Kantor Kementerian Agama Kabupaten Barito Utara
-                sebagai media informasi publik, publikasi kelembagaan, dan akses
-                layanan yang lebih rapi, modern, dan mudah digunakan.
-              </p>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link
                 href="/kontak"
-                className="theme-primary-button inline-flex items-center rounded-full px-5 py-2.5 text-sm font-black transition"
+                className="theme-primary-button inline-flex items-center rounded-full px-4 py-2 text-xs font-black transition"
               >
                 Hubungi Kami
               </Link>
 
               <Link
                 href="/profil"
-                className="theme-footer-panel inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:text-(--primary-strong)"
+                className="theme-footer-panel inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold transition hover:-translate-y-0.5 hover:text-(--primary-strong)"
                 style={{ color: "var(--footer-fg)" }}
               >
                 Lihat Profil
@@ -169,15 +160,16 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Menu */}
           <div>
             <p
-              className="text-sm font-bold uppercase tracking-[0.18em]"
+              className="text-xs font-bold uppercase tracking-[0.18em]"
               style={{ color: "var(--footer-fg)" }}
             >
               Menu Utama
             </p>
 
-            <div className="mt-5 grid grid-cols-1 gap-3">
+            <div className="mt-3 grid grid-cols-1 gap-2">
               {mainMenu.map((item) => (
                 <FooterLink key={item.href} href={item.href}>
                   {item.label}
@@ -186,15 +178,16 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Contact */}
           <div>
             <p
-              className="text-sm font-bold uppercase tracking-[0.18em]"
+              className="text-xs font-bold uppercase tracking-[0.18em]"
               style={{ color: "var(--footer-fg)" }}
             >
               Kontak Resmi
             </p>
 
-            <div className="mt-5 space-y-5">
+            <div className="mt-3 space-y-3">
               <FooterInfoItem
                 label="Email"
                 value={siteInfo.email}
@@ -219,15 +212,16 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Social */}
           <div>
             <p
-              className="text-sm font-bold uppercase tracking-[0.18em]"
+              className="text-xs font-bold uppercase tracking-[0.18em]"
               style={{ color: "var(--footer-fg)" }}
             >
               Ikuti Kami
             </p>
 
-            <div className="mt-5 flex flex-wrap items-center gap-3">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               {socialLinks.map((item) => (
                 <SocialIconLink
                   key={item.label}
@@ -240,18 +234,19 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-(--border) pt-6">
-          <div className="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
-            <p className="theme-footer-muted">
+        {/* Bottom bar */}
+        <div className="mt-6 border-t border-(--border) pt-4">
+          <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <p className="theme-footer-muted text-xs">
               © {year} {siteInfo.shortName}. Hak Cipta Dilindungi.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="theme-footer-badge-accent inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="theme-footer-badge-accent inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold">
                 Resmi
               </span>
 
-              <span className="theme-footer-badge inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold">
+              <span className="theme-footer-badge inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold">
                 Layanan Digital
               </span>
             </div>

@@ -75,7 +75,7 @@ export default function TugasFungsiPage() {
           <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-emerald-300 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="relative w-full px-6 py-20 sm:px-10 lg:px-16 xl:px-20">
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-bold text-emerald-100 backdrop-blur">
               <SparkIcon />
@@ -96,7 +96,7 @@ export default function TugasFungsiPage() {
         </div>
       </section>
 
-      <section className="relative mx-auto -mt-10 max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+      <section className="relative -mt-10 w-full px-6 pb-20 sm:px-10 lg:px-16 xl:px-20">
         <div className="grid gap-4 md:grid-cols-4">
           {indikator.map((item) => (
             <div

@@ -35,7 +35,7 @@ export default function DocumentListPage({
       />
 
       <main className="bg-slate-50/60 dark:bg-slate-950">
-        <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-14 lg:px-8">
+        <section className="w-full px-6 py-10 sm:px-10 md:py-14 lg:px-16 xl:px-20">
           {intro ? (
             <div className="rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">

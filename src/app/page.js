@@ -3,6 +3,9 @@ import Image from "next/image";
 import { siteInfo } from "../data/site";
 import { getLatestBeritaHome } from "../lib/berita-home";
 import { toCoverPreviewUrl } from "../lib/cover-image";
+import ApaKataMerekaSection from "../components/ApaKataMerekaSection";
+import HomepageSlidesSection from "../components/HomepageSlidesSection";
+import { getPublicHomepageSlides } from "../lib/homepage-slides";
 
 export const revalidate = 300;
 
@@ -18,23 +21,45 @@ const featuredServices = [
     title: "Pelayanan Terpadu Satu Pintu",
     desc: "Pusat layanan administrasi dan informasi publik secara terpadu.",
     href: "/layanan/ptsp",
+    icon: "building",
   },
   {
     tag: "Pengaduan",
     title: "Layanan Pengaduan",
     desc: "Sampaikan aspirasi, masukan, dan pengaduan layanan secara resmi.",
     href: "/layanan/pengaduan",
+    icon: "megaphone",
   },
   {
     tag: "ZI",
     title: "Zona Integritas",
     desc: "Komitmen menuju birokrasi bersih, transparan, dan melayani.",
     href: "/zona-integritas",
+    icon: "shield",
   },
 ];
 
 function ArrowIcon() {
   return <span aria-hidden="true">→</span>;
+}
+
+function ArrowRightIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M5 12h14M12 5l7 7-7 7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 function EyeIcon({ className = "" }) {
@@ -57,6 +82,76 @@ function EyeIcon({ className = "" }) {
   );
 }
 
+function BuildingIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MegaphoneIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M18 8a3 3 0 0 1 0 6M4 9v6h3l5 5V4L7 9H4Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ShieldIcon({ className = "" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m9 12 2 2 4-4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const serviceIcons = {
+  building: BuildingIcon,
+  megaphone: MegaphoneIcon,
+  shield: ShieldIcon,
+};
+
 function formatViewCount(value) {
   const total = Number(value || 0);
   return new Intl.NumberFormat("id-ID").format(total);
@@ -68,78 +163,110 @@ function getBeritaCover(item) {
 
 function SectionDivider() {
   return (
-    <div
-      className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8"
-      aria-hidden="true"
-    >
-      <div className="relative h-10">
-        <div
-          className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 rounded-full"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.18) 18%, rgba(148,163,184,0.35) 50%, rgba(16,185,129,0.18) 82%, transparent 100%)",
-          }}
-        />
-        <div className="absolute left-1/2 top-1/2 h-3 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/20 blur-xl dark:bg-emerald-300/10" />
+    <div className="py-4" aria-hidden="true">
+      <div className="mx-auto w-full max-w-6xl px-6 sm:px-10 lg:px-16 xl:px-20">
+        <div className="relative h-10">
+          <div
+            className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 rounded-full"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.35) 16%, rgba(148,163,184,0.55) 50%, rgba(16,185,129,0.35) 84%, transparent 100%)",
+            }}
+          />
+          <div className="absolute left-1/2 top-1/2 h-3 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/30 blur-xl dark:bg-emerald-300/15" />
+        </div>
       </div>
     </div>
   );
 }
 
 export default async function HomePage() {
-  const latestBerita = await getLatestBeritaHome();
+  const [latestBerita, homepageSlides] = await Promise.all([
+    getLatestBeritaHome(),
+    getPublicHomepageSlides(),
+  ]);
 
   return (
     <main className="theme-page min-h-screen">
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* HERO SECTION — Full Width with Kantor Image Background */}
+      {/* ═══════════════════════════════════════════════════════ */}
       <section className="theme-hero-shell relative overflow-hidden">
-        <div className="absolute inset-0 [background:var(--hero-gradient)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.24),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.14),transparent_24%)]" />
+        {/* Kantor image background */}
+        <div className="absolute inset-0">
+          <Image
+            src="/kantor-kemenag.jpg"
+            alt="Kantor Kementerian Agama Kabupaten Barito Utara"
+            fill
+            sizes="100vw"
+            quality={85}
+            className="object-cover"
+            priority
+          />
+        </div>
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-emerald-950/80 to-slate-900/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.20),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.10),transparent_24%)]" />
 
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
-          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-            <div>
-              <div className="theme-hero-panel inline-flex rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-[0.32em]">
+        {/* Decorative floating orbs */}
+        <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl animate-float" />
+        <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-yellow-500/8 blur-3xl animate-float animate-delay-300" />
+
+        <div className="relative w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-24 xl:px-20">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+            {/* Left - Content */}
+            <div className="animate-slide-in-left">
+              <div className="glass inline-flex rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-[0.32em] text-emerald-300">
                 Portal Resmi Kemenag Barito Utara
               </div>
 
-              <h1 className="mt-6 max-w-3xl text-4xl font-black leading-tight md:text-5xl">
-                Layanan dan Informasi Keagamaan dalam Satu Portal Resmi.
+              <h1 className="mt-7 max-w-3xl text-4xl font-black leading-[1.12] tracking-tight text-white md:text-5xl lg:text-6xl">
+                Layanan dan Informasi{" "}
+                <span className="relative">
+                  Keagamaan
+                  <span className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-emerald-400/50" />
+                </span>{" "}
+                dalam Satu Portal Resmi.
               </h1>
 
-              <p className="theme-hero-muted mt-6 max-w-2xl text-base leading-8">
+              <p className="mt-7 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
                 Website resmi Kementerian Agama Kabupaten Barito Utara sebagai
                 pusat informasi publik, berita, layanan, dan publikasi
                 kelembagaan yang mudah diakses masyarakat.
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Link
-                  href="/layanan"
-                  className="theme-primary-button rounded-full px-6 py-3 text-sm font-black transition"
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a
+                  href="https://ptsp-kemenag-baritoutara.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="theme-primary-button group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-black transition"
                 >
-                  Akses Layanan
-                </Link>
+                  Akses Layanan PTSP
+                  <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
 
                 <Link
                   href="/berita"
-                  className="rounded-full border border-white/18 bg-white/8 px-6 py-3 text-sm font-black text-white transition hover:bg-white/12"
+                  className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-black text-white transition hover:bg-white/15"
                 >
                   Lihat Berita
                 </Link>
               </div>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {/* Stats row */}
+              <div className="mt-10 grid gap-4 sm:grid-cols-3">
                 {[
                   ["24+", "Layanan Publik"],
                   ["120+", "Publikasi Aktif"],
                   ["100%", "Informasi Resmi"],
-                ].map(([number, label]) => (
+                ].map(([number, label], index) => (
                   <div
                     key={label}
-                    className="theme-hero-metric rounded-3xl p-5"
+                    className={`glass rounded-2xl p-5 animate-fade-in-up animate-delay-${(index + 1) * 100}`}
                   >
-                    <p className="text-2xl font-black">{number}</p>
-                    <p className="theme-hero-accent mt-1 text-xs font-bold">
+                    <p className="text-3xl font-black text-white">{number}</p>
+                    <p className="mt-1 text-xs font-bold tracking-wide text-emerald-300">
                       {label}
                     </p>
                   </div>
@@ -147,13 +274,14 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute -inset-3 rounded-4xl bg-white/8 blur-2xl" />
+            {/* Right - Card Panel */}
+            <div className="relative animate-slide-in-right">
+              <div className="absolute -inset-4 rounded-[2rem] bg-white/6 blur-2xl" />
 
-              <div className="theme-hero-panel relative overflow-hidden rounded-4xl p-5 shadow-2xl">
-                <div className="theme-hero-card rounded-3xl p-5 shadow-xl">
+              <div className="theme-hero-panel relative overflow-hidden rounded-[2rem] p-6 shadow-2xl">
+                <div className="theme-hero-card rounded-2xl p-6 shadow-xl">
                   <div className="flex items-center gap-4">
-                    <div className="theme-accent-soft flex h-16 w-16 items-center justify-center rounded-3xl border p-3">
+                    <div className="theme-accent-soft flex h-16 w-16 items-center justify-center rounded-2xl border p-3">
                       <Image
                         src={siteInfo.logoSrc}
                         alt={siteInfo.shortName}
@@ -174,7 +302,7 @@ export default async function HomePage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-3xl bg-(--primary-soft) p-5">
+                  <div className="mt-5 rounded-2xl bg-(--primary-soft) p-5">
                     <p className="text-xs font-black uppercase tracking-[0.28em] text-emerald-700 dark:text-emerald-300">
                       Fokus Pelayanan
                     </p>
@@ -198,18 +326,24 @@ export default async function HomePage() {
                   </div>
 
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-3xl bg-(--surface-soft) p-4">
+                    <div className="rounded-2xl bg-(--surface-soft) p-4">
                       <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
                         Status Portal
                       </p>
-                      <p className="mt-2 text-xl font-black">Aktif</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                        <p className="text-xl font-black">Aktif</p>
+                      </div>
                     </div>
 
-                    <div className="rounded-3xl bg-(--surface-soft) p-4">
+                    <div className="rounded-2xl bg-(--surface-soft) p-4">
                       <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
                         Akses Publik
                       </p>
-                      <p className="mt-2 text-xl font-black">Terbuka</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                        <p className="text-xl font-black">Terbuka</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -219,86 +353,100 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div className="pt-8 lg:pt-10">
+        <SectionDivider />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* BERITA SECTION — Full Width Modern Cards           */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.32em] text-emerald-700 dark:text-emerald-300">
               Berita Terbaru
             </p>
 
-            <h2 className="mt-3 max-w-2xl text-2xl font-black lg:text-3xl">
+            <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight lg:text-4xl">
               Ikuti pembaruan kegiatan dan informasi terkini
             </h2>
+
+            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 dark:text-slate-400">
+              Berita resmi dari Kementerian Agama Kabupaten Barito Utara untuk
+              masyarakat.
+            </p>
           </div>
 
           <Link
             href="/berita"
-            className="theme-outline-button w-fit rounded-full px-5 py-2.5 text-sm font-black transition"
+            className="theme-outline-button group inline-flex w-fit items-center gap-2 rounded-full px-6 py-3 text-sm font-black transition"
           >
             Lihat Semua Berita
+            <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
         {latestBerita.length > 0 ? (
-          <div className="mt-7 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {latestBerita.map((item, index) => (
               <article
                 key={item.slug}
-                className="theme-news-card group overflow-hidden rounded-3xl transition hover:-translate-y-1"
+                className={`theme-news-card group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl animate-fade-in-up animate-delay-${(index + 1) * 100}`}
               >
                 <Link href={`/berita/${item.slug}`} className="block h-full">
-                  <div className="relative h-52 overflow-hidden bg-(--surface-muted)">
+                  <div className="relative h-48 overflow-hidden bg-(--surface-muted)">
                     <Image
                       src={getBeritaCover(item)}
                       alt={item.title}
                       fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       loading={index === 0 ? "eager" : "lazy"}
                       fetchPriority={index === 0 ? "high" : "auto"}
                       quality={index === 0 ? 75 : 70}
                       decoding="async"
                       className={
                         item.coverImage
-                          ? "object-cover transition duration-500 group-hover:scale-105"
-                          : "object-contain p-10 transition duration-500 group-hover:scale-105"
+                          ? "object-cover transition-transform duration-700 group-hover:scale-110"
+                          : "object-contain p-10 transition-transform duration-700 group-hover:scale-110"
                       }
                     />
 
                     <div className="absolute inset-0 [background:var(--news-overlay)]" />
 
-                    <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-black text-emerald-700 shadow-sm dark:bg-slate-900/90 dark:text-emerald-300">
+                    <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-black text-emerald-700 shadow-sm dark:bg-slate-900/90 dark:text-emerald-300">
                       {item.category}
                     </div>
 
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-white/80">
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-white/80">
                         <span>{item.date}</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-950/30 px-2.5 py-1 text-[11px] font-black text-white backdrop-blur-sm">
-                          <EyeIcon className="h-3.5 w-3.5" />
-                          {formatViewCount(item.viewCount)}x dilihat
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/30 px-2 py-0.5 text-[10px] font-black text-white backdrop-blur-sm">
+                          <EyeIcon className="h-3 w-3" />
+                          {formatViewCount(item.viewCount)}x
                         </span>
                       </div>
 
-                      <h3 className="mt-2 line-clamp-2 text-lg font-black leading-snug text-white">
+                      <h3 className="mt-1.5 line-clamp-2 text-sm font-black leading-snug text-white">
                         {item.title}
                       </h3>
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <p className="theme-text-muted line-clamp-2 text-sm leading-7">
+                  <div className="p-4">
+                    <p className="theme-text-muted line-clamp-2 text-sm leading-6">
                       {item.excerpt ||
                         "Klik untuk membaca berita selengkapnya."}
                     </p>
 
-                    <div className="mt-5 flex items-center justify-between gap-3">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
-                        <EyeIcon className="h-4 w-4" />
-                        {formatViewCount(item.viewCount)} pembaca
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                        <EyeIcon className="h-3.5 w-3.5" />
+                        {formatViewCount(item.viewCount)}
                       </span>
 
-                      <span className="inline-block text-sm font-black text-emerald-700 dark:text-emerald-300">
-                        Baca selengkapnya <ArrowIcon />
+                      <span className="inline-flex items-center gap-1 text-xs font-black text-emerald-700 transition-colors group-hover:text-emerald-600 dark:text-emerald-300">
+                        Baca
+                        <ArrowRightIcon className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                       </span>
                     </div>
                   </div>
@@ -307,7 +455,7 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="theme-news-empty mt-7 rounded-3xl p-7 text-center">
+          <div className="theme-news-empty mt-10 rounded-2xl p-10 text-center">
             <h3 className="text-xl font-black">Belum ada berita terbaru</h3>
             <p className="theme-text-muted mt-3 text-sm leading-7">
               Berita yang sudah dipublikasikan akan tampil otomatis di bagian
@@ -319,15 +467,18 @@ export default async function HomePage() {
 
       <SectionDivider />
 
-      <section className="py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* LAYANAN SECTION — Full Width Modern Service Cards  */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <section className="py-16 lg:py-20">
+        <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-20">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.32em] text-emerald-700 dark:text-emerald-300">
                 Layanan Unggulan
               </p>
 
-              <h2 className="mt-3 max-w-2xl text-2xl font-black lg:text-3xl">
+              <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight lg:text-4xl">
                 Pelayanan utama yang paling sering dibutuhkan masyarakat
               </h2>
 
@@ -339,37 +490,61 @@ export default async function HomePage() {
 
             <Link
               href="/layanan"
-              className="theme-outline-button w-fit rounded-full px-5 py-2.5 text-sm font-black transition"
+              className="theme-outline-button group inline-flex w-fit items-center gap-2 rounded-full px-6 py-3 text-sm font-black transition"
             >
               Semua Layanan
+              <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
-          <div className="mt-7 grid gap-4 md:grid-cols-3">
-            {featuredServices.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="theme-news-card group rounded-3xl border p-6 transition hover:-translate-y-1 hover:border-emerald-400/40"
-              >
-                <span className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-700 dark:text-emerald-300">
-                  {item.tag}
-                </span>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {featuredServices.map((item) => {
+              const IconComponent = serviceIcons[item.icon] || BuildingIcon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="theme-news-card group relative overflow-hidden rounded-2xl border p-7 transition-all duration-300 hover:-translate-y-2 hover:border-emerald-400/40 hover:shadow-2xl"
+                >
+                  {/* Decorative gradient blob */}
+                  <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-500/5 blur-2xl transition-all duration-500 group-hover:bg-emerald-500/10 group-hover:blur-3xl" />
 
-                <h3 className="mt-4 text-xl font-black">{item.title}</h3>
+                  <div className="relative">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700 transition-colors group-hover:bg-emerald-500/15 dark:text-emerald-300">
+                        <IconComponent className="h-6 w-6" />
+                      </div>
+                      <span className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-700 dark:text-emerald-300">
+                        {item.tag}
+                      </span>
+                    </div>
 
-                <p className="theme-text-muted mt-3 text-sm leading-7">
-                  {item.desc}
-                </p>
+                    <h3 className="mt-5 text-xl font-black">{item.title}</h3>
 
-                <p className="mt-5 text-sm font-black text-emerald-700 dark:text-emerald-300">
-                  Lihat detail <ArrowIcon />
-                </p>
-              </Link>
-            ))}
+                    <p className="theme-text-muted mt-3 text-sm leading-7">
+                      {item.desc}
+                    </p>
+
+                    <div className="mt-6 flex items-center gap-2 text-sm font-black text-emerald-700 transition-colors group-hover:text-emerald-600 dark:text-emerald-300">
+                      <span>Lihat detail</span>
+                      <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
+
+      <SectionDivider />
+
+      {/* Section Baru: Apa Kata Mereka */}
+      <ApaKataMerekaSection />
+
+      <SectionDivider />
+
+      <HomepageSlidesSection slides={homepageSlides} />
     </main>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -86,7 +86,7 @@ function GalleryCard({ item, onOpen }) {
                             className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
                         >
                             Buka berita
-                            <span aria-hidden="true">→</span>
+                            <span aria-hidden="true">â†’</span>
                         </Link>
                     ) : null}
                 </div>
@@ -168,7 +168,7 @@ export default function GaleriPageClient({ items = [] }) {
 
     return (
         <>
-            <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8">
+            <section className="w-full px-6 py-10 sm:px-10 lg:px-16 xl:px-20">
                 <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700 dark:text-emerald-400">
@@ -212,7 +212,7 @@ export default function GaleriPageClient({ items = [] }) {
 
             {selectedItem ? (
                 <div
-                    className="fixed inset-0 z-50 bg-slate-950/92 backdrop-blur-md"
+                    className="fixed inset-0 z-[200] bg-slate-950/92 backdrop-blur-md"
                     onClick={handleClose}
                 >
                     <div className="relative flex min-h-screen items-center justify-center p-3 sm:p-6">
@@ -229,7 +229,10 @@ export default function GaleriPageClient({ items = [] }) {
 
                             <div className="absolute right-3 top-3 z-20 sm:right-6 sm:top-6">
                                 <LightboxButton onClick={handleClose} label="Tutup preview">
-                                    <span className="text-xl leading-none">×</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
                                 </LightboxButton>
                             </div>
 
@@ -237,13 +240,17 @@ export default function GaleriPageClient({ items = [] }) {
                                 <>
                                     <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-6">
                                         <LightboxButton onClick={handlePrev} label="Gambar sebelumnya">
-                                            <span className="text-2xl leading-none">‹</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                                <polyline points="15 18 9 12 15 6" />
+                                            </svg>
                                         </LightboxButton>
                                     </div>
 
                                     <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-6">
                                         <LightboxButton onClick={handleNext} label="Gambar berikutnya">
-                                            <span className="text-2xl leading-none">›</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                                <polyline points="9 18 15 12 9 6" />
+                                            </svg>
                                         </LightboxButton>
                                     </div>
                                 </>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -114,20 +114,20 @@ export default function SearchResultsClient({ initialQuery = "" }) {
     query && filteredResults.length === 0 && remoteStatus !== "loading";
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-10">
+    <section className="w-full px-6 py-10 sm:px-10 lg:px-16 xl:px-20">
       <div className="mb-8">
         {query ? (
           <>
             <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
               {t("searchPage.resultFor")}{" "}
               <span className="font-semibold text-slate-900 dark:text-slate-100">
-                “{query}”
+                â€œ{query}â€
               </span>
             </p>
 
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
               {filteredResults.length} {t("searchPage.resultCount")}
-              {loadingRemote ? " • memuat konten dinamis..." : ""}
+              {loadingRemote ? " â€¢ memuat konten dinamis..." : ""}
             </p>
           </>
         ) : (

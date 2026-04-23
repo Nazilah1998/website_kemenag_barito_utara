@@ -59,27 +59,15 @@ export default async function sitemap() {
   }));
 
   let beritaRoutes = [];
-  let halamanRoutes = [];
 
   try {
     const supabase = createAdminClient();
 
-    const [
-      { data: beritaList, error: beritaError },
-      { data: staticPages, error: halamanError },
-    ] = await Promise.all([
-      supabase
-        .from("berita")
-        .select("slug, updated_at, published_at, created_at, status")
-        .eq("status", "published")
-        .order("published_at", { ascending: false }),
-      supabase
-        .from("static_pages")
-        .select("slug, updated_at, status")
-        .eq("status", "published")
-        .order("updated_at", { ascending: false })
-        .limit(200),
-    ]);
+    const { data: beritaList, error: beritaError } = await supabase
+      .from("berita")
+      .select("slug, updated_at, published_at, created_at, status")
+      .eq("status", "published")
+      .order("published_at", { ascending: false });
 
     if (beritaError) {
       console.error("[sitemap] berita fetch error:", beritaError.message);
@@ -93,22 +81,11 @@ export default async function sitemap() {
         priority: 0.8,
       }));
     }
-
-    if (halamanError) {
-      console.error("[sitemap] halaman fetch error:", halamanError.message);
-    } else {
-      halamanRoutes = (staticPages || []).map((page) => ({
-        url: `${base}/halaman/${page.slug}`,
-        lastModified: safeDate(page.updated_at),
-        changeFrequency: "monthly",
-        priority: 0.6,
-      }));
-    }
   } catch (err) {
     console.error("[sitemap] general fetch error:", err?.message || err);
   }
 
-  return [...staticRoutes, ...laporanRoutes, ...halamanRoutes, ...beritaRoutes];
+  return [...staticRoutes, ...laporanRoutes, ...beritaRoutes];
 }
 
 function safeDate(value) {

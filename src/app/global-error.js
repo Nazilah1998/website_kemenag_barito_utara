@@ -10,7 +10,7 @@ export default function GlobalError({ error, reset }) {
   return (
     <html lang="id">
       <body className="min-h-screen bg-slate-100 text-slate-800">
-        <main className="mx-auto flex min-h-screen max-w-7xl items-center px-4 py-12">
+        <main className="flex min-h-screen w-full items-center px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
           <section className="w-full rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200 md:p-12">
             <p className="text-sm font-semibold uppercase tracking-wide text-red-600">
               System Error

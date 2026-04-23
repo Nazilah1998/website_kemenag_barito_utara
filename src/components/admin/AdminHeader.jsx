@@ -18,9 +18,9 @@ const titleMap = {
     title: "Dokumen Laporan",
     subtitle: "Kelola kategori, upload, edit, dan publikasi dokumen laporan.",
   },
-  "/admin/halaman": {
-    title: "Halaman Statis",
-    subtitle: "Kelola konten halaman statis website instansi.",
+  "/admin/homepage-slides": {
+    title: "Slider Beranda",
+    subtitle: "Kelola slide gambar dan teks yang tampil otomatis di beranda.",
   },
   "/admin/audit": {
     title: "Audit Log",
@@ -96,7 +96,8 @@ export default function AdminHeader({ onOpenSidebar }) {
     if (titleMap[pathname]) return titleMap[pathname];
     if (pathname.startsWith("/admin/berita")) return titleMap["/admin/berita"];
     if (pathname.startsWith("/admin/laporan")) return titleMap["/admin/laporan"];
-    if (pathname.startsWith("/admin/halaman")) return titleMap["/admin/halaman"];
+    if (pathname.startsWith("/admin/homepage-slides"))
+      return titleMap["/admin/homepage-slides"];
     if (pathname.startsWith("/admin/audit")) return titleMap["/admin/audit"];
 
     return {

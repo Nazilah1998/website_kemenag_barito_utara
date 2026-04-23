@@ -255,3 +255,18 @@ values
     7
   )
 on conflict (slug) do nothing;
+
+-- 6) Tabel slider beranda
+create table if not exists public.homepage_slides (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  caption text not null default '',
+  image_url text not null,
+  is_published boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_homepage_slides_order
+  on public.homepage_slides (is_published, sort_order asc, updated_at desc);

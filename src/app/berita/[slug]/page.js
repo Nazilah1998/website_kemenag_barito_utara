@@ -226,7 +226,7 @@ export default async function DetailBeritaPage({ params }) {
       />
 
       <main className="bg-slate-50 transition-colors dark:bg-slate-950">
-        <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 lg:px-8">
+        <section className="w-full px-6 py-8 sm:px-10 lg:px-16 xl:px-20">
           <Link
             href="/berita"
             className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"

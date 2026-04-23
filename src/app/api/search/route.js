@@ -29,22 +29,9 @@ async function searchTable(supabase, { table, columns, limit = 10, q }) {
   const needle = `%${escapeLike(q)}%`;
   const orClause = columns.map((c) => `${c}.ilike.${needle}`).join(",");
 
-  // Kolom select minimal yang umum. Ditambah filter is_published kalau tabel punya.
-  const select = `
-    id, slug, title,
-    excerpt:excerpt,
-    description:description,
-    content:content,
-    is_published,
-    published_at,
-    updated_at,
-    created_at
-  `;
-
   let query = supabase
     .from(table)
     .select(
-      // gunakan nama kolom yang ada saja. Kita akan pakai select umum dan ignore error.
       "id, slug, title, excerpt, description, content, is_published, published_at, updated_at",
       { count: "exact" },
     )
@@ -59,7 +46,6 @@ async function searchTable(supabase, { table, columns, limit = 10, q }) {
   const { data, error } = await query;
 
   if (error) {
-    // Biarkan silent, mungkin kolom tidak ada di tabel tersebut
     return [];
   }
 
@@ -110,12 +96,6 @@ export async function GET(request) {
         columns: ["title", "excerpt", "content"],
         section: "Berita",
         hrefBase: "/berita",
-      },
-      {
-        table: "static_pages",
-        columns: ["title", "description", "content"],
-        section: "Halaman",
-        hrefBase: "/halaman",
       },
     ];
 

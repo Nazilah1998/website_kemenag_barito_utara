@@ -448,7 +448,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-100 w-full bg-white/95 shadow-sm backdrop-blur dark:bg-slate-950/95">
-      <div className="mx-auto max-w-7xl px-4 pt-2">
+      <div className="w-full px-6 pt-2 sm:px-10 lg:px-16 xl:px-20">
 
         {/* Top bar */}
         <div className="flex items-center justify-between py-3">

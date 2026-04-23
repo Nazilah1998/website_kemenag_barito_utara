@@ -1,6 +1,7 @@
 export const laporanCategories = [
   {
     slug: "sop-dan-standar-pelayanan",
+    icon: "clipboard-check",
     title: "SOP dan Standar Pelayanan",
     description:
       "Standar Operasional Prosedur dan Standar Pelayanan untuk setiap layanan publik Kemenag Barito Utara.",
@@ -10,6 +11,7 @@ export const laporanCategories = [
   },
   {
     slug: "renstra",
+    icon: "target",
     title: "Rencana Strategis (Renstra)",
     description:
       "Rencana strategis lima tahunan yang memuat visi, misi, tujuan, sasaran, strategi, dan kebijakan.",
@@ -19,6 +21,7 @@ export const laporanCategories = [
   },
   {
     slug: "perjanjian-kinerja",
+    icon: "handshake",
     title: "Perjanjian Kinerja",
     description:
       "Perjanjian Kinerja (PK) tahunan antara pimpinan satuan kerja dengan atasan langsung.",
@@ -28,6 +31,7 @@ export const laporanCategories = [
   },
   {
     slug: "rencana-kinerja",
+    icon: "calendar-plan",
     title: "Rencana Kinerja",
     description:
       "Rencana Kinerja tahunan sebagai penjabaran program dan kegiatan dalam Renstra.",
@@ -37,6 +41,7 @@ export const laporanCategories = [
   },
   {
     slug: "capaian-kinerja",
+    icon: "chart-up",
     title: "Capaian Kinerja",
     description:
       "Laporan capaian kinerja berdasarkan indikator yang telah ditetapkan dalam Perjanjian Kinerja.",
@@ -46,6 +51,7 @@ export const laporanCategories = [
   },
   {
     slug: "laporan-kinerja",
+    icon: "file-report",
     title: "Laporan Kinerja (LKj)",
     description:
       "Laporan Kinerja tahunan yang memuat pertanggungjawaban kinerja instansi pemerintah.",
@@ -55,6 +61,7 @@ export const laporanCategories = [
   },
   {
     slug: "rencana-kerja-tahunan",
+    icon: "briefcase-plan",
     title: "Rencana Kerja Tahunan (RKT)",
     description:
       "Rencana Kerja Tahunan yang memuat program, kegiatan, dan anggaran tahun berjalan.",

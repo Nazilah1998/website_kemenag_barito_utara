@@ -20,10 +20,32 @@ export function getNavigationItems() {
       label: "Layanan",
       href: "/layanan",
       children: [
-        { label: "PTSP", href: "/layanan/ptsp" },
-        { label: "Maklumat Pelayanan", href: "/layanan/maklumat-pelayanan" },
-        { label: "Agen Perubahan", href: "/layanan/agen-perubahan" },
-        { label: "Layanan Pengaduan", href: "/layanan/pengaduan" },
+        { label: "Sekjen", href: "/layanan/sekjen" },
+        { label: "Seksi Bimas Islam", href: "/layanan/seksi-bimas-islam" },
+        {
+          label: "Seksi Pendidikan Agama Islam",
+          href: "/layanan/seksi-pendidikan-agama-islam",
+        },
+        {
+          label: "Seksi Pendidikan Diniyah Dan Pondok Pesantren",
+          href: "/layanan/seksi-pendidikan-diniyah-dan-pondok-pesantren",
+        },
+        {
+          label: "Seksi Pendidikan Madrasah",
+          href: "/layanan/seksi-pendidikan-madrasah",
+        },
+        {
+          label: "Penyelenggara Hindu",
+          href: "/layanan/penyelenggara-hindu",
+        },
+        {
+          label: "Penyelenggara Zakat Wakaf",
+          href: "/layanan/penyelenggara-zakat-wakaf",
+        },
+        {
+          label: "KUA (Kantor Urusan Agama)",
+          href: "/layanan/kua-kantor-urusan-agama",
+        },
       ],
     },
 

@@ -5,7 +5,7 @@ export default async function NewsSection() {
   const latestNews = await getLatestBerita(3);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <section className="w-full px-6 py-16 sm:px-10 lg:px-16 xl:px-20">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">

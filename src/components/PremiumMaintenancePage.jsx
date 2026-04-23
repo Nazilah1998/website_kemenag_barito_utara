@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 function StatusPill({ children, tone = "emerald" }) {
@@ -65,7 +65,7 @@ export default function PremiumMaintenancePage({
     return (
         <main className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_34%),radial-gradient(circle_at_top_right,rgba(245,158,11,0.10),transparent_28%),linear-gradient(to_bottom,#f8fafc,#f1f5f9)]">
             <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(15,23,42,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.03)_1px,transparent_1px)] bg-size-[24px_24px]" />
-            <section className="mx-auto flex min-h-[calc(100svh-170px)] max-w-7xl items-center px-4 py-4 sm:px-6 md:py-6 lg:px-8">
+            <section className="flex min-h-[calc(100svh-170px)] w-full items-center px-6 py-4 sm:px-10 md:py-6 lg:px-16 xl:px-20">
                 <div className="grid w-full gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                     <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.10)] backdrop-blur">
                         <div className="absolute right-0 top-0 h-36 w-36 translate-x-10 -translate-y-10 rounded-full bg-emerald-100/80 blur-2xl" />
@@ -235,7 +235,7 @@ export default function PremiumMaintenancePage({
                                     className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
                                 >
                                     <span>Beranda</span>
-                                    <span aria-hidden="true">↗</span>
+                                    <span aria-hidden="true">â†—</span>
                                 </Link>
 
                                 <Link
@@ -243,7 +243,7 @@ export default function PremiumMaintenancePage({
                                     className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
                                 >
                                     <span>Berita</span>
-                                    <span aria-hidden="true">↗</span>
+                                    <span aria-hidden="true">â†—</span>
                                 </Link>
 
                                 <Link
@@ -251,7 +251,7 @@ export default function PremiumMaintenancePage({
                                     className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
                                 >
                                     <span>Kontak</span>
-                                    <span aria-hidden="true">↗</span>
+                                    <span aria-hidden="true">â†—</span>
                                 </Link>
                             </div>
                         </div>

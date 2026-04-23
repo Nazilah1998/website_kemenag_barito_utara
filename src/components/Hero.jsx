@@ -4,7 +4,7 @@ import { heroData } from "../data/hero";
 export default function Hero() {
   return (
     <section className="w-full bg-linear-to-r from-emerald-950 via-emerald-900 to-teal-700">
-      <div className="mx-auto grid max-w-350 gap-8 px-6 py-16 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-24 xl:px-10">
+      <div className="grid w-full gap-8 px-6 py-16 sm:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-16 lg:py-24 xl:px-20">
         <div>
           <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white">
             {heroData.badge}

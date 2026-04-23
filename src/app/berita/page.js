@@ -10,7 +10,7 @@ import {
   getAvailableBeritaCategories,
 } from "../../lib/berita";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 8;
 const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
 
 function getAvailableBeritaMonths(items = []) {
@@ -130,7 +130,7 @@ function NewsCard({ item }) {
           alt={item.title}
           fill
           className="object-cover transition duration-500 group-hover:scale-[1.03]"
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes="(max-width: 768px) 100vw, 25vw"
         />
       </Link>
 
@@ -244,7 +244,7 @@ export default async function BeritaPage({ searchParams }) {
       />
 
       <main className="bg-slate-50 transition-colors dark:bg-slate-950">
-        <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8">
+        <section className="w-full px-6 py-10 sm:px-10 lg:px-16 xl:px-20">
           <BeritaFilters
             categories={categories}
             months={months}
@@ -273,7 +273,7 @@ export default async function BeritaPage({ searchParams }) {
 
           {paginatedNews.length > 0 ? (
             <>
-              <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
                 {paginatedNews.map((item) => (
                   <NewsCard key={item.id} item={item} />
                 ))}
