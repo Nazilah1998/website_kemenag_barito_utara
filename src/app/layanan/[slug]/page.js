@@ -6,7 +6,7 @@ import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
 import { useLanguage } from "@/context/LanguageContext";
 
 const LAYANAN_MAP = {
-  "sekjen": "nav.sekjen",
+  sekjen: "nav.sekjen",
   "seksi-bimas-islam": "nav.bimasIslam",
   "seksi-pendidikan-agama-islam": "nav.pai",
   "seksi-pendidikan-diniyah-dan-pondok-pesantren": "nav.pdpontren",
@@ -16,7 +16,7 @@ const LAYANAN_MAP = {
   "kua-kantor-urusan-agama": "nav.kua",
   "agen-perubahan": "Agen Perubahan",
   "maklumat-pelayanan": "Maklumat Pelayanan",
-  "pengaduan": "Pengaduan Masyarakat"
+  pengaduan: "Pengaduan Masyarakat",
 };
 
 export default function LayananSubPage() {
@@ -24,7 +24,11 @@ export default function LayananSubPage() {
   const { t } = useLanguage();
 
   const i18nKey = LAYANAN_MAP[slug];
-  const menuTitle = i18nKey ? (i18nKey.startsWith("nav.") ? t(i18nKey) : i18nKey) : "Layanan Publik";
+  const menuTitle = i18nKey
+    ? i18nKey.startsWith("nav.")
+      ? t(i18nKey)
+      : i18nKey
+    : "Layanan Publik";
 
   return (
     <MaintenancePage

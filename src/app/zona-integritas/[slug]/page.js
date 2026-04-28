@@ -8,7 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 const ZI_MAP = {
   "area-perubahan-zi": "nav.ziArea",
   "video-pembangunan-zi": "nav.ziVideo",
-  "berita-zona-integritas": "nav.ziBerita"
+  "berita-zona-integritas": "nav.ziBerita",
 };
 
 export default function ZIZoneSubPage() {

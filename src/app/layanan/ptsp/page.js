@@ -5,5 +5,5 @@ export const metadata = {
 };
 
 export default function PTSPPage() {
-  redirect("https://ptsp-kemenag-baritoutara.vercel.app/");
+  redirect("https://ptsp.kemenag-baritoutara.com/");
 }

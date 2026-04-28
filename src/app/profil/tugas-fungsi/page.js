@@ -75,7 +75,9 @@ export default function TugasFungsiPage() {
               key={item}
               className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <p className="text-lg font-black text-emerald-800 dark:text-emerald-400">{item}</p>
+              <p className="text-lg font-black text-emerald-800 dark:text-emerald-400">
+                {item}
+              </p>
               <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                 Prinsip Layanan
               </p>
@@ -99,7 +101,9 @@ export default function TugasFungsiPage() {
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-black text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                     {index + 1}
                   </div>
-                  <p className="text-sm leading-8 text-slate-600 dark:text-slate-400">{item}</p>
+                  <p className="text-sm leading-8 text-slate-600 dark:text-slate-400">
+                    {item}
+                  </p>
                 </div>
               ))}
             </div>
@@ -193,4 +197,3 @@ export default function TugasFungsiPage() {
     </main>
   );
 }
-

@@ -47,7 +47,7 @@ export default function HomeHeroSection() {
 
             <div className="mt-8 flex flex-wrap gap-4">
               <a
-                href="https://ptsp-kemenag-baritoutara.vercel.app/"
+                href="https://ptsp.kemenag-baritoutara.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="theme-primary-button group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-black transition"

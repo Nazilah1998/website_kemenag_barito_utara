@@ -6,10 +6,10 @@ import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
 import { useLanguage } from "@/context/LanguageContext";
 
 const INFORMASI_MAP = {
-  "regulasi": "nav.regulasi",
+  regulasi: "nav.regulasi",
   "profil-pejabat": "nav.pejabat",
   "struktur-organisasi": "nav.struktur",
-  "dasar-hukum": "nav.dasarHukum"
+  "dasar-hukum": "nav.dasarHukum",
 };
 
 export default function InformasiSubPage() {
@@ -17,7 +17,11 @@ export default function InformasiSubPage() {
   const { t } = useLanguage();
 
   const i18nKey = INFORMASI_MAP[slug];
-  const menuTitle = i18nKey ? (i18nKey.startsWith("nav.") ? t(i18nKey) : i18nKey) : "Informasi Publik";
+  const menuTitle = i18nKey
+    ? i18nKey.startsWith("nav.")
+      ? t(i18nKey)
+      : i18nKey
+    : "Informasi Publik";
 
   return (
     <MaintenancePage

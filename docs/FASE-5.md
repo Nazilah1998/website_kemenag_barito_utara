@@ -63,7 +63,7 @@ Total test naik dari 29 ke 36.
 2. Schema Markup Validator: `https://validator.schema.org/`
 3. Facebook Sharing Debugger: `https://developers.facebook.com/tools/debug/`
 4. Twitter Card Validator: `https://cards-dev.twitter.com/validator`
-5. Google Search Console - submit sitemap: `https://kemenag-baritoutara.vercel.app/sitemap.xml`
+5. Google Search Console - submit sitemap: `https://ptsp.kemenag-baritoutara.com/sitemap.xml`
 
 ## Checklist lanjutan
 

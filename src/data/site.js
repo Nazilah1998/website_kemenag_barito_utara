@@ -26,8 +26,7 @@ export const siteInfo = {
   complaintHref: "/kontak",
   logoSrc: "/kemenag.svg",
   siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "https://kemenag-baritoutara.vercel.app",
+    process.env.NEXT_PUBLIC_SITE_URL || "https://www.kemenag-baritoutara.com",
 };
 
 export const siteLinks = {

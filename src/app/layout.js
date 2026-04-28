@@ -20,7 +20,7 @@ export const metadata = {
   },
   description: siteInfo.description,
   alternates: { canonical: "/" },
-  icons: { icon: "/kemenag.svg" },
+  icons: { icon: "/logo-share.png" },
   manifest: "/manifest.webmanifest",
   applicationName: siteInfo.shortName,
   appleWebApp: {
@@ -35,13 +35,20 @@ export const metadata = {
     siteName: siteInfo.shortName,
     title: `${siteInfo.name}`,
     description: siteInfo.description,
-    images: [{ url: "/kemenag.svg", alt: siteInfo.shortName }],
+    images: [
+      {
+        url: "/logo-share.png",
+        width: 512,
+        height: 512,
+        alt: siteInfo.shortName,
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: `${siteInfo.name}`,
     description: siteInfo.description,
-    images: ["/kemenag.svg"],
+    images: ["/logo-share.png"],
   },
 };
 
@@ -50,7 +57,8 @@ export const viewport = {
     { media: "(prefers-color-scheme: light)", color: "#059669" },
     { media: "(prefers-color-scheme: dark)", color: "#047857" },
   ],
-  width: "device-width", initialScale: 1,
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
