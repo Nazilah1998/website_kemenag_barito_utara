@@ -1,43 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentUserPermissionContext } from "@/lib/user-permissions";
 import { PERMISSIONS } from "@/lib/permissions";
-import { listAudit } from "@/lib/audit";
+import AdminAuditManager from "@/components/features/admin/AdminAuditManager";
 
 export const dynamic = "force-dynamic";
-
-function formatDate(iso) {
-  if (!iso) return "-";
-  try {
-    return new Intl.DateTimeFormat("id-ID", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Asia/Jakarta",
-    }).format(new Date(iso));
-  } catch {
-    return iso;
-  }
-}
-
-function ActionBadge({ action }) {
-  const tones = {
-    create: "bg-emerald-100 text-emerald-700",
-    update: "bg-sky-100 text-sky-700",
-    delete: "bg-rose-100 text-rose-700",
-    publish: "bg-amber-100 text-amber-700",
-    unpublish: "bg-slate-100 text-slate-700",
-    login: "bg-indigo-100 text-indigo-700",
-    logout: "bg-slate-100 text-slate-700",
-    role_change: "bg-violet-100 text-violet-700",
-  };
-  const cls = tones[action] || "bg-slate-100 text-slate-700";
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${cls}`}
-    >
-      {action}
-    </span>
-  );
-}
 
 export default async function AdminAuditPage() {
   const { session, permissionContext } = await getCurrentUserPermissionContext();
@@ -63,81 +29,5 @@ export default async function AdminAuditPage() {
     );
   }
 
-  const result = await listAudit({ limit: 100 });
-  const items = result.items || [];
-
-  return (
-    <section className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
-          Audit Log
-        </p>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-          Riwayat Aktivitas Admin
-        </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Menampilkan 100 aktivitas terbaru. Gunakan log ini untuk audit internal
-          dan investigasi perubahan konten.
-        </p>
-      </div>
-
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-800/70">
-              <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                <th className="px-4 py-3">Waktu</th>
-                <th className="px-4 py-3">Aksi</th>
-                <th className="px-4 py-3">Entitas</th>
-                <th className="px-4 py-3">Ringkasan</th>
-                <th className="px-4 py-3">Pelaku</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {items.length === 0 ? (
-                <tr>
-                  <td
-                    className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400"
-                    colSpan={5}
-                  >
-                    Belum ada aktivitas tercatat.
-                  </td>
-                </tr>
-              ) : (
-                items.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
-                      {formatDate(item.created_at)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <ActionBadge action={item.action} />
-                    </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                      <span className="font-medium">{item.entity}</span>
-                      {item.entity_id ? (
-                        <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
-                          #{String(item.entity_id).slice(0, 8)}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                      {item.summary || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                      <div className="font-medium">
-                        {item.actor_email || "-"}
-                      </div>
-                      <div className="text-xs text-slate-400 dark:text-slate-500">
-                        {item.actor_role || "-"}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  );
+  return <AdminAuditManager />;
 }

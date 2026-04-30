@@ -117,3 +117,33 @@ export async function listAudit({
     return { ok: false, error: error?.message, items: [] };
   }
 }
+
+export async function deleteAudit(id) {
+  try {
+    if (!id) throw new Error("ID log wajib diisi.");
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("admin_audit_log")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+    return { ok: true, message: "Log berhasil dihapus secara permanen." };
+  } catch (error) {
+    return { ok: false, error: error?.message || "Gagal menghapus log." };
+  }
+}
+
+export async function clearAllAudit() {
+  try {
+    const supabase = createAdminClient();
+    // Gunakan filter yang pasti benar untuk menghapus semua, atau .neq('id', 0)
+    const { error } = await supabase
+      .from("admin_audit_log")
+      .delete()
+      .neq("id", 0);
+    if (error) throw error;
+    return { ok: true, message: "Seluruh riwayat log berhasil dibersihkan." };
+  } catch (error) {
+    return { ok: false, error: error?.message || "Gagal membersihkan log." };
+  }
+}

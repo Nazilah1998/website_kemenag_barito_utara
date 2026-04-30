@@ -413,7 +413,19 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     }
   }
 
-  async function deleteDocument(id) {
+  function handleDeleteRequest(id) {
+    if (!id) return;
+    dispatch({ type: "SET_ID_TO_DELETE", payload: id });
+    dispatch({ type: "SET_SHOW_DELETE_MODAL", payload: true });
+  }
+
+  function handleCancelDelete() {
+    dispatch({ type: "SET_ID_TO_DELETE", payload: null });
+    dispatch({ type: "SET_SHOW_DELETE_MODAL", payload: false });
+  }
+
+  async function handleConfirmDelete() {
+    const id = state.idToDelete;
     if (!id || !activeCategory?.slug) return;
 
     dispatch({ type: "SET_DELETING_ID", payload: id });
@@ -439,6 +451,9 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
           message: json?.message || "Dokumen berhasil dihapus.",
         },
       });
+
+      dispatch({ type: "SET_SHOW_DELETE_MODAL", payload: false });
+      dispatch({ type: "SET_ID_TO_DELETE", payload: null });
     } catch (error) {
       dispatch({
         type: "SET_ACTION_FEEDBACK",
@@ -484,6 +499,8 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     savingEditId: state.savingEditId,
     deletingId: state.deletingId,
 
+    showDeleteModal: state.showDeleteModal,
+
     handleSwitchCategory,
     setDocForm,
     setSelectedFile,
@@ -493,6 +510,8 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     cancelEdit,
     saveEdit,
     togglePublish,
-    deleteDocument,
+    deleteDocument: handleDeleteRequest,
+    handleConfirmDelete,
+    handleCancelDelete,
   };
 }

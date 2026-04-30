@@ -101,3 +101,58 @@ export function GalleryEmpty() {
   );
 }
 
+export function GalleryPagination({ currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, startPage + 4);
+  if (endPage - startPage < 4) {
+    startPage = Math.max(1, endPage - 4);
+  }
+  const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+
+  return (
+    <div className="mt-16 flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        Halaman <span className="font-bold text-slate-900 dark:text-slate-100">{currentPage}</span> dari <span className="font-bold text-slate-900 dark:text-slate-100">{totalPages}</span>
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button
+          onClick={() => {
+            onPageChange(currentPage - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={currentPage === 1}
+          className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          Sebelumnya
+        </button>
+        {pages.map((p) => (
+          <button
+            key={p}
+            onClick={() => {
+              onPageChange(p);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition ${p === currentPage
+                ? "bg-emerald-600 text-white shadow-md dark:bg-emerald-500"
+                : "text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
+              }`}
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            onPageChange(currentPage + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          disabled={currentPage === totalPages}
+          className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          Selanjutnya
+        </button>
+      </div>
+    </div>
+  );
+}

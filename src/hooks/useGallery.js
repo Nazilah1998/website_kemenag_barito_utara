@@ -7,6 +7,32 @@ export function useGallery(items) {
   }, [items]);
 
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setItemsPerPage(6); // Mobile
+      } else if (width < 1024) {
+        setItemsPerPage(9); // Tablet (3 columns = 3x3)
+      } else {
+        setItemsPerPage(10); // Desktop
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const totalPages = Math.max(1, Math.ceil(safeItems.length / itemsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
+
+  const paginatedItems = useMemo(() => {
+    const start = (activePage - 1) * itemsPerPage;
+    return safeItems.slice(start, start + itemsPerPage);
+  }, [safeItems, activePage, itemsPerPage]);
 
   const selectedItem = useMemo(() => {
     if (selectedIndex < 0 || selectedIndex >= safeItems.length) return null;
@@ -58,5 +84,10 @@ export function useGallery(items) {
     handleClose,
     handlePrev,
     handleNext,
+    currentPage: activePage,
+    setCurrentPage,
+    totalPages,
+    paginatedItems,
+    itemsPerPage,
   };
 }

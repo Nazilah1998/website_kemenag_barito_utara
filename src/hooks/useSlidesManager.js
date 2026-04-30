@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { compressImageToBase64 } from "@/lib/image-compress";
 import { toCoverPreviewUrl } from "@/lib/cover-image";
 
@@ -42,7 +42,20 @@ export function useSlidesManager() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  async function loadItems() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 3;
+
+  const totalPages = Math.ceil(items.length / pageSize);
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return items.slice(start, start + pageSize);
+  }, [items, currentPage]);
+
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
+
+  const loadItems = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -58,17 +71,18 @@ export function useSlidesManager() {
       }
 
       setItems(Array.isArray(data?.items) ? data.items : []);
+      setCurrentPage(1);
     } catch (err) {
       setError(err?.message || "Gagal memuat data slider.");
       setItems([]);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     loadItems();
-  }, []);
+  }, [loadItems]);
 
   useEffect(() => {
     if (!message && !error) return undefined;
@@ -89,17 +103,17 @@ export function useSlidesManager() {
     return toCoverPreviewUrl(form.image_url || "");
   }, [form.image_upload_base64, form.image_url]);
 
-  function resetForm() {
+  const resetForm = useCallback(() => {
     setForm(emptyForm);
     setEditingId("");
-  }
+  }, []);
 
-  function handleOpenCreate() {
+  const handleOpenCreate = useCallback(() => {
     resetForm();
     setOpenForm(true);
-  }
+  }, [resetForm]);
 
-  function handleOpenEdit(item) {
+  const handleOpenEdit = useCallback((item) => {
     setEditingId(item.id);
     setForm({
       title: item.title || "",
@@ -111,22 +125,22 @@ export function useSlidesManager() {
       sort_order: toNumber(item.sort_order, 0),
     });
     setOpenForm(true);
-  }
+  }, []);
 
-  function handleCloseForm() {
+  const handleCloseForm = useCallback(() => {
     setOpenForm(false);
     resetForm();
-  }
+  }, [resetForm]);
 
-  function handleChange(event) {
+  const handleChange = useCallback((event) => {
     const { name, value, type, checked } = event.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  }
+  }, []);
 
-  async function handleImageFileChange(event) {
+  const handleImageFileChange = useCallback(async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -155,17 +169,17 @@ export function useSlidesManager() {
       setUploadingImage(false);
       event.target.value = "";
     }
-  }
+  }, []);
 
-  function validateForm() {
+  const validateForm = useCallback(() => {
     if (!String(form.title || "").trim()) return "Judul slide wajib diisi.";
     if (!String(form.image_url || "").trim() && !form.image_upload_base64) {
       return "Gambar slide wajib diupload.";
     }
     return "";
-  }
+  }, [form.title, form.image_url, form.image_upload_base64]);
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     const validation = validateForm();
     if (validation) {
       setError(validation);
@@ -211,20 +225,30 @@ export function useSlidesManager() {
     } finally {
       setSaving(false);
     }
-  }
+  }, [form, editingId, validateForm, handleCloseForm, loadItems]);
 
-  async function handleDelete(id) {
-    const confirmDelete = window.confirm(
-      "Yakin ingin menghapus slide ini? Tindakan ini tidak bisa dibatalkan.",
-    );
-    if (!confirmDelete) return;
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [idToDelete, setIdToDelete] = useState(null);
+
+  const handleDeleteRequest = useCallback((id) => {
+    setIdToDelete(id);
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const handleCancelDelete = useCallback(() => {
+    setIdToDelete(null);
+    setShowDeleteConfirm(false);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!idToDelete) return;
 
     try {
-      setDeletingId(id);
+      setDeletingId(idToDelete);
       setError("");
       setMessage("");
 
-      const response = await fetch(`/api/admin/homepage-slides/${id}`, {
+      const response = await fetch(`/api/admin/homepage-slides/${idToDelete}`, {
         method: "DELETE",
       });
 
@@ -234,16 +258,22 @@ export function useSlidesManager() {
       }
 
       setMessage(data?.message || "Slide berhasil dihapus.");
+      setShowDeleteConfirm(false);
+      setIdToDelete(null);
       await loadItems();
     } catch (err) {
       setError(err?.message || "Gagal menghapus slide.");
     } finally {
       setDeletingId("");
     }
-  }
+  }, [idToDelete, loadItems]);
 
   return {
     items,
+    paginatedItems,
+    currentPage,
+    totalPages,
+    handlePageChange,
     loading,
     openForm,
     editingId,
@@ -252,7 +282,9 @@ export function useSlidesManager() {
     uploadingImage,
     deletingId,
     message,
+    setMessage,
     error,
+    setError,
     totalPublished,
     imagePreview,
     handleOpenCreate,
@@ -261,7 +293,10 @@ export function useSlidesManager() {
     handleChange,
     handleImageFileChange,
     handleSave,
-    handleDelete,
+    handleDelete: handleDeleteRequest,
+    showDeleteConfirm,
+    handleConfirmDelete,
+    handleCancelDelete,
     toNumber,
   };
 }

@@ -82,46 +82,65 @@ export default async function LaporanCategoryPage({ params }) {
         ]}
       />
 
-      <main className="bg-slate-50/60 dark:bg-slate-950">
-        <section className="w-full px-6 py-10 sm:px-10 md:py-14 lg:px-16 xl:px-20">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <main className="relative bg-white dark:bg-slate-950">
+        {/* Background Decorative Elements */}
+        <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-full overflow-hidden opacity-40">
+          <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-emerald-100/50 blur-[120px] dark:bg-emerald-900/10" />
+        </div>
+
+        <section className="relative z-10 w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-6">
             <Link
               href="/laporan"
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
+              className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-[11px] font-bold text-slate-500 shadow-sm transition-all hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-emerald-700"
             >
-              <ArrowLeftIcon />
-              <span>Kembali ke semua kategori</span>
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-50 transition-all group-hover:bg-emerald-50 dark:bg-white/5 dark:group-hover:bg-emerald-900/30">
+                <ArrowLeftIcon />
+              </div>
+              <span>Back to Index</span>
             </Link>
 
-            <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300">
-              {documents.length} dokumen tersedia
-            </span>
+            <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 dark:bg-emerald-900/10">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+                {documents.length} Dokumen Tersedia
+              </span>
+            </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm dark:border-emerald-900/40 dark:bg-slate-900">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.14),_transparent_42%)]" />
-            <div className="relative">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {category.title}
-              </h2>
+          {/* Modern Minimalist Header Banner */}
+          <div className="relative mb-14 overflow-hidden rounded-[2.5rem] bg-emerald-950 p-8 text-white shadow-xl lg:p-12">
+            {/* Subtle Decorative Mesh */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.3),_transparent_70%)]" />
+            </div>
 
-              {category.description ? (
-                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  {category.description}
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-300 backdrop-blur-md">
+                  Category Repository
+                </div>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  {category.title}
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-emerald-100/60">
+                  {category.description
+                    ? category.description.split(".")[0] + "."
+                    : "Koleksi dokumen resmi untuk transparansi publik."}
                 </p>
-              ) : null}
+              </div>
+
+              {category.intro && (
+                <div className="hidden shrink-0 rounded-3xl bg-white/5 p-6 backdrop-blur-sm border border-white/10 max-w-xs lg:block">
+                  <p className="text-[10px] italic leading-relaxed text-emerald-100/40">
+                    &ldquo;{category.intro.substring(0, 80)}...&rdquo;
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          {category.intro ? (
-            <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-sm leading-7 text-slate-600 dark:text-slate-300">
-                {category.intro}
-              </p>
-            </div>
-          ) : null}
-
-          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <LaporanDocumentsClient documents={documents} />
           </div>
         </section>

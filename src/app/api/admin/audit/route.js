@@ -30,3 +30,44 @@ export async function GET(request) {
     { headers: { "Cache-Control": "no-store" } },
   );
 }
+
+export async function DELETE(request) {
+  const auth = await validateAdmin({
+    permission: PERMISSIONS.AUDIT_VIEW, // Minimal view, tapi sebaiknya ada permission khusus DELETE jika ada
+  });
+  if (!auth.ok) return auth.response;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const clearAll = searchParams.get("clear") === "all";
+
+    let result;
+    if (clearAll) {
+      const { clearAllAudit } = await import("@/lib/audit");
+      result = await clearAllAudit();
+    } else if (id) {
+      const { deleteAudit } = await import("@/lib/audit");
+      result = await deleteAudit(id);
+    } else {
+      return NextResponse.json(
+        { message: "ID log atau parameter pembersihan wajib ditentukan." },
+        { status: 400 },
+      );
+    }
+
+    if (!result.ok) {
+      return NextResponse.json(
+        { message: result.error || "Gagal menghapus log." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ message: result.message });
+  } catch (error) {
+    return NextResponse.json(
+      { message: error?.message || "Internal server error." },
+      { status: 500 },
+    );
+  }
+}

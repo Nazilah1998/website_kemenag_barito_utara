@@ -1,61 +1,90 @@
 import React from "react";
+import { StatusPill, ActionIconButton } from "./SlidesUI";
 
 export function SlideTable({ items, loading, onEdit, onDelete, deletingId, toNumber }) {
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse bg-white dark:bg-slate-900/40">
-          <thead className="bg-slate-50 dark:bg-slate-800/70">
-            <tr>
-              {["Judul", "Caption", "Urutan", "Status", "Aksi"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <TableMessage colSpan={5} message="Memuat data slide..." />
-            ) : items.length === 0 ? (
-              <TableMessage colSpan={5} message="Belum ada slide." />
-            ) : (
-              items.map((item) => (
-                <tr key={item.id} className="border-t border-slate-100 align-top dark:border-slate-800">
-                  <td className="px-4 py-4 text-sm font-semibold text-slate-800 dark:text-slate-100">{item.title}</td>
-                  <td className="px-4 py-4 text-sm text-slate-600 dark:text-slate-300">{item.caption || "-"}</td>
-                  <td className="px-4 py-4 text-sm text-slate-600 dark:text-slate-300">{toNumber(item.sort_order, 0)}</td>
-                  <td className="px-4 py-4 text-sm">
-                    <StatusBadge isPublished={item.is_published} />
-                  </td>
-                  <td className="px-4 py-4 text-sm">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button onClick={() => onEdit(item)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-200">Edit</button>
-                      <button onClick={() => onDelete(item.id)} disabled={deletingId === item.id} className="rounded-xl border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-300">
-                        {deletingId === item.id ? "Menghapus..." : "Hapus"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr>
+            <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
+              Judul Slide
+            </th>
+            <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
+              Caption
+            </th>
+            <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
+              Urutan
+            </th>
+            <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
+              Status
+            </th>
+            <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
+              Aksi
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
+            <TableMessage colSpan={5} message="Memuat data slide..." loading />
+          ) : items.length === 0 ? (
+            <TableMessage colSpan={5} message="Belum ada slide yang ditambahkan." />
+          ) : (
+            items.map((item) => (
+              <tr key={item.id} className="group border-t border-slate-100 bg-white hover:bg-slate-50 transition-all align-top dark:border-slate-800 dark:bg-transparent dark:hover:bg-white/5">
+                <td className="px-6 py-6">
+                  <p className="text-sm font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">
+                    {item.title}
+                  </p>
+                </td>
+                <td className="px-6 py-6">
+                  <p className="max-w-md text-xs font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                    {item.caption || "-"}
+                  </p>
+                </td>
+                <td className="px-6 py-6">
+                  <span className="text-xs font-black text-slate-900 dark:text-slate-100 italic">
+                    #{toNumber(item.sort_order, 0)}
+                  </span>
+                </td>
+                <td className="px-6 py-6">
+                  <StatusPill published={item.is_published} />
+                </td>
+                <td className="px-6 py-6">
+                  <div className="flex items-center gap-2">
+                    <ActionIconButton
+                      title="Edit slide"
+                      onClick={() => onEdit(item)}
+                      variant="neutral"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m4 20 4.1-.8L18 9.3 14.7 6 4.8 15.9 4 20Z" /><path d="m12.9 7.8 3.3 3.3" /></svg>
+                    </ActionIconButton>
+
+                    <ActionIconButton
+                      title={deletingId === item.id ? "Menghapus..." : "Hapus slide"}
+                      onClick={() => onDelete(item.id)}
+                      disabled={deletingId === item.id}
+                      variant="danger"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 7h16M9 7V4.8a.8.8 0 0 1 .8-.8h4.4a.8.8 0 0 1 .8.8V7M7 7v11a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7M10 11v5M14 11v5" /></svg>
+                    </ActionIconButton>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function TableMessage({ colSpan, message }) {
+function TableMessage({ colSpan, message, loading }) {
   return (
     <tr>
-      <td colSpan={colSpan} className="px-4 py-10 text-center text-sm text-slate-500">{message}</td>
+      <td colSpan={colSpan} className={`px-6 py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 ${loading ? "animate-pulse" : ""}`}>
+        {message}
+      </td>
     </tr>
-  );
-}
-
-function StatusBadge({ isPublished }) {
-  return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${isPublished ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"}`}>
-      {isPublished ? "Publish" : "Draft"}
-    </span>
   );
 }

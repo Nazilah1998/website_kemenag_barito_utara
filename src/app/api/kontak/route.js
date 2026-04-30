@@ -5,7 +5,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 export const dynamic = "force-dynamic";
 
 const MAX_NAMA = 120;
-const MAX_EMAIL = 180;
+const MAX_WHATSAPP = 20;
 const MAX_SUBJEK = 160;
 const MAX_PESAN = 4000;
 const MIN_PESAN = 10;
@@ -19,10 +19,9 @@ function cleanString(value, max = 1000) {
   return trimmed.slice(0, max);
 }
 
-function isValidEmail(email) {
-  if (!email) return false;
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  return re.test(email);
+function isValidWhatsapp(wa) {
+  if (!wa) return false;
+  return /^[0-9+\-\s()]{9,20}$/.test(wa);
 }
 
 function jsonResponse(data, status = 200) {
@@ -87,7 +86,7 @@ export async function POST(request) {
   }
 
   const nama = cleanString(body?.nama, MAX_NAMA);
-  const email = cleanString(body?.email, MAX_EMAIL).toLowerCase();
+  const whatsapp = cleanString(body?.whatsapp, MAX_WHATSAPP);
   const subjek = cleanString(body?.subjek, MAX_SUBJEK);
   const pesan = cleanString(body?.pesan, MAX_PESAN);
 
@@ -97,9 +96,13 @@ export async function POST(request) {
   if (nama && nama.length < 3)
     errors.push({ field: "nama", message: "Nama minimal 3 karakter." });
 
-  if (!email) errors.push({ field: "email", message: "Email wajib diisi." });
-  if (email && !isValidEmail(email))
-    errors.push({ field: "email", message: "Format email tidak valid." });
+  if (!whatsapp)
+    errors.push({ field: "whatsapp", message: "No. WhatsApp wajib diisi." });
+  if (whatsapp && !isValidWhatsapp(whatsapp))
+    errors.push({
+      field: "whatsapp",
+      message: "Format No. WhatsApp tidak valid.",
+    });
 
   if (!pesan) errors.push({ field: "pesan", message: "Pesan wajib diisi." });
   if (pesan && pesan.length < MIN_PESAN)
@@ -121,8 +124,8 @@ export async function POST(request) {
 
   const record = {
     nama,
-    email,
-    subjek: subjek || null,
+    whatsapp,
+    subjek: subjek || "Pertanyaan",
     pesan,
     ip_address: ip,
     user_agent: request.headers.get("user-agent") || null,
@@ -132,7 +135,6 @@ export async function POST(request) {
   const saved = await saveToSupabase(record);
 
   if (!saved.ok) {
-    // Supabase gagal (mis. tabel belum ada). Log lokal agar pesan tidak hilang.
     console.info("[kontak] pesan diterima (fallback log):", record);
   }
 

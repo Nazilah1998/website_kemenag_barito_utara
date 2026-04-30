@@ -2,8 +2,8 @@ import { useState } from "react";
 
 const INITIAL = {
   nama: "",
-  email: "",
-  subjek: "",
+  whatsapp: "",
+  subjek: "Pertanyaan",
   pesan: "",
   website: "", // honeypot
 };

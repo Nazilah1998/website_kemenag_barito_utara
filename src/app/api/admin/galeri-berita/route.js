@@ -398,3 +398,70 @@ export async function POST(request) {
     );
   }
 }
+
+export async function DELETE(request) {
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = cleanString(searchParams.get("id"));
+
+    if (!id) {
+      throw createHttpError("ID galeri wajib ada.", 400);
+    }
+
+    const supabase = createAdminClient();
+
+    const { data: item, error: lookupError } = await supabase
+      .from("galeri")
+      .select("id, title, image_url, source_id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (lookupError) throw lookupError;
+    if (!item) {
+      throw createHttpError("Item galeri tidak ditemukan.", 404);
+    }
+
+    // Hapus file dari storage
+    if (item.image_url) {
+      try {
+        await removeStorageFileByPublicUrl(supabase, item.image_url);
+      } catch (error) {
+        console.error("Gagal menghapus file galeri dari storage:", error);
+      }
+    }
+
+    // Hapus record dari database
+    const { error: deleteError } = await supabase
+      .from("galeri")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) throw deleteError;
+
+    revalidateGaleriPaths();
+
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.DELETE,
+      entity: AUDIT_ENTITIES.GALERI,
+      entityId: id,
+      summary: `Menghapus item galeri "${item.title}"`,
+      before: item,
+      request,
+    });
+
+    return createNoStoreResponse({
+      message: "Item galeri berhasil dihapus.",
+    });
+  } catch (error) {
+    return createNoStoreResponse(
+      {
+        message: error.message || "Gagal menghapus item galeri.",
+      },
+      error.status || 500,
+    );
+  }
+}

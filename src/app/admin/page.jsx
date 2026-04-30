@@ -2,44 +2,20 @@ import { getCurrentSessionContext } from "@/lib/auth";
 import { getUserPermissionContext } from "@/lib/user-permissions";
 import { getDashboardStats } from "@/lib/admin-stats";
 import { redirect } from "next/navigation";
+import AdminLoginClient from "@/components/features/admin/AdminLoginClient";
+import {
+  DashboardHeader,
+  StatCard,
+  RecentActivity,
+  TopContent,
+  QuickMenu
+} from "@/components/features/admin/dashboard/DashboardUI";
 
 export const dynamic = "force-dynamic";
-
-function StatCard({ label, value, helper, tone = "slate" }) {
-  const tones = {
-    slate: "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/80",
-    emerald:
-      "border-emerald-200 bg-emerald-50/80 dark:border-emerald-700/60 dark:bg-emerald-900/20",
-    amber:
-      "border-amber-200 bg-amber-50/80 dark:border-amber-700/60 dark:bg-amber-900/20",
-    sky: "border-sky-200 bg-sky-50/80 dark:border-sky-700/60 dark:bg-sky-900/20",
-    rose: "border-rose-200 bg-rose-50/80 dark:border-rose-700/60 dark:bg-rose-900/20",
-  };
-
-  const textTones = {
-    slate: "text-slate-900 dark:text-slate-100",
-    emerald: "text-emerald-900 dark:text-emerald-200",
-    amber: "text-amber-900 dark:text-amber-200",
-    sky: "text-sky-900 dark:text-sky-200",
-    rose: "text-rose-900 dark:text-rose-200",
-  };
-
-  return (
-    <div className={`rounded-3xl border p-5 shadow-sm ${tones[tone] || tones.slate}`}>
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
-      <p className={`mt-2 text-3xl font-bold ${textTones[tone] || textTones.slate}`}>
-        {value}
-      </p>
-      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{helper}</p>
-    </div>
-  );
-}
 
 function numberFmt(n) {
   return new Intl.NumberFormat("id-ID").format(Number(n || 0));
 }
-
-import AdminLoginClient from "@/components/features/admin/AdminLoginClient";
 
 export default async function AdminDashboardPage({ searchParams }) {
   const session = await getCurrentSessionContext();
@@ -71,63 +47,82 @@ export default async function AdminDashboardPage({ searchParams }) {
     recent7: 0,
     totalKontak: 0,
     kontakBaru: 0,
+    totalReportDocs: 0,
   };
 
-  const displayEmail = user?.email || "-";
-  const compactName =
-    user?.full_name?.trim() || String(displayEmail).split("@")[0] || "Admin";
-
   return (
-    <section className="space-y-6">
-      <div className="rounded-3xl border border-emerald-100 bg-linear-to-br from-emerald-50 via-white to-white p-6 shadow-sm dark:border-emerald-700/50 dark:from-emerald-900/25 dark:via-slate-900 dark:to-slate-900">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
-          Dashboard Admin
-        </p>
+    <div className="space-y-12 animate-in fade-in duration-700 delay-100">
+      {/* 1. Greeting & Hero Area */}
+      <DashboardHeader user={user} session={session} />
 
-        <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">
-          Selamat datang, {compactName}
-        </h1>
-
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          {displayEmail} · Peran:{" "}
-          <span className="font-semibold capitalize">
-            {session.role || "tidak diketahui"}
-          </span>
-        </p>
-      </div>
-
-      {isPendingEditor ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Akun editor Anda sudah bisa login, tetapi akses fitur masih dikunci.
-          Silakan tunggu verifikasi super admin untuk membuka permissions.
+      {isPendingEditor && (
+        <div className="rounded-[2rem] border-2 border-amber-100 bg-amber-50 p-8 dark:border-amber-900/30 dark:bg-amber-950/20">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-500/20">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Verifikasi Tertunda</p>
+              <p className="mt-1 text-sm font-medium text-amber-800/80 dark:text-amber-300/80 leading-relaxed">
+                Akun editor Anda sudah bisa login, tetapi akses fitur masih dikunci. Silakan hubungi Super Admin untuk verifikasi.
+              </p>
+            </div>
+          </div>
         </div>
-      ) : null}
+      )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {/* 2. Main Analytics Grid */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Total Berita"
+          label="Publikasi Berita"
           value={numberFmt(summary.totalBerita)}
-          helper={`${numberFmt(summary.recent7)} berita dibuat 7 hari terakhir.`}
+          helper={`${numberFmt(summary.recent7)} berita baru dalam 7 hari terakhir.`}
           tone="emerald"
+          icon={
+            <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14 2v4a2 2 0 002 2h4" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 12h10M7 16h10" />
+            </svg>
+          }
         />
         <StatCard
-          label="Berita Publish"
-          value={numberFmt(summary.totalPublished)}
-          helper="Konten yang tampil di website publik."
-        />
-        <StatCard
-          label="Draft"
-          value={numberFmt(summary.totalDraft)}
-          helper="Konten yang sedang disiapkan."
-          tone="amber"
-        />
-        <StatCard
-          label="Total Views"
+          label="Total Jangkauan"
           value={numberFmt(summary.totalViews)}
-          helper="Akumulasi view seluruh berita."
-          tone="sky"
+          helper="Akumulasi tayangan seluruh konten berita."
+          tone="blue"
+          icon={
+            <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          }
+        />
+        <StatCard
+          label="Pesan Masuk"
+          value={numberFmt(summary.totalKontak)}
+          helper={`${numberFmt(summary.kontakBaru)} pesan baru perlu ditanggapi.`}
+          tone="amber"
+          icon={
+            <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          }
+        />
+        <StatCard
+          label="Dokumen Laporan"
+          value={numberFmt(summary.totalReportDocs)}
+          helper="Total dokumen publik yang terbit saat ini."
+          tone="violet"
+          icon={
+            <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          }
         />
       </div>
-    </section>
+    </div>
   );
 }

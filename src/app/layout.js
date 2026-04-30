@@ -24,13 +24,6 @@ export const metadata = {
   },
   description: siteInfo.description,
   alternates: { canonical: "/" },
-  icons: {
-    icon: [
-      { url: "/kemenag.svg", type: "image/svg+xml" },
-      { url: "/logo-share.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/logo-share.png", sizes: "512x512", type: "image/png" }],
-  },
   manifest: "/manifest.webmanifest",
   applicationName: "Kemenag Barito Utara",
   appleWebApp: {

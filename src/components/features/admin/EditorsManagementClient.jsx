@@ -16,27 +16,38 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
   const e = useEditorsManagement(initialEditors);
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 sm:p-7">
-          <EditorHeader 
-            pendingCount={e.pendingCount} 
-            filteredCount={e.filteredEditors.length} 
-            totalCount={e.editors.length} 
-          />
-          <EditorFilters 
-            search={e.search} setSearch={e.setSearch} 
-            filterRole={e.filterRole} setFilterRole={e.setFilterRole} 
-          />
-        </div>
+    <div className="space-y-12 animate-in fade-in duration-700 delay-100">
+      <div className="rounded-[3.5rem] border border-slate-100 bg-white p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none sm:p-12">
+        <EditorHeader
+          pendingCount={e.pendingCount}
+          filteredCount={e.filteredEditors.length}
+          totalCount={e.editors.length}
+        />
+        <EditorFilters
+          search={e.search} setSearch={e.setSearch}
+          filterRole={e.filterRole} setFilterRole={e.setFilterRole}
+        />
+      </div>
 
-        <div className="space-y-3">
-          {e.loading ? (
-            <p className="text-sm text-slate-500">Memuat data editor...</p>
-          ) : e.filteredEditors.length === 0 ? (
-            <p className="text-sm text-slate-500">Tidak ada data editor yang sesuai.</p>
-          ) : (
-            e.filteredEditors.map((item, idx) => (
+      <div className="space-y-6">
+        {e.loading ? (
+          <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+            <div className="h-16 w-16 rounded-full border-4 border-slate-100 border-t-slate-900 dark:border-slate-800 dark:border-t-white animate-spin mb-6" />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Sinkronisasi Data Personil...</p>
+          </div>
+        ) : e.filteredEditors.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 rounded-[3.5rem] border-2 border-dashed border-slate-100 dark:border-slate-800">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-300 dark:bg-white/5">
+              <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">Data personil tidak ditemukan</p>
+            <p className="mt-2 text-sm font-medium text-slate-300 dark:text-slate-600">Coba sesuaikan kata kunci pencarian Anda.</p>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {e.filteredEditors.map((item, idx) => (
               <EditorCard
                 key={item.user_id} index={idx + 1} editor={item}
                 onOpenToggleActiveModal={e.openToggleActiveModal}
@@ -47,14 +58,8 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                 busyAction={e.busyAction}
                 getPermissionCount={e.getPermissionCount}
               />
-            ))
-          )}
-        </div>
-
-        {(e.message || e.error) && (
-          <p className={`text-sm ${e.message ? "text-emerald-600" : "text-rose-600"}`}>
-            {e.message || e.error}
-          </p>
+            ))}
+          </div>
         )}
       </div>
 
@@ -86,6 +91,6 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
 
       <EditorConfirmDialog dialog={e.confirmDialog} onClose={e.closeConfirmDialog} />
       <EditorToast toast={e.toast} />
-    </>
+    </div>
   );
 }

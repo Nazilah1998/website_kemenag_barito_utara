@@ -7,10 +7,10 @@ export function KontakFormHeader() {
         Formulir Pesan
       </p>
       <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-        Kirim pertanyaan atau masukan Anda
+        Kirim pertanyaan, masukan, atau pengaduan Anda
       </h2>
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-        Pesan akan diterima tim humas pada jam layanan kantor.
+        Pesan akan diterima tim kami dan ditindaklanjuti pada jam layanan.
       </p>
     </div>
   );
@@ -21,11 +21,10 @@ export function KontakFormStatus({ result }) {
   return (
     <div
       role="status"
-      className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
-        result.ok
+      className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${result.ok
           ? "border-emerald-200 bg-emerald-50 text-emerald-800"
           : "border-rose-200 bg-rose-50 text-rose-800"
-      }`}
+        }`}
     >
       {result.message}
     </div>

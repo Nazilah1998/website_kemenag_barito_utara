@@ -1,6 +1,7 @@
+// src/components/features/admin/AdminLaporanPageClient.jsx
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminLaporanCategoryManager from "./AdminLaporanCategoryManager";
 
 export default function AdminLaporanPageClient() {
@@ -51,32 +52,26 @@ export default function AdminLaporanPageClient() {
     const initialCategory = categories[0] || null;
 
     return (
-        <section className="space-y-6">
-            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700 dark:text-emerald-400">
-                    Modul Laporan
-                </p>
-                <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    Manajemen Dokumen Laporan
-                </h1>
-                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                    Kelola kategori, upload dokumen PDF, ubah metadata, dan atur publikasi
-                    dokumen laporan instansi secara terpusat.
-                </p>
-            </div>
-
+        <section className="space-y-12 animate-in fade-in duration-700">
             {loading ? (
-                <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                        Memuat data kategori laporan…
-                    </p>
-                </section>
+                <div className="flex flex-col items-center justify-center p-20 text-center">
+                    <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-100 border-t-emerald-600 dark:border-slate-800 dark:border-t-emerald-500" />
+                    <p className="mt-6 text-sm font-black uppercase tracking-widest text-slate-400">Menginisialisasi Sistem...</p>
+                </div>
             ) : error ? (
-                <section className="rounded-[28px] border border-rose-200 bg-rose-50 p-6 shadow-sm dark:border-rose-900 dark:bg-rose-950/30">
-                    <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
-                        {error}
-                    </p>
-                </section>
+                <div className="rounded-[2.5rem] border border-rose-100 bg-rose-50/50 p-12 text-center dark:border-rose-900/30 dark:bg-rose-950/20">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-100 text-rose-600 dark:bg-rose-900 dark:text-rose-400 mb-6">
+                        <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">Terjadi Kesalahan</h2>
+                    <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-8 rounded-2xl bg-slate-900 px-8 py-3 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-slate-800 active:scale-95 dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                    >
+                        Coba Lagi
+                    </button>
+                </div>
             ) : (
                 <AdminLaporanCategoryManager
                     category={initialCategory}

@@ -34,25 +34,35 @@ export function KontakFormFields({ form, onChange, getFieldError }) {
           required
         />
         <FormInput
-          id="email"
-          label="Email"
-          type="email"
-          value={form.email}
+          id="whatsapp"
+          label="No. WhatsApp"
+          type="tel"
+          value={form.whatsapp}
           onChange={onChange}
-          error={getFieldError("email")}
-          placeholder="nama@email.com"
+          error={getFieldError("whatsapp")}
+          placeholder="Contoh: 081234567890"
           required
         />
       </div>
 
       <div className="mt-4">
-        <FormInput
+        <label
+          htmlFor="subjek"
+          className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
+        >
+          Kategori Pesan
+        </label>
+        <select
           id="subjek"
-          label="Subjek (opsional)"
+          name="subjek"
           value={form.subjek}
           onChange={onChange}
-          placeholder="Ringkasan singkat pesan Anda"
-        />
+          className={`${baseInput} border-slate-200`}
+        >
+          <option value="Pertanyaan">Pertanyaan</option>
+          <option value="Masukan">Masukan</option>
+          <option value="Pengaduan">Pengaduan</option>
+        </select>
       </div>
 
       <div className="mt-4">

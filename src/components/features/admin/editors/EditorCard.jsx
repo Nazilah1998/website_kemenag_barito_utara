@@ -31,71 +31,56 @@ export function EditorCard({
   const deleting = busyAction === `delete:${editor.user_id}`;
 
   return (
-    <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80 sm:p-6">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-900 text-sm font-bold text-white">
-              {index}
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                {editor.full_name}
-              </h3>
-              <p className="mt-0.5 break-all text-sm text-slate-600 dark:text-slate-400">
-                {editor.email}
-              </p>
-            </div>
+    <div className={`group relative overflow-hidden rounded-[2.5rem] border-2 bg-white transition-all duration-500 hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/20 dark:hover:border-white`}>
+      <div className="flex flex-col xl:flex-row xl:items-center gap-8 p-8">
+        {/* Left: ID & Info */}
+        <div className="flex flex-col md:flex-row md:items-center gap-8 flex-1">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white shadow-xl group-hover:scale-110 transition-transform dark:bg-white dark:text-black">
+            <span className="text-xl font-black italic">{index}</span>
           </div>
 
-          <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-400 sm:grid-cols-2 xl:grid-cols-3">
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                Unit kerja
-              </p>
-              <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
-                {editor.unit_name || "-"}
-              </p>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              {isPending && <Badge tone="amber">Pending Approval</Badge>}
+              {isApproved && <Badge tone="emerald">Verified Account</Badge>}
+              {isRejected && <Badge tone="rose">Account Rejected</Badge>}
+              <Badge tone={isActive ? "blue" : "slate"}>
+                {isActive ? "STATUS: AKTIF" : "STATUS: NONAKTIF"}
+              </Badge>
+              <Badge tone="violet">{role.toUpperCase()}</Badge>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                Role
-              </p>
-              <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
-                {role}
-              </p>
-            </div>
+            <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight uppercase group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+              {editor.full_name}
+            </h3>
+            <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-400 break-all italic">
+              {editor.email}
+            </p>
 
-            <div className="rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                Permission
-              </p>
-              <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
-                {getPermissionCount(editor)} akses
-              </p>
+            {/* Systematic Info Grid */}
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-50 pt-6 dark:border-white/5">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Unit Kerja</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{editor.unit_name || "-"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Level Akses</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">{role}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1.5">Kapasitas</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white">{getPermissionCount(editor)} Modul Terbuka</p>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {isPending ? <Badge tone="amber">Pending</Badge> : null}
-            {isApproved ? <Badge tone="emerald">Approved</Badge> : null}
-            {isRejected ? <Badge tone="rose">Rejected</Badge> : null}
-            <Badge tone={isActive ? "blue" : "slate"}>
-              {isActive ? "Akun aktif" : "Akun nonaktif"}
-            </Badge>
-            <Badge tone="violet">{role === "admin" ? "Admin" : "Editor"}</Badge>
           </div>
         </div>
 
-        <div className="lg:w-auto lg:min-w-47">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-            Aksi cepat
-          </p>
-
-          <div className="flex flex-wrap gap-2">
+        {/* Right: Modern Action Section */}
+        <div className="shrink-0 bg-slate-50/50 dark:bg-white/5 p-6 rounded-[2rem] border-2 border-slate-100 dark:border-white/5">
+          <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center xl:text-left">Kontrol Cepat</p>
+          <div className="flex flex-wrap justify-center gap-3">
             <IconButton
-              label={verifying ? "Memproses verifikasi" : "Verifikasi editor"}
+              label="Verifikasi"
               icon={<CheckIcon />}
               onClick={() => onOpenVerifyModal(editor)}
               disabled={verifying}
@@ -103,31 +88,27 @@ export function EditorCard({
               tone="emerald"
             />
             <IconButton
-              label={
-                toggling
-                  ? "Memproses status akun"
-                  : "Atur status akun"
-              }
+              label="Toggle Aktif"
               icon={<PowerIcon />}
               onClick={() => onOpenToggleActiveModal(editor)}
               disabled={toggling}
               loading={toggling}
-              tone="slate"
-            />
-            <IconButton
-              label="Atur permission"
-              icon={<ShieldIcon />}
-              onClick={() => onOpenPermissions(editor)}
               tone="blue"
             />
             <IconButton
-              label="Ubah role"
-              icon={<span className="text-xs font-bold">R</span>}
+              label="Permission"
+              icon={<ShieldIcon />}
+              onClick={() => onOpenPermissions(editor)}
+              tone="slate"
+            />
+            <IconButton
+              label="Ubah Role"
+              icon={<span className="text-[10px] font-black">R</span>}
               onClick={() => onOpenRoleModal(editor)}
               tone="slate"
             />
             <IconButton
-              label={deleting ? "Menghapus akun..." : "Hapus akun"}
+              label="Hapus"
               icon={<TrashIcon />}
               onClick={() => onDelete(editor)}
               disabled={deleting}

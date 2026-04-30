@@ -11,70 +11,51 @@ export function DeleteConfirmModal({
   if (!open || !item) return null;
 
   return (
-    <div className="fixed inset-0 z-80 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-rose-200 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.45)] dark:border-rose-900/60 dark:bg-slate-900">
-        <div className="flex items-start gap-4 px-6 py-5">
-          <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
+
+      <div className="relative w-full max-w-lg animate-in zoom-in slide-in-from-bottom-4 duration-300 overflow-hidden rounded-[2.5rem] border border-rose-100 bg-white shadow-2xl dark:border-rose-900/30 dark:bg-slate-900">
+        <div className="flex items-start gap-5 px-8 py-8">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400">
             <IconTrashWarning />
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-              Konfirmasi hapus berita
+            <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+              Hapus Berita?
             </h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Tindakan ini tidak bisa dibatalkan.
+            <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+              Tindakan ini permanen dan tidak dapat dibatalkan.
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={deleting}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-            aria-label="Tutup konfirmasi hapus"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M6 6l12 12" />
-              <path d="M18 6 6 18" />
-            </svg>
-          </button>
         </div>
 
-        <div className="px-6 pb-2">
-          <div className="rounded-2xl border border-rose-100 bg-rose-50/70 px-4 py-3 dark:border-rose-900/40 dark:bg-rose-950/20">
-            <p className="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
-              Berita yang akan dihapus
-            </p>
-            <p className="mt-1 text-sm font-medium leading-6 text-slate-800 dark:text-slate-100">
+        <div className="px-8 pb-4">
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Item Terpilih</span>
+            <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-2">
               {item.title}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col-reverse gap-2 px-6 py-5 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={deleting}
-            className="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            Batal
-          </button>
-
+        <div className="flex flex-col gap-3 px-8 py-8">
           <button
             type="button"
             onClick={onConfirm}
             disabled={deleting}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-14 w-full items-center justify-center rounded-2xl bg-rose-600 px-6 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-rose-700 active:scale-95 disabled:opacity-50"
           >
-            {deleting ? "Menghapus..." : "Ya, hapus berita"}
+            {deleting ? "Menghapus..." : "Ya, Hapus Permanen"}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deleting}
+            className="flex h-14 w-full items-center justify-center rounded-2xl border-2 border-slate-100 bg-white px-6 text-sm font-black uppercase tracking-widest text-slate-900 transition-all hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+          >
+            Batalkan
           </button>
         </div>
       </div>
@@ -86,65 +67,39 @@ export function CloseFormConfirmModal({ open, onCancel, onConfirm }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-90 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-amber-200 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.45)] dark:border-amber-900/60 dark:bg-slate-900">
-        <div className="flex items-start gap-4 px-6 py-5">
-          <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300">
+    <div className="fixed inset-0 z-[210] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onCancel} />
+
+      <div className="relative w-full max-w-md animate-in zoom-in slide-in-from-bottom-4 duration-300 overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl dark:border-amber-900/30 dark:bg-slate-900">
+        <div className="flex flex-col items-center px-10 py-10 text-center">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
             <IconAlertCircle />
           </div>
 
-          <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-              Tutup form berita?
-            </h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Perubahan belum disimpan. Tutup form dan buang perubahan?
-            </p>
-          </div>
+          <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            Tutup Form?
+          </h3>
+          <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">
+            Ada perubahan yang belum disimpan. Jika ditutup sekarang, perubahan Anda akan hilang.
+          </p>
 
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-            aria-label="Tutup konfirmasi tutup form"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+          <div className="mt-10 flex w-full flex-col gap-3">
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="flex h-14 w-full items-center justify-center rounded-2xl bg-slate-900 px-6 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-slate-800 active:scale-95 dark:bg-white dark:text-black dark:hover:bg-slate-200"
             >
-              <path d="M6 6l12 12" />
-              <path d="M18 6 6 18" />
-            </svg>
-          </button>
-        </div>
+              Buang Perubahan
+            </button>
 
-        <div className="px-6 pb-2">
-          <div className="rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-            <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">
-              Jika ditutup sekarang, semua perubahan pada form akan hilang.
-            </p>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex h-14 w-full items-center justify-center rounded-2xl border-2 border-slate-100 bg-white px-6 text-sm font-black uppercase tracking-widest text-slate-900 transition-all hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+            >
+              Lanjut Mengedit
+            </button>
           </div>
-        </div>
-
-        <div className="flex flex-col-reverse gap-2 px-6 py-5 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            Lanjut mengedit
-          </button>
-
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700"
-          >
-            Ya, tutup & buang
-          </button>
         </div>
       </div>
     </div>

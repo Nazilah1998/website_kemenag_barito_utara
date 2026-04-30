@@ -4,24 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED_PERMISSIONS = new Set([
-  "dashboard:view",
-  "berita:view",
-  "berita:create",
-  "berita:update",
-  "berita:delete",
-  "berita:publish",
-  "halaman:view",
-  "halaman:create",
-  "halaman:update",
-  "halaman:delete",
-  "halaman:publish",
-  "laporan:view",
-  "laporan:manage",
-  "homepage_slides:view",
-  "homepage_slides:manage",
-  "audit:view",
-]);
+import { PERMISSIONS } from "@/lib/permissions";
+
+const ALLOWED_PERMISSIONS = new Set(Object.values(PERMISSIONS));
 
 function json(data, status = 200) {
   return NextResponse.json(data, {

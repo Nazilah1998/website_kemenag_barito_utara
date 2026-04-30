@@ -792,6 +792,36 @@ export function useBeritaManager() {
     }
   }
 
+  async function handleDeleteGallery() {
+    if (!galleryForm.id) return;
+
+    try {
+      setGallerySendingId(galleryForm.berita_id);
+      setError("");
+      setMessage("");
+
+      const response = await fetch(
+        `/api/admin/galeri-berita?id=${galleryForm.id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const data = await readJsonSafely(response);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal menghapus item galeri.");
+      }
+
+      setMessage(data?.message || "Item galeri berhasil dihapus.");
+      handleCloseGalleryForm();
+    } catch (err) {
+      setError(err.message || "Gagal menghapus item galeri.");
+    } finally {
+      setGallerySendingId(null);
+    }
+  }
+
   return {
     editorRef,
     items,
@@ -863,6 +893,7 @@ export function useBeritaManager() {
     onDeleteConfirmed: handleDeleteConfirmed,
     onCloseDeleteModal: handleCloseDeleteModal,
     onSubmitGallery: handleSubmitGallery,
+    onDeleteGallery: handleDeleteGallery,
     startIndex,
   };
 }

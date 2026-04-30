@@ -36,10 +36,10 @@ export default function AdminBeritaManager() {
         onClose={() => { m.setMessage(""); m.setError(""); }}
       />
 
-      <section className="space-y-6">
+      <section className="space-y-8">
         <BeritaStats stats={m.stats} />
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+        <div className="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
           <BeritaFilters
             query={m.query} setQuery={m.setQuery}
             statusFilter={m.statusFilter} setStatusFilter={m.setStatusFilter}
@@ -81,9 +81,10 @@ export default function AdminBeritaManager() {
         open={m.openGalleryForm} form={m.galleryForm}
         previewSrc={m.galleryPreviewSrc} sendingId={m.gallerySendingId}
         uploading={m.uploadingGalleryImage} prefillLoading={m.galleryPrefillLoading}
+        isAlreadyInGallery={m.isAlreadyInGallery}
         onClose={m.handleCloseGalleryForm} onChange={m.handleGalleryChange}
         onFileChange={m.onGalleryFileChange} onClearImage={m.onClearGalleryImage}
-        onSubmit={m.onSubmitGallery}
+        onSubmit={m.onSubmitGallery} onDelete={m.onDeleteGallery}
       />
     </>
   );

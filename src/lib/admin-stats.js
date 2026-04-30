@@ -58,6 +58,7 @@ export async function getDashboardStats({ days = 14 } = {}) {
   // Hitung agenda & pengumuman (jika tabel tersedia).
   let totalKontak = 0;
   let kontakBaru = 0;
+  let totalReportDocs = 0;
 
   try {
     const { count } = await supabase
@@ -70,6 +71,12 @@ export async function getDashboardStats({ days = 14 } = {}) {
       .select("id", { count: "exact", head: true })
       .eq("status", "baru");
     kontakBaru = baru.count || 0;
+
+    const docs = await supabase
+      .from("report_documents")
+      .select("id", { count: "exact", head: true })
+      .eq("is_published", true);
+    totalReportDocs = docs.count || 0;
   } catch {
     // abaikan
   }
@@ -128,6 +135,7 @@ export async function getDashboardStats({ days = 14 } = {}) {
       recent7,
       totalKontak,
       kontakBaru,
+      totalReportDocs,
     },
     trend,
     topBerita,

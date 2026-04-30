@@ -4,56 +4,93 @@ import React from "react";
 import { useSlidesManager } from "@/hooks/useSlidesManager";
 import { SlideTable } from "./slides/SlideTable";
 import { SlideFormModal } from "./slides/SlideFormModal";
+import { FloatingFeedback, SlidePagination, DeleteConfirmModal } from "./slides/SlidesUI";
 
 export default function AdminHomepageSlidesManager() {
   const s = useSlidesManager();
 
   return (
-    <section className="space-y-6">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
-        <SlidesHeader
-          count={s.items.length}
-          published={s.totalPublished}
-          onAdd={s.handleOpenCreate}
-        />
+    <section className="space-y-12">
+      <FloatingFeedback
+        message={s.message}
+        error={s.error}
+        onClose={() => {
+          s.setMessage && s.setMessage("");
+          s.setError && s.setError("");
+        }}
+      />
 
-        {s.message && <StatusMessage type="success" text={s.message} />}
-        {s.error && <StatusMessage type="error" text={s.error} />}
+      {/* Header Section */}
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+            Slider Beranda
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            Manajemen visual utama halaman depan website.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={s.handleOpenCreate}
+          className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-slate-900 px-6 py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-2xl hover:shadow-slate-900/30 active:scale-95 dark:bg-white dark:text-black dark:shadow-none dark:hover:bg-slate-200"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Tambah Slide</span>
+        </button>
+      </div>
+
+      {/* Content Card */}
+      <div className="rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-8 shadow-2xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none">
+        <div className="mb-8 flex items-center justify-between border-b border-slate-100 pb-6 dark:border-slate-800/50">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+              Total {s.items.length} slide • {s.totalPublished} aktif saat ini
+            </p>
+          </div>
+        </div>
 
         <SlideTable
-          items={s.items} loading={s.loading}
-          onEdit={s.handleOpenEdit} onDelete={s.handleDelete}
-          deletingId={s.deletingId} toNumber={s.toNumber}
+          items={s.paginatedItems}
+          loading={s.loading}
+          onEdit={s.handleOpenEdit}
+          onDelete={s.handleDelete}
+          deletingId={s.deletingId}
+          toNumber={s.toNumber}
+        />
+
+        <SlidePagination
+          currentPage={s.currentPage}
+          totalPages={s.totalPages}
+          onPageChange={s.handlePageChange}
         />
       </div>
 
       <SlideFormModal
-        open={s.openForm} editingId={s.editingId}
-        form={s.form} imagePreview={s.imagePreview}
-        saving={s.saving} uploadingImage={s.uploadingImage}
-        onClose={s.handleCloseForm} onChange={s.handleChange}
-        onFileChange={s.handleImageFileChange} onSave={s.handleSave}
+        open={s.openForm}
+        editingId={s.editingId}
+        form={s.form}
+        imagePreview={s.imagePreview}
+        saving={s.saving}
+        uploadingImage={s.uploadingImage}
+        onClose={s.handleCloseForm}
+        onChange={s.handleChange}
+        onFileChange={s.handleImageFileChange}
+        onSave={s.handleSave}
+      />
+
+      <DeleteConfirmModal
+        open={s.showDeleteConfirm}
+        onConfirm={s.handleConfirmDelete}
+        onCancel={s.handleCancelDelete}
+        loading={Boolean(s.deletingId)}
+        title="Hapus Slide?"
+        description="Slide ini akan dihapus permanen dari sistem. Anda harus mengunggah ulang jika ingin menampilkannya kembali."
       />
     </section>
   );
-}
-
-function SlidesHeader({ count, published, onAdd }) {
-  return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">Slider Beranda</p>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Manajemen Slide Beranda</h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Total {count} slide • {published} dipublikasikan</p>
-      </div>
-      <button onClick={onAdd} className="inline-flex items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800">Tambah Slide</button>
-    </div>
-  );
-}
-
-function StatusMessage({ type, text }) {
-  const classes = type === "success"
-    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300"
-    : "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300";
-  return <div className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${classes}`}>{text}</div>;
 }

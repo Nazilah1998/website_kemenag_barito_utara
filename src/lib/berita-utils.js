@@ -119,7 +119,18 @@ export function sanitizeEditorHtml(html = "") {
         }
 
         if (name === "style") {
+          const styleValue = attr.value.toLowerCase();
+          // Hanya izinkan text-align untuk perataan teks
+          if (styleValue.includes("text-align")) {
+            // Kita bisa membersihkan style lain jika perlu, tapi untuk sekarang
+            // kita izinkan jika ada text-align agar fitur editor berfungsi
+            return;
+          }
           element.removeAttribute("style");
+          return;
+        }
+
+        if (name === "align") {
           return;
         }
 

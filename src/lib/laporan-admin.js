@@ -7,7 +7,7 @@ export const EMPTY_DOC_FORM = {
   is_published: true,
 };
 
-export const ITEMS_PER_PAGE = 4;
+export const ITEMS_PER_PAGE = 3;
 
 export function normalizeCategoryMap(categories = []) {
   if (Array.isArray(categories)) {
@@ -116,6 +116,9 @@ export function createLaporanAdminInitialState({
     publishingId: null,
     savingEditId: null,
     deletingId: null,
+
+    showDeleteModal: false,
+    idToDelete: null,
   };
 }
 
@@ -259,6 +262,20 @@ export function laporanAdminReducer(state, action) {
         editingId: null,
         editFile: null,
         actionFeedback: { type: "", message: "" },
+        showDeleteModal: false,
+        idToDelete: null,
+      };
+
+    case "SET_SHOW_DELETE_MODAL":
+      return {
+        ...state,
+        showDeleteModal: action.payload,
+      };
+
+    case "SET_ID_TO_DELETE":
+      return {
+        ...state,
+        idToDelete: action.payload,
       };
 
     default:

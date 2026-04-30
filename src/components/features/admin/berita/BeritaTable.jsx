@@ -1,6 +1,6 @@
 import React from "react";
 import { StatusPill, ActionIconButton } from "./BeritaUI";
-import { IconPencil, IconTrash, IconGallery } from "./BeritaIcons";
+import { IconPencil, IconTrash, IconGallery, IconViewsStat } from "./BeritaIcons";
 import { formatDate, getItemBaseDate, getItemPublishedState } from "@/lib/berita-utils";
 
 export function BeritaTable({
@@ -17,32 +17,32 @@ export function BeritaTable({
       <div className="overflow-x-auto">
         <table className="min-w-300 w-full border-collapse bg-white dark:bg-slate-900/40">
           <colgroup>
+            <col style={{ width: "4%" }} />
+            <col style={{ width: "66%" }} />
+            <col style={{ width: "10%" }} />
             <col style={{ width: "6%" }} />
-            <col style={{ width: "54%" }} />
-            <col style={{ width: "11%" }} />
+            <col style={{ width: "6%" }} />
             <col style={{ width: "8%" }} />
-            <col style={{ width: "9%" }} />
-            <col style={{ width: "12%" }} />
           </colgroup>
 
-          <thead className="bg-slate-50 dark:bg-slate-800/70">
+          <thead className="bg-slate-50 dark:bg-slate-800/40">
             <tr>
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
                 No
               </th>
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Judul
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                Judul Berita
               </th>
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
                 Kategori
               </th>
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
                 Dibaca
               </th>
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
                 Status
               </th>
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 dark:border-slate-800">
                 Aksi
               </th>
             </tr>
@@ -53,7 +53,7 @@ export function BeritaTable({
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
+                  className="px-6 py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse"
                 >
                   Memuat data berita...
                 </td>
@@ -62,7 +62,7 @@ export function BeritaTable({
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
+                  className="px-6 py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400"
                 >
                   Belum ada data yang cocok.
                 </td>
@@ -71,40 +71,53 @@ export function BeritaTable({
               items.map((item, index) => (
                 <tr
                   key={item.id}
-                  className="border-t border-slate-100 align-top dark:border-slate-800"
+                  className="group border-t border-slate-100 bg-white hover:bg-slate-50 transition-all align-top dark:border-slate-800 dark:bg-transparent dark:hover:bg-white/5"
                 >
-                  <td className="px-4 py-4 text-sm text-slate-600 dark:text-slate-400">
+                  <td className="px-6 py-6 text-xs font-black italic text-slate-400">
                     {startIndex + index + 1}
                   </td>
 
-                  <td className="px-4 py-4">
-                    <div className="pr-10">
-                      <p className="text-base font-semibold leading-7 text-slate-900 dark:text-slate-100">
+                  <td className="px-6 py-6">
+                    <div>
+                      <p className="text-base font-black tracking-tight text-slate-900 dark:text-slate-100 transition-colors">
                         {item.title}
                       </p>
-                      <p className="mt-1 wrap-break-word text-xs text-slate-500 dark:text-slate-400">
-                        /berita/{item.slug}
-                      </p>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        {formatDate(getItemBaseDate(item))}
-                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-3">
+                        <span className="text-[11px] font-bold text-slate-400">
+                          /berita/{item.slug}
+                        </span>
+                        <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
+                        <span className="text-[11px] font-bold text-slate-400">
+                          {formatDate(getItemBaseDate(item))}
+                        </span>
+                      </div>
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 text-sm text-slate-700 dark:text-slate-300">
-                    {item.category || "-"}
+                  <td className="px-6 py-6">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
+                      {item.category || "-"}
+                    </span>
                   </td>
 
-                  <td className="px-4 py-4 text-sm text-slate-700 dark:text-slate-300">
-                    {Number(item.views || 0)}
+                  <td className="px-6 py-6">
+                    <div className="flex items-center gap-2 text-xs font-black text-slate-900 dark:text-slate-100">
+                      <span className="text-emerald-500">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </span>
+                      {Number(item.views || 0)}
+                    </div>
                   </td>
 
-                  <td className="px-4 py-4">
+                  <td className="px-6 py-6">
                     <StatusPill published={getItemPublishedState(item)} />
                   </td>
 
-                  <td className="px-4 py-4">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <td className="px-6 py-6">
+                    <div className="flex items-center gap-2">
                       <ActionIconButton
                         title="Edit berita"
                         onClick={() => onEdit(item)}
