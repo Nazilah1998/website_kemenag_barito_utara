@@ -9,18 +9,18 @@ const BASE = siteInfo.siteUrl.replace(/\/$/, "");
 export function organizationSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "GovernmentOrganization",
+    "@type": ["GovernmentOrganization", "GovernmentOffice"],
     "@id": `${BASE}#organization`,
     name: "Kementerian Agama Kabupaten Barito Utara",
-    alternateName: [
-      "Kemenag Barito Utara",
-      "Kemenag Barut",
-    ],
+    alternateName: ["Kemenag Barito Utara", "Kemenag Barut"],
     url: `${BASE}/`,
     logo: {
       "@type": "ImageObject",
-      url: `${BASE}${siteInfo.logoSrc}`,
+      url: `${BASE}/kemenag-512.png`,
+      width: 512,
+      height: 512,
     },
+    image: `${BASE}/kantor-kemenag.jpg`,
     description: siteInfo.description,
     email: siteInfo.email,
     telephone: siteInfo.phone,
@@ -32,6 +32,25 @@ export function organizationSchema() {
       postalCode: "73811",
       addressCountry: "ID",
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: "-0.9576",
+      longitude: "114.8967",
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday"],
+        opens: "07:30",
+        closes: "16:00",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: "Friday",
+        opens: "07:30",
+        closes: "16:30",
+      },
+    ],
     areaServed: {
       "@type": "AdministrativeArea",
       name: "Kabupaten Barito Utara",
@@ -54,8 +73,12 @@ export function websiteSchema() {
     "@type": "WebSite",
     "@id": `${BASE}#website`,
     url: `${BASE}/`,
-    name: "Kementerian Agama Kabupaten Barito Utara",
-    alternateName: ["Kemenag Barito Utara", "Kemenag Barut"],
+    name: "Kemenag Barito Utara",
+    alternateName: [
+      "Kementerian Agama Kabupaten Barito Utara",
+      "Kemenag Barut",
+      "kemenag-baritoutara.com",
+    ],
     description: siteInfo.description,
     inLanguage: "id-ID",
     publisher: { "@id": `${BASE}#organization` },
@@ -101,7 +124,9 @@ export function newsArticleSchema(berita, { canonicalUrl } = {}) {
       name: siteInfo.name,
       logo: {
         "@type": "ImageObject",
-        url: `${BASE}${siteInfo.logoSrc}`,
+        url: `${BASE}/kemenag-512.png`,
+        width: 512,
+        height: 512,
       },
     },
   };

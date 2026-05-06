@@ -5,13 +5,13 @@ import HomeNewsSection from "@/components/features/home/HomeNewsSection";
 import ApaKataMerekaSection from "@/components/features/home/ApaKataMerekaSection";
 import HomepageSlidesSection from "@/components/features/home/HomepageSlidesSection";
 import ExternalAppsSection from "@/components/features/home/ExternalAppsSection";
+import { siteInfo } from "@/data/site";
 
 export const revalidate = 300;
 
 export const metadata = {
   title: "Kementerian Agama Kabupaten Barito Utara",
-  description:
-    "Website Resmi Kementerian Agama Kabupaten Barito Utara sebagai pusat informasi, layanan publik, berita, dan publikasi kelembagaan.",
+  description: siteInfo.description,
 };
 
 function SectionDivider() {

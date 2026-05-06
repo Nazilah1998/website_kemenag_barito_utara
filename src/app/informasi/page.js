@@ -1,7 +1,7 @@
 import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
 
 export const metadata = {
-  title: "Informasi | Kementerian Agama Kabupaten Barito Utara",
+  title: "Informasi",
 };
 
 export default function InformasiPage() {

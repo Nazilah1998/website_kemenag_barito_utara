@@ -4,7 +4,7 @@ export function buildWhatsAppLink(number, message = "") {
   return `https://wa.me/${normalized}${text}`;
 }
 
-const mapQuery = "Kementerian Agama Kabupaten Barito Utara";
+const mapQuery = "Kantor Kementerian Agama Kabupaten Barito Utara";
 
 export const siteInfo = {
   name: "Kementerian Agama Kabupaten Barito Utara",
@@ -12,7 +12,7 @@ export const siteInfo = {
   tagline: "KABUPATEN BARITO UTARA",
 
   description:
-    "Kementerian Agama Kabupaten Barito Utara menyediakan informasi, publikasi kegiatan, pengumuman, agenda, dan akses layanan digital secara terpadu.",
+    "Website Resmi Kantor Kementerian Agama Kabupaten Barito Utara. Portal informasi publik, layanan digital PTSP, berita kegiatan, dan publikasi resmi Kemenag Barito Utara, Kalimantan Tengah.",
   email: "kepegawaiankemenagbarut@gmail.com",
   phone: "(0519) 21269",
   phoneRaw: "051921269",
@@ -24,7 +24,7 @@ export const siteInfo = {
   ],
   address: "Jl. Ahmad Yani No.126 Muara Teweh 73811",
   complaintHref: "/kontak",
-  logoSrc: "/kemenag.svg",
+  logoSrc: "/kemenag-512.png",
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.kemenag-baritoutara.com",
 };
