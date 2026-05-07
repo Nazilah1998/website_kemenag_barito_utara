@@ -30,7 +30,7 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
     <div className="flex h-full flex-col bg-white dark:bg-slate-950">
       <SidebarHeader onClose={onClose} />
       <div className="flex-1 overflow-y-auto px-5 py-8 no-scrollbar">
-        <p className="mb-5 px-5 text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500 italic">Menu Navigasi</p>
+        <p className="mb-5 px-5 text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500">Menu Navigasi</p>
         <nav className="space-y-3 no-scrollbar">
           {links.filter(l => l.show).map(l => (
             <SidebarNavLink key={l.href} {...l} onNavigate={onNavigate} />
@@ -48,9 +48,9 @@ function SidebarHeader({ onClose }) {
       <div className="group cursor-default">
         <div className="flex items-center gap-2 mb-1">
           <div className="h-1 w-1 rounded-full bg-emerald-500" />
-          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400 italic">Admin CMS</p>
+          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">Admin CMS</p>
         </div>
-        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase italic leading-none tracking-tight">Kemenag Barito Utara</h2>
+        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight">Kemenag Barito Utara</h2>
       </div>
       {onClose && (
         <button

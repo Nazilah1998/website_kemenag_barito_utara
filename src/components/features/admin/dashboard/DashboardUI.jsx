@@ -15,7 +15,7 @@ export function DashboardHeader({ user, session }) {
       <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-blue-500/10 blur-[100px]" />
 
       <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
-        <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[2.5rem] bg-emerald-500 text-3xl font-black italic text-white shadow-2xl shadow-emerald-500/20">
+        <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[2.5rem] bg-emerald-500 text-3xl font-black text-white shadow-2xl shadow-emerald-500/20">
           {initials}
         </div>
         <div className="min-w-0 flex-1">
@@ -25,7 +25,7 @@ export function DashboardHeader({ user, session }) {
               Pusat Kendali Administrasi
             </p>
           </div>
-          <h1 className="text-4xl font-black tracking-tight leading-none sm:text-5xl uppercase italic">
+          <h1 className="text-4xl font-black tracking-tight leading-none sm:text-5xl uppercase">
             Halo, {user?.full_name || "Admin"}
           </h1>
           <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-slate-400">
@@ -58,7 +58,7 @@ export function StatCard({ label, value, helper, icon, tone = "emerald" }) {
         </div>
       </div>
       <div className="h-px w-full bg-slate-50 dark:bg-white/5 mb-4" />
-      <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest italic leading-relaxed">
+      <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
         {helper}
       </p>
     </div>
@@ -68,7 +68,7 @@ export function StatCard({ label, value, helper, icon, tone = "emerald" }) {
 export function SectionTitle({ title, subtitle }) {
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase italic">{title}</h2>
+      <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase">{title}</h2>
       {subtitle && <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>}
     </div>
   );

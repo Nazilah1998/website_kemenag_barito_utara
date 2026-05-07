@@ -68,10 +68,10 @@ function AdminLoading() {
         </div>
 
         <div className="space-y-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-600 dark:text-emerald-400 italic">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-600 dark:text-emerald-400">
             Authorization
           </p>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight leading-none">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">
             Memuat Panel Kendali
           </h2>
           <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
@@ -93,9 +93,9 @@ function AdminBrand() {
     <div className="min-w-0 group cursor-default">
       <div className="flex items-center gap-2 mb-1">
         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400 italic">Panel Kendali</p>
+        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">Panel Kendali</p>
       </div>
-      <h1 className="truncate text-xl font-black text-slate-900 dark:text-white uppercase italic leading-none tracking-tight">Kemenag Barito Utara</h1>
+      <h1 className="truncate text-xl font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight">Kemenag Barito Utara</h1>
     </div>
   );
 }
@@ -103,7 +103,7 @@ function AdminBrand() {
 function AdminUserBadge({ name, email }) {
   return (
     <div className="hidden min-w-[180px] max-w-[240px] rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-4 py-2.5 dark:border-white/5 dark:bg-white/5 sm:block transition-all hover:border-slate-200 dark:hover:border-white/10">
-      <p className="truncate text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white italic">{name}</p>
+      <p className="truncate text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{name}</p>
       <p className="truncate text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5">{email || "-"}</p>
     </div>
   );

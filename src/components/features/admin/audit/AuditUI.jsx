@@ -15,7 +15,7 @@ export function ActionBadge({ action }) {
   const cls = tones[action] || "bg-slate-900 text-white";
 
   return (
-    <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest italic shadow-sm ${cls}`}>
+    <span className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest shadow-sm ${cls}`}>
       {action}
     </span>
   );
@@ -27,7 +27,7 @@ export function AuditTable({ items, loading, onDelete, deletingId }) {
       <div className="py-20 text-center">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-2xl border-4 border-slate-100 border-t-slate-900 dark:border-white/10 dark:border-t-white" />
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Sinkronisasi Log...</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Sinkronisasi Log...</p>
         </div>
       </div>
     );
@@ -39,7 +39,7 @@ export function AuditTable({ items, loading, onDelete, deletingId }) {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-50 text-slate-300 dark:bg-white/5">
           <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>
-        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Riwayat Kosong</p>
+        <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Riwayat Kosong</p>
       </div>
     );
   }
@@ -51,19 +51,19 @@ export function AuditTable({ items, loading, onDelete, deletingId }) {
         <table className="w-full">
           <thead>
             <tr className="border-b-2 border-slate-50 dark:border-white/5">
-              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Kronologi</th>
-              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Aksi</th>
-              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Entitas</th>
-              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Ringkasan</th>
-              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Pelaku</th>
-              <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Opsi</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Kronologi</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Aksi</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Entitas</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Ringkasan</th>
+              <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-400">Pelaku</th>
+              <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Opsi</th>
             </tr>
           </thead>
           <tbody className="divide-y-2 divide-slate-50 dark:divide-white/5">
             {items.map((item) => (
               <tr key={item.id} className="group transition-all hover:bg-slate-50/50 dark:hover:bg-white/5">
                 <td className="px-6 py-6 whitespace-nowrap">
-                  <p className="text-[11px] font-black uppercase italic text-slate-900 dark:text-white">
+                  <p className="text-[11px] font-black uppercase text-slate-900 dark:text-white">
                     {new Intl.DateTimeFormat("id-ID", {
                       dateStyle: "medium",
                       timeStyle: "short",
@@ -74,18 +74,18 @@ export function AuditTable({ items, loading, onDelete, deletingId }) {
                   <ActionBadge action={item.action} />
                 </td>
                 <td className="px-6 py-6">
-                  <p className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white italic">{item.entity}</p>
+                  <p className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white">{item.entity}</p>
                   {item.entity_id && (
                     <p className="mt-1 text-[9px] font-bold text-slate-400 uppercase">ID: {String(item.entity_id).slice(0, 8)}</p>
                   )}
                 </td>
                 <td className="px-6 py-6 max-w-xs">
-                  <p className="text-[11px] font-bold leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2 italic">
+                  <p className="text-[11px] font-bold leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2">
                     {item.summary || "-"}
                   </p>
                 </td>
                 <td className="px-6 py-6">
-                  <p className="text-xs font-black uppercase italic text-slate-900 dark:text-white">{item.actor_email?.split('@')[0] || "System"}</p>
+                  <p className="text-xs font-black uppercase text-slate-900 dark:text-white">{item.actor_email?.split('@')[0] || "System"}</p>
                   <p className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-400">{item.actor_role || "SYSTEM"}</p>
                 </td>
                 <td className="px-6 py-6 text-right">
@@ -113,9 +113,9 @@ export function AuditTable({ items, loading, onDelete, deletingId }) {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <ActionBadge action={item.action} />
-                  <span className="text-[9px] font-black uppercase italic tracking-widest text-slate-300 dark:text-slate-700">#{item.id.slice(0, 5)}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-300 dark:text-slate-700">#{item.id.slice(0, 5)}</span>
                 </div>
-                <h4 className="mt-2 text-sm font-black uppercase italic text-slate-900 dark:text-white">{item.entity}</h4>
+                <h4 className="mt-2 text-sm font-black uppercase text-slate-900 dark:text-white">{item.entity}</h4>
               </div>
               <button
                 onClick={() => onDelete(item.id)}
@@ -129,21 +129,21 @@ export function AuditTable({ items, loading, onDelete, deletingId }) {
             </div>
 
             <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl mb-4">
-              <p className="text-[11px] font-bold leading-relaxed text-slate-500 dark:text-slate-400 italic">
+              <p className="text-[11px] font-bold leading-relaxed text-slate-500 dark:text-slate-400">
                 {item.summary || "Tidak ada detail kronologi."}
               </p>
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t-2 border-slate-50 dark:border-white/5">
               <div className="flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-300 italic">Waktu</span>
-                <span className="text-[10px] font-black uppercase italic text-slate-500 dark:text-slate-400">
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">Waktu</span>
+                <span className="text-[10px] font-black uppercase text-slate-500 dark:text-slate-400">
                   {new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(item.created_at))}
                 </span>
               </div>
               <div className="text-right flex flex-col">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-300 italic">Oleh</span>
-                <span className="text-[10px] font-black uppercase italic text-slate-900 dark:text-white leading-none">{item.actor_email?.split('@')[0] || "System"}</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-300">Oleh</span>
+                <span className="text-[10px] font-black uppercase text-slate-900 dark:text-white leading-none">{item.actor_email?.split('@')[0] || "System"}</span>
               </div>
             </div>
           </div>

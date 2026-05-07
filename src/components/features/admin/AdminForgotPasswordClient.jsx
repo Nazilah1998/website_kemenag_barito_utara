@@ -24,12 +24,12 @@ export default function AdminForgotPasswordClient() {
 
           <div className="flex items-center gap-3 mb-4">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-400 italic">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-400">
               Security Recovery
             </p>
           </div>
 
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic leading-none">
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
             Reset Akses
           </h1>
         </div>
@@ -38,9 +38,9 @@ export default function AdminForgotPasswordClient() {
           {f.step === 1 && (
             <form onSubmit={f.handleVerifyEmail} className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               <div className="space-y-4">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center italic">Tahap 1: Verifikasi Identitas</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 text-center">Tahap 1: Verifikasi Identitas</p>
                 <div className="group">
-                  <label htmlFor="email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic">Email Terdaftar</label>
+                  <label htmlFor="email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Email Terdaftar</label>
                   <input
                     id="email" type="email" value={f.email} onChange={(e) => f.setEmail(e.target.value)}
                     placeholder="nama@email.com" required
@@ -53,7 +53,7 @@ export default function AdminForgotPasswordClient() {
 
               <button
                 type="submit" disabled={f.submitting || !f.email.trim()}
-                className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] italic text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
               >
                 <span className="relative z-10">{f.submitting ? "Memverifikasi..." : "Lanjutkan Verifikasi"}</span>
                 <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
@@ -64,10 +64,10 @@ export default function AdminForgotPasswordClient() {
           {f.step === 2 && (
             <form onSubmit={f.handleResetPassword} className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               <div className="space-y-4">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 text-center italic">Tahap 2: Perbaharui Password</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 text-center">Tahap 2: Perbaharui Password</p>
 
                 <div className="group">
-                  <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic">Password Baru</label>
+                  <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Password Baru</label>
                   <div className="relative">
                     <input
                       type={f.showPassword ? "text" : "password"} value={f.password} onChange={(e) => f.setPassword(e.target.value)}
@@ -81,7 +81,7 @@ export default function AdminForgotPasswordClient() {
                 </div>
 
                 <div className="group">
-                  <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic">Konfirmasi Password Baru</label>
+                  <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Konfirmasi Password Baru</label>
                   <input
                     type={f.showPassword ? "text" : "password"} value={f.confirmPassword} onChange={(e) => f.setConfirmPassword(e.target.value)}
                     placeholder="Ulangi password" required
@@ -94,7 +94,7 @@ export default function AdminForgotPasswordClient() {
 
               <button
                 type="submit" disabled={f.submitting || !f.password || !f.confirmPassword}
-                className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-600 text-xs font-black uppercase tracking-[0.25em] italic text-white transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-600 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
               >
                 <span className="relative z-10">{f.submitting ? "Memperbarui..." : "Simpan Password Baru"}</span>
                 <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
@@ -112,10 +112,10 @@ export default function AdminForgotPasswordClient() {
                 </svg>
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-black uppercase italic text-slate-900 dark:text-white">Berhasil!</h2>
+                <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white">Berhasil!</h2>
                 <p className="text-sm font-medium text-slate-400 leading-relaxed">Password Anda telah diperbarui. Silakan gunakan password baru untuk masuk ke Panel Kendali.</p>
               </div>
-              <Link href="/admin/login" className="inline-flex h-14 w-full items-center justify-center rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] italic text-white transition-all hover:bg-black dark:bg-white dark:text-black">
+              <Link href="/admin/login" className="inline-flex h-14 w-full items-center justify-center rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black dark:bg-white dark:text-black">
                 Kembali ke Login
               </Link>
             </div>

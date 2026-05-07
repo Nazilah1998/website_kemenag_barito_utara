@@ -73,7 +73,7 @@ export function BeritaTable({
                   key={item.id}
                   className="group border-t border-slate-100 bg-white hover:bg-slate-50 transition-all align-top dark:border-slate-800 dark:bg-transparent dark:hover:bg-white/5"
                 >
-                  <td className="px-6 py-6 text-xs font-black italic text-slate-400">
+                  <td className="px-6 py-6 text-xs font-black text-slate-400">
                     {startIndex + index + 1}
                   </td>
 

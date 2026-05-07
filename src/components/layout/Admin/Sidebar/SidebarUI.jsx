@@ -7,7 +7,7 @@ export function SidebarNavLink({ href, label, icon, active, onNavigate }) {
     <Link
       href={href}
       onClick={onNavigate}
-      className={`group flex items-center gap-3 rounded-2xl px-5 py-3.5 text-[11px] font-black uppercase tracking-widest italic transition-all ${active
+      className={`group flex items-center gap-3 rounded-2xl px-5 py-3.5 text-[11px] font-black uppercase tracking-widest transition-all ${active
         ? "bg-slate-900 text-white shadow-xl shadow-slate-900/10 dark:bg-white dark:text-black dark:shadow-white/5"
         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
         }`}
@@ -24,10 +24,10 @@ export function SidebarProfile({ profile, role, permissionContext }) {
   return (
     <div className="border-t-2 border-slate-50 px-5 py-6 dark:border-white/5">
       <div className="rounded-[2rem] border-2 border-slate-50 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-white/5">
-        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Otorisasi Sesi</p>
+        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Otorisasi Sesi</p>
 
         <div className="mt-4 space-y-1">
-          <p className="truncate text-sm font-black uppercase italic text-slate-900 dark:text-white leading-tight">{compactName}</p>
+          <p className="truncate text-sm font-black uppercase text-slate-900 dark:text-white leading-tight">{compactName}</p>
           <p className="truncate text-[10px] font-bold text-slate-400 dark:text-slate-500">{profile?.email || "-"}</p>
         </div>
 

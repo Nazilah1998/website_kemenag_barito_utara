@@ -45,7 +45,7 @@ export default function LaporanDocumentPanel({
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-1.5">Data Terverifikasi</p>
                     <h2
                         id="laporan-dokumen-title"
-                        className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic"
+                        className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase"
                     >
                         Arsip Dokumen
                     </h2>
@@ -105,14 +105,14 @@ export default function LaporanDocumentPanel({
                             <article
                                 key={doc.id}
                                 className={`group relative overflow-hidden rounded-[2rem] border-2 transition-all duration-500 ${isEditing
-                                        ? "border-slate-900 bg-slate-900 shadow-xl dark:border-white dark:bg-white scale-[1.01] z-20"
-                                        : "border-slate-100 bg-white hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/20 dark:hover:border-white"
+                                    ? "border-slate-900 bg-slate-900 shadow-xl dark:border-white dark:bg-white scale-[1.01] z-20"
+                                    : "border-slate-100 bg-white hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/20 dark:hover:border-white"
                                     }`}
                             >
                                 {!isEditing ? (
                                     <div className="flex flex-col xl:flex-row xl:items-center gap-6 p-6">
                                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg group-hover:scale-105 transition-transform dark:bg-white dark:text-black">
-                                            <span className="text-xs font-black italic">
+                                            <span className="text-xs font-black">
                                                 {(currentPage - 1) * 3 + index + 1}
                                             </span>
                                         </div>
@@ -130,7 +130,7 @@ export default function LaporanDocumentPanel({
                                                 {doc.title}
                                             </h3>
 
-                                            <p className="mt-2 text-[13px] font-bold leading-snug text-slate-500 dark:text-slate-400 line-clamp-1 italic">
+                                            <p className="mt-2 text-[13px] font-bold leading-snug text-slate-500 dark:text-slate-400 line-clamp-1">
                                                 {doc.description || "— No additional description provided."}
                                             </p>
 
@@ -194,7 +194,7 @@ export default function LaporanDocumentPanel({
                                         <div className="flex items-center justify-between mb-8 border-b border-white/10 dark:border-black/10 pb-6">
                                             <div>
                                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 dark:text-black/50">Sistem Pembaruan</p>
-                                                <h3 className="text-xl font-black text-white dark:text-black italic tracking-tighter uppercase">Edit Dokumen</h3>
+                                                <h3 className="text-xl font-black text-white dark:text-black tracking-tighter uppercase">Edit Dokumen</h3>
                                             </div>
                                             <button onClick={onCancelEdit} className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white hover:text-black dark:bg-black/10 dark:text-black dark:hover:bg-black dark:hover:text-white transition-all">
                                                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 18L18 6M6 6l12 12" /></svg>
@@ -296,7 +296,7 @@ export default function LaporanDocumentPanel({
                     {totalPages > 1 && (
                         <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t-2 border-slate-900 pt-8 dark:border-white lg:flex-row">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-                                <span className="text-slate-900 dark:text-white italic">{currentPage}</span> / <span className="text-slate-900 dark:text-white italic">{totalPages}</span>
+                                <span className="text-slate-900 dark:text-white">{currentPage}</span> / <span className="text-slate-900 dark:text-white">{totalPages}</span>
                             </p>
 
                             <div className="flex items-center gap-2">
@@ -320,8 +320,8 @@ export default function LaporanDocumentPanel({
                                                 key={p}
                                                 onClick={() => setCurrentPage(p)}
                                                 className={`h-9 min-w-[36px] rounded-xl text-[10px] font-black transition-all border-2 ${isAct
-                                                        ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black"
-                                                        : "bg-white border-slate-100 text-slate-400 hover:border-slate-900 hover:text-slate-900 dark:bg-slate-800 dark:border-slate-800 dark:text-slate-500"
+                                                    ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black"
+                                                    : "bg-white border-slate-100 text-slate-400 hover:border-slate-900 hover:text-slate-900 dark:bg-slate-800 dark:border-slate-800 dark:text-slate-500"
                                                     }`}
                                             >
                                                 {p}
@@ -353,7 +353,7 @@ export default function LaporanDocumentPanel({
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h3 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic">Belum Ada Data</h3>
+                    <h3 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Belum Ada Data</h3>
                     <p className="mt-3 text-sm font-bold text-slate-400 max-w-xs mx-auto uppercase tracking-widest leading-relaxed">
                         Database kosong. Silahkan tambahkan dokumen baru melalui panel navigasi sebelah kiri.
                     </p>

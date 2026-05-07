@@ -27,12 +27,12 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 
           <div className="flex items-center gap-3 mb-4">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-400 italic">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-400">
               Administrative Portal
             </p>
           </div>
 
-          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic leading-none">
+          <h1 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
             Panel Kendali
           </h1>
           <p className="mt-3 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
@@ -98,7 +98,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 function EmailField({ value, onChange }) {
   return (
     <div className="group">
-      <label htmlFor="admin-email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic">Email Admin</label>
+      <label htmlFor="admin-email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Email Admin</label>
       <input id="admin-email" type="email" value={value} onChange={(e) => onChange(e.target.value)} className={inputClassName()} placeholder="nama@email.com" autoComplete="email" required />
     </div>
   );
@@ -108,7 +108,7 @@ function PasswordField({ value, onChange, show, onToggleShow, onKeyState, capsLo
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-2">
-        <label htmlFor="admin-password" className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic">Security Password</label>
+        <label htmlFor="admin-password" className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Security Password</label>
         <Link href="/admin/forgot-password" className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Lupa?</Link>
       </div>
       <div className="relative">
@@ -127,7 +127,7 @@ function SubmitButton({ submitting, disabled }) {
     <button
       type="submit"
       disabled={submitting || disabled}
-      className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] italic text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
+      className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
     >
       <span className="relative z-10">{submitting ? "Memverifikasi..." : "Masuk ke Dashboard"}</span>
       <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />

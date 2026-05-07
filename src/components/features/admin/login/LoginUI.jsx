@@ -42,10 +42,10 @@ export function LoginLoading() {
           <div className="absolute inset-0 rounded-2xl border-4 border-slate-100 dark:border-white/5" />
           <div className="absolute inset-0 animate-spin rounded-2xl border-4 border-slate-900 border-t-transparent dark:border-white dark:border-t-transparent" />
         </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 italic">
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
           Security Check
         </p>
-        <p className="mt-2 text-sm font-black text-slate-900 dark:text-white uppercase italic">
+        <p className="mt-2 text-sm font-black text-slate-900 dark:text-white uppercase">
           Memverifikasi Sesi...
         </p>
       </div>

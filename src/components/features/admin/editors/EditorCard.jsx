@@ -36,7 +36,7 @@ export function EditorCard({
         {/* Left: ID & Info */}
         <div className="flex flex-col md:flex-row md:items-center gap-8 flex-1">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white shadow-xl group-hover:scale-110 transition-transform dark:bg-white dark:text-black">
-            <span className="text-xl font-black italic">{index}</span>
+            <span className="text-xl font-black">{index}</span>
           </div>
 
           <div className="min-w-0 flex-1">
@@ -53,7 +53,7 @@ export function EditorCard({
             <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight uppercase group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
               {editor.full_name}
             </h3>
-            <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-400 break-all italic">
+            <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-400 break-all">
               {editor.email}
             </p>
 

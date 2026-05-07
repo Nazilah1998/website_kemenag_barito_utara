@@ -101,7 +101,7 @@ export default function AdminPesanManager() {
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-2xl border-4 border-slate-100 border-t-emerald-500" />
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Sinkronisasi Data...</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Sinkronisasi Data...</p>
         </div>
       </div>
     );
@@ -117,22 +117,22 @@ export default function AdminPesanManager() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400 italic">Monitoring</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">Monitoring</p>
           </div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight leading-none">Kotak Masuk</h1>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Kotak Masuk</h1>
           <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400 max-w-md">Kelola pesan dan pengaduan masyarakat secara sistematis dan terstruktur.</p>
         </div>
 
         {/* Filters - Adaptive */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className="w-full sm:w-auto">
-            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 italic mb-3 block">Kategori</label>
+            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-3 block">Kategori</label>
             <div className="flex flex-wrap gap-1.5 rounded-[1.25rem] border-2 border-slate-50 bg-slate-50/50 p-1.5 dark:border-white/5 dark:bg-white/5">
               {subjekOptions.map((opt) => (
                 <button
                   key={opt}
                   onClick={() => setFilterSubjek(opt)}
-                  className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase italic tracking-wider transition-all ${filterSubjek === opt
+                  className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${filterSubjek === opt
                     ? "bg-slate-900 text-white shadow-lg dark:bg-white dark:text-black"
                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                     }`}
@@ -144,13 +144,13 @@ export default function AdminPesanManager() {
           </div>
 
           <div className="w-full sm:w-auto">
-            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 italic mb-3 block">Status</label>
+            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-3 block">Status</label>
             <div className="flex gap-1.5 rounded-[1.25rem] border-2 border-slate-50 bg-slate-50/50 p-1.5 dark:border-white/5 dark:bg-white/5">
               {statusOptions.map((opt) => (
                 <button
                   key={opt}
                   onClick={() => setFilterStatus(opt)}
-                  className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase italic tracking-wider transition-all ${filterStatus === opt
+                  className={`rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-wider transition-all ${filterStatus === opt
                     ? "bg-slate-900 text-white shadow-lg dark:bg-white dark:text-black"
                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                     }`}
@@ -171,7 +171,7 @@ export default function AdminPesanManager() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
           </div>
-          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Arsip Kosong</p>
+          <p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Arsip Kosong</p>
         </div>
       ) : (
         <>
@@ -181,21 +181,21 @@ export default function AdminPesanManager() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b-2 border-slate-50 bg-slate-50/30 dark:border-white/5 dark:bg-white/5">
-                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Opsi</th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Kronologi</th>
-                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Identitas Pengirim</th>
-                    <th className="px-8 py-6 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Status</th>
-                    <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-widest text-slate-400 italic">Tindakan</th>
+                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Opsi</th>
+                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Kronologi</th>
+                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Identitas Pengirim</th>
+                    <th className="px-8 py-6 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                    <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Tindakan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y-2 divide-slate-50 dark:divide-white/5">
                   {filteredMessages.map((msg, idx) => (
                     <tr key={msg.id} className="group transition-all hover:bg-slate-50/50 dark:hover:bg-white/5">
                       <td className="px-8 py-6">
-                        <span className="text-xs font-black text-slate-200 dark:text-slate-800 uppercase italic">#{String(idx + 1).padStart(3, '0')}</span>
+                        <span className="text-xs font-black text-slate-200 dark:text-slate-800 uppercase">#{String(idx + 1).padStart(3, '0')}</span>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="text-[11px] font-black uppercase italic text-slate-900 dark:text-white leading-none">
+                        <div className="text-[11px] font-black uppercase text-slate-900 dark:text-white leading-none">
                           {new Date(msg.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                         </div>
                         <div className="mt-1.5 text-[10px] font-bold text-slate-400">
@@ -203,7 +203,7 @@ export default function AdminPesanManager() {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="font-black uppercase italic text-sm text-slate-900 dark:text-white">{msg.nama}</div>
+                        <div className="font-black uppercase text-sm text-slate-900 dark:text-white">{msg.nama}</div>
                         <div className="mt-2 flex items-center gap-2">
                           <span className={`rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest ${msg.subjek === "Pengaduan" ? "bg-rose-500 text-white" :
                             msg.subjek === "Pertanyaan" ? "bg-emerald-500 text-white" : "bg-slate-900 text-white"
@@ -219,14 +219,14 @@ export default function AdminPesanManager() {
                           : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
                           }`}>
                           <div className={`h-1.5 w-1.5 rounded-full ${msg.status.toLowerCase() === "baru" ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
-                          <span className="text-[10px] font-black uppercase italic tracking-widest">{msg.status}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest">{msg.status}</span>
                         </div>
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-3 transition-all">
                           <button
                             onClick={() => setSelectedMsg(msg)}
-                            className="rounded-xl bg-slate-900 px-5 py-2.5 text-[10px] font-black uppercase italic tracking-widest text-white transition-all hover:scale-105 active:scale-95 dark:bg-white dark:text-black"
+                            className="rounded-xl bg-slate-900 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 dark:bg-white dark:text-black"
                           >
                             Buka Pesan
                           </button>
@@ -251,12 +251,12 @@ export default function AdminPesanManager() {
               <div key={msg.id} className="relative overflow-hidden rounded-[2.5rem] border-2 border-slate-50 bg-white p-6 shadow-xl shadow-slate-200/30 dark:border-white/5 dark:bg-slate-900">
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <div className="text-[10px] font-black uppercase italic tracking-widest text-slate-300 dark:text-slate-700 mb-1">Entry #{String(idx + 1).padStart(3, '0')}</div>
-                    <h3 className="text-lg font-black uppercase italic text-slate-900 dark:text-white leading-tight">{msg.nama}</h3>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-300 dark:text-slate-700 mb-1">Entry #{String(idx + 1).padStart(3, '0')}</div>
+                    <h3 className="text-lg font-black uppercase text-slate-900 dark:text-white leading-tight">{msg.nama}</h3>
                     <p className="mt-1 text-xs font-bold text-slate-400">{msg.whatsapp}</p>
                   </div>
                   <div className={`rounded-xl px-4 py-2 border-2 ${msg.status.toLowerCase() === "baru" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"}`}>
-                    <span className="text-[9px] font-black uppercase italic tracking-widest">{msg.status}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest">{msg.status}</span>
                   </div>
                 </div>
 
@@ -265,7 +265,7 @@ export default function AdminPesanManager() {
                     {msg.subjek}
                   </span>
                   <div className="h-1 w-1 rounded-full bg-slate-200 dark:bg-white/10" />
-                  <span className="text-[10px] font-black uppercase italic text-slate-400">
+                  <span className="text-[10px] font-black uppercase text-slate-400">
                     {new Date(msg.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ export default function AdminPesanManager() {
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t-2 border-slate-50 dark:border-white/5">
                   <button
                     onClick={() => setSelectedMsg(msg)}
-                    className="flex h-12 items-center justify-center rounded-2xl bg-slate-900 text-[10px] font-black uppercase italic tracking-widest text-white dark:bg-white dark:text-black"
+                    className="flex h-12 items-center justify-center rounded-2xl bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white dark:bg-white dark:text-black"
                   >
                     Rincian
                   </button>
@@ -301,7 +301,7 @@ export default function AdminPesanManager() {
                 <span className={`rounded-lg px-3 py-1.5 text-[9px] font-black uppercase tracking-widest ${selectedMsg.subjek === "Pengaduan" ? "bg-rose-500 text-white" : "bg-emerald-500 text-white"}`}>
                   {selectedMsg.subjek}
                 </span>
-                <h2 className="mt-4 text-3xl font-black uppercase italic tracking-tight text-slate-900 dark:text-white leading-none">{selectedMsg.nama}</h2>
+                <h2 className="mt-4 text-3xl font-black uppercase tracking-tight text-slate-900 dark:text-white leading-none">{selectedMsg.nama}</h2>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <p className="text-xs font-bold text-slate-500 dark:text-slate-400">{selectedMsg.whatsapp}</p>
@@ -318,11 +318,11 @@ export default function AdminPesanManager() {
             {/* Modal Body */}
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
               <div className="relative rounded-[2.5rem] border-2 border-slate-50 bg-slate-50/50 p-10 dark:border-white/5 dark:bg-white/5">
-                <p className="text-lg leading-relaxed text-slate-800 dark:text-slate-200 italic font-bold">
+                <p className="text-lg leading-relaxed text-slate-800 dark:text-slate-200 font-bold">
                   &ldquo;{selectedMsg.pesan}&rdquo;
                 </p>
                 <div className="mt-10 flex flex-col gap-1 border-t-2 border-slate-100 pt-8 dark:border-white/10">
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Direkam pada</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Direkam pada</span>
                   <span className="text-xs font-bold text-slate-500">
                     {new Date(selectedMsg.created_at).toLocaleString("id-ID", { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB
                   </span>
@@ -337,7 +337,7 @@ export default function AdminPesanManager() {
                   const newStatus = selectedMsg.status.toLowerCase() === "baru" ? "selesai" : "baru";
                   updateStatus(selectedMsg.id, newStatus);
                 }}
-                className={`group relative flex h-16 w-full items-center justify-center overflow-hidden rounded-2xl text-[11px] font-black uppercase italic tracking-[0.2em] text-white transition-all active:scale-95 shadow-2xl ${selectedMsg.status.toLowerCase() === "baru"
+                className={`group relative flex h-16 w-full items-center justify-center overflow-hidden rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all active:scale-95 shadow-2xl ${selectedMsg.status.toLowerCase() === "baru"
                   ? "bg-emerald-600 shadow-emerald-600/20"
                   : "bg-amber-500 shadow-amber-500/20"
                   }`}
@@ -358,7 +358,7 @@ export default function AdminPesanManager() {
             : "border-rose-500/20 bg-white/90 text-rose-900 dark:bg-slate-900/90 dark:text-rose-400"
             }`}>
             <div className={`h-2.5 w-2.5 rounded-full animate-pulse ${toast.type === "success" ? "bg-emerald-500" : "bg-rose-500"}`} />
-            <p className="text-[10px] font-black uppercase italic tracking-widest">{toast.message}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest">{toast.message}</p>
           </div>
         </div>
       )}
@@ -370,12 +370,12 @@ export default function AdminPesanManager() {
             <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-600 dark:bg-rose-900/30">
               <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
-            <h3 className="text-center text-2xl font-black uppercase italic tracking-tight text-slate-900 dark:text-white leading-none">Hapus Permanen?</h3>
+            <h3 className="text-center text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white leading-none">Hapus Permanen?</h3>
             <p className="mt-4 text-center text-xs font-bold text-slate-500 leading-relaxed px-4">{confirmData.message}</p>
 
             <div className="mt-10 flex flex-col gap-3">
-              <button onClick={confirmData.onConfirm} className="h-14 w-full rounded-2xl bg-rose-600 text-[10px] font-black uppercase italic tracking-widest text-white shadow-xl shadow-rose-600/20 hover:bg-rose-700">Ya, Hapus Data</button>
-              <button onClick={() => setConfirmData(null)} className="h-14 w-full rounded-2xl bg-slate-50 text-[10px] font-black uppercase italic tracking-widest text-slate-500 hover:bg-slate-100 dark:bg-white/5">Batalkan</button>
+              <button onClick={confirmData.onConfirm} className="h-14 w-full rounded-2xl bg-rose-600 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-rose-600/20 hover:bg-rose-700">Ya, Hapus Data</button>
+              <button onClick={() => setConfirmData(null)} className="h-14 w-full rounded-2xl bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 dark:bg-white/5">Batalkan</button>
             </div>
           </div>
         </div>

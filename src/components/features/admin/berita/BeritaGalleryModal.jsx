@@ -46,7 +46,7 @@ export function BeritaGalleryModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase italic leading-none">
+                <h3 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
                   {isAlreadyInGallery ? "Perbarui Galeri" : "Kirim ke Galeri"}
                 </h3>
                 {isAlreadyInGallery && (
@@ -78,7 +78,7 @@ export function BeritaGalleryModal({
             {/* Left Column: Inputs */}
             <div className="space-y-6 lg:col-span-7">
               <div className="group">
-                <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic mb-2 block">
+                <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2 block">
                   Judul Galeri
                 </label>
                 <input
@@ -91,7 +91,7 @@ export function BeritaGalleryModal({
               </div>
 
               <div className="group opacity-70">
-                <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic mb-2 block">
+                <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2 block">
                   Tautan Berita (Link URL)
                 </label>
                 <input
@@ -102,11 +102,11 @@ export function BeritaGalleryModal({
                   className="h-14 w-full rounded-2xl border-2 border-slate-50 bg-slate-100 px-5 text-sm font-bold text-slate-500 outline-none dark:border-white/5 dark:bg-slate-800/20"
                   readOnly
                 />
-                <p className="text-[9px] font-bold text-slate-400 italic mt-2">Sinkronisasi otomatis dengan slug berita.</p>
+                <p className="text-[9px] font-bold text-slate-400 mt-2">Sinkronisasi otomatis dengan slug berita.</p>
               </div>
 
               <div className="group">
-                <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic mb-2 block">
+                <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2 block">
                   Tanggal Galeri
                 </label>
                 <input
@@ -123,7 +123,7 @@ export function BeritaGalleryModal({
             <div className="lg:col-span-5">
               <div className="flex flex-col h-full space-y-4">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400 italic">
+                  <label className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">
                     Visual Galeri (3:4)
                   </label>
                   {(form.image_url || form.gallery_upload_base64) && (
@@ -152,7 +152,7 @@ export function BeritaGalleryModal({
                           <path d="M12 4v16m8-8H4" />
                         </svg>
                       </div>
-                      <p className="text-xs font-black uppercase tracking-[0.2em] italic text-slate-900 dark:text-white">
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
                         {uploading
                           ? "Memproses..."
                           : isAlreadyInGallery
@@ -190,7 +190,7 @@ export function BeritaGalleryModal({
                 type="button"
                 onClick={onDelete}
                 disabled={Boolean(sendingId) || uploading || prefillLoading}
-                className="h-12 w-full sm:w-auto rounded-xl bg-rose-50 px-6 text-[10px] font-black uppercase tracking-[0.2em] italic text-rose-600 transition-all hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-950/20 dark:text-rose-400"
+                className="h-12 w-full sm:w-auto rounded-xl bg-rose-50 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-rose-600 transition-all hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-950/20 dark:text-rose-400"
               >
                 Hapus Konten
               </button>
@@ -201,7 +201,7 @@ export function BeritaGalleryModal({
             <button
               type="button"
               onClick={onClose}
-              className="h-12 w-full sm:w-auto rounded-xl border-2 border-slate-50 px-8 text-[10px] font-black uppercase tracking-[0.2em] italic text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-900 dark:border-white/5 dark:hover:bg-white/5 dark:hover:text-white"
+              className="h-12 w-full sm:w-auto rounded-xl border-2 border-slate-50 px-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition-all hover:bg-slate-50 hover:text-slate-900 dark:border-white/5 dark:hover:bg-white/5 dark:hover:text-white"
             >
               Batal
             </button>
@@ -210,7 +210,7 @@ export function BeritaGalleryModal({
               type="button"
               onClick={onSubmit}
               disabled={Boolean(sendingId) || uploading || prefillLoading}
-              className="group relative flex h-12 w-full sm:w-auto items-center justify-center gap-3 overflow-hidden rounded-xl bg-slate-900 px-10 text-[10px] font-black uppercase tracking-[0.2em] italic text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-slate-100"
+              className="group relative flex h-12 w-full sm:w-auto items-center justify-center gap-3 overflow-hidden rounded-xl bg-slate-900 px-10 text-[10px] font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-slate-100"
             >
               {sendingId ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white dark:border-black/30 dark:border-t-black" />

@@ -30,7 +30,7 @@ export default function LaporanUploadPanel({
                 </div>
                 <h2
                     id="laporan-upload-title"
-                    className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic leading-none"
+                    className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none"
                 >
                     Upload Baru
                 </h2>

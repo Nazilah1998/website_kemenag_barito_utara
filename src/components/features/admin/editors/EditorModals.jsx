@@ -21,10 +21,10 @@ function ModalHeader({ title, subtitle, onClose }) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-6 mb-8 pb-8 border-b border-slate-100 dark:border-white/5">
       <div>
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-2 italic">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-2">
           Konfigurasi Keamanan
         </p>
-        <h3 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none uppercase italic">
+        <h3 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none uppercase">
           {title}
         </h3>
         {subtitle && <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>}

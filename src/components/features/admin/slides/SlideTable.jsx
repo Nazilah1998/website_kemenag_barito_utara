@@ -43,7 +43,7 @@ export function SlideTable({ items, loading, onEdit, onDelete, deletingId, toNum
                   </p>
                 </td>
                 <td className="px-6 py-6">
-                  <span className="text-xs font-black text-slate-900 dark:text-slate-100 italic">
+                  <span className="text-xs font-black text-slate-900 dark:text-slate-100">
                     #{toNumber(item.sort_order, 0)}
                   </span>
                 </td>

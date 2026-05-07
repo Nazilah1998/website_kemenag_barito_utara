@@ -34,7 +34,7 @@ export default function AdminRegisterEditorClient() {
             <button
               type="submit"
               disabled={r.submitting || !r.fullName || !r.email || !r.password}
-              className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] italic text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
+              className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
             >
               <span className="relative z-10">{r.submitting ? "Memproses..." : "Daftarkan Akun"}</span>
               <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
@@ -48,7 +48,7 @@ export default function AdminRegisterEditorClient() {
                   <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <p className="text-[9px] font-bold leading-relaxed text-slate-400 dark:text-slate-500 uppercase tracking-[0.1em] italic">
+              <p className="text-[9px] font-bold leading-relaxed text-slate-400 dark:text-slate-500 uppercase tracking-[0.1em]">
                 Akun <span className="text-slate-900 dark:text-white">Editor</span> memerlukan verifikasi keamanan dari Super Admin sebelum dapat digunakan.
               </p>
             </div>
@@ -74,10 +74,10 @@ function RegisterHeader() {
         </Link>
         <div className="h-10 w-px bg-slate-100 dark:bg-white/5" />
         <div className="text-left">
-          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 italic mb-1">
+          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 mb-1">
             Gatekeeper Access
           </p>
-          <h1 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic leading-none">
+          <h1 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
             Buat Akun <span className="text-emerald-600 dark:text-emerald-400">Editor</span>
           </h1>
         </div>
