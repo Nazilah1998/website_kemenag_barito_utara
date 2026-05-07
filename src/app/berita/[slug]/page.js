@@ -6,8 +6,10 @@ import {
   BeritaDetailBackLink,
   BeritaDetailMetaPills,
   BeritaDetailSidebar,
+  BeritaDetailCategoryBadge,
 } from "@/components/features/berita/BeritaDetailLocalized";
 import { BeritaDetailNavigation } from "@/components/features/berita/BeritaDetailNavigation";
+import BeritaDetailHeader from "@/components/features/berita/BeritaDetailHeader";
 import {
   getAdjacentBerita,
   getBeritaBySlug,
@@ -129,14 +131,7 @@ export default async function DetailBeritaPage({ params }) {
   return (
     <>
       <JsonLd data={jsonLd} />
-      <PageBanner
-        title={berita.title}
-        breadcrumb={[
-          { label: "Beranda", href: "/" },
-          { label: "Berita", href: "/berita" },
-          { label: berita.title },
-        ]}
-      />
+      <BeritaDetailHeader title={berita.title} />
 
       <main className="bg-slate-50 transition-colors dark:bg-slate-950">
         <section className="w-full px-6 py-8 sm:px-10 lg:px-16 xl:px-20">
@@ -163,13 +158,11 @@ export default async function DetailBeritaPage({ params }) {
                 <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
 
                 <div className="absolute left-6 top-6 md:left-10 md:top-10">
-                  <div className="inline-flex rounded-full border border-white/15 bg-emerald-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
-                    {berita.category}
-                  </div>
+                  <BeritaDetailCategoryBadge category={berita.category} />
                 </div>
 
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-10">
-                  <BeritaDetailMetaPills date={berita.date}>
+                  <BeritaDetailMetaPills isoDate={berita.isoDate}>
                     <BeritaViewCounter
                       slug={berita.slug}
                       initialViews={berita.views}
@@ -190,7 +183,7 @@ export default async function DetailBeritaPage({ params }) {
 
               <BeritaDetailSidebar
                 category={berita.category}
-                date={berita.date}
+                isoDate={berita.isoDate}
                 views={berita.views}
                 title={berita.title}
                 slug={berita.slug}

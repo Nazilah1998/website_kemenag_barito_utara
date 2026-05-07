@@ -1,9 +1,14 @@
+"use client";
+
 import React from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const baseInput =
   "w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100";
 
 export function KontakFormFields({ form, onChange, getFieldError }) {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* Honeypot */}
@@ -26,16 +31,16 @@ export function KontakFormFields({ form, onChange, getFieldError }) {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <FormInput
           id="nama"
-          label="Nama lengkap"
+          label={t("contact.fullName")}
           value={form.nama}
           onChange={onChange}
           error={getFieldError("nama")}
-          placeholder="Nama Anda"
+          placeholder={t("contact.placeholderName")}
           required
         />
         <FormInput
           id="whatsapp"
-          label="No. WhatsApp"
+          label={t("contact.whatsapp")}
           type="tel"
           value={form.whatsapp}
           onChange={onChange}
@@ -50,7 +55,7 @@ export function KontakFormFields({ form, onChange, getFieldError }) {
           htmlFor="subjek"
           className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
         >
-          Kategori Pesan
+          {t("contact.messageCategory")}
         </label>
         <select
           id="subjek"
@@ -59,9 +64,9 @@ export function KontakFormFields({ form, onChange, getFieldError }) {
           onChange={onChange}
           className={`${baseInput} border-slate-200`}
         >
-          <option value="Pertanyaan">Pertanyaan</option>
-          <option value="Masukan">Masukan</option>
-          <option value="Pengaduan">Pengaduan</option>
+          <option value="Pertanyaan">{t("contact.categories.Pertanyaan")}</option>
+          <option value="Masukan">{t("contact.categories.Masukan")}</option>
+          <option value="Pengaduan">{t("contact.categories.Pengaduan")}</option>
         </select>
       </div>
 
@@ -70,7 +75,7 @@ export function KontakFormFields({ form, onChange, getFieldError }) {
           htmlFor="pesan"
           className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
         >
-          Pesan
+          {t("contact.message")}
         </label>
         <textarea
           id="pesan"
@@ -82,7 +87,7 @@ export function KontakFormFields({ form, onChange, getFieldError }) {
           value={form.pesan}
           onChange={onChange}
           className={`${baseInput} ${getFieldError("pesan") ? "border-rose-400" : "border-slate-200"}`}
-          placeholder="Tulis pertanyaan, masukan, atau pengaduan Anda di sini."
+          placeholder={t("contact.placeholderMessage")}
         />
         <div className="mt-1 flex items-center justify-between text-xs">
           <span className="text-rose-600">{getFieldError("pesan") || ""}</span>

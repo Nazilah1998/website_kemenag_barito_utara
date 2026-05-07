@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 function ChevronLeftIcon() {
     return (
@@ -81,6 +84,7 @@ export default function NewsPagination({
     basePath = "/berita",
     searchParams = {},
 }) {
+    const { t } = useLanguage();
     if (totalPages <= 1) return null;
 
     const items = buildPagination(totalPages, currentPage);
@@ -91,7 +95,7 @@ export default function NewsPagination({
 
     return (
         <nav
-            aria-label="Pagination berita"
+            aria-label={t("nav.berita") + " pagination"}
             className="mt-10 flex flex-wrap items-center justify-center gap-3"
         >
             <Link

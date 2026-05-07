@@ -38,7 +38,11 @@ export const siteLinks = {
   ),
   mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`,
   mapDirectionUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`,
-  instagram: "https://www.instagram.com/kemenag.barut",
+  instagram: "https://www.instagram.com/kemenag.barut/",
+  youtube: "http://www.youtube.com/@KemenagBaritoUtara",
+  tiktok: "#",
+  facebook: "#",
+  x: "#",
 };
 
 export const footerMenuLinks = [

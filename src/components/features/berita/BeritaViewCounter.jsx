@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function BeritaViewCounter({ slug, initialViews = 0 }) {
+  const { t, locale } = useLanguage();
   const [views, setViews] = useState(Number(initialViews || 0));
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function BeritaViewCounter({ slug, initialViews = 0 }) {
         <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
         <circle cx="12" cy="12" r="3" />
       </svg>
-      <span>{views.toLocaleString("id-ID")} kali dibaca</span>
+      <span>{views.toLocaleString(locale === "en" ? "en-US" : "id-ID")} {t("berita.readCount")}</span>
     </div>
   );
 }

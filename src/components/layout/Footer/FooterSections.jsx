@@ -67,10 +67,10 @@ export function FooterContact() {
         {t("nav.kontak")}
       </p>
       <div className="mt-3 space-y-3">
-        <FooterInfoItem label="Email" value={siteInfo.email} href={siteLinks.emailHref} />
-        <FooterInfoItem label="Telepon" value={siteInfo.phone} href={siteLinks.phoneHref} />
-        <FooterInfoItem label={t("footer.officeHours")} value={siteInfo.officeHours} />
-        <FooterInfoItem label="Wilayah" value="Kabupaten Barito Utara, Kalimantan Tengah" />
+        <FooterInfoItem label={t("footer.email")} value={siteInfo.email} href={siteLinks.emailHref} />
+        <FooterInfoItem label={t("footer.phone")} value={siteInfo.phone} href={siteLinks.phoneHref} />
+        <FooterInfoItem label={t("footer.officeHours")} value={t("contact.officeHours")} />
+        <FooterInfoItem label={t("footer.region")} value={t("footer.regionValue")} />
       </div>
     </div>
   );
@@ -79,11 +79,11 @@ export function FooterContact() {
 export function FooterSocial() {
   const { t } = useLanguage();
   const socialLinks = [
-    { label: "Facebook", href: "#", icon: FacebookIcon },
-    { label: "X / Twitter", href: "#", icon: XIcon },
-    { label: "Instagram", href: "#", icon: InstagramIcon },
-    { label: "YouTube", href: "#", icon: YouTubeIcon },
-    { label: "TikTok", href: "#", icon: TikTokIcon },
+    { label: "Instagram", href: siteLinks.instagram, icon: InstagramIcon },
+    { label: "YouTube", href: siteLinks.youtube, icon: YouTubeIcon },
+    { label: "TikTok", href: siteLinks.tiktok, icon: TikTokIcon },
+    { label: "Facebook", href: siteLinks.facebook, icon: FacebookIcon },
+    { label: "X / Twitter", href: siteLinks.x, icon: XIcon },
   ];
 
   return (

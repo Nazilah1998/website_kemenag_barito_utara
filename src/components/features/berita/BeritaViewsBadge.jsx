@@ -1,4 +1,10 @@
+"use client";
+
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function BeritaViewsBadge({ views = 0, className = "" }) {
+    const { t, locale } = useLanguage();
+
     return (
         <div
             className={`inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 ${className}`.trim()}
@@ -19,7 +25,7 @@ export default function BeritaViewsBadge({ views = 0, className = "" }) {
                 <circle cx="12" cy="12" r="3" />
             </svg>
 
-            <span>{Number(views || 0).toLocaleString("id-ID")} kali dibaca</span>
+            <span>{Number(views || 0).toLocaleString(locale === "en" ? "en-US" : "id-ID")} {t("berita.views")}</span>
         </div>
     );
 }

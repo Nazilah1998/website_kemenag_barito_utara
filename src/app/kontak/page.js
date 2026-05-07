@@ -1,27 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import PageBanner from "@/components/common/PageBanner";
 import KontakForm from "@/components/features/kontak/KontakForm";
 import { siteInfo, siteLinks } from "../../data/site";
-
-const WEEKDAY_LABELS = {
-  Mon: "Senin",
-  Tue: "Selasa",
-  Wed: "Rabu",
-  Thu: "Kamis",
-  Fri: "Jum'at",
-  Sat: "Sabtu",
-  Sun: "Minggu",
-};
+import { useLanguage } from "@/context/LanguageContext";
 
 function getOfficeScheduleByDay(weekday) {
   if (["Mon", "Tue", "Wed", "Thu"].includes(weekday)) {
     return {
       openMinutes: 7 * 60 + 30,
       closeMinutes: 16 * 60,
-      nextOpenText: "07.30 WIB",
-      closeText: "16.00 WIB",
+      nextOpenText: "07.30",
+      closeText: "16.00",
     };
   }
 
@@ -29,15 +20,15 @@ function getOfficeScheduleByDay(weekday) {
     return {
       openMinutes: 7 * 60 + 30,
       closeMinutes: 16 * 60 + 30,
-      nextOpenText: "07.30 WIB",
-      closeText: "16.30 WIB",
+      nextOpenText: "07.30",
+      closeText: "16.30",
     };
   }
 
   return null;
 }
 
-function getNextOpeningDetail(weekday) {
+function getNextOpeningDetail(weekday, t) {
   const dayOrder = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const currentIndex = dayOrder.indexOf(weekday);
 
@@ -46,14 +37,16 @@ function getNextOpeningDetail(weekday) {
     const nextSchedule = getOfficeScheduleByDay(nextDay);
 
     if (nextSchedule) {
-      return `Layanan akan dibuka kembali ${WEEKDAY_LABELS[nextDay]} pukul ${nextSchedule.nextOpenText}.`;
+      return t("contact.openingDetail")
+        .replace("{day}", t(`contact.weekdays.${nextDay}`))
+        .replace("{time}", `${nextSchedule.nextOpenText} WIB`);
     }
   }
 
-  return "Jadwal layanan sedang diperbarui.";
+  return t("contact.updateSchedule");
 }
 
-function getOfficeStatus() {
+function getOfficeStatus(t) {
   const now = new Date();
 
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -81,19 +74,19 @@ function getOfficeStatus() {
   let detail = "";
 
   if (isOpen && schedule) {
-    detail = `Layanan tatap muka sedang berjalan hingga pukul ${schedule.closeText}.`;
+    detail = t("contact.runningUntil").replace("{time}", `${schedule.closeText} WIB`);
   } else if (schedule && currentMinutes < schedule.openMinutes) {
-    detail = `Layanan akan dibuka hari ini pukul ${schedule.nextOpenText}.`;
+    detail = t("contact.openingToday").replace("{time}", `${schedule.nextOpenText} WIB`);
   } else {
-    detail = getNextOpeningDetail(weekday);
+    detail = getNextOpeningDetail(weekday, t);
   }
 
+  const timeString = `${String(hour).padStart(2, "0")}.${String(minute).padStart(2, "0")} WIB`;
+
   return {
-    label: isOpen ? "Sedang Buka" : "Sedang Tutup",
+    label: isOpen ? t("contact.open") : t("contact.closed"),
     detail,
-    nowText: `${WEEKDAY_LABELS[weekday]}, ${String(hour).padStart(2, "0")}.${String(
-      minute,
-    ).padStart(2, "0")} WIB`,
+    nowText: `${t(`contact.weekdays.${weekday}`)}, ${timeString}`,
     isOpen,
   };
 }
@@ -101,9 +94,8 @@ function getOfficeStatus() {
 function OfficeHoursBlock({
   className = "text-sm leading-6 text-slate-700 dark:text-slate-300",
 }) {
-  const officeHoursList = Array.isArray(siteInfo.officeHours)
-    ? siteInfo.officeHours
-    : [siteInfo.officeHours];
+  const { t } = useLanguage();
+  const officeHoursList = t("contact.officeHours") || [];
 
   return (
     <div className="space-y-1.5">
@@ -117,23 +109,28 @@ function OfficeHoursBlock({
 }
 
 export default function KontakPage() {
-  const [officeStatus, setOfficeStatus] = useState(getOfficeStatus());
+  const { t } = useLanguage();
+  const [officeStatus, setOfficeStatus] = useState(() => getOfficeStatus(t));
 
   useEffect(() => {
-    const updateStatus = () => setOfficeStatus(getOfficeStatus());
+    const updateStatus = () => setOfficeStatus(getOfficeStatus(t));
 
     updateStatus();
     const intervalId = setInterval(updateStatus, 60000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [t]);
 
   return (
     <>
       <PageBanner
-        title="Kontak"
-        description="Pilih kanal komunikasi yang paling sesuai, temukan lokasi kantor, dan hubungi instansi melalui jalur resmi yang tersedia."
-        breadcrumb={[{ label: "Beranda", href: "/" }, { label: "Kontak" }]}
+        title={t("contact.title")}
+        description={t("contact.description")}
+        breadcrumb={[
+          { label: t("nav.home"), href: "/" },
+          { label: t("contact.title") }
+        ]}
+        eyebrow={t("berita.publicService")}
       />
 
       <main className="bg-slate-50 transition-colors dark:bg-slate-950">
@@ -143,7 +140,7 @@ export default function KontakPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                    Status Layanan
+                    {t("contact.statusTitle")}
                   </p>
                   <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
                     {officeStatus.label}
@@ -157,7 +154,7 @@ export default function KontakPage() {
                       : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
                   }`}
                 >
-                  {officeStatus.isOpen ? "Online" : "Offline"}
+                  {officeStatus.isOpen ? t("contact.online") : t("contact.offline")}
                 </span>
               </div>
 
@@ -168,14 +165,14 @@ export default function KontakPage() {
               <div className="mt-6 grid gap-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-300">
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Waktu kantor saat ini
+                    {t("contact.currentTime")}
                   </p>
                   <p className="mt-1">{officeStatus.nowText}</p>
                 </div>
 
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Jam layanan
+                    {t("contact.serviceHours")}
                   </p>
                   <div className="mt-2">
                     <OfficeHoursBlock />
@@ -186,27 +183,27 @@ export default function KontakPage() {
 
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
               <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                Kontak Utama
+                {t("contact.mainContact")}
               </p>
 
               <div className="mt-5 space-y-4 text-sm text-slate-700 dark:text-slate-300">
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Nama Instansi
+                    {t("contact.agencyName")}
                   </p>
                   <p className="mt-1">{siteInfo.name}</p>
                 </div>
 
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Alamat
+                    {t("contact.address")}
                   </p>
                   <p className="mt-1 leading-6">{siteInfo.address}</p>
                 </div>
 
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    WhatsApp
+                    {t("contact.whatsapp")}
                   </p>
                   <a
                     href={siteLinks.whatsappHref}
@@ -220,7 +217,7 @@ export default function KontakPage() {
 
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Telepon
+                    {t("contact.phone")}
                   </p>
                   <a
                     href={siteLinks.phoneHref}
@@ -232,7 +229,7 @@ export default function KontakPage() {
 
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">
-                    Email
+                    {t("contact.email")}
                   </p>
                   <a
                     href={siteLinks.emailHref}
@@ -249,20 +246,19 @@ export default function KontakPage() {
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
               <div className="border-b border-slate-200 p-6 transition-colors dark:border-slate-800">
                 <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-                  Lokasi Kantor
+                  {t("contact.officeLocation")}
                 </p>
                 <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  Temukan kami di peta
+                  {t("contact.findUsOnMap")}
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Gunakan peta di bawah ini untuk melihat lokasi kantor, lalu
-                  buka petunjuk arah jika ingin datang langsung.
+                  {t("contact.mapDesc")}
                 </p>
               </div>
 
               <iframe
                 src={siteLinks.mapEmbedUrl}
-                title="Peta lokasi kantor"
+                title={t("contact.findUsOnMap")}
                 className="h-90 w-full"
                 loading="lazy"
                 allowFullScreen
@@ -276,7 +272,7 @@ export default function KontakPage() {
                   rel="noreferrer"
                   className="rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                 >
-                  Petunjuk Arah
+                  {t("contact.getDirections")}
                 </a>
                 <a
                   href={siteLinks.mapDirectionUrl}
@@ -284,7 +280,7 @@ export default function KontakPage() {
                   rel="noreferrer"
                   className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
-                  Buka di Google Maps
+                  {t("contact.openInMaps")}
                 </a>
               </div>
             </div>
