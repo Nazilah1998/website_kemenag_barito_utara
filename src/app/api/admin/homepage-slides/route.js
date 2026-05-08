@@ -38,9 +38,7 @@ export async function GET() {
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("homepage_slides")
-      .select(
-        "id, title, caption, image_url, is_published, sort_order, created_at, updated_at",
-      )
+      .select("*")
       .order("sort_order", { ascending: true })
       .order("updated_at", { ascending: false });
 
@@ -76,6 +74,7 @@ export async function POST(request) {
     const imageUploadName = toText(body?.image_upload_name, "homepage-slide");
     const isPublished = toBool(body?.is_published, true);
     const sortOrder = toNumber(body?.sort_order, 0);
+    const category = toText(body?.category, "utama");
 
     if (!title) {
       return NextResponse.json(
@@ -110,12 +109,11 @@ export async function POST(request) {
         title,
         caption,
         image_url: finalImageUrl,
+        category,
         is_published: isPublished,
         sort_order: sortOrder,
       })
-      .select(
-        "id, title, caption, image_url, is_published, sort_order, created_at, updated_at",
-      )
+      .select("*")
       .single();
 
     if (error) throw error;

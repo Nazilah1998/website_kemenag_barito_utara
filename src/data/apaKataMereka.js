@@ -6,8 +6,8 @@ export const getApaKataMereka = (locale = "id") => {
         position: "Menteri Agama Republik Indonesia",
         image: "/menteri.png",
         quote: [
-          "Mari kita wakafkan diri kita untuk berhimpun kepada umat melalui Kementerian Agama.",
-          "Kemenag tidak serta merta menjadikan kita kaya raya, namun dari sanlah kita dapat pelajaran yang penting berkah.",
+          "Mari kita wakafkan diri untuk berkhidmat kepada umat melalui Kementerian Agama. Kehadiran kita bukan sekadar menjalankan tugas, melainkan membawa misi kedamaian dan harmoni bagi seluruh bangsa.",
+          "Kementerian Agama bukan tempat untuk mencari kekayaan materi, melainkan ladang untuk menanam keberkahan dan pengabdian yang tulus bagi agama, nusa, dan bangsa.",
         ],
       },
       {
@@ -15,9 +15,8 @@ export const getApaKataMereka = (locale = "id") => {
         position: "Kepala Kantor Wilayah Kemenag Provinsi Kalimantan Tengah",
         image: "/Kanwil.png",
         quote: [
-          "Hijrah adalah kiscayahan untuk menuju kehidupan yang lebih baik, hijrah adalah suah pilar utak yang haris dilakukan untuk memperbaki kembla arak haluan kemnyimpang, Bahkan para Nabi dan Rasul pun berhijrah.",
-          "Dari hijrah yang sesungguhnya adalah hijrah kepad Allah, melaksanakan perjalan menuju Allah, dengan ketaqatan hati yang engangkalan segala bentuk kehilangan dan kemungkaran.",
-          "Di sertain keteguhan dalam menjalankan semu tuntunan anal kebijak, sebagai satu-satunya pilar untuk memperkuat langkah perjalan kita menuju ridha Allah SWT",
+          "Hijrah adalah keniscayaan menuju kehidupan yang lebih bermakna. Ia adalah pilar utama dalam memperbaiki arah perjuangan dari penyimpangan menuju keridaan Ilahi. Bahkan para Nabi dan Rasul pun melakukan hijrah sebagai bentuk ketaatan.",
+          "Hakikat hijrah yang sesungguhnya adalah perjalanan batin menuju Allah SWT, menguatkan keteguhan hati dalam menjalankan amanah, serta meninggalkan segala bentuk kemungkaran demi meraih keberkahan hidup.",
         ],
       },
       {
@@ -25,9 +24,8 @@ export const getApaKataMereka = (locale = "id") => {
         position: "Kepala Kantor Kemenag Kabupaten Barito Utara",
         image: "/Kemenag-kepala.png",
         quote: [
-          "Ladang perbedaan sebagai ujian keimanan dalam berbangsa dan bernegara agar tetap indah dengan berbagai warna dan jenis.",
-          "Jangankan menjadi sebab perbedaan sebagai kesomobongan akan rasa paling benar dalam berfikir dan bertindak, karena perbedaan yang mengikatkan perpecahanan yang membut bangsa dan negara melemah, hingga akhirnya mu dah terijah.",
-          "Mari satukan ENERGI kita, tuangkan dalam KERJA nyata sebagai amal bhakti bagi nusa dan bangsa demi menjaga Marwah Kementerian Agama.",
+          "Keberagaman adalah ujian keimanan dalam berbangsa. Mari kita jadikan perbedaan sebagai warna yang memperindah persatuan, bukan alasan untuk merasa paling benar yang berujung pada perpecahan.",
+          "Satukan energi, tuangkan dalam kerja nyata sebagai amal bakti bagi masyarakat. Mari kita jaga marwah Kementerian Agama dengan profesionalitas, integritas, dan ketulusan dalam melayani umat.",
         ],
       },
     ],
@@ -37,8 +35,8 @@ export const getApaKataMereka = (locale = "id") => {
         position: "Minister of Religious Affairs of the Republic of Indonesia",
         image: "/menteri.png",
         quote: [
-          "Let us dedicate ourselves to serving the community through the Ministry of Religious Affairs.",
-          "The Ministry does not necessarily make us wealthy, but from there we gain the important lesson of blessings.",
+          "Let us dedicate ourselves to serving the community through the Ministry of Religious Affairs. Our presence is not just to perform tasks, but to bring a mission of peace and harmony for the entire nation.",
+          "The Ministry of Religious Affairs is not a place to seek material wealth, but a field to plant blessings and sincere devotion for religion, country, and nation.",
         ],
       },
       {
@@ -47,9 +45,8 @@ export const getApaKataMereka = (locale = "id") => {
           "Head of the Regional Office of the Ministry of Religious Affairs, Central Kalimantan Province",
         image: "/Kanwil.png",
         quote: [
-          "Migration (Hijrah) is a necessity towards a better life; it is a main pillar that must be undertaken to correct the direction of deviation. Even the Prophets and Messengers migrated.",
-          "The true migration is towards Allah, undertaking a journey towards Allah, with obedience of heart that abandons all forms of loss and evil.",
-          "Accompanied by steadfastness in following all wise guidance, as the only pillar to strengthen our steps towards the pleasure of Allah SWT.",
+          "Migration (Hijrah) is a necessity towards a more meaningful life. It is the main pillar in correcting the direction of struggle from deviation towards Divine pleasure. Even the Prophets and Messengers migrated as a form of obedience.",
+          "The true essence of migration is an inner journey towards Allah SWT, strengthening steadfastness in carrying out mandates, and leaving all forms of evil to achieve the blessings of life.",
         ],
       },
       {
@@ -58,9 +55,8 @@ export const getApaKataMereka = (locale = "id") => {
           "Head of the Office of the Ministry of Religious Affairs, Barito Utara Regency",
         image: "/Kemenag-kepala.png",
         quote: [
-          "The field of difference is a test of faith in nation and state-building, so it remains beautiful with various colors and types.",
-          "Let difference not become a cause for arrogance or feeling most right in thinking and acting, because differences that lead to division make the nation and state weak, until finally easily colonized.",
-          "Let us unite our ENERGY, pour it into real WORK as a service to the nation and country for the sake of maintaining the dignity of the Ministry of Religious Affairs.",
+          "Diversity is a test of faith in the nation. Let us make differences as colors that beautify unity, not as a reason to feel most righteous which leads to division.",
+          "Unite energy, pour it into real work as service to the community. Let us maintain the dignity of the Ministry of Religious Affairs with professionalism, integrity, and sincerity in serving the people.",
         ],
       },
     ],

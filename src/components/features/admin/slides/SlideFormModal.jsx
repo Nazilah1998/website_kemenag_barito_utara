@@ -68,15 +68,33 @@ export function SlideFormModal({
                   />
                 </div>
 
-                <div className="w-40">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Urutan Tampil</label>
-                  <input
-                    type="number"
-                    name="sort_order"
-                    value={form.sort_order}
-                    onChange={onChange}
-                    className="mt-1.5 h-12 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-900 outline-none dark:border-slate-800 dark:bg-slate-800/50 dark:text-white"
-                  />
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Urutan Tampil</label>
+                    <input
+                      type="number"
+                      name="sort_order"
+                      value={form.sort_order}
+                      onChange={onChange}
+                      className="mt-1.5 h-12 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-900 outline-none dark:border-slate-800 dark:bg-slate-800/50 dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Kategori / Seksi</label>
+                    <select
+                      name="category"
+                      value={form.category || "utama"}
+                      onChange={onChange}
+                      className="mt-1.5 h-12 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-900 outline-none transition-all focus:border-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-white"
+                    >
+                      <option value="utama">Slider Utama (Tengah)</option>
+                      <option value="kristen">Renungan Kristen</option>
+                      <option value="katolik">Renungan Katolik</option>
+                      <option value="islam">Mutiara Hikmah Islam</option>
+                      <option value="hindu">Dharma Wacana Hindu</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

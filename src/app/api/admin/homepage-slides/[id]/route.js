@@ -32,9 +32,7 @@ function toBool(value, fallback = false) {
 async function getExistingSlide(supabase, id) {
   const { data, error } = await supabase
     .from("homepage_slides")
-    .select(
-      "id, title, caption, image_url, is_published, sort_order, created_at, updated_at",
-    )
+    .select("*")
     .eq("id", id)
     .single();
 
@@ -78,6 +76,7 @@ export async function PATCH(request, { params }) {
     const imageUploadName = toText(body?.image_upload_name, title || "slide");
     const isPublished = toBool(body?.is_published, existing.is_published);
     const sortOrder = toNumber(body?.sort_order, existing.sort_order);
+    const category = toText(body?.category, existing.category || "utama");
 
     if (!title) {
       return NextResponse.json(
@@ -120,14 +119,13 @@ export async function PATCH(request, { params }) {
         title,
         caption,
         image_url: finalImageUrl,
+        category,
         is_published: isPublished,
         sort_order: sortOrder,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .select(
-        "id, title, caption, image_url, is_published, sort_order, created_at, updated_at",
-      )
+      .select("*")
       .single();
 
     if (error) throw error;

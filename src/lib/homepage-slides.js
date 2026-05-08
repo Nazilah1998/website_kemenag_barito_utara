@@ -25,6 +25,7 @@ export function normalizeHomepageSlide(item = {}) {
     title: toText(item.title, "Slide"),
     caption: toText(item.caption, ""),
     image_url: toText(item.image_url, ""),
+    category: toText(item.category, "utama"),
     is_published: toBool(item.is_published, false),
     sort_order: toNumber(item.sort_order, 0),
     created_at: item.created_at || null,
@@ -50,9 +51,7 @@ export async function getPublicHomepageSlides() {
 
     const { data, error } = await supabase
       .from("homepage_slides")
-      .select(
-        "id, title, caption, image_url, is_published, sort_order, created_at, updated_at",
-      )
+      .select("*")
       .eq("is_published", true)
       .order("sort_order", { ascending: true })
       .order("updated_at", { ascending: false });
@@ -71,9 +70,7 @@ export async function getAdminHomepageSlides() {
 
     const { data, error } = await supabase
       .from("homepage_slides")
-      .select(
-        "id, title, caption, image_url, is_published, sort_order, created_at, updated_at",
-      )
+      .select("*")
       .order("sort_order", { ascending: true })
       .order("updated_at", { ascending: false });
 

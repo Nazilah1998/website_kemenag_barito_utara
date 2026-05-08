@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useKontakForm } from "@/hooks/useKontakForm";
-import { KontakFormHeader, KontakFormActions, KontakFormStatus } from "./KontakFormUI";
-import { KontakFormFields } from "./KontakFormFields";
+import { KontakFormHeader, KontakFormActions, KontakFormStatus } from "./components/KontakFormUI";
+import { KontakFormFields } from "./components/KontakFormFields";
 
 export default function KontakForm() {
   const {

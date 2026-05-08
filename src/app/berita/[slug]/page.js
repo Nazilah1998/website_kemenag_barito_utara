@@ -1,15 +1,15 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import PageBanner from "@/components/common/PageBanner";
-import BeritaViewCounter from "@/components/features/berita/BeritaViewCounter";
+import BeritaViewCounter from "@/components/features/berita/components/BeritaViewCounter";
 import {
   BeritaDetailBackLink,
   BeritaDetailMetaPills,
   BeritaDetailSidebar,
   BeritaDetailCategoryBadge,
-} from "@/components/features/berita/BeritaDetailLocalized";
-import { BeritaDetailNavigation } from "@/components/features/berita/BeritaDetailNavigation";
-import BeritaDetailHeader from "@/components/features/berita/BeritaDetailHeader";
+} from "@/components/features/berita/components/BeritaDetailLocalized";
+import { BeritaDetailNavigation } from "@/components/features/berita/components/BeritaDetailNavigation";
+import BeritaDetailHeader from "@/components/features/berita/components/BeritaDetailHeader";
 import {
   getAdjacentBerita,
   getBeritaBySlug,

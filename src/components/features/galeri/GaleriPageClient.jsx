@@ -4,8 +4,8 @@ import React from "react";
 import { useGallery } from "@/hooks/useGallery";
 import { useLanguage } from "@/context/LanguageContext";
 import PageBanner from "@/components/common/PageBanner";
-import { GalleryHeader, GalleryCard, GalleryEmpty, GalleryPagination } from "./GalleryUI";
-import { GalleryLightbox } from "./GalleryLightbox";
+import { GalleryHeader, GalleryCard, GalleryEmpty, GalleryPagination } from "./components/GalleryUI";
+import { GalleryLightbox } from "./components/GalleryLightbox";
 
 export default function GaleriPageClient({ items = [] }) {
   const g = useGallery(items);

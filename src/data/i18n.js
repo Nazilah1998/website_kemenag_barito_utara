@@ -124,6 +124,22 @@ export const messages = {
           "Pilih aplikasi yang dibutuhkan. Setiap tautan akan dibuka di tab baru agar akses portal utama tetap terbuka.",
         openButton: "BUKA APLIKASI",
       },
+      christianSection: {
+        title: "Renungan Iman",
+        subtitle: "Kristen",
+      },
+      katolikSection: {
+        title: "Doa & Renungan",
+        subtitle: "Katolik",
+      },
+      islamicSection: {
+        title: "Mutiara Hikmah",
+        subtitle: "Islam",
+      },
+      hinduSection: {
+        title: "Dharma Wacana",
+        subtitle: "Hindu",
+      },
     },
     newsDetail: {
       published: "Dipublikasikan",
@@ -392,6 +408,22 @@ export const messages = {
         description:
           "Select the required application. Each link will open in a new tab so the main portal remains accessible.",
         openButton: "OPEN APP",
+      },
+      christianSection: {
+        title: "Faith Reflection",
+        subtitle: "Christian",
+      },
+      katolikSection: {
+        title: "Prayer & Reflection",
+        subtitle: "Catholic",
+      },
+      islamicSection: {
+        title: "Pearl of Wisdom",
+        subtitle: "Islamic",
+      },
+      hinduSection: {
+        title: "Dharma Talk",
+        subtitle: "Hindu",
       },
     },
     newsDetail: {

@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import SectionHeading from "./SectionHeading";
+import SectionHeading from "@/components/common/SectionHeading";
 import { useBeritaList } from "@/hooks/useBeritaList";
-import { BeritaPublicFilters } from "./berita/BeritaPublicFilters";
-import { BeritaFeaturedCard, BeritaCard } from "./berita/BeritaPublicCards";
+import { BeritaPublicFilters } from "./components/BeritaPublicFilters";
+import { BeritaFeaturedCard, BeritaCard } from "./components/BeritaPublicCards";
 
 export default function BeritaListClient({ items }) {
   const b = useBeritaList(items);
@@ -24,7 +24,7 @@ export default function BeritaListClient({ items }) {
         description="Tampilan berita dibuat lebih rapi dengan fitur pencarian sederhana, filter kategori, dan tata letak yang lebih nyaman dibaca."
       />
 
-      <BeritaPublicFilters 
+      <BeritaPublicFilters
         query={b.query} handleQueryChange={b.handleQueryChange}
         category={b.category} handleCategoryChange={b.handleCategoryChange}
         categories={b.categories}
@@ -37,7 +37,7 @@ export default function BeritaListClient({ items }) {
       ) : (
         <>
           <BeritaFeaturedCard item={b.featured} />
-          
+
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {b.restItems.map((item) => (
               <BeritaCard key={item.slug} item={item} />

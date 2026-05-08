@@ -4,9 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import PageBanner from "@/components/common/PageBanner";
-import BeritaFilters from "@/components/features/berita/BeritaFilters";
-import { FeaturedNewsCard, NewsCard } from "@/components/features/berita/BeritaCards";
-import NewsPagination from "@/components/features/berita/NewsPagination";
+import BeritaFilters from "./components/BeritaFilters";
+import { FeaturedNewsCard, NewsCard } from "./components/BeritaCards";
+import NewsPagination from "./components/NewsPagination";
 
 export default function BeritaPageClient({
   categories,

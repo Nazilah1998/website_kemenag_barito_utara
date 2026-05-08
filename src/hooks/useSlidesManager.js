@@ -10,6 +10,7 @@ const emptyForm = {
   image_upload_name: "",
   is_published: true,
   sort_order: 0,
+  category: "utama",
 };
 
 async function readJsonSafely(response) {
@@ -123,6 +124,7 @@ export function useSlidesManager() {
       image_upload_name: "",
       is_published: Boolean(item.is_published),
       sort_order: toNumber(item.sort_order, 0),
+      category: item.category || "utama",
     });
     setOpenForm(true);
   }, []);
@@ -199,6 +201,7 @@ export function useSlidesManager() {
         image_upload_name: form.image_upload_name || "",
         is_published: Boolean(form.is_published),
         sort_order: toNumber(form.sort_order, 0),
+        category: form.category || "utama",
       };
 
       const url = editingId
