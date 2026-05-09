@@ -99,7 +99,7 @@ if (isProd) {
 const nextConfig = {
   images: {
     remotePatterns,
-    qualities: [70, 75, 85],
+    qualities: [100, 70, 75, 85],
   },
   allowedDevOrigins: ["127.0.0.1"],
   async headers() {

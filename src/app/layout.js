@@ -8,6 +8,7 @@ import VercelAnalytics from "@/components/layout/VercelAnalytics";
 import VercelSpeedInsights from "@/components/layout/VercelSpeedInsights";
 import PwaRegister from "@/components/layout/PwaRegister";
 import JsonLd from "@/components/features/seo/JsonLd";
+import ChatWidget from "@/components/features/chat/ChatWidget";
 import {
   organizationSchema,
   websiteSchema,
@@ -103,6 +104,7 @@ export const viewport = {
   initialScale: 1,
 };
 
+
 export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
@@ -114,6 +116,7 @@ export default function RootLayout({ children }) {
 
         <Providers>
           <AppShell>{children}</AppShell>
+          <ChatWidget />
         </Providers>
 
         <VercelAnalytics />
