@@ -43,7 +43,7 @@ export default function AdminForgotPasswordClient() {
                   <label htmlFor="email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Email Terdaftar</label>
                   <input
                     id="email" type="email" value={f.email} onChange={(e) => f.setEmail(e.target.value)}
-                    placeholder="nama@email.com" required
+                    placeholder="nama@gmail.com" required
                     className={inputClassName()}
                   />
                 </div>

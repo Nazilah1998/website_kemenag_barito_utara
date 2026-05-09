@@ -8,7 +8,6 @@ import { BeritaFilters } from "./berita/BeritaFilters";
 import { BeritaTable } from "./berita/BeritaTable";
 import { BeritaPagination } from "./berita/BeritaPagination";
 import { BeritaFormModal } from "./berita/BeritaFormModal";
-import { BeritaGalleryModal } from "./berita/BeritaGalleryModal";
 import { DeleteConfirmModal, CloseFormConfirmModal } from "./berita/BeritaModals";
 
 export default function AdminBeritaManager() {
@@ -53,7 +52,7 @@ export default function AdminBeritaManager() {
           <BeritaTable
             items={m.paginatedItems} loading={m.loading}
             startIndex={m.startIndex} onEdit={m.handleOpenEdit}
-            onDelete={m.handleAskDelete} onGallery={m.handleOpenGalleryForm}
+            onDelete={m.handleAskDelete}
             deletingId={m.deletingId}
           />
 
@@ -75,16 +74,6 @@ export default function AdminBeritaManager() {
         onEditorPaste={m.onEditorPaste} onRunCommand={m.onRunCommand}
         onInsertLink={m.onInsertLink} onCoverChange={m.onCoverChange}
         onClearCover={m.onClearCover} onSave={m.onSave}
-      />
-
-      <BeritaGalleryModal
-        open={m.openGalleryForm} form={m.galleryForm}
-        previewSrc={m.galleryPreviewSrc} sendingId={m.gallerySendingId}
-        uploading={m.uploadingGalleryImage} prefillLoading={m.galleryPrefillLoading}
-        isAlreadyInGallery={m.isAlreadyInGallery}
-        onClose={m.handleCloseGalleryForm} onChange={m.handleGalleryChange}
-        onFileChange={m.onGalleryFileChange} onClearImage={m.onClearGalleryImage}
-        onSubmit={m.onSubmitGallery} onDelete={m.onDeleteGallery}
       />
     </>
   );

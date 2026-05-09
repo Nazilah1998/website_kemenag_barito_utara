@@ -12,7 +12,7 @@ export const UNIT_KERJA_OPTIONS = [
   "Penyelenggara Zakat & Wakaf",
 ];
 
-const inputClasses = "w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-5 py-3 text-sm font-bold text-slate-900 outline-none transition-all placeholder:text-slate-300 focus:border-slate-900 focus:bg-white dark:border-white/5 dark:bg-white/5 dark:text-white dark:focus:border-white";
+const inputClasses = "w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-5 py-3 text-sm font-bold text-slate-900 outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-slate-900 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-slate-900/80 dark:focus:border-emerald-500";
 const labelClasses = "mb-1.5 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400";
 
 export function RegisterInput({ label, type = "text", value, onChange, placeholder, required = true, autoComplete = "off" }) {

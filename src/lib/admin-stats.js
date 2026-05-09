@@ -59,8 +59,20 @@ export async function getDashboardStats({ days = 14 } = {}) {
   let totalKontak = 0;
   let kontakBaru = 0;
   let totalReportDocs = 0;
+  let totalSlides = 0;
+  let totalGallery = 0;
 
   try {
+    const { count: slideCount } = await supabase
+      .from("homepage_slides")
+      .select("id", { count: "exact", head: true });
+    totalSlides = slideCount || 0;
+
+    const { count: galleryCount } = await supabase
+      .from("galeri")
+      .select("id", { count: "exact", head: true });
+    totalGallery = galleryCount || 0;
+
     const { count } = await supabase
       .from("kontak_pesan")
       .select("id", { count: "exact", head: true });
@@ -136,6 +148,8 @@ export async function getDashboardStats({ days = 14 } = {}) {
       totalKontak,
       kontakBaru,
       totalReportDocs,
+      totalSlides,
+      totalGallery,
     },
     trend,
     topBerita,

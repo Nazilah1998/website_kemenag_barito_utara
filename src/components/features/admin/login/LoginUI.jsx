@@ -28,8 +28,8 @@ export function inputClassName(hasTrailingButton = false) {
   return [
     "w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-5 py-3.5",
     "text-sm font-bold text-slate-900 outline-none transition-all",
-    "placeholder:text-slate-300",
-    "focus:border-slate-900 focus:bg-white dark:border-white/5 dark:bg-white/5 dark:text-white dark:focus:border-white",
+    "placeholder:text-slate-300 dark:placeholder:text-slate-600",
+    "focus:border-slate-900 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-slate-900/80 dark:focus:border-emerald-500",
     hasTrailingButton ? "pr-14" : "",
   ].filter(Boolean).join(" ");
 }

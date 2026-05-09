@@ -1,7 +1,9 @@
 import { getLatestBeritaHome } from "../lib/berita-home";
+import { getLatestGaleriHome } from "../lib/galeri-home";
 import { getPublicHomepageSlides } from "../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
 import HomeNewsSection from "@/components/features/home/HomeNewsSection";
+import HomeGallerySection from "@/components/features/home/HomeGallerySection";
 import ApaKataMerekaSection from "@/components/features/home/ApaKataMerekaSection";
 import HomepageSlidesSection from "@/components/features/home/HomepageSlidesSection";
 import ExternalAppsSection from "@/components/features/home/ExternalAppsSection";
@@ -34,8 +36,9 @@ function SectionDivider() {
 }
 
 export default async function HomePage() {
-  const [latestBerita, homepageSlides] = await Promise.all([
+  const [latestBerita, latestGaleri, homepageSlides] = await Promise.all([
     getLatestBeritaHome(),
+    getLatestGaleriHome(),
     getPublicHomepageSlides(),
   ]);
 
@@ -47,11 +50,15 @@ export default async function HomePage() {
         <SectionDivider />
       </div>
 
+      <ApaKataMerekaSection />
+
+      <SectionDivider />
+
       <HomeNewsSection latestBerita={latestBerita} />
 
       <SectionDivider />
 
-      <ApaKataMerekaSection />
+      <HomeGallerySection latestGaleri={latestGaleri} />
 
       <SectionDivider />
 

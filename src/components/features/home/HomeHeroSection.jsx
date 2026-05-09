@@ -10,80 +10,117 @@ export default function HomeHeroSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="theme-hero-shell relative overflow-hidden">
-      <div className="absolute inset-0">
+    <section className="relative h-[calc(100vh-140px)] min-h-[600px] max-h-[900px] w-full overflow-hidden bg-slate-950 flex items-center">
+      {/* 1. LAYERED BACKGROUND SYSTEM */}
+      <div className="absolute inset-0 z-0">
         <Image
           src="/kantor-kemenag.jpg"
           alt="Kantor Kementerian Agama Kabupaten Barito Utara"
           fill
           sizes="100vw"
-          quality={85}
-          className="object-cover"
+          quality={100}
+          className="object-cover opacity-30 mix-blend-luminosity scale-105"
           priority
         />
+        {/* Dynamic Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/90 to-emerald-950/60" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(5,150,105,0.08),transparent_30%)]" />
+
+        {/* Animated Orbs */}
+        <div className="absolute -left-20 top-10 h-[400px] w-[400px] rounded-full bg-emerald-500/10 blur-[100px] animate-pulse" />
+        <div className="absolute -right-20 bottom-10 h-[300px] w-[300px] rounded-full bg-blue-500/5 blur-[80px] animate-pulse delay-700" />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/85 via-emerald-950/80 to-slate-900/90" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.20),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.10),transparent_24%)]" />
 
-      <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl animate-float" />
-      <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-yellow-500/8 blur-3xl animate-float animate-delay-300" />
+      {/* 2. CONTENT CONTAINER */}
+      <div className="relative z-10 w-full px-6 py-8 sm:px-10 lg:px-16 xl:px-24">
+        <div className="mx-auto grid max-w-[1600px] items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
 
-      <div className="relative w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-24 xl:px-20">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="animate-slide-in-left">
-            <div className="glass inline-flex rounded-full px-5 py-2 text-[11px] font-black uppercase tracking-[0.32em] text-emerald-300">
-              {t("home.hero.badge")}
+          {/* Left Column: Text & Stats */}
+          <div className="flex flex-col animate-fade-in">
+            {/* Badge */}
+            <div className="group flex w-fit items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/50">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">
+                {t("home.hero.badge")}
+              </span>
             </div>
 
-            <h1 className="mt-7 max-w-3xl text-4xl font-black leading-[1.12] tracking-tight text-white md:text-5xl lg:text-6xl">
-              {t("home.hero.title")}
+            {/* Title */}
+            <h1 className="mt-6 max-w-3xl text-3xl font-black leading-[1.1] tracking-tight text-white md:text-4xl lg:text-5xl xl:text-6xl">
+              {t("home.hero.title").split('.').map((part, i) => (
+                <span key={i} className={i === 0 ? "block" : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"}>
+                  {part}{i === 0 && part ? "." : ""}
+                </span>
+              ))}
             </h1>
 
-
-
-            <p className="mt-7 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
+            {/* Description */}
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose">
               {t("home.hero.description")}
             </p>
 
+            {/* CTAs */}
             <div className="mt-8 flex flex-wrap gap-4">
               <a
                 href="https://ptsp.kemenag-baritoutara.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="theme-primary-button group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-black transition"
+                className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-emerald-600 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition-all hover:bg-emerald-500 hover:shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)]"
               >
-                {t("home.hero.ctaLayanan")}
-                <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <span className="relative z-10">{t("home.hero.ctaLayanan")}</span>
+                <ArrowRightIcon className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-transform duration-500 group-hover:translate-x-0" />
               </a>
 
               <Link
                 href="/berita"
-                className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-black text-white transition hover:bg-white/15"
+                className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20"
               >
                 {t("home.hero.ctaBerita")}
               </Link>
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            {/* Stats - Grid Modern */}
+            <div className="mt-12 grid grid-cols-3 gap-6 sm:max-w-lg">
               {[
-                ["24+", t("home.stats.layanan")],
-                ["120+", t("home.stats.berita")],
-                ["100%", t("home.stats.dokumen")],
-              ].map(([number, label], index) => (
-                <div
-                  key={label}
-                  className={`glass rounded-2xl p-5 animate-fade-in-up animate-delay-${(index + 1) * 100}`}
-                >
-                  <p className="text-3xl font-black text-white">{number}</p>
-                  <p className="mt-1 text-xs font-bold tracking-wide text-emerald-300">
-                    {label}
+                { number: "24+", label: t("home.stats.layanan"), icon: "⚡" },
+                { number: "120+", label: t("home.stats.berita"), icon: "📰" },
+                { number: "100%", label: t("home.stats.dokumen"), icon: "🛡️" },
+              ].map((stat, i) => (
+                <div key={i} className="group flex flex-col gap-1 transition-transform hover:-translate-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-black text-white lg:text-3xl">{stat.number}</span>
+                    <span className="hidden opacity-0 transition-opacity group-hover:opacity-100 sm:inline text-lg">{stat.icon}</span>
+                  </div>
+                  <div className="h-0.5 w-6 rounded-full bg-emerald-500/50 transition-all group-hover:w-full group-hover:bg-emerald-500" />
+                  <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
+                    {stat.label}
                   </p>
                 </div>
               ))}
             </div>
           </div>
 
-          <HomeFocusCard t={t} />
+          {/* Right Column: Premium Focus Card */}
+          <div className="relative perspective-1000 hidden lg:block">
+            <div className="animate-float">
+              <HomeFocusCard t={t} />
+            </div>
+
+            {/* Floating Accent Elements */}
+            <div className="absolute -right-6 -top-6 h-20 w-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm animate-pulse" />
+            <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm animate-bounce-slow" />
+          </div>
+        </div>
+      </div>
+
+      {/* 3. SCROLL INDICATOR */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce opacity-30">
+        <div className="h-8 w-5 rounded-full border-2 border-white/20 p-1">
+          <div className="mx-auto h-1.5 w-0.5 rounded-full bg-white" />
         </div>
       </div>
     </section>
@@ -92,49 +129,71 @@ export default function HomeHeroSection() {
 
 function HomeFocusCard({ t }) {
   return (
-    <div className="relative animate-slide-in-right">
-      <div className="absolute -inset-4 rounded-[2rem] bg-white/6 blur-2xl" />
-      <div className="theme-hero-panel relative overflow-hidden rounded-[2rem] p-6 shadow-2xl">
-        <div className="theme-hero-card rounded-2xl p-6 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="theme-accent-soft flex h-16 w-16 items-center justify-center rounded-2xl border p-3">
-              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={52} height={52} className="object-contain" priority />
-            </div>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-300">{siteInfo.shortName}</p>
-              <h2 className="mt-1 text-xl font-black">{t("home.focus.subtitle")}</h2>
+    <div className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/40 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-700 hover:border-emerald-500/30 hover:bg-slate-900/60">
+      {/* Inner Glow */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+
+      <div className="relative rounded-[28px] bg-slate-950/50 p-6 xl:p-8">
+        {/* Header Content */}
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <div className="absolute -inset-1.5 rounded-2xl bg-emerald-500/20 blur-lg animate-pulse" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-inner">
+              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={50} height={50} className="object-contain" priority />
             </div>
           </div>
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.5em] text-emerald-400 opacity-80">{siteInfo.shortName}</p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-white">{t("home.focus.subtitle")}</h2>
+          </div>
+        </div>
 
-          <div className="mt-5 rounded-2xl bg-(--primary-soft) p-5">
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-emerald-700 dark:text-emerald-300">{t("home.focus.title")}</p>
-            <div className="mt-4 space-y-3">
-              {[t("home.focus.point1"), t("home.focus.point2"), t("home.focus.point3")].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-xs font-black text-white">✓</span>
-                  <p className="theme-text-muted text-sm leading-6">{item}</p>
+        {/* Highlight Section */}
+        <div className="mt-8 space-y-5 rounded-[24px] border border-white/5 bg-white/5 p-6 transition-colors group-hover:bg-white/[0.08]">
+          <div className="flex items-center gap-3">
+            <div className="h-1 w-6 rounded-full bg-emerald-500" />
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">{t("home.focus.title")}</p>
+          </div>
+
+          <div className="space-y-4">
+            {[t("home.focus.point1"), t("home.focus.point2"), t("home.focus.point3")].map((item, i) => (
+              <div key={i} className="flex items-start gap-3 group/item">
+                <div className="mt-1 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-emerald-500/50 text-[9px] text-emerald-500 transition-colors group-hover/item:bg-emerald-500 group-hover/item:text-white">
+                  ✓
                 </div>
-              ))}
-            </div>
+                <p className="text-[13px] leading-relaxed text-slate-400 transition-colors group-hover/item:text-slate-200">{item}</p>
+              </div>
+            ))}
           </div>
+        </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <StatusBox label={t("home.focus.statusTitle")} value={t("home.focus.statusValue")} color="bg-emerald-500" />
-            <StatusBox label={t("home.focus.accessTitle")} value={t("home.focus.accessValue")} color="bg-blue-500" />
-          </div>
+        {/* Footer Stats/Status */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <StatusBox
+            label={t("home.focus.statusTitle")}
+            value={t("home.focus.statusValue")}
+            color="bg-emerald-500"
+            glow="shadow-emerald-500/40"
+          />
+          <StatusBox
+            label={t("home.focus.accessTitle")}
+            value={t("home.focus.accessValue")}
+            color="bg-blue-500"
+            glow="shadow-blue-500/40"
+          />
         </div>
       </div>
     </div>
   );
 }
 
-function StatusBox({ label, value, color }) {
+function StatusBox({ label, value, color, glow }) {
   return (
-    <div className="rounded-2xl bg-(--surface-soft) p-4">
-      <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">{label}</p>
+    <div className="rounded-2xl border border-white/5 bg-white/5 p-4 transition-transform hover:scale-[1.02]">
+      <p className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-400/70">{label}</p>
       <div className="mt-2 flex items-center gap-2">
-        <span className={`h-2.5 w-2.5 rounded-full ${color} shadow-lg`} />
-        <p className="text-xl font-black">{value}</p>
+        <div className={`h-2 w-2 rounded-full ${color} ${glow} shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse`} />
+        <p className="text-base font-black text-white">{value}</p>
       </div>
     </div>
   );
@@ -143,7 +202,7 @@ function StatusBox({ label, value, color }) {
 function ArrowRightIcon({ className = "" }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

@@ -11,12 +11,13 @@ export default function Header() {
   const h = useHeader();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-100 w-full bg-white/95 shadow-sm backdrop-blur dark:bg-slate-950/95">
-      <div className="w-full px-6 pt-2 sm:px-10 lg:px-16 xl:px-20">
-        <div className="flex items-center justify-between py-3">
+    <header className="fixed top-0 left-0 right-0 z-100 w-full border-b border-slate-200/50 bg-white/70 backdrop-blur-xl transition-all duration-300 dark:border-white/5 dark:bg-slate-950/70">
+      <div className="mx-auto w-full max-w-[1600px] px-6 sm:px-10 lg:px-16 xl:px-20">
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between py-2.5 lg:py-4">
           <HeaderLogo />
 
-          <div className="mx-6 hidden max-w-sm flex-1 lg:block">
+          <div className="mx-8 hidden max-w-sm flex-1 lg:block">
             <HeaderSearchForm
               value={h.searchQuery} onChange={(e) => h.setSearchQuery(e.target.value)}
               onSubmit={h.handleSearchSubmit} onKeyDown={h.handleSearchKeyDown}
@@ -30,6 +31,7 @@ export default function Header() {
           <MobileMenuToggle isOpen={h.isMobileMenuOpen} onToggle={h.toggleMobileMenu} />
         </div>
 
+        {/* Desktop Navigation Row */}
         <DesktopNav
           navigationItems={h.navigationItems} pathname={h.pathname}
           openDesktopDropdown={h.openDesktopDropdown} toggleDesktopDropdown={h.toggleDesktopDropdown}

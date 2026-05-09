@@ -9,7 +9,6 @@ export function BeritaTable({
   startIndex,
   onEdit,
   onDelete,
-  onGallery,
   deletingId,
 }) {
   return (
@@ -18,11 +17,11 @@ export function BeritaTable({
         <table className="min-w-300 w-full border-collapse bg-white dark:bg-slate-900/40">
           <colgroup>
             <col style={{ width: "4%" }} />
-            <col style={{ width: "66%" }} />
+            <col style={{ width: "70%" }} />
             <col style={{ width: "10%" }} />
             <col style={{ width: "6%" }} />
             <col style={{ width: "6%" }} />
-            <col style={{ width: "8%" }} />
+            <col style={{ width: "4%" }} />
           </colgroup>
 
           <thead className="bg-slate-50 dark:bg-slate-800/40">
@@ -137,14 +136,6 @@ export function BeritaTable({
                         variant="danger"
                       >
                         <IconTrash />
-                      </ActionIconButton>
-
-                      <ActionIconButton
-                        title="Kirim atau edit galeri"
-                        onClick={() => onGallery(item)}
-                        variant="sky"
-                      >
-                        <IconGallery />
                       </ActionIconButton>
                     </div>
                   </td>

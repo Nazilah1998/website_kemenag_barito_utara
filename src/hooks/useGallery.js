@@ -14,11 +14,11 @@ export function useGallery(items) {
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 768) {
-        setItemsPerPage(6); // Mobile
-      } else if (width < 1024) {
-        setItemsPerPage(9); // Tablet (3 columns = 3x3)
+        setItemsPerPage(6); // Mobile (2 columns = 3 rows)
+      } else if (width < 1280) {
+        setItemsPerPage(12); // Tablet/Small Desktop (3-4 columns = 3-4 rows)
       } else {
-        setItemsPerPage(10); // Desktop
+        setItemsPerPage(12); // Large Desktop (6 columns = 2 rows)
       }
     };
     handleResize();

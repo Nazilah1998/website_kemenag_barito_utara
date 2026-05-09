@@ -42,6 +42,7 @@ export default function CategorySlider({ slides = [], fallbackTitle }) {
                     src={resolveImage(current.image_url)}
                     alt={current.title}
                     fill
+                    sizes="(max-width: 1024px) 100vw, 16vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105 animate-[fadeIn_700ms_ease-in-out]"
                 />
                 {slides.length > 1 && (

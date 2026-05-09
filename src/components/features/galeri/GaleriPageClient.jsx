@@ -10,6 +10,7 @@ import { GalleryLightbox } from "./components/GalleryLightbox";
 export default function GaleriPageClient({ items = [] }) {
   const g = useGallery(items);
   const { t } = useLanguage();
+  const [tappedId, setTappedId] = React.useState(null);
 
   return (
     <>
@@ -28,13 +29,16 @@ export default function GaleriPageClient({ items = [] }) {
           <GalleryEmpty />
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {g.paginatedItems.map((item, index) => {
                 const absoluteIndex = (g.currentPage - 1) * g.itemsPerPage + index;
+                const itemId = item.id ?? absoluteIndex;
                 return (
                   <GalleryCard
-                    key={item.id ?? index}
+                    key={itemId}
                     item={item}
+                    isActive={tappedId === itemId}
+                    onToggle={() => setTappedId(tappedId === itemId ? null : itemId)}
                     onOpen={() => g.setSelectedIndex(absoluteIndex)}
                   />
                 );

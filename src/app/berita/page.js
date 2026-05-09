@@ -5,7 +5,7 @@ import {
   getAvailableBeritaCategories,
 } from "../../lib/berita";
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 12;
 
 function getAvailableBeritaMonths(items = []) {
   const formatter = new Intl.DateTimeFormat("id-ID", {

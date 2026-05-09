@@ -99,7 +99,7 @@ function EmailField({ value, onChange }) {
   return (
     <div className="group">
       <label htmlFor="admin-email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Email Admin</label>
-      <input id="admin-email" type="email" value={value} onChange={(e) => onChange(e.target.value)} className={inputClassName()} placeholder="nama@email.com" autoComplete="email" required />
+      <input id="admin-email" type="email" value={value} onChange={(e) => onChange(e.target.value)} className={inputClassName()} placeholder="nama@gmail.com" autoComplete="email" required />
     </div>
   );
 }

@@ -48,7 +48,7 @@ export function FooterMenu() {
   ];
 
   return (
-    <div>
+    <div className="hidden lg:block">
       <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "var(--footer-fg)" }}>
         {t("footer.quickLinks")}
       </p>

@@ -91,27 +91,31 @@ export function getAvailableBeritaCategories(items = []) {
 
 export function filterAndSortBerita(items = [], filters = {}) {
   const q = normalizeSearchValue(filters.q);
+  const keywords = q ? q.split(/\s+/).filter(Boolean) : [];
   const category = normalizeSearchValue(filters.category);
   const month = String(filters.month || "");
   const sort = String(filters.sort || "newest");
 
   const filtered = items.filter((item) => {
-    const searchableParts = [
-      item.title,
-      item.excerpt,
-      item.category,
-      stripHtml(item.content),
-    ];
+    // 1. Keyword Match (All keywords must be found somewhere)
+    const matchKeyword = keywords.every((kw) => {
+      const searchable = [
+        item.title,
+        item.excerpt,
+        item.category,
+        stripHtml(item.content),
+      ].map(normalizeSearchValue);
 
-    const matchKeyword =
-      !q ||
-      searchableParts.some((part) => normalizeSearchValue(part).includes(q));
+      return searchable.some((text) => text.includes(kw));
+    });
 
+    // 2. Category Match
     const matchCategory =
       !category ||
       category === "all" ||
       normalizeSearchValue(item.category) === category;
 
+    // 3. Month Match
     const matchMonth =
       !month || String(item.isoDate || "").slice(0, 7) === month;
 

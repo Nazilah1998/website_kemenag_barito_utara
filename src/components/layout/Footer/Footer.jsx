@@ -19,8 +19,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-6 border-t border-(--border) pt-4">
-          <div className="flex flex-col items-center gap-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <p className="theme-footer-muted text-center text-xs sm:text-left">© {year} {siteInfo.shortName}. {t("footer.copyright")}.</p>
+          <div className="flex flex-col items-center justify-center gap-4 text-sm sm:flex-row">
+            <p className="theme-footer-muted text-center text-xs">© {year} {siteInfo.shortName}. {t("footer.copyright")}.</p>
             <FooterBadges t={t} />
           </div>
         </div>

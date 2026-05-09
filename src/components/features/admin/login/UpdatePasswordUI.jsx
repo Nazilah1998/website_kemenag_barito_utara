@@ -21,12 +21,12 @@ export function EyeIcon({ isOpen = false }) {
 export function PasswordInput({ label, value, onChange, show, onToggle, placeholder }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-black">{label}</label>
+      <label className="mb-2 block text-xs font-black uppercase tracking-widest text-slate-400">{label}</label>
       <div className="relative">
         <input
           type={show ? "text" : "password"} value={value} onChange={onChange}
           placeholder={placeholder} required
-          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-sm font-medium text-black outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 pr-12"
+          className="w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 px-5 py-3.5 text-sm font-bold text-slate-900 outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 focus:border-slate-900 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-slate-900/80 dark:focus:border-emerald-500 pr-12"
         />
         <button
           type="button" onClick={onToggle}

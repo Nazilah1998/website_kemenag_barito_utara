@@ -16,7 +16,7 @@ export function DesktopNav({
   desktopDropdownRef,
 }) {
   return (
-    <nav className="hidden border-t border-slate-100 py-1 dark:border-slate-900 lg:block">
+    <nav className="hidden border-t border-slate-100/50 py-1 dark:border-white/5 lg:block">
       <div className="flex items-center justify-between">
         <ul className="flex flex-nowrap items-center gap-1" ref={desktopDropdownRef}>
           {navigationItems.map((item) => {
@@ -33,37 +33,51 @@ export function DesktopNav({
               >
                 {hasChildren ? (
                   <div
-                    className={`inline-flex cursor-default flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${active
+                    className={`group inline-flex cursor-default flex-shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-black uppercase tracking-tight transition-all duration-300 ${active
                       ? "text-emerald-700 dark:text-emerald-400"
-                      : "text-slate-600 dark:text-slate-400"
+                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                       }`}
                   >
                     {item.label}
-                    <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`h-3 w-3 transition-transform duration-500 ${isOpen ? "rotate-180 text-emerald-500" : "text-slate-400"}`} />
+
+                    {/* Active Indicator Underline */}
+                    {active && (
+                      <div className="absolute bottom-0 left-4 right-8 h-0.5 rounded-full bg-emerald-500/50" />
+                    )}
                   </div>
                 ) : (
                   <Link
                     href={item.href}
-                    className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold transition ${active
+                    className={`relative inline-flex flex-shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-black uppercase tracking-tight transition-all duration-300 ${active
                       ? "text-emerald-700 dark:text-emerald-400"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+                      : "text-slate-500 hover:bg-emerald-500/5 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
                       }`}
                   >
                     {item.label}
+                    {active && (
+                      <div className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-emerald-500" />
+                    )}
                   </Link>
                 )}
 
                 {hasChildren && isOpen && (
-                  <div className="absolute left-0 top-full z-50 pt-2 min-w-[220px] animate-scale-in">
-                    <div className="rounded-2xl border border-slate-100 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
-                      <ul className="space-y-1">
+                  <div className="absolute left-0 top-full z-50 pt-2 min-w-[240px] animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
+                      {/* Decorative Background for Dropdown */}
+                      <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl" />
+
+                      <ul className="relative z-10 space-y-0.5">
                         {item.children.map((child) => (
                           <li key={child.href}>
                             <Link
                               href={child.href}
-                              className="block rounded-xl px-4 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
+                              className="group/item flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
                             >
-                              {child.label}
+                              <span>{child.label}</span>
+                              <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0" stroke="currentColor" strokeWidth="3">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                              </svg>
                             </Link>
                           </li>
                         ))}
@@ -76,50 +90,53 @@ export function DesktopNav({
           })}
         </ul>
 
-        <div className="flex items-center gap-3">
-          {/* Language Switcher */}
-          <div className="flex items-center gap-1 rounded-full bg-slate-100/80 p-1 ring-1 ring-slate-200 dark:bg-slate-900/80 dark:ring-slate-800 backdrop-blur-sm">
-            {["id", "en"].map((l) => (
+        <div className="flex items-center gap-4">
+          {/* Controls Group */}
+          <div className="flex items-center gap-4 border-r border-slate-200/50 pr-4 dark:border-white/5">
+            {/* Language Switcher */}
+            <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
+              {["id", "en"].map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLocale(l)}
+                  className={`rounded-full px-3 py-1 text-[10px] font-black uppercase transition-all duration-300 ${locale === l
+                    ? "bg-white text-emerald-700 shadow-sm dark:bg-emerald-600 dark:text-white"
+                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                    }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+
+            {/* Theme Switcher */}
+            <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
               <button
-                key={l}
-                onClick={() => setLocale(l)}
-                className={`rounded-full px-3 py-1 text-[11px] font-black uppercase transition ${locale === l
-                  ? "bg-emerald-600 text-white shadow-sm shadow-emerald-200 dark:shadow-none"
-                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                onClick={setLightTheme}
+                className={`rounded-full p-1.5 transition-all duration-300 ${theme === "light" ? "bg-white text-amber-500 shadow-sm" : "text-slate-400 hover:text-slate-600"
                   }`}
+                aria-label="Light Mode"
               >
-                {l}
+                <SunIcon className="h-3.5 w-3.5" />
               </button>
-            ))}
+              <button
+                onClick={setDarkTheme}
+                className={`rounded-full p-1.5 transition-all duration-300 ${theme === "dark" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+                  }`}
+                aria-label="Dark Mode"
+              >
+                <MoonIcon className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
 
-          {/* Theme Switcher */}
-          <div className="flex items-center gap-1 rounded-full bg-slate-100/80 p-1 ring-1 ring-slate-200 dark:bg-slate-900/80 dark:ring-slate-800 backdrop-blur-sm">
-            <button
-              onClick={setLightTheme}
-              className={`rounded-full p-1.5 transition ${theme === "light" ? "bg-amber-400 text-white shadow-sm shadow-amber-200" : "text-slate-400 hover:text-slate-600"
-                }`}
-              aria-label="Light Mode"
-            >
-              <SunIcon className="h-4 w-4" />
-            </button>
-            <button
-              onClick={setDarkTheme}
-              className={`rounded-full p-1.5 transition ${theme === "dark" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
-                }`}
-              aria-label="Dark Mode"
-            >
-              <MoonIcon className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Admin Link */}
+          {/* Admin Link / Login */}
           <Link
             href="/admin"
-            className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-emerald-700 px-5 py-2 text-xs font-black text-white transition hover:bg-emerald-800"
+            className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white transition-all hover:shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] active:scale-95"
           >
-            <div className="absolute inset-0 bg-white/10 transition-transform duration-300 translate-y-full group-hover:translate-y-0" />
-            <span className="relative">{adminState?.user ? "Panel Admin" : "Login"}</span>
+            <span className="relative z-10">{adminState?.user ? "Panel Admin" : "Login"}</span>
+            <div className="absolute inset-0 bg-white/20 transition-transform duration-500 translate-y-full group-hover:translate-y-0" />
           </Link>
         </div>
       </div>

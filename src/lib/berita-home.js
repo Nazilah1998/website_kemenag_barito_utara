@@ -25,7 +25,7 @@ const getCachedLatestBeritaHome = unstable_cache(
       .eq("is_published", true)
       .order("published_at", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(8);
+      .limit(12);
 
     if (error) {
       console.error("getCachedLatestBeritaHome error:", error);

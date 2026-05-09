@@ -36,21 +36,8 @@ const emptyForm = {
   published_at: "",
 };
 
-const emptyGalleryForm = {
-  berita_id: "",
-  title: "",
-  slug: "",
-  image_url: "",
-  gallery_upload_base64: "",
-  gallery_upload_name: "",
-  gallery_upload_size_kb: 0,
-  link_url: "",
-  published_at: "",
-};
-
 export function useBeritaManager() {
   const editorRef = useRef(null);
-  const galleryPrefillRequestRef = useRef(0);
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,13 +64,6 @@ export function useBeritaManager() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
-
-  const [openGalleryForm, setOpenGalleryForm] = useState(false);
-  const [galleryForm, setGalleryForm] = useState(emptyGalleryForm);
-  const [gallerySendingId, setGallerySendingId] = useState(null);
-  const [uploadingGalleryImage, setUploadingGalleryImage] = useState(false);
-  const [galleryPrefillLoading, setGalleryPrefillLoading] = useState(false);
-  const [isAlreadyInGallery, setIsAlreadyInGallery] = useState(false);
 
   async function loadItems() {
     try {
@@ -250,17 +230,7 @@ export function useBeritaManager() {
     return toCoverPreviewUrl(form.cover_image);
   }, [form.cover_upload_base64, form.cover_image]);
 
-  const galleryPreviewSrc = useMemo(() => {
-    const uploadedPreview = String(
-      galleryForm.gallery_upload_base64 || "",
-    ).trim();
-    if (uploadedPreview) return uploadedPreview;
-
-    const savedGalleryImage = String(galleryForm.image_url || "").trim();
-    if (savedGalleryImage) return toCoverPreviewUrl(savedGalleryImage);
-
-    return "";
-  }, [galleryForm.gallery_upload_base64, galleryForm.image_url]);
+  const galleryPreviewSrc = "";
 
   function resetForm() {
     setForm({
@@ -276,13 +246,18 @@ export function useBeritaManager() {
     }
   }
 
-  function resetGalleryForm() {
-    galleryPrefillRequestRef.current += 1;
-    setGalleryPrefillLoading(false);
-    setGalleryForm(emptyGalleryForm);
-    setGallerySendingId(null);
-    setUploadingGalleryImage(false);
-    setIsAlreadyInGallery(false);
+  function resetForm() {
+    setForm({
+      ...emptyForm,
+      published_at: getDefaultPublishedAt(),
+    });
+    setEditingId(null);
+    setSlugManuallyEdited(false);
+    setDirty(false);
+
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
   }
 
   function handleOpenCreate() {
@@ -340,83 +315,7 @@ export function useBeritaManager() {
     closeFormAndReset();
   }
 
-  async function handleOpenGalleryForm(item) {
-    setError("");
-    setMessage("");
-
-    const requestId = galleryPrefillRequestRef.current + 1;
-    galleryPrefillRequestRef.current = requestId;
-
-    const basePublishedAt = getItemBaseDate(item) || new Date().toISOString();
-    const baseLinkUrl = `/berita/${item.slug}`;
-
-    setGalleryPrefillLoading(true);
-    setGalleryForm({
-      berita_id: item.id,
-      title: item.title || "",
-      slug: item.slug || "",
-      image_url: "",
-      gallery_upload_base64: "",
-      gallery_upload_name: "",
-      gallery_upload_size_kb: 0,
-      link_url: baseLinkUrl,
-      published_at: basePublishedAt,
-    });
-
-    setOpenGalleryForm(true);
-
-    try {
-      const response = await fetch(
-        `/api/admin/galeri-berita?berita_id=${encodeURIComponent(item.id)}`,
-        {
-          method: "GET",
-          cache: "no-store",
-        },
-      );
-
-      const data = await readJsonSafely(response);
-
-      if (galleryPrefillRequestRef.current !== requestId) return;
-
-      if (data?.item) {
-        setIsAlreadyInGallery(true);
-        setGalleryForm((prev) => ({
-          ...prev,
-          image_url: data.item.image_url || "",
-          link_url: data.item.link_url || prev.link_url || baseLinkUrl,
-          published_at: data.item.published_at || prev.published_at || "",
-        }));
-      } else {
-        setIsAlreadyInGallery(false);
-        setGalleryForm((prev) => ({
-          ...prev,
-          image_url: "", // Biarkan kosong untuk upload pertama kali
-          link_url: prev.link_url || baseLinkUrl,
-          published_at: prev.published_at || basePublishedAt,
-        }));
-      }
-    } catch (err) {
-      if (galleryPrefillRequestRef.current !== requestId) return;
-
-      console.error("Prefill galeri gagal:", err);
-
-      setGalleryForm((prev) => ({
-        ...prev,
-        image_url: item.cover_image || "",
-        link_url: prev.link_url || baseLinkUrl,
-        published_at: prev.published_at || basePublishedAt,
-      }));
-    } finally {
-      if (galleryPrefillRequestRef.current === requestId) {
-        setGalleryPrefillLoading(false);
-      }
-    }
-  }
-
-  function handleCloseGalleryForm() {
-    setOpenGalleryForm(false);
-    resetGalleryForm();
-  }
+  function handleCloseGalleryForm() {}
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -742,87 +641,6 @@ export function useBeritaManager() {
     setDeleteTarget(null);
   }
 
-  async function handleSubmitGallery() {
-    if (!galleryForm.berita_id) {
-      setError("ID berita untuk galeri tidak ditemukan.");
-      return;
-    }
-
-    if (galleryPrefillLoading) {
-      setError("Tunggu data galeri selesai dimuat terlebih dahulu.");
-      return;
-    }
-
-    if (!galleryForm.image_url && !galleryForm.gallery_upload_base64) {
-      setError("Gambar galeri wajib diupload.");
-      return;
-    }
-
-    try {
-      const payload = {
-        ...galleryForm,
-        published_at: galleryForm.published_at || new Date().toISOString(),
-      };
-
-      setGallerySendingId(galleryForm.berita_id);
-      setError("");
-      setMessage("");
-
-      const response = await fetch("/api/admin/galeri-berita", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await readJsonSafely(response);
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Gagal mengirim berita ke galeri.");
-      }
-
-      setMessage(
-        data?.message || "Item galeri berhasil disimpan dari data berita.",
-      );
-      handleCloseGalleryForm();
-    } catch (err) {
-      setError(err.message || "Gagal mengirim berita ke galeri.");
-    } finally {
-      setGallerySendingId(null);
-    }
-  }
-
-  async function handleDeleteGallery() {
-    if (!galleryForm.id) return;
-
-    try {
-      setGallerySendingId(galleryForm.berita_id);
-      setError("");
-      setMessage("");
-
-      const response = await fetch(
-        `/api/admin/galeri-berita?id=${galleryForm.id}`,
-        {
-          method: "DELETE",
-        },
-      );
-
-      const data = await readJsonSafely(response);
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Gagal menghapus item galeri.");
-      }
-
-      setMessage(data?.message || "Item galeri berhasil dihapus.");
-      handleCloseGalleryForm();
-    } catch (err) {
-      setError(err.message || "Gagal menghapus item galeri.");
-    } finally {
-      setGallerySendingId(null);
-    }
-  }
-
   return {
     editorRef,
     items,
@@ -851,13 +669,6 @@ export function useBeritaManager() {
     deleteTarget,
     uploadingCover,
     closeConfirmOpen,
-    openGalleryForm,
-    galleryForm,
-    setGalleryForm,
-    gallerySendingId,
-    uploadingGalleryImage,
-    galleryPrefillLoading,
-    isAlreadyInGallery,
     stats,
     yearOptions,
     monthOptions,
@@ -870,31 +681,23 @@ export function useBeritaManager() {
     readingTime,
     previewSlug,
     coverPreviewSrc,
-    galleryPreviewSrc,
     handleOpenCreate,
     handleOpenEdit,
     handleCloseForm,
     handleCancelCloseConfirm,
     handleConfirmCloseForm,
-    handleOpenGalleryForm,
-    handleCloseGalleryForm,
     handleChange,
-    handleGalleryChange,
     handlePublishedToggle,
     onEditorInput: handleEditorInput,
     onEditorPaste: handleEditorPaste,
     onRunCommand: runEditorCommand,
     onInsertLink: handleInsertLink,
     onCoverChange: handleCoverFileChange,
-    onGalleryFileChange: handleGalleryFileChange,
     onClearCover: clearCoverImage,
-    onClearGalleryImage: clearGalleryImage,
     onSave: saveForm,
     handleAskDelete,
     onDeleteConfirmed: handleDeleteConfirmed,
     onCloseDeleteModal: handleCloseDeleteModal,
-    onSubmitGallery: handleSubmitGallery,
-    onDeleteGallery: handleDeleteGallery,
     startIndex,
   };
 }

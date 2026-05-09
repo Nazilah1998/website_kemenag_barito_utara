@@ -2,21 +2,21 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 
-export default function BeritaViewsBadge({ views = 0, className = "" }) {
+export default function BeritaViewsBadge({ views = 0, className = "", isSmall = false }) {
     const { t, locale } = useLanguage();
 
     return (
         <div
-            className={`inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 ${className}`.trim()}
+            className={`inline-flex items-center gap-1.5 ${isSmall ? "text-[9px]" : "text-[11px]"} text-slate-400 dark:text-slate-500 ${className}`.trim()}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
+                width={isSmall ? "12" : "14"}
+                height={isSmall ? "12" : "14"}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
@@ -25,7 +25,9 @@ export default function BeritaViewsBadge({ views = 0, className = "" }) {
                 <circle cx="12" cy="12" r="3" />
             </svg>
 
-            <span>{Number(views || 0).toLocaleString(locale === "en" ? "en-US" : "id-ID")} {t("berita.views")}</span>
+            <span className="font-medium">
+                {Number(views || 0).toLocaleString(locale === "en" ? "en-US" : "id-ID")} {t("berita.views")}
+            </span>
         </div>
     );
 }

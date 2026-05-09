@@ -7,10 +7,12 @@ import {
   useMemo,
   useSyncExternalStore,
 } from "react";
+import { usePathname } from "next/navigation";
 
 const ThemeContext = createContext(null);
 
-const STORAGE_KEY = "site-theme";
+const DEFAULT_STORAGE_KEY = "site-theme";
+const ADMIN_STORAGE_KEY = "admin-theme";
 const DEFAULT_THEME = "light";
 const VALID_THEMES = new Set(["light", "dark"]);
 
@@ -20,9 +22,15 @@ function emitThemeChange() {
   themeListeners.forEach((listener) => listener());
 }
 
+function getStorageKey() {
+  if (typeof window === "undefined") return DEFAULT_STORAGE_KEY;
+  return window.location.pathname.startsWith("/admin") ? ADMIN_STORAGE_KEY : DEFAULT_STORAGE_KEY;
+}
+
 function getStoredTheme() {
   if (typeof window === "undefined") return null;
-  const savedTheme = window.localStorage.getItem(STORAGE_KEY);
+  const key = getStorageKey();
+  const savedTheme = window.localStorage.getItem(key);
   return VALID_THEMES.has(savedTheme) ? savedTheme : null;
 }
 
@@ -67,7 +75,7 @@ function subscribeTheme(listener) {
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
   const onStorage = (event) => {
-    if (event.key === STORAGE_KEY) {
+    if (event.key === DEFAULT_STORAGE_KEY || event.key === ADMIN_STORAGE_KEY) {
       listener();
     }
   };
@@ -99,6 +107,9 @@ function subscribeTheme(listener) {
 }
 
 export function ThemeProvider({ children }) {
+  const pathname = usePathname();
+  const storageKey = pathname?.startsWith("/admin") ? ADMIN_STORAGE_KEY : DEFAULT_STORAGE_KEY;
+
   const theme = useSyncExternalStore(
     subscribeTheme,
     getThemeSnapshot,
@@ -117,7 +128,7 @@ export function ThemeProvider({ children }) {
         if (typeof window === "undefined") return;
         if (!VALID_THEMES.has(nextTheme)) return;
 
-        window.localStorage.setItem(STORAGE_KEY, nextTheme);
+        window.localStorage.setItem(storageKey, nextTheme);
         applyTheme(nextTheme);
         emitThemeChange();
       },
@@ -125,20 +136,20 @@ export function ThemeProvider({ children }) {
         const nextTheme = theme === "dark" ? "light" : "dark";
         if (typeof window === "undefined") return;
 
-        window.localStorage.setItem(STORAGE_KEY, nextTheme);
+        window.localStorage.setItem(storageKey, nextTheme);
         applyTheme(nextTheme);
         emitThemeChange();
       },
       clearThemePreference: () => {
         if (typeof window === "undefined") return;
 
-        window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(storageKey);
         const nextTheme = getResolvedTheme();
         applyTheme(nextTheme);
         emitThemeChange();
       },
     }),
-    [theme],
+    [theme, storageKey],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

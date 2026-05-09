@@ -22,7 +22,7 @@ export default function AdminRegisterEditorClient() {
 
           <form onSubmit={r.handleSubmit} className="mt-8 space-y-4" autoComplete="off">
             <RegisterInput label="Nama Lengkap Personil" value={r.fullName} onChange={(e) => r.setFullName(e.target.value)} placeholder="Contoh: Muhammad Nazilah, S.E" />
-            <RegisterInput label="Alamat Email Resmi" type="email" value={r.email} onChange={(e) => r.setEmail(e.target.value)} placeholder="nama@email.com" />
+            <RegisterInput label="Alamat Email Resmi" type="email" value={r.email} onChange={(e) => r.setEmail(e.target.value)} placeholder="nama@gmail.com" />
             <RegisterSelect label="Unit Kerja / Bidang" value={r.unitName} onChange={(e) => r.setUnitName(e.target.value)} options={UNIT_KERJA_OPTIONS} />
             <RegisterPasswordInput value={r.password} onChange={(e) => r.setPassword(e.target.value)} show={r.showPassword} onToggle={() => r.setShowPassword(!r.showPassword)} />
 

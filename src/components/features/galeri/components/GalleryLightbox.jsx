@@ -1,4 +1,4 @@
-import React from "react";
+import Image from "next/image";
 
 export function GalleryLightbox({
   item,
@@ -26,12 +26,23 @@ export function GalleryLightbox({
 
           {total > 1 && (
             <>
-              <div className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-6">
+              {/* Tombol navigasi samping (Desktop) */}
+              <div className="hidden sm:block absolute left-6 top-1/2 z-20 -translate-y-1/2">
                 <LightboxButton onClick={onPrev} label="Sebelumnya">
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
                 </LightboxButton>
               </div>
-              <div className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-6">
+              <div className="hidden sm:block absolute right-6 top-1/2 z-20 -translate-y-1/2">
+                <LightboxButton onClick={onNext} label="Berikutnya">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                </LightboxButton>
+              </div>
+
+              {/* Tombol navigasi bawah (Mobile) */}
+              <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-6 sm:hidden">
+                <LightboxButton onClick={onPrev} label="Sebelumnya">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                </LightboxButton>
                 <LightboxButton onClick={onNext} label="Berikutnya">
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
                 </LightboxButton>
@@ -39,8 +50,16 @@ export function GalleryLightbox({
             </>
           )}
 
-          <div className="flex h-full w-full items-center justify-center">
-            <img src={item.imageUrl} alt={item.title} className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl sm:rounded-3xl" loading="eager" />
+          <div className="relative flex h-full w-full items-center justify-center">
+            <Image
+              src={item.imageUrl}
+              alt="Preview"
+              fill
+              priority
+              className="object-contain shadow-2xl transition-all duration-300"
+              sizes="100vw"
+              unoptimized
+            />
           </div>
         </div>
       </div>

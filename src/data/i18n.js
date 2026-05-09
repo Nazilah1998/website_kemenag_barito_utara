@@ -164,9 +164,9 @@ export const messages = {
       badge: "DOKUMENTASI",
       title: "Galeri Kegiatan",
       subtitle:
-        "Kumpulan dokumentasi visual yang terhubung langsung ke berita dan publikasi resmi.",
+        "Koleksi dokumentasi visual resmi Kementerian Agama Kabupaten Barito Utara.",
       totalItems: "TOTAL ITEM",
-      preview: "Preview",
+      preview: "Pratinjau",
       openNews: "Buka berita",
       viewImage: "Lihat gambar",
       empty: "Belum ada galeri kegiatan saat ini.",
@@ -449,7 +449,7 @@ export const messages = {
       badge: "DOCUMENTATION",
       title: "Activity Gallery",
       subtitle:
-        "A collection of visual documentation directly linked to official news and publications.",
+        "Official visual documentation collection of the Ministry of Religious Affairs of Barito Utara Regency.",
       totalItems: "TOTAL ITEMS",
       preview: "Preview",
       openNews: "Open news",

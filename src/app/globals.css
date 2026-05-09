@@ -142,15 +142,35 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Premium Theme Transition */
-*,
-*::before,
-*::after {
-  transition-property:
-    background-color, border-color, color, fill, stroke, box-shadow,
-    text-decoration-color;
-  transition-duration: 600ms;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+/* 
+   HIGH-PERFORMANCE THEME TRANSITION SYSTEM
+   Ensures all key elements change color/background in sync without lag.
+*/
+.theme-page,
+.theme-home-section,
+.theme-card,
+.theme-surface,
+.theme-header,
+.theme-footer,
+.theme-news-card,
+.theme-section-contrast,
+body {
+  transition:
+    background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Specific fast transitions for smaller elements */
+a,
+button,
+input,
+select {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
 }
 
 body {

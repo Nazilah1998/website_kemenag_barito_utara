@@ -34,9 +34,9 @@ export default function HomeNewsSection({ latestBerita }) {
 
         <Link
           href="/berita"
-          className="theme-outline-button group inline-flex w-fit items-center gap-2 rounded-full px-6 py-3 text-sm font-black transition lg:flex"
+          className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
         >
-          {t("actions.viewAll")}
+          {t("actions.viewAll") || "Lihat Semua Berita"}
           <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
@@ -45,24 +45,31 @@ export default function HomeNewsSection({ latestBerita }) {
         <>
           {/* 1. MOBILE & TABLET SLIDER (KHUSUS MOBILE/TABLET) */}
           <div className="mt-10 lg:hidden">
-            <div className="overflow-hidden rounded-[2.5rem]">
+            <div className="overflow-hidden">
               <div
-                className="flex transition-transform duration-500 ease-out"
+                className="flex transition-transform duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]"
                 style={{ transform: `translateX(-${activeIndex * 100}%)` }}
               >
-                {latestBerita.map((item, index) => (
-                  <div key={item.slug} className="w-full flex-none p-1">
-                    <NewsCard item={item} index={index} t={t} isSlider />
-                  </div>
-                ))}
+                {latestBerita.map((item, index) => {
+                  const isActive = index === activeIndex;
+                  return (
+                    <div
+                      key={item.slug}
+                      className={`w-full flex-none px-1 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isActive ? "scale-100 opacity-100" : "scale-90 opacity-40 blur-[1px]"}`}
+                    >
+                      <NewsCard item={item} index={index} t={t} isSlider />
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Navigation (Sesuai Apa Kata Mereka) */}
+            {/* Navigation */}
             <div className="mt-8 flex items-center justify-center gap-6">
               <button
                 onClick={prevSlide}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-slate-400 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none"
+                disabled={activeIndex === 0}
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
               >
                 <ChevronLeftIcon className="h-5 w-5" />
               </button>
@@ -71,29 +78,29 @@ export default function HomeNewsSection({ latestBerita }) {
                 {latestBerita.map((_, i) => (
                   <div
                     key={i}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300"}`}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300 dark:bg-slate-700"}`}
                   />
                 ))}
               </div>
 
               <button
                 onClick={nextSlide}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-slate-400 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none"
+                disabled={activeIndex === latestBerita.length - 1}
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === latestBerita.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
               >
                 <ChevronRightIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          {/* 2. DESKTOP GRID */}
-          <div className="mt-10 hidden lg:grid lg:grid-cols-4 lg:gap-6">
-            {latestBerita.map((item, index) => (
+          {/* 2. DESKTOP GRID - 6 KOLOM */}
+          <div className="mt-10 hidden lg:grid lg:grid-cols-6 lg:gap-4 xl:gap-5">
+            {latestBerita.slice(0, 12).map((item, index) => (
               <NewsCard
                 key={item.slug}
                 item={item}
                 index={index}
                 t={t}
-                className={index >= 4 ? "hidden xl:block" : ""}
               />
             ))}
           </div>
@@ -112,33 +119,53 @@ export default function HomeNewsSection({ latestBerita }) {
 
 function NewsCard({ item, index, t, className = "", isSlider = false }) {
   return (
-    <article className={`theme-news-card group overflow-hidden rounded-[2rem] border border-slate-100 bg-white transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-1' : ''} ${className}`}>
-      <Link href={`/berita/${item.slug}`} className="block h-full">
-        <div className="relative h-56 overflow-hidden bg-slate-100 dark:bg-slate-800">
+    <article className={`group relative h-full overflow-hidden rounded-none border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}>
+      <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
+        {/* Image Area */}
+        <div className="relative h-48 w-full overflow-hidden">
           <Image
             src={item.coverImage || "/kemenag.svg"}
             alt={item.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-700 group-hover:scale-110"
+            unoptimized
           />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-          <div className="absolute left-4 top-4 rounded-full bg-emerald-600 px-3 py-1 text-[10px] font-black text-white shadow-sm">
-            {item.category}
+
+          {/* Elegant Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
+
+          {/* Category Badge - Floating style */}
+          <div className="absolute left-4 top-4 z-10">
+            <div className="rounded-full bg-emerald-600/90 backdrop-blur-md px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-white shadow-lg">
+              {item.category}
+            </div>
           </div>
-          <div className="absolute bottom-4 left-4 right-4">
-            <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{item.date}</div>
-            <h3 className="mt-2 line-clamp-2 text-base font-black leading-tight text-white">{item.title}</h3>
+
+          {/* Date Overlay */}
+          <div className="absolute bottom-4 left-4 right-4 z-10">
+            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-emerald-400">
+              <span className="h-0.5 w-4 rounded-full bg-emerald-500/50" />
+              {item.date}
+            </div>
+            <h3 className="mt-2 line-clamp-2 text-sm font-black leading-tight text-white transition-colors group-hover:text-emerald-50">
+              {item.title}
+            </h3>
           </div>
         </div>
-        <div className="p-6">
-          <p className="line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{item.excerpt || t("actions.readMore")}</p>
-          <div className="mt-6 flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+
+        {/* Content Area */}
+        <div className="flex flex-1 flex-col p-6">
+          <p className="line-clamp-3 text-[11px] leading-6 text-slate-500 dark:text-slate-400 lg:leading-5">
+            {item.excerpt || "Baca selengkapnya mengenai berita terbaru dari Kementerian Agama Kabupaten Barito Utara..."}
+          </p>
+
+          <div className="mt-auto pt-6 flex items-center justify-between border-t border-slate-50 dark:border-white/5">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition-colors group-hover:text-emerald-600 dark:text-slate-500 dark:group-hover:text-emerald-400">
               {t("actions.readMore")}
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-950/30">
-              <ArrowRightIcon className="h-4 w-4" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white dark:bg-slate-800">
+              <ArrowRightIcon className="h-3.5 w-3.5" />
             </div>
           </div>
         </div>
