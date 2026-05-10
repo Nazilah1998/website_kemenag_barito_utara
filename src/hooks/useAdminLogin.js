@@ -10,15 +10,6 @@ function mapLoginError(error) {
   return error?.message || "Terjadi kesalahan saat login admin.";
 }
 
-function createSimpleCaptcha(length = 5) {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let value = "";
-  for (let i = 0; i < length; i += 1) {
-    value += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return value;
-}
-
 export function useAdminLogin(initialUnauthorized) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -35,10 +26,7 @@ export function useAdminLogin(initialUnauthorized) {
       : "",
   );
 
-  const [captchaChallenge, setCaptchaChallenge] = useState(() =>
-    createSimpleCaptcha(),
-  );
-  const [captchaInput, setCaptchaInput] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -78,23 +66,13 @@ export function useAdminLogin(initialUnauthorized) {
   const handlePasswordKeyState = (event) =>
     setCapsLock(Boolean(event.getModifierState?.("CapsLock")));
 
-  const refreshCaptcha = () => {
-    setCaptchaChallenge(createSimpleCaptcha());
-    setCaptchaInput("");
-  };
-
   async function handleSubmit(event) {
     event.preventDefault();
     if (submitting) return;
     setError("");
 
-    const normalizedCaptchaInput = captchaInput.trim().toUpperCase();
-    if (
-      !normalizedCaptchaInput ||
-      normalizedCaptchaInput !== captchaChallenge
-    ) {
-      setError("Captcha tidak sesuai. Silakan coba lagi.");
-      refreshCaptcha();
+    if (!recaptchaToken) {
+      setError("Silakan centang 'I'm not a robot' terlebih dahulu.");
       return;
     }
 
@@ -104,19 +82,21 @@ export function useAdminLogin(initialUnauthorized) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          password,
+          recaptchaToken 
+        }),
       });
 
       const payload = await res.json();
       if (!res.ok || !payload?.ok) {
         setError(mapLoginError(payload));
-        refreshCaptcha();
         return;
       }
       window.location.href = "/admin";
     } catch (err) {
       setError(err?.message || "Terjadi kesalahan jaringan saat login.");
-      refreshCaptcha();
     } finally {
       setSubmitting(false);
     }
@@ -134,11 +114,9 @@ export function useAdminLogin(initialUnauthorized) {
     capsLock,
     error,
     setError,
-    captchaChallenge,
-    captchaInput,
-    setCaptchaInput,
+    recaptchaToken,
+    setRecaptchaToken,
     handlePasswordKeyState,
-    refreshCaptcha,
     handleSubmit,
   };
 }

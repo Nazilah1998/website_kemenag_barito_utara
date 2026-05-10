@@ -9,8 +9,10 @@ export default function AppShell({ children }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
 
-  if (isAdminRoute) {
-    return <main id="konten-utama" className="bg-slate-100">{children}</main>;
+  const isPortalPage = pathname === "/";
+
+  if (isAdminRoute || isPortalPage) {
+    return <main id="konten-utama" className={isAdminRoute ? "bg-slate-100" : ""}>{children}</main>;
   }
 
   return (

@@ -3,10 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ReCAPTCHA from "react-google-recaptcha";
 import { siteInfo } from "@/data/site";
 import { useAdminLogin } from "@/hooks/useAdminLogin";
 import { EyeIcon, inputClassName, LoginLoading } from "./login/LoginUI";
-import { LoginCaptcha } from "./login/LoginCaptcha";
 
 export default function AdminLoginClient({ initialUnauthorized = false }) {
   const l = useAdminLogin(initialUnauthorized);
@@ -51,11 +51,12 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               error={l.error}
             />
 
-            <div className="pt-2">
-              <LoginCaptcha
-                challenge={l.captchaChallenge} input={l.captchaInput}
-                setInput={l.setCaptchaInput} onRefresh={l.refreshCaptcha}
-              />
+            <div className="pt-2 flex justify-center">
+                <ReCAPTCHA
+                  sitekey="6LfPTeMsAAAAAHr-HVm6YcHa9HqAaIhxQAgCRLeZ"
+                  onChange={l.setRecaptchaToken}
+                  theme="light"
+                />
             </div>
 
             {l.error && (
@@ -69,7 +70,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               </div>
             )}
 
-            <SubmitButton submitting={l.submitting} disabled={!l.email || !l.password || !l.captchaInput} />
+            <SubmitButton submitting={l.submitting} disabled={!l.email || !l.password || !l.recaptchaToken} />
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4 text-center">

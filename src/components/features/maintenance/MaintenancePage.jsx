@@ -8,7 +8,7 @@ import PageBanner from "@/components/common/PageBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
 const quickLinks = [
-  { label: "Beranda", href: "/" },
+  { label: "Beranda", href: "/beranda" },
   { label: "Berita", href: "/berita" },
   { label: "Kontak", href: "/kontak" },
 ];
@@ -22,7 +22,7 @@ export default function MaintenancePage({
   const { t } = useLanguage();
 
   const defaultBreadcrumb = [
-    { label: t("nav.home"), href: "/" },
+    { label: t("nav.home"), href: "/beranda" },
     { label: menuName },
   ];
 
@@ -89,7 +89,7 @@ export default function MaintenancePage({
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
-                  href="/"
+                  href="/beranda"
                   className="rounded-full bg-white px-5 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-50"
                 >
                   Kembali ke Beranda

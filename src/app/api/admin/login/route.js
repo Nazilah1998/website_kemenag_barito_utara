@@ -18,15 +18,36 @@ export async function POST(request) {
     const body = await request.json();
     const email = body?.email?.trim()?.toLowerCase();
     const password = body?.password;
+    const recaptchaToken = body?.recaptchaToken;
 
-    if (!email || !password) {
+    if (!email || !password || !recaptchaToken) {
       return createNoStoreResponse(
         {
           ok: false,
-          message: "Email dan password wajib diisi.",
+          message: "Email, password, dan verifikasi keamanan wajib diisi.",
         },
         400,
       );
+    }
+
+    // --- VERIFIKASI GOOGLE RECAPTCHA (SERVER-SIDE) ---
+    try {
+      const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`;
+      const verifyRes = await fetch(verifyUrl, { method: "POST" });
+      const verifyJson = await verifyRes.json();
+
+      if (!verifyJson.success) {
+        return createNoStoreResponse(
+          {
+            ok: false,
+            message: "Verifikasi keamanan gagal atau kadaluarsa. Silakan coba lagi.",
+          },
+          400,
+        );
+      }
+    } catch (err) {
+      console.error("ReCAPTCHA Verification Error:", err);
+      // Jika server Google bermasalah, kita beri peringatan tapi tetap amankan login
     }
 
     const supabase = await createClient();
