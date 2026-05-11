@@ -195,7 +195,7 @@ GEMINI_API_KEY=...
 - **File frontend**: `src/components/features/chat/ChatWidget.js`
 - **Model AI**: `gemini-flash-latest` (dengan fallback ke model lain jika gagal)
 - **API**: Google Generative Language API v1beta
-- **System Prompt**: Berisi identitas bot, aturan jawaban singkat (max 2-3 kalimat), dan pengetahuan lengkap tentang Kemenag Barito Utara (pimpinan, layanan, haji, nikah, kepegawaian, dll.)
+- **System Prompt**: Berisi identitas bot, aturan jawaban singkat (max 2-3 kalimat), dan pengetahuan lengkap tentang Kemenag Barito Utara (pimpinan, layanan, haji, nikah, kepegawaian, dll.). **Catatan**: Juga mencakup informasi pribadi pengembang (Bapak Nazilah) dan istrinya (Sintya Wati) sebagai bagian dari memori bot.
 - **maxOutputTokens**: 400 token
 - **Integrasi**: ChatWidget dipasang di `src/app/layout.js` (tersedia di semua halaman)
 - **Quick Actions**: 4 pertanyaan populer muncul di awal chat

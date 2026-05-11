@@ -72,6 +72,24 @@ const IconSparkle = () => (
     <path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5L12 2z" />
   </svg>
 );
+const IconTrash = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 6h18" />
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
+);
 
 // ─── Quick Action Buttons ────────────────────────────────────────────────────
 const QUICK_ACTIONS = [
@@ -147,6 +165,7 @@ const ChatWidget = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -212,6 +231,20 @@ const ChatWidget = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleReset = () => {
+    setMessages([
+      {
+        role: "assistant",
+        content:
+          "Halo! Saya Asisten Virtual Kemenag Barito Utara 👋\nAda yang bisa saya bantu hari ini?",
+        time: new Date(),
+      },
+    ]);
+    setShowQuickActions(true);
+    setInput("");
+    setShowResetConfirm(false);
   };
 
   const handleSubmit = (e) => {
@@ -297,17 +330,16 @@ const ChatWidget = () => {
   // ─── Chat Window ─────────────────────────────────────────────────────────
   return (
     <div
+      className="ai-chat-window"
       style={{
         position: "fixed",
         bottom: 28,
         right: 28,
         zIndex: 9999,
-        width: "min(380px, calc(100vw - 32px))",
-        height: "min(580px, calc(100vh - 80px))",
         background: "rgba(10, 15, 25, 0.97)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderRadius: 24,
+        borderRadius: 28,
         boxShadow:
           "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
         display: "flex",
@@ -317,6 +349,109 @@ const ChatWidget = () => {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
+      {/* ── Custom Reset Confirmation Modal ──────────────── */}
+      {showResetConfirm && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 100,
+            background: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            animation: "fadeSlideIn 0.2s ease",
+          }}
+        >
+          <div
+            style={{
+              background: "#1a2234",
+              borderRadius: 20,
+              padding: "24px 20px",
+              width: "100%",
+              maxWidth: 300,
+              textAlign: "center",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <div
+              style={{
+                width: 50,
+                height: 50,
+                background: "rgba(239,68,68,0.15)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px",
+                color: "#ef4444",
+              }}
+            >
+              <IconTrash />
+            </div>
+            <h3
+              style={{
+                color: "#fff",
+                fontSize: 17,
+                fontWeight: 600,
+                marginBottom: 8,
+              }}
+            >
+              Hapus Riwayat?
+            </h3>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.6)",
+                fontSize: 13,
+                lineHeight: 1.5,
+                marginBottom: 20,
+              }}
+            >
+              Seluruh percakapan Anda akan dihapus dan tidak dapat dikembalikan.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "transparent",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleReset}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: 12,
+                  border: "none",
+                  background: "#ef4444",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ── Header ─────────────────────────────────────────── */}
       <div
         style={{
@@ -427,6 +562,32 @@ const ChatWidget = () => {
           </div>
           {/* Action buttons */}
           <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 10,
+                border: "none",
+                background: "rgba(255,255,255,0.12)",
+                color: "#fff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.22)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.12)")
+              }
+              title="Hapus Riwayat"
+              aria-label="Hapus Riwayat"
+            >
+              <IconTrash />
+            </button>
             <button
               onClick={() => setIsOpen(false)}
               style={{
@@ -710,6 +871,37 @@ const ChatWidget = () => {
       </div>
 
       <style>{`
+        .ai-chat-window {
+          width: 440px;
+          height: 700px;
+        }
+        @media (max-width: 1024px) {
+          .ai-chat-window {
+            width: 400px;
+            height: 650px;
+            bottom: 24px;
+            right: 24px;
+          }
+        }
+        @media (max-width: 768px) {
+          .ai-chat-window {
+            width: 380px;
+            height: 600px;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 24px;
+          }
+        }
+        @media (max-width: 480px) {
+          .ai-chat-window {
+            left: 12px;
+            right: 12px;
+            width: auto;
+            height: min(650px, calc(100vh - 100px));
+            bottom: 12px;
+            border-radius: 24px;
+          }
+        }
         @keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes scaleIn { from{opacity:0;transform:scale(0.92) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
         @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
