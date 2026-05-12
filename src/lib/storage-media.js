@@ -1,44 +1,15 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { uploadToR2, deleteFromR2, getR2PublicUrl } from "./r2";
 
 export const CMS_MEDIA_BUCKET =
   process.env.NEXT_PUBLIC_SUPABASE_CMS_BUCKET || "cms-media";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const DEFAULT_FILE_SIZE_LIMIT = 2 * 1024 * 1024;
-
-export async function ensureCmsBucket(supabase = createAdminClient()) {
-  const { data, error } = await supabase.storage.getBucket(CMS_MEDIA_BUCKET);
-
-  if (!error && data) {
-    return data;
-  }
-
-  const { data: created, error: createError } =
-    await supabase.storage.createBucket(CMS_MEDIA_BUCKET, {
-      public: true,
-      fileSizeLimit: DEFAULT_FILE_SIZE_LIMIT,
-      allowedMimeTypes: ALLOWED_MIME_TYPES,
-    });
-
-  if (
-    createError &&
-    !String(createError?.message || "")
-      .toLowerCase()
-      .includes("already")
-  ) {
-    throw createError;
-  }
-
-  return created ?? { name: CMS_MEDIA_BUCKET };
-}
 
 export async function uploadBase64Image({
-  supabase = createAdminClient(),
   dataUrl,
   folder = "berita",
   fileNameStem = "image",
 }) {
-  await ensureCmsBucket(supabase);
 
   const parsed = parseDataUrl(dataUrl);
 
@@ -49,47 +20,24 @@ export async function uploadBase64Image({
   const ext = mimeTypeToExt(parsed.mimeType);
   const path = buildStoragePath(folder, fileNameStem, ext);
 
-  const { error: uploadError } = await supabase.storage
-    .from(CMS_MEDIA_BUCKET)
-    .upload(path, parsed.buffer, {
-      contentType: parsed.mimeType,
-      upsert: false,
-      cacheControl: "3600",
-    });
-
-  if (uploadError) {
-    throw uploadError;
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from(CMS_MEDIA_BUCKET)
-    .getPublicUrl(path);
+  const publicUrl = await uploadToR2(parsed.buffer, path, parsed.mimeType);
 
   return {
     path,
-    publicUrl: publicUrlData?.publicUrl || null,
+    publicUrl,
     mimeType: parsed.mimeType,
     sizeBytes: parsed.buffer.length,
   };
 }
 
-export async function removeStorageFileByPublicUrl(
-  supabase = createAdminClient(),
-  publicUrl,
-) {
+export async function removeStorageFileByPublicUrl(publicUrl) {
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {
     return false;
   }
 
-  const { error } = await supabase.storage
-    .from(CMS_MEDIA_BUCKET)
-    .remove([path]);
-
-  if (error) {
-    throw error;
-  }
+  await deleteFromR2(path);
 
   return true;
 }
@@ -141,16 +89,31 @@ function buildStoragePath(folder, fileNameStem, ext) {
 }
 
 function extractStoragePathFromPublicUrl(publicUrl = "") {
-  try {
-    const url = new URL(publicUrl);
-    const marker = `/storage/v1/object/public/${CMS_MEDIA_BUCKET}/`;
-    const index = url.pathname.indexOf(marker);
+  if (!publicUrl) return null;
 
-    if (index === -1) {
-      return null;
+  try {
+    // Check if it's our R2 proxy URL
+    const marker = "/api/storage/r2/";
+    const index = publicUrl.indexOf(marker);
+
+    if (index !== -1) {
+      return publicUrl.slice(index + marker.length);
     }
 
-    return decodeURIComponent(url.pathname.slice(index + marker.length));
+    // Fallback check for Supabase if some old URLs still exist
+    const supabaseMarker = "/storage/v1/object/public/";
+    const sIndex = publicUrl.indexOf(supabaseMarker);
+
+    if (sIndex !== -1) {
+      const rest = publicUrl.slice(sIndex + supabaseMarker.length);
+      const parts = rest.split("/");
+      // The first part is the bucket name, the rest is the path
+      if (parts.length > 1) {
+        return parts.slice(1).join("/");
+      }
+    }
+
+    return null;
   } catch {
     return null;
   }

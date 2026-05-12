@@ -9,12 +9,27 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
 import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
 import prisma from "@/lib/prisma";
+import { broadcastRefresh } from "@/lib/realtime-service";
 
 export const dynamic = "force-dynamic";
 
 const table = "berita";
-const MAX_IMAGE_SIZE_KB = 100;
+const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
+
+function revalidateBeritaPaths(slug) {
+  revalidatePath("/");
+  revalidatePath("/beranda");
+  revalidatePath("/berita");
+  revalidatePath("/admin");
+  revalidatePath("/admin/berita");
+
+  if (slug) {
+    revalidatePath(`/berita/${slug}`);
+  }
+  
+  broadcastRefresh("berita");
+}
 
 function stripHtml(html = "") {
   return String(html || "")

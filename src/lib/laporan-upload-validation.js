@@ -1,6 +1,6 @@
 // src/lib/laporan-upload-validation.js
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 const ALLOWED_MIME_TYPES = ["application/pdf"];
 const ALLOWED_EXTENSIONS = [".pdf"];
 
@@ -25,7 +25,7 @@ export function validatePdfFile(file) {
   if (file.size === 0)
     return { ok: false, message: "File tidak boleh kosong." };
   if (file.size > MAX_FILE_SIZE)
-    return { ok: false, message: "Ukuran file melebihi batas 10 MB." };
+    return { ok: false, message: "Ukuran file melebihi batas 50 MB." };
   if (!hasAllowedPdfExtension(file.name))
     return {
       ok: false,

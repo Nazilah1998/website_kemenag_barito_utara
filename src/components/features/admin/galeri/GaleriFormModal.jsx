@@ -119,16 +119,20 @@ export function GaleriFormModal({
           <button
             onClick={onSave}
             disabled={saving || uploadingImage}
-            className="flex h-12 items-center gap-3 rounded-xl bg-slate-900 px-10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-black disabled:opacity-50 dark:bg-white dark:text-black dark:shadow-none"
+            className="group relative flex h-14 items-center gap-3 overflow-hidden rounded-2xl bg-slate-900 px-10 text-[11px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-slate-900 dark:shadow-none"
           >
-            {saving ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white dark:border-black/30 dark:border-t-black" />
-            ) : (
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4">
-                <path d="M5 13l4 4L19 7" />
-              </svg>
-            )}
-            <span>{saving ? "Menyimpan..." : "Simpan Konten"}</span>
+            <div className="absolute inset-0 bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
+            
+            <div className="relative flex items-center gap-3">
+              {saving ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white dark:border-slate-900/30 dark:border-t-slate-900" />
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+              <span>{saving ? "Sedang Menyimpan..." : "Simpan Konten"}</span>
+            </div>
           </button>
         </div>
       </div>

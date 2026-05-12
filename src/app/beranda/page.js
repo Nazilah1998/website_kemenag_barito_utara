@@ -9,7 +9,8 @@ import HomepageSlidesSection from "@/components/features/home/HomepageSlidesSect
 import ExternalAppsSection from "@/components/features/home/ExternalAppsSection";
 import { siteInfo } from "@/data/site";
 
-export const revalidate = 300;
+// Halaman ini sekarang mendukung update real-time penuh
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Kementerian Agama Kabupaten Barito Utara",

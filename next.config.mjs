@@ -37,6 +37,19 @@ const isProd = process.env.NODE_ENV === "production";
 function buildCsp() {
   const supabase = supabaseHost ? `https://${supabaseHost}` : "";
   const wsSupabase = supabaseHost ? `wss://${supabaseHost}` : "";
+  const r2Endpoint = process.env.CLOUDFLARE_R2_ENDPOINT || "";
+
+  if (r2Endpoint) {
+    try {
+      const r2Host = new URL(r2Endpoint).hostname;
+      remotePatterns.push({
+        protocol: "https",
+        hostname: r2Host,
+      });
+    } catch {
+      // ignore
+    }
+  }
 
   const directives = {
     "default-src": ["'self'"],
@@ -60,6 +73,7 @@ function buildCsp() {
       "https://www.gstatic.com",
       supabase,
       wsSupabase,
+      r2Endpoint,
     ].filter(Boolean),
     "frame-src": [
       "'self'",

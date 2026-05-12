@@ -1,5 +1,4 @@
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { validateAdmin } from "@/lib/cms-utils";
 import {
   removeStorageFileByPublicUrl,
@@ -8,10 +7,11 @@ import {
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { apiResponse } from "@/lib/prisma-helpers";
 import prisma from "@/lib/prisma";
+import { broadcastRefresh } from "@/lib/realtime-service";
 
 export const dynamic = "force-dynamic";
 
-const MAX_IMAGE_SIZE_KB = 200;
+const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
 
 function cleanString(value = "") {
@@ -43,8 +43,10 @@ function getBase64PayloadMeta(dataUrl) {
 
 function revalidateGaleriPaths() {
   revalidatePath("/");
+  revalidatePath("/beranda");
   revalidatePath("/galeri");
   revalidatePath("/admin/galeri");
+  broadcastRefresh("galeri");
 }
 
 export async function GET(request) {
@@ -74,7 +76,6 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const supabase = createAdminClient();
 
     const uploadBase64 = cleanString(body?.gallery_upload_base64);
     const publishedAt = body?.published_at
@@ -100,7 +101,6 @@ export async function POST(request) {
     }
 
     const uploaded = await uploadBase64Image({
-      supabase,
       dataUrl: uploadBase64,
       folder: "galeri",
       fileNameStem: `galeri-${Date.now()}`,
@@ -158,7 +158,6 @@ export async function PUT(request) {
     if (!id) return apiResponse({ message: "ID galeri wajib ada." }, 400);
 
     const body = await request.json();
-    const supabase = createAdminClient();
 
     const existingItem = await prisma.galeri.findUnique({
       where: { id: id },
@@ -183,7 +182,6 @@ export async function PUT(request) {
         throw new Error(`Maksimal ${MAX_IMAGE_SIZE_KB} KB.`);
 
       const uploaded = await uploadBase64Image({
-        supabase,
         dataUrl: uploadBase64,
         folder: "galeri",
         fileNameStem: `galeri-${Date.now()}`,
@@ -191,7 +189,6 @@ export async function PUT(request) {
 
       if (existingItem.image_url) {
         await removeStorageFileByPublicUrl(
-          supabase,
           existingItem.image_url,
         ).catch(console.error);
       }
@@ -246,7 +243,6 @@ export async function DELETE(request) {
     const id = searchParams.get("id");
     if (!id) return apiResponse({ message: "ID galeri wajib ada." }, 400);
 
-    const supabase = createAdminClient();
     const item = await prisma.galeri.findUnique({
       where: { id: id },
     });
@@ -254,7 +250,7 @@ export async function DELETE(request) {
     if (!item) return apiResponse({ message: "Item tidak ditemukan." }, 404);
 
     if (item.image_url) {
-      await removeStorageFileByPublicUrl(supabase, item.image_url).catch(
+      await removeStorageFileByPublicUrl(item.image_url).catch(
         console.error,
       );
     }

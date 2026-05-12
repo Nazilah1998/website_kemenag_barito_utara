@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_request, { params }) {
+export async function GET(request, { params }) {
   try {
     const resolvedParams = await params;
     const id = resolvedParams?.id;
@@ -40,7 +40,14 @@ export async function GET(_request, { params }) {
       }
     });
 
-    return NextResponse.redirect(doc.file_url);
+    // Construct absolute URL if the path is relative
+    let targetUrl = doc.file_url;
+    if (targetUrl.startsWith("/")) {
+      const baseUrl = new URL(request.url).origin;
+      targetUrl = `${baseUrl}${targetUrl}`;
+    }
+
+    return NextResponse.redirect(targetUrl);
   } catch (error) {
     console.error("GET Laporan View Redirect Error:", error);
     return apiResponse(

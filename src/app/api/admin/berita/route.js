@@ -15,6 +15,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { apiResponse } from "@/lib/prisma-helpers";
 import prisma from "@/lib/prisma";
+import { broadcastRefresh } from "@/lib/realtime-service";
 
 const LIMITS = {
   title: { min: 3, max: 200 },
@@ -27,7 +28,7 @@ const LIMITS = {
 export const dynamic = "force-dynamic";
 
 const table = "berita";
-const MAX_IMAGE_SIZE_KB = 100;
+const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
 
 function cleanString(value = "") {
@@ -237,6 +238,7 @@ async function buildPayload(
 
 function revalidateBeritaPaths(slug) {
   revalidatePath("/");
+  revalidatePath("/beranda");
   revalidatePath("/berita");
   revalidatePath("/admin");
   revalidatePath("/admin/berita");
@@ -244,6 +246,8 @@ function revalidateBeritaPaths(slug) {
   if (slug) {
     revalidatePath(`/berita/${slug}`);
   }
+  
+  broadcastRefresh("berita");
 }
 
 

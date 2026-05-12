@@ -9,6 +9,7 @@ import VercelSpeedInsights from "@/components/layout/VercelSpeedInsights";
 import PwaRegister from "@/components/layout/PwaRegister";
 import JsonLd from "@/components/features/seo/JsonLd";
 import ChatWidget from "@/components/features/chat/ChatWidget";
+import RealtimeSync from "@/components/common/RealtimeSync";
 import {
   organizationSchema,
   websiteSchema,
@@ -117,6 +118,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <AppShell>{children}</AppShell>
           <ChatWidget />
+          <RealtimeSync />
         </Providers>
 
         <VercelAnalytics />

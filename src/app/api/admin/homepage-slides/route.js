@@ -5,6 +5,8 @@ import { uploadBase64Image } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { broadcastRefresh } from "@/lib/realtime-service";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +118,10 @@ export async function POST(request) {
       after: data,
       request,
     });
+
+    revalidatePath("/");
+    revalidatePath("/beranda");
+    broadcastRefresh("slider");
 
     return apiResponse({
       message: "Slide beranda berhasil ditambahkan.",

@@ -1,4 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
+import { broadcastRefresh } from "@/lib/realtime-service";
 import {
   isCmsStoragePublicUrl,
   removeStorageFileByPublicUrl,
@@ -115,6 +117,10 @@ export async function PATCH(request, context) {
       request,
     });
 
+    revalidatePath("/");
+    revalidatePath("/beranda");
+    broadcastRefresh("slider");
+
     return apiResponse({
       message: "Slide beranda berhasil diperbarui.",
       item: normalizeHomepageSlide(data || {}),
@@ -166,6 +172,10 @@ export async function DELETE(request, context) {
       before: existing,
       request,
     });
+
+    revalidatePath("/");
+    revalidatePath("/beranda");
+    broadcastRefresh("slider");
 
     return apiResponse({
       message: "Slide beranda berhasil dihapus.",

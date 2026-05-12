@@ -1,6 +1,5 @@
 import { apiResponse } from "@/lib/prisma-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import { createAdminClient } from "@/lib/supabase/admin";
 import {
   buildSafePdfFilename,
   validateDocumentPayload,
@@ -8,6 +7,9 @@ import {
 } from "@/lib/laporan-upload-validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import prisma from "@/lib/prisma";
+import { uploadToR2 } from "@/lib/r2";
+import { broadcastRefresh } from "@/lib/realtime-service";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -63,25 +65,9 @@ export async function POST(request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const storagePath = `laporan/${category.slug}/${filename}`;
-    const supabase = createAdminClient();
 
-    const { error: uploadError } = await supabase.storage
-      .from("laporan-documents")
-      .upload(storagePath, buffer, {
-        contentType: "application/pdf",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("admin_laporan_upload_storage_error", uploadError);
-      return apiResponse({ message: "Gagal mengupload file dokumen." }, 500);
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from("laporan-documents")
-      .getPublicUrl(storagePath);
-
-    const fileUrl = publicUrlData?.publicUrl || "";
+    // Upload to Cloudflare R2
+    const fileUrl = await uploadToR2(buffer, storagePath, "application/pdf");
 
     const document = await prisma.report_documents.create({
       data: {
@@ -110,6 +96,9 @@ export async function POST(request) {
       after: document,
       request,
     });
+
+    revalidatePath("/laporan");
+    broadcastRefresh("laporan");
 
     return apiResponse({
       message: "Dokumen berhasil diupload.",

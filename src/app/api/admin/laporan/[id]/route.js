@@ -1,6 +1,6 @@
 import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { uploadToR2, deleteFromR2 } from "@/lib/r2";
 import {
   buildSafePdfFilename,
   validateDocumentPayload,
@@ -8,16 +8,15 @@ import {
 } from "@/lib/laporan-upload-validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import prisma from "@/lib/prisma";
+import { broadcastRefresh } from "@/lib/realtime-service";
+import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-const STORAGE_BUCKET = "laporan-documents";
-
-function buildStoragePath(filename) {
-  const now = new Date();
-  const year = String(now.getFullYear());
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  return `laporan/${year}/${month}/${filename}`;
+function buildStoragePath(filename, categorySlug) {
+  const safeSlug = categorySlug || "media";
+  return `laporan/${safeSlug}/${filename}`;
 }
 
 export async function PUT(request, context) {
@@ -73,29 +72,16 @@ export async function PUT(request, context) {
           existingDoc?.title || "dokumen-laporan",
         );
 
-        const storagePath = buildStoragePath(safeFilename);
+        const storagePath = buildStoragePath(safeFilename, existingDoc?.category_slug || "laporan");
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const { error: uploadError } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(storagePath, buffer, {
-            contentType: "application/pdf",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          return apiResponse({ message: "Gagal mengupload file PDF pengganti." }, 500);
-        }
-
-        const { data: publicFile } = supabase.storage
-          .from(STORAGE_BUCKET)
-          .getPublicUrl(storagePath);
+        const fileUrl = await uploadToR2(buffer, storagePath, "application/pdf");
 
         replacementFileData = {
           file_name: safeFilename,
           file_path: storagePath,
-          file_url: publicFile?.publicUrl || "",
+          file_url: fileUrl,
           mime_type: "application/pdf",
           file_size: BigInt(file.size || 0),
         };
@@ -130,9 +116,7 @@ export async function PUT(request, context) {
     });
 
     if (replacementFileData && existingDoc?.file_path) {
-      await supabase.storage
-        .from(STORAGE_BUCKET)
-        .remove([existingDoc.file_path]);
+      await deleteFromR2(existingDoc.file_path);
     }
 
     await recordAudit({
@@ -145,6 +129,9 @@ export async function PUT(request, context) {
       after: updatedDoc,
       request,
     });
+
+    revalidatePath("/laporan");
+    broadcastRefresh("laporan");
 
     return apiResponse({
       message: "Dokumen berhasil diperbarui.",
@@ -182,10 +169,7 @@ export async function DELETE(request, context) {
     });
 
     if (existingDoc.file_path) {
-      const supabase = createAdminClient();
-      await supabase.storage
-        .from(STORAGE_BUCKET)
-        .remove([existingDoc.file_path]);
+      await deleteFromR2(existingDoc.file_path);
     }
 
     await recordAudit({
@@ -197,6 +181,9 @@ export async function DELETE(request, context) {
       before: existingDoc,
       request,
     });
+
+    revalidatePath("/laporan");
+    broadcastRefresh("laporan");
 
     return apiResponse({
       message: "Dokumen berhasil dihapus.",

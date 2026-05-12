@@ -27,6 +27,12 @@ export const env = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   recaptchaSiteKey: readEnv("NEXT_PUBLIC_RECAPTCHA_SITE_KEY", ""),
   recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY ?? "",
+  r2: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID ?? "",
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY ?? "",
+    endpoint: process.env.CLOUDFLARE_R2_ENDPOINT ?? "",
+    bucketName: process.env.CLOUDFLARE_R2_BUCKET_NAME ?? "",
+  },
 };
 
 export function assertServiceRoleKey() {
