@@ -1,73 +1,74 @@
-import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import { listAudit } from "@/lib/audit";
-import { PERMISSIONS } from "@/lib/permissions";
-
-export const dynamic = "force-dynamic";
 
 export async function GET(request) {
-  const auth = await validateAdmin({
-    permission: PERMISSIONS.AUDIT_VIEW,
-  });
-  if (!auth.ok) return auth.response;
+  try {
+    const validation = await validateAdmin();
+    if (!validation.ok) return validation.response;
 
-  const { searchParams } = new URL(request.url);
-  const limit = Number(searchParams.get("limit") || 50);
-  const entity = searchParams.get("entity") || null;
-  const action = searchParams.get("action") || null;
+    const { session, permissionContext } = validation;
+    
+    // Only allow if has AUDIT_VIEW permission or is super_admin
+    if (session.role !== "super_admin" && !permissionContext?.permissions?.includes("audit_view")) {
+      return apiResponse({ error: "Unauthorized. Audit access required." }, 403);
+    }
 
-  const result = await listAudit({ limit, entity, action });
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const skip = (page - 1) * limit;
 
-  if (!result.ok) {
-    return NextResponse.json(
-      { message: result.error || "Gagal mengambil log audit.", items: [] },
-      { status: 500, headers: { "Cache-Control": "no-store" } },
-    );
+    const [logs, total] = await Promise.all([
+      prisma.admin_audit_log.findMany({
+        orderBy: { created_at: "desc" },
+        take: limit,
+        skip: skip,
+      }),
+      prisma.admin_audit_log.count()
+    ]);
+
+    return apiResponse({
+      logs,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error("Audit log API error:", error);
+    return apiResponse({ error: "Internal Server Error" }, 500);
   }
-
-  return NextResponse.json(
-    { items: result.items },
-    { headers: { "Cache-Control": "no-store" } },
-  );
 }
 
 export async function DELETE(request) {
-  const auth = await validateAdmin({
-    permission: PERMISSIONS.AUDIT_VIEW, // Minimal view, tapi sebaiknya ada permission khusus DELETE jika ada
-  });
-  if (!auth.ok) return auth.response;
-
   try {
+    const validation = await validateAdmin();
+    if (!validation.ok) return validation.response;
+
+    const { session } = validation;
+    
+    // Only super_admin can delete or clear logs
+    if (session.role !== "super_admin") {
+      return apiResponse({ error: "Hanya Super Admin yang dapat menghapus riwayat log." }, 403);
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const clearAll = searchParams.get("clear") === "all";
 
-    let result;
-    if (clearAll) {
-      const { clearAllAudit } = await import("@/lib/audit");
-      result = await clearAllAudit();
-    } else if (id) {
-      const { deleteAudit } = await import("@/lib/audit");
-      result = await deleteAudit(id);
+    if (id) {
+      await prisma.admin_audit_log.delete({
+        where: { id }
+      });
+      return apiResponse({ message: "Log berhasil dihapus." });
     } else {
-      return NextResponse.json(
-        { message: "ID log atau parameter pembersihan wajib ditentukan." },
-        { status: 400 },
-      );
+      await prisma.admin_audit_log.deleteMany();
+      return apiResponse({ message: "Seluruh riwayat log berhasil dibersihkan." });
     }
-
-    if (!result.ok) {
-      return NextResponse.json(
-        { message: result.error || "Gagal menghapus log." },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({ message: result.message });
   } catch (error) {
-    return NextResponse.json(
-      { message: error?.message || "Internal server error." },
-      { status: 500 },
-    );
+    console.error("Audit log DELETE error:", error);
+    return apiResponse({ error: "Gagal menghapus log." }, 500);
   }
 }

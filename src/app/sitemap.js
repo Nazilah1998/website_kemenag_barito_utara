@@ -1,6 +1,6 @@
 import { siteInfo } from "@/data/site";
 import { laporanCategories } from "@/data/laporan";
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
 
 export const revalidate = 300;
 
@@ -61,28 +61,27 @@ export default async function sitemap() {
   let beritaRoutes = [];
 
   try {
-    const supabase = createAdminClient();
+    const beritaList = await prisma.berita.findMany({
+      where: { is_published: true },
+      select: {
+        slug: true,
+        updated_at: true,
+        published_at: true,
+        created_at: true,
+      },
+      orderBy: { published_at: "desc" },
+    });
 
-    const { data: beritaList, error: beritaError } = await supabase
-      .from("berita")
-      .select("slug, updated_at, published_at, created_at, is_published")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false });
-
-    if (beritaError) {
-      console.error("[sitemap] berita fetch error:", beritaError.message);
-    } else {
-      beritaRoutes = (beritaList || []).map((item) => ({
-        url: `${base}/berita/${item.slug}`,
-        lastModified: safeDate(
-          item.updated_at || item.published_at || item.created_at,
-        ),
-        changeFrequency: "weekly",
-        priority: 0.8,
-      }));
-    }
+    beritaRoutes = (beritaList || []).map((item) => ({
+      url: `${base}/berita/${item.slug}`,
+      lastModified: safeDate(
+        item.updated_at || item.published_at || item.created_at,
+      ),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
   } catch (err) {
-    console.error("[sitemap] general fetch error:", err?.message || err);
+    console.error("[sitemap] berita fetch error:", err?.message || err);
   }
 
   return [...staticRoutes, ...laporanRoutes, ...beritaRoutes];

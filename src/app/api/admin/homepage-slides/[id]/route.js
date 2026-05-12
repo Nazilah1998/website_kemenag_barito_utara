@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdminAccess } from "@/lib/admin-guard";
 import {
   isCmsStoragePublicUrl,
   removeStorageFileByPublicUrl,
   uploadBase64Image,
 } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
+import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -29,44 +31,25 @@ function toBool(value, fallback = false) {
   return fallback;
 }
 
-async function getExistingSlide(supabase, id) {
-  const { data, error } = await supabase
-    .from("homepage_slides")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function PATCH(request, { params }) {
-  const access = await requireAdminAccess();
-  if (!access?.ok) {
-    return NextResponse.json(
-      { message: access?.message || "Akses ditolak." },
-      { status: access?.status || 403 },
-    );
-  }
-
-  const { id } = await params;
-  if (!id) {
-    return NextResponse.json(
-      { message: "ID slide tidak valid." },
-      { status: 400 },
-    );
-  }
+export async function PATCH(request, context) {
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
+    const id = await getSafeIdFromContext(context);
+    if (!id) {
+      return apiResponse({ message: "ID slide tidak valid." }, 400);
+    }
+
     const body = await request.json().catch(() => ({}));
     const supabase = createAdminClient();
 
-    const existing = await getExistingSlide(supabase, id);
+    const existing = await prisma.homepage_slides.findUnique({
+      where: { id: id }
+    });
+
     if (!existing) {
-      return NextResponse.json(
-        { message: "Slide tidak ditemukan." },
-        { status: 404 },
-      );
+      return apiResponse({ message: "Slide tidak ditemukan." }, 404);
     }
 
     const title = toText(body?.title, existing.title || "");
@@ -79,16 +62,14 @@ export async function PATCH(request, { params }) {
     const category = toText(body?.category, existing.category || "utama");
 
     if (!title) {
-      return NextResponse.json(
-        { message: "Judul slide wajib diisi." },
-        { status: 400 },
-      );
+      return apiResponse({ message: "Judul slide wajib diisi." }, 400);
     }
 
     let finalImageUrl = imageUrlRaw;
 
     if (imageUploadBase64) {
       const uploaded = await uploadBase64Image({
+        supabase,
         dataUrl: imageUploadBase64,
         folder: "homepage-slides",
         fileNameStem: imageUploadName || title,
@@ -107,74 +88,68 @@ export async function PATCH(request, { params }) {
     }
 
     if (!finalImageUrl) {
-      return NextResponse.json(
-        { message: "Gambar slide wajib diupload." },
-        { status: 400 },
-      );
+      return apiResponse({ message: "Gambar slide wajib diupload." }, 400);
     }
 
-    const { data, error } = await supabase
-      .from("homepage_slides")
-      .update({
+    const data = await prisma.homepage_slides.update({
+      where: { id: id },
+      data: {
         title,
         caption,
         image_url: finalImageUrl,
         category,
         is_published: isPublished,
         sort_order: sortOrder,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select("*")
-      .single();
+        updated_at: new Date(),
+      }
+    });
 
-    if (error) throw error;
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.UPDATE,
+      entity: AUDIT_ENTITIES.SETTINGS,
+      entityId: id,
+      summary: `Memperbarui slide beranda: ${title}`,
+      before: existing,
+      after: data,
+      request,
+    });
 
-    return NextResponse.json({
+    return apiResponse({
       message: "Slide beranda berhasil diperbarui.",
       item: normalizeHomepageSlide(data || {}),
     });
   } catch (error) {
-    return NextResponse.json(
+    console.error("PATCH Homepage Slides Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal memperbarui slide beranda." },
-      { status: 500 },
+      500,
     );
   }
 }
 
-export async function DELETE(request, { params }) {
-  const access = await requireAdminAccess();
-  if (!access?.ok) {
-    return NextResponse.json(
-      { message: access?.message || "Akses ditolak." },
-      { status: access?.status || 403 },
-    );
-  }
-
-  const { id } = await params;
-  if (!id) {
-    return NextResponse.json(
-      { message: "ID slide tidak valid." },
-      { status: 400 },
-    );
-  }
+export async function DELETE(request, context) {
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
+    const id = await getSafeIdFromContext(context);
     const supabase = createAdminClient();
 
-    const existing = await getExistingSlide(supabase, id);
+    const existing = await prisma.homepage_slides.findUnique({
+      where: { id: id }
+    });
+
     if (!existing) {
-      return NextResponse.json(
+      return apiResponse(
         { message: "Slide tidak ditemukan." },
-        { status: 404 },
+        404,
       );
     }
 
-    const { error } = await supabase
-      .from("homepage_slides")
-      .delete()
-      .eq("id", id);
-    if (error) throw error;
+    await prisma.homepage_slides.delete({
+      where: { id: id }
+    });
 
     if (existing.image_url && isCmsStoragePublicUrl(existing.image_url)) {
       await removeStorageFileByPublicUrl(supabase, existing.image_url).catch(
@@ -182,13 +157,24 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    return NextResponse.json({
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.DELETE,
+      entity: AUDIT_ENTITIES.SETTINGS,
+      entityId: id,
+      summary: `Menghapus slide beranda: ${existing.title}`,
+      before: existing,
+      request,
+    });
+
+    return apiResponse({
       message: "Slide beranda berhasil dihapus.",
     });
   } catch (error) {
-    return NextResponse.json(
+    console.error("DELETE Homepage Slides Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal menghapus slide beranda." },
-      { status: 500 },
+      500,
     );
   }
 }

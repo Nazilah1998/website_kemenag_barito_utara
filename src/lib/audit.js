@@ -1,7 +1,5 @@
-// Audit log admin: catat semua aksi CRUD admin ke tabel Supabase.
-// Gagal diam-diam agar tidak mengganggu aksi utama.
-
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
+import { serializePrisma } from "@/lib/prisma-helpers";
 
 export const AUDIT_ACTIONS = {
   CREATE: "create",
@@ -60,8 +58,6 @@ export async function recordAudit({
   metadata = null,
 }) {
   try {
-    const supabase = createAdminClient();
-
     const actorId = session?.profile?.id || session?.user?.id || null;
     const actorEmail = session?.profile?.email || session?.user?.email || null;
     const actorRole = session?.role || null;
@@ -74,18 +70,16 @@ export async function recordAudit({
       entity,
       entity_id: entityId ? String(entityId) : null,
       summary: summary ? String(summary).slice(0, 500) : null,
-      before: redact(before),
-      after: redact(after),
-      metadata: metadata || null,
+      before: serializePrisma(redact(before)),
+      after: serializePrisma(redact(after)),
+      metadata: serializePrisma(metadata) || null,
       ip_address: extractIp(request),
       user_agent: request?.headers?.get?.("user-agent") || null,
     };
 
-    const { error } = await supabase.from("admin_audit_log").insert(record);
-
-    if (error) {
-      console.warn("[audit] gagal simpan log:", error.message);
-    }
+    await prisma.admin_audit_log.create({
+      data: record,
+    });
   } catch (error) {
     console.warn("[audit] exception:", error?.message);
   }
@@ -97,22 +91,26 @@ export async function listAudit({
   action = null,
 } = {}) {
   try {
-    const supabase = createAdminClient();
-    let query = supabase
-      .from("admin_audit_log")
-      .select(
-        "id, actor_email, actor_role, action, entity, entity_id, summary, created_at",
-      )
-      .order("created_at", { ascending: false })
-      .limit(Math.min(Math.max(limit, 1), 200));
+    const items = await prisma.admin_audit_log.findMany({
+      where: {
+        ...(entity && { entity }),
+        ...(action && { action }),
+      },
+      select: {
+        id: true,
+        actor_email: true,
+        actor_role: true,
+        action: true,
+        entity: true,
+        entity_id: true,
+        summary: true,
+        created_at: true,
+      },
+      orderBy: { created_at: "desc" },
+      take: Math.min(Math.max(limit, 1), 200),
+    });
 
-    if (entity) query = query.eq("entity", entity);
-    if (action) query = query.eq("action", action);
-
-    const { data, error } = await query;
-
-    if (error) return { ok: false, error: error.message, items: [] };
-    return { ok: true, items: data || [] };
+    return { ok: true, items: items || [] };
   } catch (error) {
     return { ok: false, error: error?.message, items: [] };
   }
@@ -121,12 +119,11 @@ export async function listAudit({
 export async function deleteAudit(id) {
   try {
     if (!id) throw new Error("ID log wajib diisi.");
-    const supabase = createAdminClient();
-    const { error } = await supabase
-      .from("admin_audit_log")
-      .delete()
-      .eq("id", id);
-    if (error) throw error;
+
+    await prisma.admin_audit_log.delete({
+      where: { id: String(id) },
+    });
+
     return { ok: true, message: "Log berhasil dihapus secara permanen." };
   } catch (error) {
     return { ok: false, error: error?.message || "Gagal menghapus log." };
@@ -135,13 +132,7 @@ export async function deleteAudit(id) {
 
 export async function clearAllAudit() {
   try {
-    const supabase = createAdminClient();
-    // Gunakan filter yang pasti benar untuk menghapus semua, atau .neq('id', 0)
-    const { error } = await supabase
-      .from("admin_audit_log")
-      .delete()
-      .neq("id", 0);
-    if (error) throw error;
+    await prisma.admin_audit_log.deleteMany();
     return { ok: true, message: "Seluruh riwayat log berhasil dibersihkan." };
   } catch (error) {
     return { ok: false, error: error?.message || "Gagal membersihkan log." };

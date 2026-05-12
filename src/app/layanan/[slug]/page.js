@@ -5,6 +5,9 @@ import { useParams } from "next/navigation";
 import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
 import { useLanguage } from "@/context/LanguageContext";
 
+import { getSeksiBySlug } from "@/data/seksi";
+import SeksiDetailUI from "@/components/features/layanan/SeksiDetailUI";
+
 const LAYANAN_MAP = {
   sekjen: "nav.sekjen",
   "seksi-bimas-islam": "nav.bimasIslam",
@@ -30,16 +33,24 @@ export default function LayananSubPage() {
       : i18nKey
     : "Layanan Publik";
 
+  const breadcrumb = [
+    { label: t("nav.home"), href: "/" },
+    { label: t("nav.layanan") },
+    { label: menuTitle },
+  ];
+
+  const seksiData = getSeksiBySlug(slug);
+
+  if (seksiData) {
+    return <SeksiDetailUI data={seksiData} breadcrumb={breadcrumb} menuTitle={menuTitle} />;
+  }
+
   return (
     <MaintenancePage
       title={`${menuTitle} Sedang Disiapkan`}
       menuName={menuTitle}
       description={`Informasi mengenai ${menuTitle} di Kementerian Agama Kabupaten Barito Utara sedang dalam proses penataan ulang agar dapat ditampilkan dengan lebih rapi, modern, dan nyaman diakses.`}
-      breadcrumb={[
-        { label: t("nav.home"), href: "/" },
-        { label: t("nav.layanan") },
-        { label: menuTitle },
-      ]}
+      breadcrumb={breadcrumb}
     />
   );
 }

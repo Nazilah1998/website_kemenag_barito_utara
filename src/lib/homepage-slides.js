@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -47,37 +47,33 @@ function sortSlides(items = []) {
 
 export async function getPublicHomepageSlides() {
   try {
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase
-      .from("homepage_slides")
-      .select("*")
-      .eq("is_published", true)
-      .order("sort_order", { ascending: true })
-      .order("updated_at", { ascending: false });
-
-    if (error) throw error;
+    const data = await prisma.homepage_slides.findMany({
+      where: { is_published: true },
+      orderBy: [
+        { sort_order: 'asc' },
+        { updated_at: 'desc' }
+      ]
+    });
 
     return sortSlides((data || []).map(normalizeHomepageSlide));
-  } catch {
+  } catch (error) {
+    console.error("getPublicHomepageSlides error:", error);
     return [];
   }
 }
 
 export async function getAdminHomepageSlides() {
   try {
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase
-      .from("homepage_slides")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("updated_at", { ascending: false });
-
-    if (error) throw error;
+    const data = await prisma.homepage_slides.findMany({
+      orderBy: [
+        { sort_order: 'asc' },
+        { updated_at: 'desc' }
+      ]
+    });
 
     return sortSlides((data || []).map(normalizeHomepageSlide));
-  } catch {
+  } catch (error) {
+    console.error("getAdminHomepageSlides error:", error);
     return [];
   }
 }

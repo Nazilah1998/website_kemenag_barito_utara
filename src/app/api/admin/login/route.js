@@ -1,27 +1,18 @@
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-}
+import prisma from "@/lib/prisma";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const email = body?.email?.trim()?.toLowerCase();
     const password = body?.password;
     const recaptchaToken = body?.recaptchaToken;
 
     if (!email || !password || !recaptchaToken) {
-      return createNoStoreResponse(
+      return apiResponse(
         {
           ok: false,
           message: "Email, password, dan verifikasi keamanan wajib diisi.",
@@ -37,7 +28,7 @@ export async function POST(request) {
       const verifyJson = await verifyRes.json();
 
       if (!verifyJson.success) {
-        return createNoStoreResponse(
+        return apiResponse(
           {
             ok: false,
             message: "Verifikasi keamanan gagal atau kadaluarsa. Silakan coba lagi.",
@@ -52,13 +43,40 @@ export async function POST(request) {
 
     const supabase = await createClient();
 
+    // 1. Cek profil untuk status lockout (Menggunakan Prisma)
+    const profile = await prisma.profiles.findUnique({
+      where: { email }
+    });
+
+    if (profile && profile.lockout_until && new Date(profile.lockout_until) > new Date()) {
+      const remainingMinutes = Math.ceil((new Date(profile.lockout_until) - new Date()) / 60000);
+      return apiResponse({
+        ok: false,
+        message: `Akun dikunci karena terlalu banyak percobaan gagal. Silakan coba lagi dalam ${remainingMinutes} menit.`
+      }, 403);
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      return createNoStoreResponse(
+      // 2. Catat kegagalan login
+      if (profile) {
+        const newAttempts = (profile.failed_login_attempts || 0) + 1;
+        const lockoutUntil = newAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // Kunci 15 menit jika >= 5 kali
+        
+        await prisma.profiles.update({
+          where: { id: profile.id },
+          data: { 
+            failed_login_attempts: newAttempts,
+            lockout_until: lockoutUntil
+          }
+        });
+      }
+
+      return apiResponse(
         {
           ok: false,
           message: error.message || "Login gagal.",
@@ -67,12 +85,23 @@ export async function POST(request) {
       );
     }
 
+    // 3. Reset kegagalan login jika berhasil
+    if (profile && profile.failed_login_attempts > 0) {
+      await prisma.profiles.update({
+        where: { id: profile.id },
+        data: { 
+          failed_login_attempts: 0,
+          lockout_until: null
+        }
+      });
+    }
+
     const session = await getCurrentSessionContext();
 
     if (!session?.isAuthenticated) {
       await supabase.auth.signOut();
 
-      return createNoStoreResponse(
+      return apiResponse(
         {
           ok: false,
           message: "Login gagal membuat session admin yang valid.",
@@ -86,7 +115,7 @@ export async function POST(request) {
     if (!hasAdminPanelAccess) {
       await supabase.auth.signOut();
 
-      return createNoStoreResponse(
+      return apiResponse(
         {
           ok: false,
           code: "ADMIN_PANEL_ACCESS_REQUIRED",
@@ -97,7 +126,17 @@ export async function POST(request) {
       );
     }
 
-    return createNoStoreResponse({
+    // 5. Catat Login ke Audit Log
+    await recordAudit({
+      session,
+      action: AUDIT_ACTIONS.LOGIN,
+      entity: AUDIT_ENTITIES.USER,
+      entityId: session.profile?.id || session.user?.id || null,
+      summary: `Admin "${session.profile?.full_name || email}" berhasil login.`,
+      request,
+    });
+
+    return apiResponse({
       ok: true,
       message: "Login admin berhasil.",
       user: {
@@ -113,7 +152,8 @@ export async function POST(request) {
       },
     });
   } catch (error) {
-    return createNoStoreResponse(
+    console.error("POST Login Error:", error);
+    return apiResponse(
       {
         ok: false,
         message: error?.message || "Terjadi kesalahan server saat login.",

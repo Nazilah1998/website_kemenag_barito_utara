@@ -1,8 +1,6 @@
-// src/app/api/admin/laporan/route.js
-
-import { NextResponse } from "next/server";
-import { requireAdminAccess } from "@/lib/admin-guard";
-import { logError, logInfo, logWarn } from "@/lib/logger";
+import { apiResponse } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -24,109 +22,42 @@ function normalizeDocuments(documents = []) {
 }
 
 export async function GET(request) {
-  const guard = await requireAdminAccess();
-
-  if (!guard.ok) {
-    logWarn("admin_laporan_list_denied", {
-      status: guard.status,
-      reason: guard.message,
-    });
-
-    return NextResponse.json(
-      { message: guard.message },
-      { status: guard.status },
-    );
-  }
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
     const searchParams = request.nextUrl.searchParams;
     const slug = sanitizeSlug(searchParams.get("slug") || "");
 
-    let categoriesQuery = guard.supabase
-      .from("report_categories")
-      .select(
-        "id, slug, title, description, intro, sort_order, is_active, created_at, updated_at",
-      )
-      .order("sort_order", { ascending: true });
-
-    if (slug) {
-      categoriesQuery = categoriesQuery.eq("slug", slug);
-    }
-
-    const { data: categories, error: categoriesError } = await categoriesQuery;
-
-    if (categoriesError) {
-      logError("admin_laporan_categories_query_error", {
-        adminUserId: guard.user?.id || null,
-        slug: slug || null,
-        message: categoriesError.message,
-      });
-
-      return NextResponse.json(
-        { message: "Gagal memuat kategori laporan." },
-        { status: 500 },
-      );
-    }
-
-    const categoryIds = (categories || []).map((item) => item.id);
-    let documents = [];
-
-    if (categoryIds.length > 0) {
-      const { data: docsData, error: docsError } = await guard.supabase
-        .from("report_documents")
-        .select(
-          "id, category_id, title, description, year, file_name, file_path, file_url, mime_type, file_size, sort_order, is_published, created_by, created_at, updated_at, view_count",
-        )
-        .in("category_id", categoryIds)
-        .order("created_at", { ascending: false });
-
-      if (docsError) {
-        logError("admin_laporan_documents_query_error", {
-          adminUserId: guard.user?.id || null,
-          message: docsError.message,
-        });
-
-        return NextResponse.json(
-          { message: "Gagal memuat dokumen laporan." },
-          { status: 500 },
-        );
-      }
-
-      documents = docsData || [];
-    }
-
-    const docsByCategoryId = documents.reduce((acc, doc) => {
-      const key = doc.category_id;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(doc);
-      return acc;
-    }, {});
-
-    const normalizedCategories = (categories || []).map((category) => ({
-      ...category,
-      documents: normalizeDocuments(docsByCategoryId[category.id] || []),
-    }));
-
-    logInfo("admin_laporan_list_success", {
-      adminUserId: guard.user?.id || null,
-      slug: slug || null,
-      categoryCount: normalizedCategories.length,
-      documentCount: documents.length,
+    const categories = await prisma.report_categories.findMany({
+      where: {
+        ...(slug && { slug })
+      },
+      include: {
+        report_documents: {
+          orderBy: { created_at: 'desc' }
+        }
+      },
+      orderBy: { sort_order: 'asc' }
     });
 
-    return NextResponse.json({
+    const normalizedCategories = categories.map((category) => {
+      return {
+        ...category,
+        documents: normalizeDocuments(category.report_documents || [])
+      };
+    });
+
+    return apiResponse({
       message: "Data laporan admin berhasil dimuat.",
       categories: normalizedCategories,
     });
   } catch (error) {
-    logError("admin_laporan_list_unhandled_error", {
-      adminUserId: guard.user?.id || null,
-      message: error?.message || "Unknown error",
-    });
+    console.error("admin_laporan_list_unhandled_error", error);
 
-    return NextResponse.json(
+    return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat memuat laporan." },
-      { status: 500 },
+      500,
     );
   }
 }

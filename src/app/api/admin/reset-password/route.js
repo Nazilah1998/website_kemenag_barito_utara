@@ -1,33 +1,22 @@
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-}
 
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { action, email, password } = body;
 
     const supabase = createAdminClient();
 
     if (action === "verify-email") {
       if (!email) {
-        return createNoStoreResponse(
+        return apiResponse(
           { ok: false, message: "Email wajib diisi." },
           400,
         );
       }
 
-      // Check if user exists in auth.users
+      // Check if user exists in auth.users first
       const { data: users, error: fetchError } =
         await supabase.auth.admin.listUsers();
       if (fetchError) throw fetchError;
@@ -37,7 +26,7 @@ export async function POST(request) {
       );
 
       if (!user) {
-        return createNoStoreResponse(
+        return apiResponse(
           {
             ok: false,
             message: "Email tidak terdaftar dalam sistem administrasi.",
@@ -46,16 +35,25 @@ export async function POST(request) {
         );
       }
 
-      return createNoStoreResponse({
+      // Send the actual recovery email via Supabase
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${new URL(request.url).origin}/auth/confirm?next=${encodeURIComponent("/admin/forgot-password?step=2")}`,
+      });
+
+      if (resetError) {
+        console.error("Supabase Auth Error:", resetError);
+        throw resetError;
+      }
+
+      return apiResponse({
         ok: true,
-        message: "Email tervalidasi.",
-        userId: user.id,
+        message: "Instruksi pemulihan telah dikirim ke email Anda.",
       });
     }
 
     if (action === "reset-password") {
       if (!email || !password) {
-        return createNoStoreResponse(
+        return apiResponse(
           { ok: false, message: "Email dan password baru wajib diisi." },
           400,
         );
@@ -71,7 +69,7 @@ export async function POST(request) {
       );
 
       if (!user) {
-        return createNoStoreResponse(
+        return apiResponse(
           {
             ok: false,
             message: "User tidak ditemukan.",
@@ -88,19 +86,19 @@ export async function POST(request) {
 
       if (updateError) throw updateError;
 
-      return createNoStoreResponse({
+      return apiResponse({
         ok: true,
         message: "Password berhasil diperbarui. Silakan login kembali.",
       });
     }
 
-    return createNoStoreResponse(
+    return apiResponse(
       { ok: false, message: "Aksi tidak valid." },
       400,
     );
   } catch (error) {
-    console.error("Reset Password Error:", error);
-    return createNoStoreResponse(
+    console.error("DEBUG - Reset Password Error:", error);
+    return apiResponse(
       {
         ok: false,
         message:
@@ -111,3 +109,4 @@ export async function POST(request) {
     );
   }
 }
+

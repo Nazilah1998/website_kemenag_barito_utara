@@ -1,22 +1,10 @@
-import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { PERMISSIONS } from "@/lib/permissions";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const table = "kontak_pesan";
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-}
 
 export async function GET() {
   const auth = await validateAdmin({
@@ -26,24 +14,18 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   try {
-    const supabase = createAdminClient();
+    const data = await prisma.kontak_pesan.findMany({
+      orderBy: { created_at: 'desc' }
+    });
 
-    const { data, error } = await supabase
-      .from(table)
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    return createNoStoreResponse({
+    return apiResponse({
       items: data ?? [],
     });
   } catch (error) {
-    return createNoStoreResponse(
-      {
-        message: error.message || "Gagal mengambil daftar pesan.",
-      },
-      error.status || 500,
+    console.error("GET Pesan Error:", error);
+    return apiResponse(
+      { message: error.message || "Gagal mengambil daftar pesan." },
+      500,
     );
   }
 }
@@ -60,36 +42,41 @@ export async function PATCH(request) {
     const { id, status } = body;
 
     if (!id || !status) {
-      return createNoStoreResponse(
+      return apiResponse(
         { message: "ID dan status wajib diisi." },
         400,
       );
     }
 
-    const supabase = createAdminClient();
+    const existing = await prisma.kontak_pesan.findUnique({
+      where: { id: id }
+    });
 
-    const { data, error } = await supabase
-      .from(table)
-      .update({ status })
-      .eq("id", id)
-      .select()
-      .single();
+    const data = await prisma.kontak_pesan.update({
+      where: { id: id },
+      data: { status }
+    });
 
-    if (error) throw error;
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.UPDATE,
+      entity: AUDIT_ENTITIES.KONTAK_PESAN,
+      entityId: id,
+      summary: `Mengubah status pesan dari ${existing?.status || 'unknown'} menjadi ${status}`,
+      before: existing,
+      after: data,
+      request,
+    });
 
-    return createNoStoreResponse(
-      {
-        message: "Status pesan berhasil diperbarui.",
-        item: data,
-      },
-      200,
-    );
+    return apiResponse({
+      message: "Status pesan berhasil diperbarui.",
+      item: data,
+    });
   } catch (error) {
-    return createNoStoreResponse(
-      {
-        message: error.message || "Gagal memperbarui status pesan.",
-      },
-      error.status || 500,
+    console.error("PATCH Pesan Error:", error);
+    return apiResponse(
+      { message: error.message || "Gagal memperbarui status pesan." },
+      500,
     );
   }
 }
@@ -106,21 +93,32 @@ export async function DELETE(request) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return createNoStoreResponse({ message: "ID pesan wajib diisi." }, 400);
+      return apiResponse({ message: "ID pesan wajib diisi." }, 400);
     }
 
-    const supabase = createAdminClient();
+    const existing = await prisma.kontak_pesan.findUnique({
+      where: { id: id }
+    });
 
-    const { error } = await supabase.from(table).delete().eq("id", id);
+    await prisma.kontak_pesan.delete({
+      where: { id: id }
+    });
 
-    if (error) throw error;
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.DELETE,
+      entity: AUDIT_ENTITIES.KONTAK_PESAN,
+      entityId: id,
+      summary: `Menghapus pesan dari: ${existing?.sender_name || id}`,
+      before: existing,
+      request,
+    });
 
-    return createNoStoreResponse({ message: "Pesan berhasil dihapus." });
+    return apiResponse({ message: "Pesan berhasil dihapus." });
   } catch (error) {
-    return createNoStoreResponse(
-      {
-        message: error.message || "Gagal menghapus pesan.",
-      },
+    console.error("DELETE Pesan Error:", error);
+    return apiResponse(
+      { message: error.message || "Gagal menghapus pesan." },
       500,
     );
   }

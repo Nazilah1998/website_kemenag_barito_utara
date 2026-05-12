@@ -1,30 +1,19 @@
-// src/app/api/admin/laporan/upload/route.js
-
-import { NextResponse } from "next/server";
-import { requireAdminAccess } from "@/lib/admin-guard";
+import { apiResponse } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   buildSafePdfFilename,
   validateDocumentPayload,
   validatePdfFile,
 } from "@/lib/laporan-upload-validation";
-import { logError, logInfo, logWarn } from "@/lib/logger";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request) {
-  const guard = await requireAdminAccess();
-
-  if (!guard.ok) {
-    logWarn("admin_laporan_upload_denied", {
-      status: guard.status,
-      reason: guard.message,
-    });
-    return NextResponse.json(
-      { message: guard.message },
-      { status: guard.status },
-    );
-  }
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
     const formData = await request.formData();
@@ -40,67 +29,43 @@ export async function POST(request) {
     });
 
     if (!payloadValidation.ok) {
-      return NextResponse.json(
-        { message: payloadValidation.message },
-        { status: 400 },
-      );
+      return apiResponse({ message: payloadValidation.message }, 400);
     }
 
     const fileValidation = validatePdfFile(file);
     if (!fileValidation.ok) {
-      return NextResponse.json(
-        { message: fileValidation.message },
-        { status: 400 },
-      );
+      return apiResponse({ message: fileValidation.message }, 400);
     }
 
     if (!categoryId && !categorySlug) {
-      return NextResponse.json(
-        { message: "Kategori dokumen tidak valid." },
-        { status: 400 },
-      );
+      return apiResponse({ message: "Kategori dokumen tidak valid." }, 400);
     }
 
     let category = null;
 
     if (categoryId) {
-      const { data } = await guard.supabase
-        .from("report_categories")
-        .select("id, slug, title, is_active")
-        .eq("id", categoryId)
-        .eq("is_active", true)
-        .maybeSingle();
-      if (data) category = data;
+      category = await prisma.report_categories.findFirst({
+        where: { id: categoryId, is_active: true }
+      });
     }
 
     if (!category && categorySlug) {
-      const { data } = await guard.supabase
-        .from("report_categories")
-        .select("id, slug, title, is_active")
-        .eq("slug", categorySlug)
-        .eq("is_active", true)
-        .maybeSingle();
-      if (data) category = data;
+      category = await prisma.report_categories.findFirst({
+        where: { slug: categorySlug, is_active: true }
+      });
     }
 
     if (!category) {
-      logWarn("admin_laporan_upload_category_not_found", {
-        adminUserId: guard.user?.id || null,
-        categoryId,
-        categorySlug,
-      });
-      return NextResponse.json(
-        { message: "Kategori dokumen tidak ditemukan." },
-        { status: 404 },
-      );
+      return apiResponse({ message: "Kategori dokumen tidak ditemukan." }, 404);
     }
 
     const filename = buildSafePdfFilename(file.name, category.slug);
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const storagePath = `laporan/${category.slug}/${filename}`;
+    const supabase = createAdminClient();
 
-    const { error: uploadError } = await guard.supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("laporan-documents")
       .upload(storagePath, buffer, {
         contentType: "application/pdf",
@@ -108,28 +73,18 @@ export async function POST(request) {
       });
 
     if (uploadError) {
-      logError("admin_laporan_upload_storage_error", {
-        adminUserId: guard.user?.id || null,
-        categoryId: category.id,
-        storagePath,
-        message: uploadError.message,
-      });
-      return NextResponse.json(
-        { message: "Gagal mengupload file dokumen." },
-        { status: 500 },
-      );
+      console.error("admin_laporan_upload_storage_error", uploadError);
+      return apiResponse({ message: "Gagal mengupload file dokumen." }, 500);
     }
 
-    const { data: publicUrlData } = guard.supabase.storage
+    const { data: publicUrlData } = supabase.storage
       .from("laporan-documents")
       .getPublicUrl(storagePath);
 
     const fileUrl = publicUrlData?.publicUrl || "";
 
-    // BUG FIX: insert ke tabel yang benar
-    const { data: document, error: insertError } = await guard.supabase
-      .from("report_documents")
-      .insert({
+    const document = await prisma.report_documents.create({
+      data: {
         category_id: category.id,
         title: payloadValidation.data.title,
         description: payloadValidation.data.description || null,
@@ -139,73 +94,32 @@ export async function POST(request) {
         file_path: storagePath,
         file_url: fileUrl,
         mime_type: "application/pdf",
-        file_size: file.size,
+        file_size: BigInt(file.size || 0),
         sort_order: 0,
-        view_count: 0,
-        created_by: guard.user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select("*")
-      .single();
-
-    if (insertError) {
-      // Rollback: hapus file yang sudah terupload
-      await guard.supabase.storage
-        .from("laporan-documents")
-        .remove([storagePath]);
-
-      logError("admin_laporan_upload_insert_error", {
-        adminUserId: guard.user?.id || null,
-        categoryId: category.id,
-        message: insertError.message,
-      });
-      return NextResponse.json(
-        { message: "Gagal menyimpan data dokumen." },
-        { status: 500 },
-      );
-    }
-
-    logInfo("admin_laporan_upload_success", {
-      adminUserId: guard.user?.id || null,
-      documentId: document.id,
-      categoryId: category.id,
-      isPublished: document.is_published,
+        view_count: BigInt(0),
+        created_by: auth.session.user.id,
+      }
     });
 
     await recordAudit({
-      session: guard.session,
+      session: auth.session,
       action: AUDIT_ACTIONS.CREATE,
       entity: AUDIT_ENTITIES.LAPORAN_DOKUMEN,
       entityId: document?.id,
       summary: `Menambah dokumen laporan "${document?.title || payloadValidation.data.title}"`,
-      after: {
-        id: document?.id,
-        category_id: category.id,
-        category_slug: category.slug,
-        title: document?.title,
-        year: document?.year,
-        is_published: document?.is_published,
-        file_name: document?.file_name,
-        file_size: document?.file_size,
-      },
+      after: document,
       request,
     });
 
-    return NextResponse.json({
+    return apiResponse({
       message: "Dokumen berhasil diupload.",
       document,
     });
   } catch (error) {
-    logError("admin_laporan_upload_unhandled_error", {
-      adminUserId: guard.user?.id || null,
-      message: error?.message || "Unknown error",
-    });
-    return NextResponse.json(
-      {
-        message: error?.message || "Terjadi kesalahan saat mengupload dokumen.",
-      },
-      { status: 500 },
+    console.error("admin_laporan_upload_unhandled_error", error);
+    return apiResponse(
+      { message: error?.message || "Terjadi kesalahan saat mengupload dokumen." },
+      500,
     );
   }
 }

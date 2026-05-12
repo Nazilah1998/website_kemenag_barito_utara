@@ -78,6 +78,26 @@ export default function AdminForgotPasswordClient() {
                       <EyeIcon isOpen={f.showPassword} />
                     </button>
                   </div>
+                  
+                  {/* Password Strength Indicator */}
+                  {f.password && (
+                    <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Security Level</span>
+                        <span className={`text-[9px] font-black uppercase tracking-widest ${f.strength.score === 1 ? "text-rose-500" : f.strength.score === 2 ? "text-amber-500" : "text-emerald-500"}`}>
+                          {f.strength.label}
+                        </span>
+                      </div>
+                      <div className="flex gap-1.5 h-1">
+                        {[1, 2, 3].map((s) => (
+                          <div 
+                            key={s} 
+                            className={`flex-1 rounded-full transition-all duration-500 ${s <= f.strength.score ? f.strength.color : "bg-slate-100 dark:bg-white/5"}`} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="group">
@@ -115,13 +135,36 @@ export default function AdminForgotPasswordClient() {
                 <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white">Berhasil!</h2>
                 <p className="text-sm font-medium text-slate-400 leading-relaxed">Password Anda telah diperbarui. Silakan gunakan password baru untuk masuk ke Panel Kendali.</p>
               </div>
-              <Link href="/admin/login" className="inline-flex h-14 w-full items-center justify-center rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black dark:bg-white dark:text-black">
+              <Link href="/admin/login" className="inline-flex h-14 w-full items-center justify-center rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-slate-800 active:scale-[0.98] dark:bg-white dark:text-black dark:hover:bg-slate-200">
                 Kembali ke Login
               </Link>
             </div>
           )}
+          
+          {f.step === 4 && (
+            <div className="text-center space-y-6 animate-in zoom-in duration-300">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-blue-500 text-white shadow-2xl shadow-blue-500/20">
+                <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white">Cek Email!</h2>
+                <p className="text-sm font-medium text-slate-400 leading-relaxed">
+                  Kami telah mengirimkan instruksi pemulihan ke <strong>{f.email}</strong>. 
+                  Silakan cek kotak masuk atau folder spam Anda.
+                </p>
+              </div>
+              <button 
+                onClick={() => f.setStep(1)}
+                className="inline-flex h-14 w-full items-center justify-center rounded-xl bg-slate-100 text-xs font-black uppercase tracking-[0.25em] text-slate-600 transition-all hover:bg-slate-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10"
+              >
+                Gunakan Email Lain
+              </button>
+            </div>
+          )}
 
-          {f.step !== 3 && (
+          {(f.step !== 3 && f.step !== 4) && (
             <div className="mt-8 flex flex-col items-center gap-4 text-center">
               <div className="h-px w-10 bg-slate-100 dark:bg-white/5" />
               <Link href="/admin/login" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">

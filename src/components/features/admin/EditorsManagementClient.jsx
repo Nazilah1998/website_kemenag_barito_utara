@@ -54,6 +54,7 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
                 onOpenPermissions={e.openPermissions}
                 onOpenRoleModal={e.openRoleModal}
                 onDelete={e.handleDelete}
+                onUnlock={e.handleUnlock}
                 onOpenVerifyModal={e.openVerifyModal}
                 busyAction={e.busyAction}
                 getPermissionCount={e.getPermissionCount}

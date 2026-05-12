@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -33,20 +33,14 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-async function saveToSupabase(payload) {
+async function saveToDatabase(payload) {
   try {
-    const supabase = createAdminClient();
-    const { error } = await supabase.from("kontak_pesan").insert(payload);
-
-    if (error) {
-      console.error("Gagal menyimpan pesan kontak:", error);
-      return { ok: false, error: error.message };
-    }
-
+    await prisma.kontak_pesan.create({
+      data: payload
+    });
     return { ok: true };
   } catch (error) {
-    // Supabase belum dikonfigurasi atau tabel belum ada.
-    console.error("Supabase admin tidak tersedia:", error?.message);
+    console.error("Gagal menyimpan pesan kontak ke Prisma:", error);
     return { ok: false, error: error?.message };
   }
 }
@@ -80,7 +74,7 @@ export async function POST(request) {
     );
   }
 
-  // Honeypot: jika diisi berarti bot.
+  // Honeypot
   if (cleanString(body?.website, 200)) {
     return jsonResponse({ message: "Pesan berhasil dikirim." }, 200);
   }
@@ -132,7 +126,7 @@ export async function POST(request) {
     status: "baru",
   };
 
-  const saved = await saveToSupabase(record);
+  const saved = await saveToDatabase(record);
 
   if (!saved.ok) {
     console.info("[kontak] pesan diterima (fallback log):", record);

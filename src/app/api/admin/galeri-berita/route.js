@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateAdmin } from "@/lib/cms-utils";
@@ -7,28 +7,12 @@ import {
   uploadBase64Image,
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 const MAX_IMAGE_SIZE_KB = 100;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
-
-function createHttpError(message, status = 400) {
-  const error = new Error(message);
-  error.status = status;
-  return error;
-}
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-}
 
 function cleanString(value = "") {
   return String(value || "").trim();
@@ -59,7 +43,7 @@ function getBase64PayloadMeta(dataUrl) {
   const match = input.match(/^data:(.+?);base64,(.+)$/);
 
   if (!match) {
-    throw createHttpError("Format file galeri tidak valid.", 400);
+    throw new Error("Format file galeri tidak valid.");
   }
 
   const base64Payload = match[2];
@@ -67,9 +51,8 @@ function getBase64PayloadMeta(dataUrl) {
   const sizeKB = Math.ceil(sizeBytes / 1024);
 
   if (sizeBytes > MAX_IMAGE_SIZE_BYTES) {
-    throw createHttpError(
+    throw new Error(
       `Ukuran cover galeri setelah kompresi masih ${sizeKB} KB. Maksimal ${MAX_IMAGE_SIZE_KB} KB.`,
-      400,
     );
   }
 
@@ -91,10 +74,10 @@ function resolvePublishedAt(value) {
   const parsedDate = sourceValue ? new Date(sourceValue) : new Date();
 
   if (Number.isNaN(parsedDate.getTime())) {
-    throw createHttpError("Tanggal publish galeri tidak valid.", 400);
+    throw new Error("Tanggal publish galeri tidak valid.");
   }
 
-  return parsedDate.toISOString();
+  return parsedDate;
 }
 
 function revalidateGaleriPaths(slug = "") {
@@ -175,52 +158,32 @@ export async function GET(request) {
     const beritaId = cleanString(searchParams.get("berita_id"));
 
     if (!beritaId) {
-      throw createHttpError("ID berita wajib ada.", 400);
+      return apiResponse({ message: "ID berita wajib ada." }, 400);
     }
 
-    const supabase = createAdminClient();
+    const data = await prisma.galeri.findUnique({
+      where: {
+        source_type_source_id: {
+          source_type: "berita",
+          source_id: beritaId
+        }
+      }
+    });
 
-    const { data, error } = await supabase
-      .from("galeri")
-      .select(
-        `
-          id,
-          title,
-          image_url,
-          image_size_kb,
-          image_size_bytes,
-          link_url,
-          published_at,
-          source_type,
-          source_id,
-          is_published
-        `,
-      )
-      .eq("source_type", "berita")
-      .eq("source_id", beritaId)
-      .maybeSingle();
-
-    if (error) {
-      throw error;
-    }
-
-    return createNoStoreResponse({
-      item: data ?? null,
+    return apiResponse({
+      item: data,
     });
   } catch (error) {
-    return createNoStoreResponse(
-      {
-        message: error.message || "Gagal mengambil data galeri.",
-      },
-      error.status || 500,
+    console.error("GET Galeri-Berita Error:", error);
+    return apiResponse(
+      { message: error.message || "Gagal mengambil data galeri." },
+      500,
     );
   }
 }
 
 export async function POST(request) {
-  console.log("POST /api/admin/galeri-berita hit");
   const auth = await validateAdmin();
-
   if (!auth.ok) return auth.response;
 
   try {
@@ -233,76 +196,65 @@ export async function POST(request) {
     const linkUrl = resolveLinkUrl(body?.link_url, slug);
 
     if (!beritaId) {
-      throw createHttpError("ID berita wajib ada.", 400);
+      return apiResponse({ message: "ID berita wajib ada." }, 400);
     }
 
     if (!title) {
-      throw createHttpError("Judul berita wajib ada.", 400);
+      return apiResponse({ message: "Judul berita wajib ada." }, 400);
     }
 
     if (!slug) {
-      throw createHttpError("Slug berita wajib ada.", 400);
+      return apiResponse({ message: "Slug berita wajib ada." }, 400);
     }
 
-    const publishedAtIso = resolvePublishedAt(body?.published_at);
+    const publishedAt = resolvePublishedAt(body?.published_at);
 
-    const { data: beritaItem, error: beritaLookupError } = await supabase
-      .from("berita")
-      .select("id, slug, cover_image, cover_size_kb, cover_size_bytes")
-      .eq("id", beritaId)
-      .maybeSingle();
+    const beritaItem = await prisma.berita.findUnique({
+      where: { id: beritaId },
+      select: { id: true, slug: true, cover_image: true, cover_size_kb: true, cover_size_bytes: true }
+    });
 
-    if (beritaLookupError) {
-      throw beritaLookupError;
-    }
-
-    const { data: existingItem, error: existingError } = await supabase
-      .from("galeri")
-      .select("id, image_url, image_size_kb, image_size_bytes")
-      .eq("source_type", "berita")
-      .eq("source_id", beritaId)
-      .maybeSingle();
-
-    if (existingError) {
-      throw existingError;
-    }
+    const existingItem = await prisma.galeri.findUnique({
+      where: {
+        source_type_source_id: {
+          source_type: "berita",
+          source_id: beritaId
+        }
+      }
+    });
 
     const finalImage = await resolveGaleriImage({
       supabase,
       body,
       currentUrl: existingItem?.image_url || null,
       currentSizeKB: existingItem?.image_size_kb || 0,
-      currentSizeBytes: existingItem?.image_size_bytes || 0,
+      currentSizeBytes: Number(existingItem?.image_size_bytes || 0),
       beritaFallbackUrl: beritaItem?.cover_image || "",
       beritaFallbackSizeKB: beritaItem?.cover_size_kb || 0,
-      beritaFallbackSizeBytes: beritaItem?.cover_size_bytes || 0,
+      beritaFallbackSizeBytes: Number(beritaItem?.cover_size_bytes || 0),
       slugSeed: slug || title,
     });
 
     if (!finalImage.publicUrl) {
-      throw createHttpError("Gambar galeri wajib diupload.", 400);
+      return apiResponse({ message: "Gambar galeri wajib diupload." }, 400);
     }
 
     if (existingItem) {
-      const { error: updateError } = await supabase
-        .from("galeri")
-        .update({
+      const data = await prisma.galeri.update({
+        where: { id: existingItem.id },
+        data: {
           title,
           image_url: finalImage.publicUrl,
           image_size_kb: finalImage.sizeKB,
-          image_size_bytes: finalImage.sizeBytes,
+          image_size_bytes: BigInt(finalImage.sizeBytes),
           link_url: linkUrl,
           source_type: "berita",
           source_id: beritaId,
           is_published: true,
-          published_at: publishedAtIso,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existingItem.id);
-
-      if (updateError) {
-        throw updateError;
-      }
+          published_at: publishedAt,
+          updated_at: new Date(),
+        }
+      });
 
       revalidateGaleriPaths(slug);
 
@@ -312,53 +264,31 @@ export async function POST(request) {
         entity: AUDIT_ENTITIES.GALERI,
         entityId: existingItem.id,
         summary: `Memperbarui item galeri dari berita "${title}"`,
-        before: {
-          image_url: existingItem?.image_url || null,
-          image_size_kb: existingItem?.image_size_kb || 0,
-          image_size_bytes: existingItem?.image_size_bytes || 0,
-          source_type: "berita",
-          source_id: beritaId,
-        },
-        after: {
-          title,
-          image_url: finalImage.publicUrl,
-          image_size_kb: finalImage.sizeKB,
-          image_size_bytes: finalImage.sizeBytes,
-          link_url: linkUrl,
-          source_type: "berita",
-          source_id: beritaId,
-          is_published: true,
-          published_at: publishedAtIso,
-        },
+        before: existingItem,
+        after: data,
         request,
       });
 
-      return createNoStoreResponse({
+      return apiResponse({
         message: `Item galeri berhasil diperbarui. Ukuran gambar aktif ${finalImage.sizeKB} KB.`,
         mode: "updated",
         gallery_id: existingItem.id,
       });
     }
 
-    const { data: insertedItem, error: insertError } = await supabase
-      .from("galeri")
-      .insert({
+    const insertedItem = await prisma.galeri.create({
+      data: {
         title,
         image_url: finalImage.publicUrl,
         image_size_kb: finalImage.sizeKB,
-        image_size_bytes: finalImage.sizeBytes,
+        image_size_bytes: BigInt(finalImage.sizeBytes),
         link_url: linkUrl,
         source_type: "berita",
         source_id: beritaId,
         is_published: true,
-        published_at: publishedAtIso,
-      })
-      .select("id")
-      .single();
-
-    if (insertError) {
-      throw insertError;
-    }
+        published_at: publishedAt,
+      }
+    });
 
     revalidateGaleriPaths(slug);
 
@@ -368,21 +298,11 @@ export async function POST(request) {
       entity: AUDIT_ENTITIES.GALERI,
       entityId: insertedItem?.id ?? null,
       summary: `Menambah item galeri dari berita "${title}"`,
-      after: {
-        title,
-        image_url: finalImage.publicUrl,
-        image_size_kb: finalImage.sizeKB,
-        image_size_bytes: finalImage.sizeBytes,
-        link_url: linkUrl,
-        source_type: "berita",
-        source_id: beritaId,
-        is_published: true,
-        published_at: publishedAtIso,
-      },
+      after: insertedItem,
       request,
     });
 
-    return createNoStoreResponse({
+    return apiResponse({
       message: `Berita berhasil dikirim ke galeri. Ukuran gambar tersimpan ${finalImage.sizeKB} KB.`,
       mode: "created",
       gallery_id: insertedItem?.id ?? null,
@@ -390,11 +310,9 @@ export async function POST(request) {
   } catch (error) {
     console.error("API /api/admin/galeri/from-berita error:", error);
 
-    return createNoStoreResponse(
-      {
-        message: error.message || "Gagal mengirim berita ke galeri.",
-      },
-      error.status || 500,
+    return apiResponse(
+      { message: error.message || "Gagal mengirim berita ke galeri." },
+      500,
     );
   }
 }
@@ -408,23 +326,19 @@ export async function DELETE(request) {
     const id = cleanString(searchParams.get("id"));
 
     if (!id) {
-      throw createHttpError("ID galeri wajib ada.", 400);
+      return apiResponse({ message: "ID galeri wajib ada." }, 400);
     }
 
     const supabase = createAdminClient();
 
-    const { data: item, error: lookupError } = await supabase
-      .from("galeri")
-      .select("id, title, image_url, source_id")
-      .eq("id", id)
-      .maybeSingle();
+    const item = await prisma.galeri.findUnique({
+      where: { id: id }
+    });
 
-    if (lookupError) throw lookupError;
     if (!item) {
-      throw createHttpError("Item galeri tidak ditemukan.", 404);
+      return apiResponse({ message: "Item galeri tidak ditemukan." }, 404);
     }
 
-    // Hapus file dari storage
     if (item.image_url) {
       try {
         await removeStorageFileByPublicUrl(supabase, item.image_url);
@@ -433,13 +347,9 @@ export async function DELETE(request) {
       }
     }
 
-    // Hapus record dari database
-    const { error: deleteError } = await supabase
-      .from("galeri")
-      .delete()
-      .eq("id", id);
-
-    if (deleteError) throw deleteError;
+    await prisma.galeri.delete({
+      where: { id: id }
+    });
 
     revalidateGaleriPaths();
 
@@ -453,15 +363,14 @@ export async function DELETE(request) {
       request,
     });
 
-    return createNoStoreResponse({
+    return apiResponse({
       message: "Item galeri berhasil dihapus.",
     });
   } catch (error) {
-    return createNoStoreResponse(
-      {
-        message: error.message || "Gagal menghapus item galeri.",
-      },
-      error.status || 500,
+    console.error("DELETE Galeri-Berita Error:", error);
+    return apiResponse(
+      { message: error.message || "Gagal menghapus item galeri." },
+      500,
     );
   }
 }

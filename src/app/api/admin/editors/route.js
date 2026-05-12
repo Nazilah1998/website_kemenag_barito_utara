@@ -1,15 +1,8 @@
-import { NextResponse } from "next/server";
-import { getCurrentSessionContext } from "@/lib/auth";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { apiResponse } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-function json(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" },
-  });
-}
 
 function isValidUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -19,75 +12,40 @@ function isValidUuid(value) {
 
 export async function GET() {
   try {
-    const session = await getCurrentSessionContext();
+    const auth = await validateAdmin();
+    if (!auth.ok) return auth.response;
 
-    if (!session?.isAuthenticated) {
-      return json({ message: "Unauthorized." }, 401);
-    }
-
-    if (session?.role !== "super_admin") {
-      return json(
+    if (auth.session?.role !== "super_admin") {
+      return apiResponse(
         { message: "Hanya super admin yang dapat mengakses data editor." },
         403,
       );
     }
 
-    const supabase = createAdminClient();
-
-    const { data: requests, error } = await supabase
-      .from("editor_requests")
-      .select(
-        `
-        user_id,
-        full_name,
-        email,
-        unit_name,
-        status,
-        requested_at,
-        reviewed_at,
-        reviewed_by,
-        review_notes,
-        profiles:user_id (
-          id,
-          role,
-          is_active
-        )
-      `,
-      )
-      .order("requested_at", { ascending: false });
-
-    if (error) {
-      throw error;
-    }
-
-    const userIds = (requests || []).map((item) => item.user_id);
-
-    let permissionsMap = new Map();
-
-    if (userIds.length) {
-      const { data: rows, error: permissionsError } = await supabase
-        .from("user_permissions")
-        .select("user_id, permission")
-        .in("user_id", userIds);
-
-      if (permissionsError) {
-        throw permissionsError;
-      }
-
-      permissionsMap = new Map();
-
-      for (const row of rows || []) {
-        const current = permissionsMap.get(row.user_id) || [];
-        current.push(row.permission);
-        permissionsMap.set(row.user_id, current);
-      }
-    }
+    const requests = await prisma.editor_requests.findMany({
+      include: {
+        profiles_editor_requests_user_idToprofiles: {
+          select: {
+            id: true,
+            role: true,
+            is_active: true,
+            user_permissions: {
+              select: {
+                permission: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { requested_at: 'desc' }
+    });
 
     const invalidMfaUserIds = {};
 
-    const editors = (requests || []).map((item) => {
+    const editors = requests.map((item) => {
+      const profile = item.profiles_editor_requests_user_idToprofiles;
       const status = String(item.status || "").toLowerCase();
-      const rawSystemRole = String(item.profiles?.role || "").toLowerCase();
+      const rawSystemRole = String(profile?.role || "").toLowerCase();
       const normalizedRole =
         rawSystemRole === "admin" || rawSystemRole === "editor"
           ? rawSystemRole
@@ -101,6 +59,9 @@ export async function GET() {
           "ID auth belum UUID valid. Sinkronkan data editor sebelum setup MFA.";
       }
 
+      // Map permissions from the relation
+      const permissions = (profile?.user_permissions || []).map(p => p.permission);
+
       return {
         user_id: item.user_id,
         full_name: item.full_name,
@@ -113,8 +74,8 @@ export async function GET() {
         review_notes: item.review_notes,
         role: status === "approved" ? "editor" : normalizedRole,
         system_role: rawSystemRole || "editor",
-        is_active: Boolean(item.profiles?.is_active),
-        permissions: permissionsMap.get(item.user_id) || [],
+        is_active: Boolean(profile?.is_active),
+        permissions: permissions,
         mfa_setup_disabled: !validUuid,
         mfa_setup_reason: validUuid
           ? ""
@@ -122,9 +83,10 @@ export async function GET() {
       };
     });
 
-    return json({ editors, invalidMfaUserIds });
+    return apiResponse({ editors, invalidMfaUserIds });
   } catch (error) {
-    return json(
+    console.error("GET Editors Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal memuat daftar editor." },
       500,
     );

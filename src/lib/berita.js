@@ -1,21 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import prisma from "@/lib/prisma";
 import { normalizeCoverImageUrl } from "@/lib/cover-image";
-
-export const BERITA_SELECT_FIELDS = `
-  id,
-  slug,
-  title,
-  excerpt,
-  category,
-  content,
-  cover_image,
-  is_published,
-  published_at,
-  views,
-  created_at,
-  updated_at
-`;
 
 export function formatDateIndonesia(value) {
   if (!value) return "-";
@@ -97,7 +82,7 @@ export function filterAndSortBerita(items = [], filters = {}) {
   const sort = String(filters.sort || "newest");
 
   const filtered = items.filter((item) => {
-    // 1. Keyword Match (All keywords must be found somewhere)
+    // 1. Keyword Match
     const matchKeyword = keywords.every((kw) => {
       const searchable = [
         item.title,
@@ -137,45 +122,28 @@ export function filterAndSortBerita(items = [], filters = {}) {
   });
 }
 
-/**
- * Mengambil semua berita dengan filter dasar.
- * Tetap disediakan untuk kompatibilitas, tapi sebaiknya gunakan query terarah.
- */
 export async function getAllBerita(options = {}) {
   const { includeDrafts = false, limit = null } = options;
 
-  // Hanya gunakan noStore jika benar-benar butuh data real-time terbaru (misal admin)
   if (includeDrafts) noStore();
 
-  const supabase = await createClient();
+  try {
+    const data = await prisma.berita.findMany({
+      where: includeDrafts ? {} : { is_published: true },
+      orderBy: [
+        { published_at: 'desc' },
+        { created_at: 'desc' }
+      ],
+      take: limit ? Number(limit) : undefined
+    });
 
-  let query = supabase
-    .from("berita")
-    .select(BERITA_SELECT_FIELDS)
-    .order("published_at", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  if (!includeDrafts) {
-    query = query.eq("is_published", true);
-  }
-
-  if (limit) {
-    query = query.limit(limit);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
+    return (data || []).map(normalizeBerita);
+  } catch (error) {
     console.error("getAllBerita error:", error);
     return [];
   }
-
-  return (data || []).map(normalizeBerita);
 }
 
-/**
- * Optimasi: Langsung limit di database.
- */
 export async function getLatestBerita(limit = 3) {
   return getAllBerita({ limit });
 }
@@ -185,28 +153,21 @@ export async function getBeritaBySlug(slug, options = {}) {
   const safeSlug = String(slug || "").trim();
 
   if (!safeSlug) return null;
-
   if (includeDrafts) noStore();
 
-  const supabase = await createClient();
+  try {
+    const data = await prisma.berita.findFirst({
+      where: {
+        slug: safeSlug,
+        ...(includeDrafts ? {} : { is_published: true })
+      }
+    });
 
-  let query = supabase
-    .from("berita")
-    .select(BERITA_SELECT_FIELDS)
-    .eq("slug", safeSlug);
-
-  if (!includeDrafts) {
-    query = query.eq("is_published", true);
-  }
-
-  const { data, error } = await query.maybeSingle();
-
-  if (error) {
+    return data ? normalizeBerita(data) : null;
+  } catch (error) {
     console.error("getBeritaBySlug error:", error);
     return null;
   }
-
-  return data ? normalizeBerita(data) : null;
 }
 
 export function estimateReadingTime(value = "", wordsPerMinute = 200) {
@@ -220,78 +181,70 @@ export function estimateReadingTime(value = "", wordsPerMinute = 200) {
   return Math.max(1, Math.ceil(totalWords / wordsPerMinute));
 }
 
-/**
- * Optimasi: Cari berita terkait langsung di database.
- */
 export async function getRelatedBerita(currentSlug, category, limit = 3) {
-  const supabase = await createClient();
+  try {
+    const results = await prisma.berita.findMany({
+      where: {
+        is_published: true,
+        category: category,
+        slug: { not: currentSlug }
+      },
+      orderBy: { published_at: 'desc' },
+      take: limit
+    });
 
-  const { data, error } = await supabase
-    .from("berita")
-    .select(BERITA_SELECT_FIELDS)
-    .eq("is_published", true)
-    .eq("category", category)
-    .neq("slug", currentSlug)
-    .order("published_at", { ascending: false })
-    .limit(limit);
+    const normalized = results.map(normalizeBerita);
 
-  if (error) {
+    if (normalized.length < limit) {
+      const fallback = await prisma.berita.findMany({
+        where: {
+          is_published: true,
+          slug: { not: currentSlug },
+          category: { not: category }
+        },
+        orderBy: { published_at: 'desc' },
+        take: limit - normalized.length
+      });
+      normalized.push(...fallback.map(normalizeBerita));
+    }
+
+    return normalized;
+  } catch (error) {
     console.error("getRelatedBerita error:", error);
     return [];
   }
-
-  const results = (data || []).map(normalizeBerita);
-
-  // Jika kurang dari limit, ambil berita terbaru lainnya sebagai fallback
-  if (results.length < limit) {
-    const { data: fallbackData } = await supabase
-      .from("berita")
-      .select(BERITA_SELECT_FIELDS)
-      .eq("is_published", true)
-      .neq("slug", currentSlug)
-      .neq("category", category)
-      .order("published_at", { ascending: false })
-      .limit(limit - results.length);
-
-    if (fallbackData) {
-      results.push(...fallbackData.map(normalizeBerita));
-    }
-  }
-
-  return results;
 }
 
-/**
- * Optimasi: Cari berita sebelum dan sesudah berdasarkan tanggal.
- */
 export async function getAdjacentBerita(currentBerita) {
   if (!currentBerita?.isoDate) return { newer: null, older: null };
 
-  const supabase = await createClient();
   const date = currentBerita.isoDate;
 
-  // Ambil yang lebih baru (yang dipublish setelah berita ini)
-  const { data: newerData } = await supabase
-    .from("berita")
-    .select("slug, title")
-    .eq("is_published", true)
-    .gt("published_at", date)
-    .order("published_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  try {
+    const newerData = await prisma.berita.findFirst({
+      where: {
+        is_published: true,
+        published_at: { gt: date }
+      },
+      select: { slug: true, title: true },
+      orderBy: { published_at: 'asc' }
+    });
 
-  // Ambil yang lebih lama (yang dipublish sebelum berita ini)
-  const { data: olderData } = await supabase
-    .from("berita")
-    .select("slug, title")
-    .eq("is_published", true)
-    .lt("published_at", date)
-    .order("published_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    const olderData = await prisma.berita.findFirst({
+      where: {
+        is_published: true,
+        published_at: { lt: date }
+      },
+      select: { slug: true, title: true },
+      orderBy: { published_at: 'desc' }
+    });
 
-  return {
-    newer: newerData || null,
-    older: olderData || null,
-  };
+    return {
+      newer: newerData || null,
+      older: olderData || null,
+    };
+  } catch (error) {
+    console.error("getAdjacentBerita error:", error);
+    return { newer: null, older: null };
+  }
 }

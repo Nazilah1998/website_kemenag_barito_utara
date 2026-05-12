@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -16,38 +16,40 @@ function isAuthorized(request) {
 }
 
 async function runScheduledPublish() {
-  const supabase = createAdminClient();
-  const nowIso = new Date().toISOString();
+  const now = new Date();
 
   // Berita dengan publish_at <= sekarang tapi belum publish.
-  const { data: beritaPending, error: beritaErr } = await supabase
-    .from("berita")
-    .select("id, slug, title")
-    .eq("is_published", false)
-    .not("published_at", "is", null)
-    .lte("published_at", nowIso);
+  const beritaPending = await prisma.berita.findMany({
+    where: {
+      is_published: false,
+      published_at: {
+        not: null,
+        lte: now,
+      },
+    },
+    select: { id: true, slug: true, title: true },
+  });
 
   let beritaPublished = 0;
-  if (!beritaErr && beritaPending && beritaPending.length > 0) {
+  if (beritaPending && beritaPending.length > 0) {
     const ids = beritaPending.map((b) => b.id);
-    const { error: upErr } = await supabase
-      .from("berita")
-      .update({ is_published: true })
-      .in("id", ids);
+    
+    await prisma.berita.updateMany({
+      where: { id: { in: ids } },
+      data: { is_published: true },
+    });
 
-    if (!upErr) {
-      beritaPublished = ids.length;
-      for (const item of beritaPending) {
-        if (item.slug) revalidatePath(`/berita/${item.slug}`);
-      }
-      revalidatePath("/berita");
-      revalidatePath("/");
+    beritaPublished = ids.length;
+    for (const item of beritaPending) {
+      if (item.slug) revalidatePath(`/berita/${item.slug}`);
     }
+    revalidatePath("/berita");
+    revalidatePath("/");
   }
 
   return {
     beritaPublished,
-    ranAt: nowIso,
+    ranAt: now.toISOString(),
   };
 }
 

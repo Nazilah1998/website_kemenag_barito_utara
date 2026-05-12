@@ -14,6 +14,7 @@ export function EditorCard({
   onOpenPermissions,
   onOpenRoleModal,
   onDelete,
+  onUnlock,
   onOpenVerifyModal,
   busyAction,
   getPermissionCount,
@@ -23,6 +24,7 @@ export function EditorCard({
   const isApproved = editor.status === "approved";
   const isRejected = editor.status === "rejected";
   const isActive = Boolean(editor.is_active);
+  const isLocked = editor.lockout_until && new Date(editor.lockout_until) > new Date();
 
   const verifying =
     busyAction === `approve:${editor.user_id}` ||
@@ -44,6 +46,7 @@ export function EditorCard({
               {isPending && <Badge tone="amber">Pending Approval</Badge>}
               {isApproved && <Badge tone="emerald">Verified Account</Badge>}
               {isRejected && <Badge tone="rose">Account Rejected</Badge>}
+              {isLocked && <Badge tone="rose">ACCOUNT LOCKED</Badge>}
               <Badge tone={isActive ? "blue" : "slate"}>
                 {isActive ? "STATUS: AKTIF" : "STATUS: NONAKTIF"}
               </Badge>
@@ -115,6 +118,14 @@ export function EditorCard({
               loading={deleting}
               tone="rose"
             />
+            {isLocked && (
+              <IconButton
+                label="Unlock"
+                icon={<PowerIcon />}
+                onClick={() => onUnlock(editor)}
+                tone="emerald"
+              />
+            )}
           </div>
         </div>
       </div>

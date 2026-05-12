@@ -1,35 +1,31 @@
-import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { apiResponse } from "@/lib/prisma-helpers";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-function noStore(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store, max-age=0" },
-  });
-}
-
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const id = String(body?.id || "").trim();
 
     if (!id) {
-      return noStore({ message: "ID dokumen tidak valid." }, 400);
+      return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase.rpc("increment_document_views", {
-      target_id: id,
+    const document = await prisma.report_documents.update({
+      where: { id: id },
+      data: {
+        view_count: {
+          increment: 1
+        }
+      },
+      select: { view_count: true }
     });
 
-    if (error) throw error;
-
-    return noStore({ views: Number(data || 0) });
+    return apiResponse({ views: document.view_count });
   } catch (error) {
-    return noStore(
+    console.error("POST Laporan View Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal mencatat pembaca." },
       500,
     );

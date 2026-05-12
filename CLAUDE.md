@@ -20,15 +20,13 @@ Dokumen ini adalah instruksi konteks untuk AI coding assistant agar memahami str
 | Framework | Next.js 16.2.3 (App Router) |
 | Language | JavaScript (JSX) — **bukan TypeScript** |
 | Styling | Tailwind CSS v4 |
-| Database & Auth | Supabase (PostgreSQL + Auth) |
+| Database | **Prisma ORM** (Primary access) |
+| Infrastructure | Supabase (Postgres Host + Auth) |
 | Storage Media | Supabase Storage (bucket: `cms-media`) |
 | Hosting | Vercel |
-| Analytics | Vercel Analytics + Speed Insights |
 | AI Chatbot | Google Gemini API (gemini-flash-latest) |
 | PDF Viewer | react-pdf + pdfjs-dist |
-| CAPTCHA | react-google-recaptcha |
-| Testing Unit | Vitest + Testing Library |
-| Testing E2E | Playwright |
+| Testing | Vitest + Playwright |
 
 ---
 
@@ -38,17 +36,14 @@ Dokumen ini adalah instruksi konteks untuk AI coding assistant agar memahami str
 # Jalankan server development
 npm run dev
 
-# Build production
+# Buka Prisma Studio (Local DB UI)
+npx prisma studio
+
+# Build production (Otomatis generate prisma client)
 npm run build
 
-# Lint
-npm run lint
-
-# Unit test (run once)
+# Unit test
 npm run test
-
-# Unit test (watch mode)
-npm run test:watch
 
 # E2E test (Playwright)
 npm run test:e2e
@@ -63,61 +58,24 @@ npm run test:e2e
 
 ```
 /
+├── prisma/                     # Skema database & migrasi Prisma
+│   └── schema.prisma           # Single source of truth database
+│
 ├── src/
 │   ├── app/                    # Next.js App Router pages
-│   │   ├── (page).js           # Halaman publik
-│   │   ├── admin/              # Dashboard admin (auth-gated)
-│   │   ├── api/                # API routes (server-side)
-│   │   │   └── chat/route.js   # AI Chatbot endpoint (Gemini)
-│   │   ├── auth/               # Callback auth Supabase
-│   │   ├── berita/             # Halaman berita & detail
-│   │   ├── galeri/             # Halaman galeri foto
-│   │   ├── informasi/          # Halaman informasi publik
-│   │   ├── kontak/             # Halaman kontak
-│   │   ├── laporan/            # Laporan & akuntabilitas (PDF)
-│   │   ├── layanan/            # Halaman layanan publik
-│   │   ├── login/              # Halaman login admin
-│   │   ├── profil/             # Halaman profil instansi
-│   │   ├── survey/             # Halaman survey kepuasan
-│   │   ├── zona-integritas/    # Halaman zona integritas
-│   │   ├── layout.js           # Root layout (termasuk ChatWidget)
-│   │   └── globals.css         # Global CSS + Tailwind
-│   │
-│   ├── components/
-│   │   ├── common/             # Komponen generik (Button, Card, dll)
-│   │   ├── features/           # Komponen fitur spesifik
-│   │   │   ├── admin/          # Komponen admin dashboard
-│   │   │   ├── berita/         # Komponen halaman berita
-│   │   │   ├── chat/           # ChatWidget.js (AI chatbot)
-│   │   │   ├── galeri/         # Komponen galeri
-│   │   │   ├── home/           # Komponen homepage (Hero, Slider, dll)
-│   │   │   ├── kontak/         # Komponen halaman kontak
-│   │   │   ├── laporan/        # Komponen PDF laporan viewer
-│   │   │   ├── maintenance/    # Halaman maintenance
-│   │   │   ├── search/         # Komponen pencarian
-│   │   │   └── seo/            # Komponen SEO / structured data
-│   │   └── layout/             # Header, Footer, Navbar
-│   │
-│   ├── data/                   # Data statis lokal (JS objects)
-│   │   ├── apaKataMereka.js    # Quotes pimpinan
-│   │   ├── i18n.js             # Terjemahan ID/EN
-│   │   ├── laporan.js          # Kategori laporan & akuntabilitas
-│   │   ├── navigation.js       # Item menu navigasi
-│   │   ├── profile.js          # Profil instansi, pejabat, visi-misi
-│   │   ├── services.js         # Data layanan publik
-│   │   ├── site.js             # Info kontak & link situs
-│   │   └── ...                 # Data statis lainnya
+│   │   ├── admin/              # Dashboard admin (Prisma-powered)
+│   │   ├── api/                # API routes
+│   │   │   ├── admin/          # API Admin (Standar: validateAdmin + Prisma)
+│   │   │   └── chat/route.js   # AI Chatbot endpoint
+│   │   └── ...
 │   │
 │   ├── lib/                    # Utility & helper functions
-│   │   ├── supabase/           # Supabase clients (client, server, admin, proxy)
-│   │   ├── auth.js             # Helper autentikasi
-│   │   ├── berita.js           # Query berita dari Supabase
-│   │   ├── permissions.js      # Role-based access control
-│   │   ├── rate-limit.js       # Rate limiting untuk API
-│   │   ├── search.js           # Full-text search Supabase
-│   │   ├── storage-media.js    # Upload/delete file Supabase Storage
-│   │   ├── validation.js       # Validasi input form
-│   │   └── ...                 # Utility lainnya
+│   │   ├── prisma.js           # Singleton Prisma Client
+│   │   ├── prisma-helpers.js   # Helper BigInt & API response
+│   │   ├── audit.js            # Audit Logging via Prisma
+│   │   ├── cms-utils.js        # validateAdmin security logic
+│   │   ├── supabase/           # Supabase Auth & Storage clients
+│   │   └── ...
 │   │
 │   ├── context/                # React Context providers
 │   └── hooks/                  # Custom React hooks
@@ -142,50 +100,31 @@ npm run test:e2e
 File: `.env.local` (tidak di-commit ke Git)
 
 ```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://tcvwuttdwyufxvkacyal.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+# Database (Prisma)
+DATABASE_URL="postgresql://user:pass@host:5432/db"
+DIRECT_URL="postgresql://user:pass@host:5432/db"
+
+# Supabase (Auth & Storage)
+NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-NEXT_PUBLIC_SUPABASE_CMS_BUCKET=cms-media
 SUPABASE_SERVICE_ROLE_KEY=...
-
-# reCAPTCHA v2
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=...
-RECAPTCHA_SECRET_KEY=...
-
-# Google Gemini AI (untuk chatbot)
-GEMINI_API_KEY=...
+NEXT_PUBLIC_SUPABASE_CMS_BUCKET=cms-media
 ```
 
 > **Untuk deploy ke Vercel**: semua env variable di atas HARUS ditambahkan di Vercel Dashboard → Project Settings → Environment Variables.
 
 ---
 
-## 6. Supabase — Database & Auth
+### Peran Supabase (Post-Migration)
+- **Auth**: Mengelola user session dan login (src/lib/supabase/server.js).
+- **Storage**: Menyimpan file media (berita, galeri, laporan) di bucket `cms-media`.
+- **Database Host**: Menjadi infrastruktur fisik PostgreSQL.
 
-### Clients yang Tersedia
-- `src/lib/supabase/client.js` — untuk **Client Component** (`use client`)
-- `src/lib/supabase/server.js` — untuk **Server Component** dan API routes
-- `src/lib/supabase/admin.js` — untuk operasi admin (service role key)
-- `src/lib/supabase/proxy.js` — client via proxy layer
-
-### Tabel Utama di Database
-- `articles` — konten berita/artikel (dengan kolom: title, content, slug, cover_image, published_at, is_published, category)
-- `gallery_items` — item galeri foto
-- `laporan_files` — file PDF laporan (terhubung ke Supabase Storage)
-- `audit_logs` — log aktivitas admin
-- `profiles` — profil user (linked ke Supabase Auth)
-
-### Storage
-- Bucket: `cms-media`
-- Digunakan untuk: cover image berita, foto galeri, file PDF laporan
-- Helper upload: `src/lib/storage-media.js`
-
-### Auth & Permissions
-- Auth provider: Supabase Auth (email/password + Google OAuth)
-- Role-based access di: `src/lib/permissions.js` dan `src/lib/user-permissions.js`
-- Admin guard: `src/lib/admin-guard.js`
-- Email admin yang diizinkan didefinisikan di permissions
+### Peran Prisma (Primary)
+- **Data Access**: Semua operasi CRUD ke database wajib menggunakan Prisma Client (`src/lib/prisma.js`).
+- **Audit Log**: Log aktivitas admin otomatis menggunakan Prisma.
+- **BigInt Serialization**: Semua response API wajib melalui helper `apiResponse` (src/lib/prisma-helpers.js) untuk menangani tipe data BigInt.
+- **Transaction**: Gunakan `prisma.$transaction` untuk operasi multi-tabel (misal: hapus berita + galeri).
 
 ---
 
@@ -230,6 +169,8 @@ GEMINI_API_KEY=...
 - Komponen fitur spesifik → `src/components/features/[feature]/`.
 - Komponen generik/reusable → `src/components/common/`.
 - Komponen layout (header/footer) → `src/components/layout/`.
+- **ATURAN WAJIB UI (Banner)**: Setiap halaman (terutama public pages) HARUS menggunakan `src/components/common/PageBanner.jsx` di bagian atas (sebagai pengganti Hero Section manual) untuk menjaga konsistensi visual *breadcrumb* dan *header*.
+- **ATURAN WAJIB UI (Layout)**: Konten utama di bawah banner HARUS menggunakan kontainer *Full-Width* (mengalir bebas mengikuti *padding*) menggunakan `w-full px-6 sm:px-10 lg:px-16 xl:px-20`. DILARANG KERAS membatasi lebar konten dengan `max-w-*` yang menyisakan blank space tidak proporsional di tepi layar.
 
 ### API Routes
 - Selalu gunakan `NextResponse` dari `next/server`.

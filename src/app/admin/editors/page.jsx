@@ -1,36 +1,25 @@
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
 import EditorsManagementClient from "@/components/features/admin/EditorsManagementClient";
 
 export const dynamic = "force-dynamic";
 
 async function getEditors() {
-    const supabase = createAdminClient();
-
-    const { data: requests, error: requestError } = await supabase
-        .from("editor_requests")
-        .select(`
-      user_id,
-      full_name,
-      email,
-      unit_name,
-      status,
-      requested_at,
-      reviewed_at,
-      reviewed_by,
-      review_notes,
-      profiles:user_id (
-        id,
-        role,
-        is_active
-      )
-    `)
-        .order("requested_at", { ascending: false });
-
-    if (requestError) {
-        throw new Error(`Gagal memuat editor_requests: ${requestError.message}`);
-    }
+    const requests = await prisma.editor_requests.findMany({
+        include: {
+            profiles_editor_requests_user_idToprofiles: {
+                select: {
+                    id: true,
+                    role: true,
+                    is_active: true,
+                    failed_login_attempts: true,
+                    lockout_until: true,
+                }
+            }
+        },
+        orderBy: { requested_at: 'desc' }
+    });
 
     if (!requests?.length) {
         return [];
@@ -38,16 +27,10 @@ async function getEditors() {
 
     const userIds = requests.map((item) => item.user_id).filter(Boolean);
 
-    const { data: permissionRows, error: permissionError } = await supabase
-        .from("user_permissions")
-        .select("user_id, permission")
-        .in("user_id", userIds);
-
-    if (permissionError) {
-        throw new Error(
-            `Gagal memuat user_permissions: ${permissionError.message}`,
-        );
-    }
+    const permissionRows = await prisma.user_permissions.findMany({
+        where: { user_id: { in: userIds } },
+        select: { user_id: true, permission: true }
+    });
 
     const permissionMap = new Map();
 
@@ -57,23 +40,28 @@ async function getEditors() {
         permissionMap.set(row.user_id, current);
     }
 
-    return requests.map((item) => ({
-        user_id: item.user_id,
-        full_name: item.full_name,
-        email: item.email,
-        unit_name: item.unit_name || "-",
-        status: item.status,
-        requested_at: item.requested_at,
-        reviewed_at: item.reviewed_at,
-        reviewed_by: item.reviewed_by,
-        review_notes: item.review_notes,
-        role:
-            item.status === "approved"
-                ? item.profiles?.role || "editor"
-                : "editor",
-        is_active: Boolean(item.profiles?.is_active),
-        permissions: permissionMap.get(item.user_id) || [],
-    }));
+    return requests.map((item) => {
+        const profile = item.profiles_editor_requests_user_idToprofiles;
+        return {
+            user_id: item.user_id,
+            full_name: item.full_name,
+            email: item.email,
+            unit_name: item.unit_name || "-",
+            status: item.status,
+            requested_at: item.requested_at,
+            reviewed_at: item.reviewed_at,
+            reviewed_by: item.reviewed_by,
+            review_notes: item.review_notes,
+            role:
+                item.status === "approved"
+                    ? profile?.role || "editor"
+                    : "editor",
+            is_active: Boolean(profile?.is_active),
+            failed_attempts: profile?.failed_login_attempts || 0,
+            lockout_until: profile?.lockout_until || null,
+            permissions: permissionMap.get(item.user_id) || [],
+        };
+    });
 }
 
 export default async function AdminEditorsPage() {

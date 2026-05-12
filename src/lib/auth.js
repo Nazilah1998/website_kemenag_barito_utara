@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
+import prisma from "@/lib/prisma";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
 const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
@@ -46,30 +47,35 @@ export async function createServerSupabaseClient() {
   });
 }
 
-async function getUserProfile(supabase, userId) {
+async function getUserProfile(userId) {
   if (!userId) return null;
 
-  const candidates = [
-    { table: "profiles", column: "id" },
-    { table: "admin_users", column: "user_id" },
-    { table: "users", column: "id" },
-  ];
+  try {
+    // Try profiles first
+    const profile = await prisma.profiles.findUnique({
+      where: { id: userId }
+    });
 
-  for (const candidate of candidates) {
-    try {
-      const { data, error } = await supabase
-        .from(candidate.table)
-        .select("*")
-        .eq(candidate.column, userId)
-        .maybeSingle();
+    if (profile) return profile;
 
-      if (!error && data) {
-        return data;
-      }
-    } catch {}
+    // Fallback to admin_users if needed (though profiles should have it)
+    const adminUser = await prisma.admin_users.findUnique({
+      where: { user_id: userId }
+    });
+
+    if (adminUser) {
+      return {
+        ...adminUser,
+        id: adminUser.user_id,
+        role: adminUser.role
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error("getUserProfile error:", error);
+    return null;
   }
-
-  return null;
 }
 
 export async function getCurrentSessionContext() {
@@ -94,12 +100,11 @@ export async function getCurrentSessionContext() {
       isAuthenticated: false,
       isAdmin: false,
       isEditor: false,
-      // TAMBAHAN: flag gabungan untuk akses panel admin
       hasAdminAccess: false,
     };
   }
 
-  const profile = await getUserProfile(supabase, user.id);
+  const profile = await getUserProfile(user.id);
 
   const currentEmail = String(user?.email || profile?.email || "")
     .trim()
@@ -109,19 +114,15 @@ export async function getCurrentSessionContext() {
 
   if (currentEmail === SUPER_ADMIN_EMAIL) {
     profileRole = "super_admin";
-  } else {
+  } else if (!profileRole) {
     try {
-      const { data: adminRow, error: adminRowError } = await supabase
-        .from("admin_users")
-        .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const adminRow = await prisma.admin_users.findUnique({
+        where: { user_id: user.id },
+        select: { role: true }
+      });
 
-      if (!adminRowError) {
-        const adminRole = normalizeRole(adminRow?.role);
-        if (adminRole) {
-          profileRole = adminRole;
-        }
+      if (adminRow) {
+        profileRole = normalizeRole(adminRow.role);
       }
     } catch {}
   }
@@ -145,7 +146,6 @@ export async function getCurrentSessionContext() {
     isAuthenticated: true,
     isAdmin,
     isEditor,
-    // hasAdminAccess = true untuk semua role yang boleh masuk panel admin
     hasAdminAccess: isAdmin || isEditor,
   };
 }

@@ -4,56 +4,52 @@ Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js App Ro
 
 ## Teknologi utama
 
-- Next.js 16
-- React 19
-- Supabase
+- Next.js 16 (App Router)
+- Prisma ORM
+- Supabase (Auth & Storage)
 - Tailwind CSS 4
-- Vitest
-- Vercel Analytics
-- Vercel Speed Insights
+- Vitest & Playwright
+- Google Gemini AI (Chatbot)
 
 ## Struktur folder utama
 
 ```bash
 .
-├── docs/                 # dokumentasi teknis dan skema database
-├── public/               # aset statis, manifest, service worker, offline page
+├── prisma/               # Skema database & konfigurasi Prisma
+├── public/               # Aset statis & manifest
 ├── src/
-│   ├── app/              # routing App Router, halaman publik, admin, API route
-│   ├── components/       # komponen UI publik dan admin
-│   ├── context/          # global context, seperti tema dan bahasa
-│   ├── data/             # data statis / fallback
-│   └── lib/              # business logic, auth, validasi, helper domain, Supabase
-├── tests/                # unit test & domain test
-└── docs/schema.sql       # skema basis data
+│   ├── app/              # Routing App Router & API routes
+│   ├── components/       # Komponen UI (Public & Admin)
+│   ├── context/          # State management (Bahasa, Tema)
+│   ├── data/             # Data statis fallback
+│   └── lib/              # Business logic, Prisma Client, Auth, Storage
+├── tests/                # Unit test & E2E test
+└── docs/                 # Dokumentasi tambahan
 ```
 
 ## Menjalankan proyek secara lokal
 
 1. Install dependency:
-
 ```bash
 npm install
 ```
 
-2. Buat file `.env.local`:
-
+2. Buat file `.env.local` dan tambahkan:
 ```env
+DATABASE_URL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-3. Jalankan development server:
-
+3. Generate Prisma Client:
 ```bash
-npm run dev
+npx prisma generate
 ```
 
-4. Buka browser ke:
-
+4. Jalankan development server:
 ```bash
-http://localhost:3000
+npm run dev
 ```
 
 ## Scripts
@@ -72,25 +68,13 @@ npm run test:coverage
 
 ## Prinsip arsitektur proyek
 
-- Semua business logic dipusatkan di `src/lib`
-- Semua halaman admin wajib melalui auth dan permission yang konsisten
-- Data dinamis tidak boleh dijadikan source utama di `src/data`
-- Perubahan database harus terdokumentasi dan terversi
-- Fitur kritikal wajib memiliki test dasar
-
-## Modul penting
-
-### Halaman publik
-
-Melayani informasi resmi instansi seperti profil, layanan, berita, galeri, laporan, ppid, kontak, dan zona integritas.
-
-### Panel admin
-
-Digunakan untuk mengelola konten dinamis seperti berita, halaman, dokumen laporan, audit, dan autentikasi admin.
-
-### Integrasi database
-
-Menggunakan Supabase untuk penyimpanan data dan storage dokumen, dengan fallback data statis pada beberapa modul tertentu.
+- Semua akses database wajib melalui Prisma ORM.
+- Semua API response harus konsisten (menggunakan `apiResponse` helper).
+- Data sensitif tidak boleh diekspos ke client-side.
+- Audit log otomatis mencatat setiap perubahan data di panel admin.
+- Supabase khusus menangani Autentikasi dan Storage file.
+- **Konsistensi UI (Banner)**: Setiap halaman (terutama public pages) HARUS selalu menyertakan komponen `PageBanner` di bagian paling atas untuk menjaga keseragaman *header* dan *breadcrumb*.
+- **Konsistensi UI (Layout)**: DILARANG menggunakan `max-w-*` untuk wrapper konten utama. Semua halaman WAJIB menggunakan format *Full-Width* mengikuti padding layar (`w-full px-6 sm:px-10 lg:px-16 xl:px-20`).
 
 ## Prioritas refactor berikutnya
 

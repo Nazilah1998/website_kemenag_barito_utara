@@ -229,9 +229,6 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
               {displayDate}
             </div>
           )}
-          <h3 className={`mt-2 line-clamp-2 text-[11px] font-black leading-tight text-white transition-all duration-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-100 lg:group-hover:text-emerald-50'}`}>
-            {item.title}
-          </h3>
 
           <div className={`mt-4 overflow-hidden transition-all duration-500 ${isActive ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0 lg:group-hover:max-h-12 lg:group-hover:opacity-100'}`}>
             <button

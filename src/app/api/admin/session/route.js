@@ -1,25 +1,14 @@
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { getCurrentSessionContext } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-}
 
 export async function GET() {
   try {
     const session = await getCurrentSessionContext();
     const hasAdminPanelAccess = session.isAdmin || session.isEditor;
 
-    return createNoStoreResponse({
+    return apiResponse({
       authenticated: session.isAuthenticated,
       user: session.isAuthenticated
         ? {
@@ -36,8 +25,9 @@ export async function GET() {
         role: session.role ?? null,
       },
     });
-  } catch {
-    return createNoStoreResponse({
+  } catch (error) {
+    console.error("GET Session Error:", error);
+    return apiResponse({
       authenticated: false,
       user: null,
       permissions: {

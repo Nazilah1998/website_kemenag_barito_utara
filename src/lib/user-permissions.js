@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { ROLES, getRolePermissions } from "@/lib/permissions";
+import prisma from "@/lib/prisma";
 
 function forbiddenUrl(
   message = "Anda tidak memiliki izin untuk mengakses halaman ini.",
@@ -61,32 +61,25 @@ export async function getUserPermissionContext({
     };
   }
 
-  const supabase = createAdminClient();
-
-  const [{ data: profile }, { data: request }, { data: rows }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, email, role, is_active")
-        .eq("id", userId)
-        .maybeSingle(),
-      supabase
-        .from("editor_requests")
-        .select("status")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("user_permissions")
-        .select("permission")
-        .eq("user_id", userId),
-    ]);
+  const [profile, request, permissions] = await Promise.all([
+    prisma.profiles.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, role: true, is_active: true }
+    }),
+    prisma.editor_requests.findUnique({
+      where: { user_id: userId },
+      select: { status: true }
+    }),
+    prisma.user_permissions.findMany({
+      where: { user_id: userId },
+      select: { permission: true }
+    })
+  ]);
 
   const requestStatus = request?.status || null;
   const approved = requestStatus === "approved";
   const isActive = Boolean(profile?.is_active);
-  const customPermissions = Array.isArray(rows)
-    ? rows.map((item) => item.permission).filter(Boolean)
-    : [];
+  const customPermissions = (permissions || []).map((item) => item.permission).filter(Boolean);
 
   return {
     role: normalizedRole || null,

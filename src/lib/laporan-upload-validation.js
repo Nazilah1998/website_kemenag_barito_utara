@@ -85,7 +85,7 @@ export function validateDocumentPayload(
     data: {
       title,
       description,
-      year: yearRaw || null,
+      year: yearRaw ? Number(yearRaw) : null,
       is_published: Boolean(payload.is_published),
     },
   };

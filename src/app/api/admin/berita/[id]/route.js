@@ -1,5 +1,4 @@
 import { revalidatePath } from "next/cache";
-import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 import {
@@ -8,47 +7,14 @@ import {
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
+import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 const table = "berita";
 const MAX_IMAGE_SIZE_KB = 100;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
-
-const selectFields = `
-  id,
-  slug,
-  title,
-  excerpt,
-  category,
-  content,
-  cover_image,
-  cover_size_kb,
-  cover_size_bytes,
-  is_published,
-  published_at,
-  views,
-  author_id,
-  created_at,
-  updated_at
-`;
-
-function createHttpError(message, status = 400) {
-  const error = new Error(message);
-  error.status = status;
-  return error;
-}
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-}
 
 function stripHtml(html = "") {
   return String(html || "")
@@ -228,17 +194,15 @@ async function buildPayload(
   };
 }
 
-async function syncRelatedGaleriMetadata(supabase, beritaItem) {
-  const { data: galeriItem, error: lookupError } = await supabase
-    .from("galeri")
-    .select("id, image_url")
-    .eq("source_type", "berita")
-    .eq("source_id", beritaItem.id)
-    .maybeSingle();
-
-  if (lookupError) {
-    throw lookupError;
-  }
+async function syncRelatedGaleriMetadata(beritaItem) {
+  const galeriItem = await prisma.galeri.findUnique({
+    where: {
+      source_type_source_id: {
+        source_type: "berita",
+        source_id: beritaItem.id
+      }
+    }
+  });
 
   if (!galeriItem) {
     return;
@@ -249,46 +213,19 @@ async function syncRelatedGaleriMetadata(supabase, beritaItem) {
     link_url: `/berita/${beritaItem.slug}`,
     is_published: Boolean(beritaItem.is_published),
     published_at: beritaItem.published_at,
-    updated_at: new Date().toISOString(),
+    updated_at: new Date()
   };
 
   if (!galeriItem.image_url) {
     patch.image_url = beritaItem.cover_image;
     patch.image_size_kb = beritaItem.cover_size_kb || 0;
-    patch.image_size_bytes = beritaItem.cover_size_bytes || 0;
+    patch.image_size_bytes = BigInt(beritaItem.cover_size_bytes || 0);
   }
 
-  const { error: updateError } = await supabase
-    .from("galeri")
-    .update(patch)
-    .eq("id", galeriItem.id);
-
-  if (updateError) {
-    throw updateError;
-  }
-}
-
-function revalidateBeritaPaths(slug) {
-  revalidatePath("/");
-  revalidatePath("/berita");
-  revalidatePath("/galeri");
-  revalidatePath("/admin");
-  revalidatePath("/admin/berita");
-
-  if (slug) {
-    revalidatePath(`/berita/${slug}`);
-  }
-}
-
-async function getSafeIdFromContext(context) {
-  const params = await context.params;
-  const safeId = cleanString(params?.id);
-
-  if (!safeId) {
-    throw createHttpError("ID berita tidak valid.", 400);
-  }
-
-  return safeId;
+  await prisma.galeri.update({
+    where: { id: galeriItem.id },
+    data: patch
+  });
 }
 
 export async function PUT(request, context) {
@@ -301,47 +238,37 @@ export async function PUT(request, context) {
   try {
     const safeId = await getSafeIdFromContext(context);
     const body = await request.json();
-    const supabase = createAdminClient();
+    const supabase = createAdminClient(); // Tetap butuh untuk Storage
 
-    const { data: existingItem, error: existingError } = await supabase
-      .from(table)
-      .select(
-        "id, slug, title, excerpt, category, content, is_published, published_at, cover_image, cover_size_kb, cover_size_bytes",
-      )
-      .eq("id", safeId)
-      .maybeSingle();
+    const existingItem = await prisma.berita.findUnique({
+      where: { id: safeId }
+    });
 
-    if (existingError) throw existingError;
     if (!existingItem) throw createHttpError("Berita tidak ditemukan.", 404);
 
     const payload = await buildPayload(supabase, body, {
       currentCoverUrl: existingItem.cover_image || null,
       currentSizeKB: existingItem.cover_size_kb || 0,
-      currentSizeBytes: existingItem.cover_size_bytes || 0,
+      currentSizeBytes: Number(existingItem.cover_size_bytes || 0),
       currentPublishedAt: existingItem.published_at || null,
     });
 
     const slug = await ensureUniqueSlug(
-      supabase,
       table,
       cleanString(body?.slug) || payload.title,
       payload.title,
       safeId,
     );
 
-    const { data, error } = await supabase
-      .from(table)
-      .update({
+    const data = await prisma.berita.update({
+      where: { id: safeId },
+      data: {
         ...payload,
-        slug,
-      })
-      .eq("id", safeId)
-      .select(selectFields)
-      .single();
+        slug
+      }
+    });
 
-    if (error) throw error;
-
-    await syncRelatedGaleriMetadata(supabase, data);
+    await syncRelatedGaleriMetadata(data);
 
     revalidateBeritaPaths(data?.slug);
 
@@ -378,12 +305,13 @@ export async function PUT(request, context) {
       request,
     });
 
-    return createNoStoreResponse({
+    return apiResponse({
       message: `Berita berhasil diperbarui. Ukuran cover aktif ${data?.cover_size_kb || payload.cover_size_kb} KB.`,
       item: data,
     });
   } catch (error) {
-    return createNoStoreResponse(
+    console.error("PUT Berita Error:", error);
+    return apiResponse(
       {
         message: error.message || "Gagal memperbarui berita.",
       },
@@ -403,44 +331,33 @@ export async function DELETE(request, context) {
     const safeId = await getSafeIdFromContext(context);
     const supabase = createAdminClient();
 
-    const { data: existingItem, error: existingError } = await supabase
-      .from(table)
-      .select("id, slug, cover_image")
-      .eq("id", safeId)
-      .maybeSingle();
+    const existingItem = await prisma.berita.findUnique({
+      where: { id: safeId },
+      select: { id: true, slug: true, cover_image: true }
+    });
 
-    if (existingError) throw existingError;
     if (!existingItem) throw createHttpError("Berita tidak ditemukan.", 404);
 
-    const { data: relatedGalleryRows, error: galleryLookupError } =
-      await supabase
-        .from("galeri")
-        .select("id, image_url")
-        .eq("source_type", "berita")
-        .eq("source_id", safeId);
+    const relatedGalleryRows = await prisma.galeri.findMany({
+      where: {
+        source_type: "berita",
+        source_id: safeId
+      },
+      select: { id: true, image_url: true }
+    });
 
-    if (galleryLookupError) {
-      throw galleryLookupError;
-    }
-
-    const { error: galleryDeleteError } = await supabase
-      .from("galeri")
-      .delete()
-      .eq("source_type", "berita")
-      .eq("source_id", safeId);
-
-    if (galleryDeleteError) {
-      throw galleryDeleteError;
-    }
-
-    const { error: beritaDeleteError } = await supabase
-      .from(table)
-      .delete()
-      .eq("id", safeId);
-
-    if (beritaDeleteError) {
-      throw beritaDeleteError;
-    }
+    // Gunakan transaksi Prisma untuk menghapus berita dan galeri terkait secara atomik
+    await prisma.$transaction([
+      prisma.galeri.deleteMany({
+        where: {
+          source_type: "berita",
+          source_id: safeId
+        }
+      }),
+      prisma.berita.delete({
+        where: { id: safeId }
+      })
+    ]);
 
     try {
       const filesToDelete = new Set();
@@ -484,11 +401,12 @@ export async function DELETE(request, context) {
       },
     });
 
-    return createNoStoreResponse({
+    return apiResponse({
       message: "Berita berhasil dihapus.",
     });
   } catch (error) {
-    return createNoStoreResponse(
+    console.error("DELETE Berita Error:", error);
+    return apiResponse(
       {
         message: error.message || "Gagal menghapus berita.",
       },

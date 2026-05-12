@@ -1,18 +1,10 @@
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/prisma-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLES } from "@/lib/permissions";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 const SUPER_ADMIN_EMAIL = "nazilahmuhammad1998@gmail.com";
-
-function json(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store",
-    },
-  });
-}
 
 export async function POST(request) {
   try {
@@ -25,14 +17,14 @@ export async function POST(request) {
     const password = String(body?.password || "");
 
     if (!fullName || !email || !password) {
-      return json(
+      return apiResponse(
         { message: "Nama lengkap, email, dan password wajib diisi." },
         400,
       );
     }
 
     if (email === SUPER_ADMIN_EMAIL) {
-      return json(
+      return apiResponse(
         {
           message:
             "Email super admin dikunci dan tidak bisa didaftarkan ulang.",
@@ -42,23 +34,22 @@ export async function POST(request) {
     }
 
     if (password.length < 8) {
-      return json({ message: "Password minimal 8 karakter." }, 400);
+      return apiResponse({ message: "Password minimal 8 karakter." }, 400);
     }
 
-    const supabaseAdmin = createAdminClient();
-
-    const { data: existingProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("id, email")
-      .eq("email", email)
-      .maybeSingle();
+    const existingProfile = await prisma.profiles.findUnique({
+      where: { email: email },
+      select: { id: true, email: true }
+    });
 
     if (existingProfile) {
-      return json(
+      return apiResponse(
         { message: "Email sudah terdaftar. Gunakan email lain." },
         409,
       );
     }
+
+    const supabaseAdmin = createAdminClient();
 
     const { data: createdUser, error: createError } =
       await supabaseAdmin.auth.admin.createUser({
@@ -86,7 +77,7 @@ export async function POST(request) {
         errorText.includes("exists");
 
       if (!isAlreadyRegistered) {
-        return json(
+        return apiResponse(
           { message: createError.message || "Gagal membuat user auth." },
           400,
         );
@@ -99,7 +90,7 @@ export async function POST(request) {
         });
 
       if (listUsersError) {
-        return json(
+        return apiResponse(
           {
             message:
               listUsersError.message ||
@@ -117,7 +108,7 @@ export async function POST(request) {
       );
 
       if (!matchedUser?.id) {
-        return json(
+        return apiResponse(
           {
             message:
               "Email terdeteksi sudah terdaftar, namun user auth tidak ditemukan.",
@@ -130,87 +121,77 @@ export async function POST(request) {
     }
 
     if (!userId) {
-      return json({ message: "User ID tidak ditemukan." }, 500);
+      return apiResponse({ message: "User ID tidak ditemukan." }, 500);
     }
 
-    const timestamp = new Date().toISOString();
+    const now = new Date();
 
-    const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
-      {
-        id: userId,
-        full_name: fullName,
-        email,
-        role: ROLES.EDITOR,
-        unit_name: unitName || null,
-        avatar_url: null,
-        is_active: false,
-        updated_at: timestamp,
-      },
-      { onConflict: "id" },
-    );
-
-    if (profileError) {
-      return json(
-        { message: profileError.message || "Gagal menyimpan profile editor." },
-        400,
-      );
-    }
-
-    const { error: adminUsersError } = await supabaseAdmin
-      .from("admin_users")
-      .upsert(
-        {
+    // Use transaction to ensure all three tables are updated
+    await prisma.$transaction([
+      prisma.profiles.upsert({
+        where: { id: userId },
+        update: {
+          full_name: fullName,
+          email,
+          role: ROLES.EDITOR,
+          unit_name: unitName || null,
+          updated_at: now,
+        },
+        create: {
+          id: userId,
+          full_name: fullName,
+          email,
+          role: ROLES.EDITOR,
+          unit_name: unitName || null,
+          is_active: false,
+          updated_at: now,
+        }
+      }),
+      prisma.admin_users.upsert({
+        where: { user_id: userId },
+        update: {
+          full_name: fullName,
+          role: ROLES.EDITOR,
+          updated_at: now,
+        },
+        create: {
           user_id: userId,
           full_name: fullName,
           role: ROLES.EDITOR,
           is_active: false,
-          updated_at: timestamp,
+          updated_at: now,
+        }
+      }),
+      prisma.editor_requests.upsert({
+        where: { user_id: userId },
+        update: {
+          full_name: fullName,
+          email,
+          unit_name: unitName || null,
+          status: "pending",
+          updated_at: now,
         },
-        { onConflict: "user_id" },
-      );
-
-    if (adminUsersError) {
-      return json(
-        { message: adminUsersError.message || "Gagal menyimpan admin_users." },
-        400,
-      );
-    }
-
-    const { error: requestError } = await supabaseAdmin
-      .from("editor_requests")
-      .upsert(
-        {
+        create: {
           user_id: userId,
           full_name: fullName,
           email,
           unit_name: unitName || null,
           status: "pending",
-          requested_at: timestamp,
-          updated_at: timestamp,
-        },
-        { onConflict: "user_id" },
-      );
+          requested_at: now,
+          updated_at: now,
+        }
+      })
+    ]);
 
-    if (requestError) {
-      return json(
-        {
-          message: requestError.message || "Gagal menyimpan permintaan editor.",
-        },
-        400,
-      );
-    }
-
-    return json({
+    return apiResponse({
       success: true,
       message:
         "Pendaftaran editor berhasil. Akun dapat langsung login tanpa verifikasi email Supabase, namun akses fitur menunggu verifikasi super admin.",
     });
   } catch (error) {
-    return json(
-      {
-        message:
-          error?.message || "Terjadi kesalahan saat mendaftar akun editor.",
-      },
+    console.error("POST Register Editor Error:", error);
+    return apiResponse(
+      { message: error?.message || "Terjadi kesalahan saat mendaftar akun editor." },
       500,
     );
   }

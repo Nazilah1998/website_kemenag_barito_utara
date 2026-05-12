@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server";
+import { apiResponse } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdminAccess } from "@/lib/admin-guard";
 import { uploadBase64Image } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -25,47 +27,39 @@ function toBool(value, fallback = false) {
   return fallback;
 }
 
+
+
 export async function GET() {
-  const access = await requireAdminAccess();
-  if (!access?.ok) {
-    return NextResponse.json(
-      { message: access?.message || "Akses ditolak." },
-      { status: access?.status || 403 },
-    );
-  }
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("homepage_slides")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("updated_at", { ascending: false });
+    const data = await prisma.homepage_slides.findMany({
+      orderBy: [
+        { sort_order: 'asc' },
+        { updated_at: 'desc' }
+      ]
+    });
 
-    if (error) throw error;
-
-    return NextResponse.json({
+    return apiResponse({
       items: (data || []).map(normalizeHomepageSlide),
     });
   } catch (error) {
-    return NextResponse.json(
+    console.error("GET Homepage Slides Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal memuat data slider beranda." },
-      { status: 500 },
+      500,
     );
   }
 }
 
 export async function POST(request) {
-  const access = await requireAdminAccess();
-  if (!access?.ok) {
-    return NextResponse.json(
-      { message: access?.message || "Akses ditolak." },
-      { status: access?.status || 403 },
-    );
-  }
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
     const body = await request.json().catch(() => ({}));
+    const supabase = createAdminClient();
 
     const title = toText(body?.title, "");
     const caption = toText(body?.caption, "");
@@ -77,9 +71,9 @@ export async function POST(request) {
     const category = toText(body?.category, "utama");
 
     if (!title) {
-      return NextResponse.json(
+      return apiResponse(
         { message: "Judul slide wajib diisi." },
-        { status: 400 },
+        400,
       );
     }
 
@@ -87,6 +81,7 @@ export async function POST(request) {
 
     if (imageUploadBase64) {
       const uploaded = await uploadBase64Image({
+        supabase,
         dataUrl: imageUploadBase64,
         folder: "homepage-slides",
         fileNameStem: imageUploadName || title,
@@ -95,37 +90,42 @@ export async function POST(request) {
     }
 
     if (!finalImageUrl) {
-      return NextResponse.json(
+      return apiResponse(
         { message: "Gambar slide wajib diupload." },
-        { status: 400 },
+        400,
       );
     }
 
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase
-      .from("homepage_slides")
-      .insert({
+    const data = await prisma.homepage_slides.create({
+      data: {
         title,
         caption,
         image_url: finalImageUrl,
         category,
         is_published: isPublished,
         sort_order: sortOrder,
-      })
-      .select("*")
-      .single();
+      }
+    });
 
-    if (error) throw error;
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.CREATE,
+      entity: AUDIT_ENTITIES.SETTINGS, // Ganti ke entity yang sesuai jika ada
+      entityId: data?.id,
+      summary: `Menambah slide beranda: ${title}`,
+      after: data,
+      request,
+    });
 
-    return NextResponse.json({
+    return apiResponse({
       message: "Slide beranda berhasil ditambahkan.",
       item: normalizeHomepageSlide(data || {}),
     });
   } catch (error) {
-    return NextResponse.json(
+    console.error("POST Homepage Slides Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal menambahkan slide beranda." },
-      { status: 500 },
+      500,
     );
   }
 }

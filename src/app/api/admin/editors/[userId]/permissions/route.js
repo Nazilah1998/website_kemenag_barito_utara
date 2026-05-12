@@ -1,28 +1,20 @@
-import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { apiResponse } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
+import { PERMISSIONS } from "@/lib/permissions";
+import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-import { PERMISSIONS } from "@/lib/permissions";
-
 const ALLOWED_PERMISSIONS = new Set(Object.values(PERMISSIONS));
-
-function json(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" },
-  });
-}
 
 export async function PUT(request, context) {
   try {
-    const session = await requireAdmin({
-      loginRedirect: "/admin/login",
-    });
+    const auth = await validateAdmin();
+    if (!auth.ok) return auth.response;
 
-    if (session?.role !== "super_admin") {
-      return json(
+    if (auth.session?.role !== "super_admin") {
+      return apiResponse(
         { message: "Hanya super admin yang dapat mengatur permission editor." },
         403,
       );
@@ -32,7 +24,7 @@ export async function PUT(request, context) {
     const userId = params?.userId;
 
     if (!userId) {
-      return json({ message: "User ID editor tidak valid." }, 400);
+      return apiResponse({ message: "User ID editor tidak valid." }, 400);
     }
 
     const body = await request.json().catch(() => ({}));
@@ -45,40 +37,45 @@ export async function PUT(request, context) {
     );
 
     if (invalidPermission) {
-      return json(
+      return apiResponse(
         { message: `Permission tidak valid: ${invalidPermission}` },
         400,
       );
     }
 
-    const supabase = createAdminClient();
-    const now = new Date().toISOString();
+    const now = new Date();
 
-    const { error: deleteError } = await supabase
-      .from("user_permissions")
-      .delete()
-      .eq("user_id", userId);
+    // Use transaction to delete old and insert new permissions
+    await prisma.$transaction(async (tx) => {
+      await tx.user_permissions.deleteMany({
+        where: { user_id: userId }
+      });
 
-    if (deleteError) throw deleteError;
+      if (permissions.length) {
+        await tx.user_permissions.createMany({
+          data: permissions.map((permission) => ({
+            user_id: userId,
+            permission,
+            created_at: now,
+            updated_at: now,
+          }))
+        });
+      }
+    });
 
-    if (permissions.length) {
-      const payload = permissions.map((permission) => ({
-        user_id: userId,
-        permission,
-        created_at: now,
-        updated_at: now,
-      }));
+    await recordAudit({
+      session: auth.session,
+      action: AUDIT_ACTIONS.UPDATE,
+      entity: AUDIT_ENTITIES.USER,
+      entityId: userId,
+      summary: `Memperbarui permission user ${userId} menjadi: ${permissions.join(", ") || "none"}`,
+      request,
+    });
 
-      const { error: insertError } = await supabase
-        .from("user_permissions")
-        .insert(payload);
-
-      if (insertError) throw insertError;
-    }
-
-    return json({ message: "Permission editor berhasil disimpan." });
+    return apiResponse({ message: "Permission editor berhasil disimpan." });
   } catch (error) {
-    return json(
+    console.error("PUT Editor Permissions Error:", error);
+    return apiResponse(
       { message: error?.message || "Gagal menyimpan permission editor." },
       500,
     );

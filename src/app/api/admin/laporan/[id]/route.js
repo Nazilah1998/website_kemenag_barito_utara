@@ -1,13 +1,13 @@
-// src/app/api/admin/laporan/[id]/route.js
-
-import { NextResponse } from "next/server";
-import { requireAdminAccess } from "@/lib/admin-guard";
+import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   buildSafePdfFilename,
   validateDocumentPayload,
   validatePdfFile,
 } from "@/lib/laporan-upload-validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -21,41 +21,27 @@ function buildStoragePath(filename) {
 }
 
 export async function PUT(request, context) {
-  const guard = await requireAdminAccess();
-
-  if (!guard.ok) {
-    return NextResponse.json(
-      { message: guard.message },
-      { status: guard.status },
-    );
-  }
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
-    const { id } = await context.params;
-
+    const id = await getSafeIdFromContext(context);
     if (!id) {
-      return NextResponse.json(
-        { message: "ID dokumen tidak valid." },
-        { status: 400 },
-      );
+      return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const { data: existingDoc, error: existingError } = await guard.supabase
-      .from("report_documents")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+    const existingDoc = await prisma.report_documents.findUnique({
+      where: { id: id }
+    });
 
-    if (existingError || !existingDoc) {
-      return NextResponse.json(
-        { message: "Dokumen tidak ditemukan." },
-        { status: 404 },
-      );
+    if (!existingDoc) {
+      return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
     }
 
     const contentType = request.headers.get("content-type") || "";
     let payload = {};
     let replacementFileData = null;
+    const supabase = createAdminClient();
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -68,10 +54,7 @@ export async function PUT(request, context) {
       });
 
       if (!validation.ok) {
-        return NextResponse.json(
-          { message: validation.message },
-          { status: 400 },
-        );
+        return apiResponse({ message: validation.message }, 400);
       }
 
       payload = validation.data;
@@ -82,10 +65,7 @@ export async function PUT(request, context) {
         const fileValidation = validatePdfFile(file);
 
         if (!fileValidation.ok) {
-          return NextResponse.json(
-            { message: fileValidation.message },
-            { status: 400 },
-          );
+          return apiResponse({ message: fileValidation.message }, 400);
         }
 
         const safeFilename = buildSafePdfFilename(
@@ -97,7 +77,7 @@ export async function PUT(request, context) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const { error: uploadError } = await guard.supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from(STORAGE_BUCKET)
           .upload(storagePath, buffer, {
             contentType: "application/pdf",
@@ -105,13 +85,10 @@ export async function PUT(request, context) {
           });
 
         if (uploadError) {
-          return NextResponse.json(
-            { message: "Gagal mengupload file PDF pengganti." },
-            { status: 500 },
-          );
+          return apiResponse({ message: "Gagal mengupload file PDF pengganti." }, 500);
         }
 
-        const { data: publicFile } = guard.supabase.storage
+        const { data: publicFile } = supabase.storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(storagePath);
 
@@ -120,7 +97,7 @@ export async function PUT(request, context) {
           file_path: storagePath,
           file_url: publicFile?.publicUrl || "",
           mime_type: "application/pdf",
-          file_size: Number(file.size || 0),
+          file_size: BigInt(file.size || 0),
         };
       }
     } else {
@@ -134,10 +111,7 @@ export async function PUT(request, context) {
       });
 
       if (!validation.ok) {
-        return NextResponse.json(
-          { message: validation.message },
-          { status: 400 },
-        );
+        return apiResponse({ message: validation.message }, 400);
       }
 
       payload = validation.data;
@@ -145,146 +119,93 @@ export async function PUT(request, context) {
 
     const updatePayload = {
       ...payload,
+      year: payload.year ? Number(payload.year) : null,
       ...(replacementFileData || {}),
-      updated_at: new Date().toISOString(),
+      updated_at: new Date(),
     };
 
-    const { data: updatedDoc, error: updateError } = await guard.supabase
-      .from("report_documents")
-      .update(updatePayload)
-      .eq("id", id)
-      .select("*")
-      .single();
-
-    if (updateError) {
-      return NextResponse.json(
-        { message: "Gagal memperbarui dokumen laporan." },
-        { status: 500 },
-      );
-    }
+    const updatedDoc = await prisma.report_documents.update({
+      where: { id: id },
+      data: updatePayload
+    });
 
     if (replacementFileData && existingDoc?.file_path) {
-      await guard.supabase.storage
+      await supabase.storage
         .from(STORAGE_BUCKET)
         .remove([existingDoc.file_path]);
     }
 
     await recordAudit({
-      session: guard.session,
+      session: auth.session,
       action: AUDIT_ACTIONS.UPDATE,
       entity: AUDIT_ENTITIES.LAPORAN_DOKUMEN,
-      entityId: updatedDoc?.id || id,
+      entityId: id,
       summary: `Memperbarui dokumen laporan "${updatedDoc?.title || existingDoc?.title || id}"`,
-      before: {
-        title: existingDoc?.title,
-        description: existingDoc?.description,
-        year: existingDoc?.year,
-        is_published: existingDoc?.is_published,
-        file_name: existingDoc?.file_name,
-        file_path: existingDoc?.file_path,
-        file_size: existingDoc?.file_size,
-      },
-      after: {
-        title: updatedDoc?.title,
-        description: updatedDoc?.description,
-        year: updatedDoc?.year,
-        is_published: updatedDoc?.is_published,
-        file_name: updatedDoc?.file_name,
-        file_path: updatedDoc?.file_path,
-        file_size: updatedDoc?.file_size,
-      },
+      before: existingDoc,
+      after: updatedDoc,
       request,
     });
 
-    return NextResponse.json({
+    return apiResponse({
       message: "Dokumen berhasil diperbarui.",
       document: updatedDoc,
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        message:
-          error?.message || "Terjadi kesalahan saat memperbarui dokumen.",
-      },
-      { status: 500 },
+    console.error("PUT Laporan [id] Error:", error);
+    return apiResponse(
+      { message: error?.message || "Terjadi kesalahan saat memperbarui dokumen." },
+      500,
     );
   }
 }
 
-export async function DELETE(_request, context) {
-  const guard = await requireAdminAccess();
-
-  if (!guard.ok) {
-    return NextResponse.json(
-      { message: guard.message },
-      { status: guard.status },
-    );
-  }
+export async function DELETE(request, context) {
+  const auth = await validateAdmin();
+  if (!auth.ok) return auth.response;
 
   try {
-    const { id } = await context.params;
-
+    const id = await getSafeIdFromContext(context);
     if (!id) {
-      return NextResponse.json(
-        { message: "ID dokumen tidak valid." },
-        { status: 400 },
-      );
+      return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const { data: existingDoc, error: existingError } = await guard.supabase
-      .from("report_documents")
-      .select("id, file_path")
-      .eq("id", id)
-      .maybeSingle();
+    const existingDoc = await prisma.report_documents.findUnique({
+      where: { id: id }
+    });
 
-    if (existingError || !existingDoc) {
-      return NextResponse.json(
-        { message: "Dokumen tidak ditemukan." },
-        { status: 404 },
-      );
+    if (!existingDoc) {
+      return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
     }
 
-    const { error: deleteError } = await guard.supabase
-      .from("report_documents")
-      .delete()
-      .eq("id", id);
-
-    if (deleteError) {
-      return NextResponse.json(
-        { message: "Gagal menghapus dokumen laporan." },
-        { status: 500 },
-      );
-    }
+    await prisma.report_documents.delete({
+      where: { id: id }
+    });
 
     if (existingDoc.file_path) {
-      await guard.supabase.storage
+      const supabase = createAdminClient();
+      await supabase.storage
         .from(STORAGE_BUCKET)
         .remove([existingDoc.file_path]);
     }
 
     await recordAudit({
-      session: guard.session,
+      session: auth.session,
       action: AUDIT_ACTIONS.DELETE,
       entity: AUDIT_ENTITIES.LAPORAN_DOKUMEN,
-      entityId: existingDoc?.id || id,
-      summary: `Menghapus dokumen laporan "${existingDoc?.id || id}"`,
-      before: {
-        id: existingDoc?.id,
-        file_path: existingDoc?.file_path,
-      },
-      after: null,
-      request: _request,
+      entityId: id,
+      summary: `Menghapus dokumen laporan "${existingDoc?.title || id}"`,
+      before: existingDoc,
+      request,
     });
 
-    return NextResponse.json({
+    return apiResponse({
       message: "Dokumen berhasil dihapus.",
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        message: error?.message || "Terjadi kesalahan saat menghapus dokumen.",
-      },
-      { status: 500 },
+    console.error("DELETE Laporan [id] Error:", error);
+    return apiResponse(
+      { message: error?.message || "Terjadi kesalahan saat menghapus dokumen." },
+      500,
     );
   }
 }

@@ -1,28 +1,30 @@
-import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { apiResponse } from "@/lib/prisma-helpers";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(_request, context) {
   try {
     const { slug } = await context.params;
-    const supabase = createAdminClient();
 
-    const { data, error } = await supabase.rpc("increment_berita_views", {
-      target_slug: slug,
+    const data = await prisma.berita.update({
+      where: { slug },
+      data: {
+        views: {
+          increment: 1
+        }
+      },
+      select: { views: true }
     });
 
-    if (error) {
-      throw error;
-    }
-
-    return NextResponse.json({
-      views: Number(data || 0),
+    return apiResponse({
+      views: Number(data?.views || 0),
     });
   } catch (error) {
-    return NextResponse.json(
+    console.error("POST Berita View Error:", error);
+    return apiResponse(
       { message: error.message || "Gagal menambah jumlah pembaca." },
-      { status: 500 }
+      500
     );
   }
 }

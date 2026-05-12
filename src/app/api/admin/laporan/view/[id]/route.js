@@ -1,68 +1,49 @@
-// src/app/api/laporan/view/[id]/route.js
-
+import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_request, context) {
+export async function GET(request, context) {
   try {
-    const { id } = await context.params;
-
+    const id = await getSafeIdFromContext(context);
     if (!id) {
-      return NextResponse.json(
-        { message: "ID dokumen tidak valid." },
-        { status: 400 },
-      );
+      return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const supabase = createAdminClient();
+    const doc = await prisma.report_documents.findUnique({
+      where: { id: id },
+      select: { id: true, file_url: true, is_published: true, view_count: true }
+    });
 
-    const { data: doc, error: docError } = await supabase
-      .from("report_documents")
-      .select("id, file_url, is_published, view_count")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (docError || !doc) {
-      return NextResponse.json(
-        { message: "Dokumen tidak ditemukan." },
-        { status: 404 },
-      );
+    if (!doc) {
+      return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
     }
 
     if (!doc.is_published) {
-      return NextResponse.json(
-        { message: "Dokumen belum dipublikasikan." },
-        { status: 403 },
-      );
+      return apiResponse({ message: "Dokumen belum dipublikasikan." }, 403);
     }
 
     if (!doc.file_url) {
-      return NextResponse.json(
-        { message: "File dokumen tidak tersedia." },
-        { status: 404 },
-      );
+      return apiResponse({ message: "File dokumen tidak tersedia." }, 404);
     }
 
-    const nextViewCount = Number(doc.view_count || 0) + 1;
-
-    await supabase
-      .from("report_documents")
-      .update({
-        view_count: nextViewCount,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id);
+    await prisma.report_documents.update({
+      where: { id: id },
+      data: {
+        view_count: {
+          increment: 1
+        },
+        updated_at: new Date(),
+      }
+    });
 
     return NextResponse.redirect(doc.file_url, 302);
   } catch (error) {
-    return NextResponse.json(
-      {
-        message:
-          error?.message || "Terjadi kesalahan saat mencatat view dokumen.",
-      },
-      { status: 500 },
+    console.error("GET Laporan View Redirect Error:", error);
+    return apiResponse(
+      { message: error?.message || "Terjadi kesalahan saat mencatat view dokumen." },
+      500,
     );
   }
 }

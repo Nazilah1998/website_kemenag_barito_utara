@@ -1,7 +1,6 @@
 import { revalidatePath } from "next/cache";
-import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
+import { ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 import {
   removeStorageFileByPublicUrl,
   uploadBase64Image,
@@ -14,6 +13,8 @@ import {
 } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { apiResponse } from "@/lib/prisma-helpers";
+import prisma from "@/lib/prisma";
 
 const LIMITS = {
   title: { min: 3, max: 200 },
@@ -29,39 +30,8 @@ const table = "berita";
 const MAX_IMAGE_SIZE_KB = 100;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
 
-const selectFields = `
-  id,
-  slug,
-  title,
-  excerpt,
-  category,
-  content,
-  cover_image,
-  cover_size_kb,
-  cover_size_bytes,
-  is_published,
-  published_at,
-  views,
-  author_id,
-  created_at,
-  updated_at
-`;
-
-function createHttpError(message, status = 400) {
-  const error = new Error(message);
-  error.status = status;
-  return error;
-}
-
-function createNoStoreResponse(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
+function cleanString(value = "") {
+  return String(value || "").trim();
 }
 
 function stripHtml(html = "") {
@@ -276,6 +246,7 @@ function revalidateBeritaPaths(slug) {
   }
 }
 
+
 export async function GET() {
   const auth = await validateAdmin({
     allowEditor: true,
@@ -284,22 +255,37 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   try {
-    const supabase = createAdminClient();
+    const data = await prisma.berita.findMany({
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        category: true,
+        content: true,
+        cover_image: true,
+        cover_size_kb: true,
+        cover_size_bytes: true,
+        is_published: true,
+        published_at: true,
+        views: true,
+        author_id: true,
+        created_at: true,
+        updated_at: true
+      },
+      orderBy: [
+        { is_published: 'desc' },
+        { published_at: 'desc' },
+        { created_at: 'desc' }
+      ]
+    });
 
-    const { data, error } = await supabase
-      .from(table)
-      .select(selectFields)
-      .order("is_published", { ascending: false })
-      .order("published_at", { ascending: false })
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    return createNoStoreResponse({
-      items: data ?? [],
+    return apiResponse({
+      items: data,
     });
   } catch (error) {
-    return createNoStoreResponse(
+    console.error("GET Berita Error:", error);
+    return apiResponse(
       {
         message: error.message || "Gagal mengambil daftar berita.",
       },
@@ -317,7 +303,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const supabase = createAdminClient();
+    const supabase = createAdminClient(); // Tetap butuh supabase untuk Storage (upload)
 
     const payload = await buildPayload(supabase, body);
 
@@ -331,23 +317,18 @@ export async function POST(request) {
     }
 
     const slug = await ensureUniqueSlug(
-      supabase,
       table,
       cleanString(body?.slug) || payload.title,
       payload.title,
     );
 
-    const { data, error } = await supabase
-      .from(table)
-      .insert({
+    const data = await prisma.berita.create({
+      data: {
         ...payload,
         slug,
         author_id: auth.session?.profile?.id ?? null,
-      })
-      .select(selectFields)
-      .single();
-
-    if (error) throw error;
+      }
+    });
 
     revalidateBeritaPaths(data?.slug);
 
@@ -356,12 +337,12 @@ export async function POST(request) {
       action: AUDIT_ACTIONS.CREATE,
       entity: AUDIT_ENTITIES.BERITA,
       entityId: data?.id,
-      summary: `Menambah berita \"${data?.title || payload.title}\"`,
+      summary: `Menambah berita "${data?.title || payload.title}"`,
       after: { slug: data?.slug, is_published: data?.is_published },
       request,
     });
 
-    return createNoStoreResponse(
+    return apiResponse(
       {
         message: `Berita berhasil ditambahkan. Ukuran cover tersimpan ${data?.cover_size_kb || payload.cover_size_kb} KB.`,
         item: data,
@@ -371,9 +352,9 @@ export async function POST(request) {
   } catch (error) {
     if (error instanceof ValidationError) {
       const resp = validationErrorResponse(error);
-      return createNoStoreResponse(resp.body, resp.status);
+      return apiResponse(resp.body, resp.status);
     }
-    return createNoStoreResponse(
+    return apiResponse(
       {
         message: error.message || "Gagal menambahkan berita.",
       },

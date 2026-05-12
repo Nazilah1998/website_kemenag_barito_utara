@@ -105,161 +105,94 @@ function normalizeFallbackCategory(item) {
   return normalizeLaporanCategory(item, item?.documents || []);
 }
 
+import prisma from "@/lib/prisma";
+
 export async function getAllLaporanCategories() {
   try {
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase
-      .from("report_categories")
-      .select(
-        `
-        id,
-        slug,
-        title,
-        description,
-        intro,
-        sort_order,
-        is_active,
-        documents:report_documents (
-          id,
-          title,
-          description,
-          year,
-          file_name,
-          file_path,
-          file_url,
-          mime_type,
-          file_size,
-          view_count,
-          sort_order,
-          is_published,
-          created_at,
-          updated_at
-        )
-        `,
-      )
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .order("title", { ascending: true });
-
-    if (error) throw error;
+    const data = await prisma.report_categories.findMany({
+      where: { is_active: true },
+      include: {
+        report_documents: true
+      },
+      orderBy: [
+        { sort_order: 'asc' },
+        { title: 'asc' }
+      ]
+    });
 
     if (!Array.isArray(data) || data.length === 0) {
       return laporanCategories.map(normalizeFallbackCategory);
     }
 
     return data.map((item) => {
-      const publicDocs = Array.isArray(item?.documents)
-        ? item.documents.filter((doc) => isPublishedDocument(doc))
-        : [];
+      const publicDocs = (item.report_documents || [])
+        .filter((doc) => isPublishedDocument(doc))
+        .map(doc => ({
+          ...doc,
+          file_size: Number(doc.file_size || 0),
+          view_count: Number(doc.view_count || 0)
+        }));
       return normalizeLaporanCategory(item, publicDocs);
     });
-  } catch {
+  } catch (error) {
+    console.error("Prisma getAllLaporanCategories Error:", error);
     return laporanCategories.map(normalizeFallbackCategory);
   }
 }
 
 export async function getLaporanDetailBySlug(slug) {
   try {
-    const supabase = createAdminClient();
+    const data = await prisma.report_categories.findUnique({
+      where: { slug: slug },
+      include: {
+        report_documents: true
+      }
+    });
 
-    const { data, error } = await supabase
-      .from("report_categories")
-      .select(
-        `
-        id,
-        slug,
-        title,
-        description,
-        intro,
-        sort_order,
-        is_active,
-        documents:report_documents (
-          id,
-          title,
-          description,
-          year,
-          file_name,
-          file_path,
-          file_url,
-          mime_type,
-          file_size,
-          view_count,
-          sort_order,
-          is_published,
-          created_at,
-          updated_at
-        )
-        `,
-      )
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .single();
+    if (!data || !data.is_active) return null;
 
-    if (error) throw error;
-    if (!data) return null;
-
-    const documents = Array.isArray(data?.documents)
-      ? data.documents.filter((item) => isPublishedDocument(item))
-      : [];
+    const documents = (data.report_documents || [])
+      .filter((item) => isPublishedDocument(item))
+      .map(doc => ({
+        ...doc,
+        file_size: Number(doc.file_size || 0),
+        view_count: Number(doc.view_count || 0)
+      }));
 
     return normalizeLaporanCategory(data, documents);
-  } catch {
+  } catch (error) {
+    console.error("Prisma getLaporanDetailBySlug Error:", error);
     const fallback = laporanCategories.find((item) => item.slug === slug);
     if (!fallback) return null;
     return normalizeFallbackCategory(fallback);
   }
 }
 
-// Alias agar konsisten dengan pemanggilan di halaman [slug]/page.js
 export const getLaporanCategoryBySlug = getLaporanDetailBySlug;
 
 export async function getAdminLaporanCategories(slug = "") {
   try {
-    const supabase = createAdminClient();
+    const data = await prisma.report_categories.findMany({
+      where: slug ? { slug: slug } : {},
+      include: {
+        report_documents: true
+      },
+      orderBy: [
+        { sort_order: 'asc' },
+        { title: 'asc' }
+      ]
+    });
 
-    let query = supabase.from("report_categories").select(
-      `
-      id,
-      slug,
-      title,
-      description,
-      intro,
-      sort_order,
-      is_active,
-      documents:report_documents (
-        id,
-        title,
-        description,
-        year,
-        file_name,
-        file_path,
-        file_url,
-        mime_type,
-        file_size,
-        view_count,
-        sort_order,
-        is_published,
-        created_at,
-        updated_at
-      )
-      `,
-    );
-
-    if (slug) {
-      query = query.eq("slug", slug);
-    }
-
-    const { data, error } = await query
-      .order("sort_order", { ascending: true })
-      .order("title", { ascending: true });
-
-    if (error) throw error;
-
-    return (data || []).map((item) =>
-      normalizeLaporanCategory(item, item?.documents || []),
-    );
-  } catch {
+    return (data || []).map((item) => {
+      const docs = (item.report_documents || []).map(doc => ({
+        ...doc,
+        file_size: Number(doc.file_size || 0),
+        view_count: Number(doc.view_count || 0)
+      }));
+      return normalizeLaporanCategory(item, docs);
+    });
+  } catch (error) {
+    console.error("Prisma getAdminLaporanCategories Error:", error);
     if (slug) {
       const fallback = laporanCategories.find((item) => item.slug === slug);
       return fallback ? [normalizeFallbackCategory(fallback)] : [];

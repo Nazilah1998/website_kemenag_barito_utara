@@ -1,27 +1,17 @@
-import { NextResponse } from "next/server";
-import { getCurrentSessionContext } from "@/lib/auth";
+import { apiResponse } from "@/lib/prisma-helpers";
+import { validateAdmin } from "@/lib/cms-utils";
 import { getUserPermissionContext } from "@/lib/user-permissions";
 
 export const dynamic = "force-dynamic";
 
-function json(data, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" },
-  });
-}
-
 export async function GET() {
   try {
-    const session = await getCurrentSessionContext();
+    const auth = await validateAdmin({ allowEditor: true });
+    if (!auth.ok) return auth.response;
 
-    if (!session?.isAuthenticated) {
-      return json({ permissionContext: null }, 401);
-    }
-
-    const userId = session?.profile?.id || session?.user?.id || null;
-    const role = session?.role || null;
-    const email = session?.profile?.email || session?.user?.email || null;
+    const userId = auth.session?.profile?.id || auth.session?.user?.id || null;
+    const role = auth.session?.role || null;
+    const email = auth.session?.profile?.email || auth.session?.user?.email || null;
 
     const permissionContext = await getUserPermissionContext({
       userId,
@@ -29,8 +19,9 @@ export async function GET() {
       email,
     });
 
-    return json({ permissionContext });
-  } catch {
-    return json({ permissionContext: null }, 500);
+    return apiResponse({ permissionContext });
+  } catch (error) {
+    console.error("GET My Permissions Error:", error);
+    return apiResponse({ permissionContext: null }, 500);
   }
 }

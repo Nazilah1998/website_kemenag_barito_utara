@@ -5,6 +5,7 @@ import {
   getUserPermissionContext,
   hasUserPermission,
 } from "@/lib/user-permissions";
+import prisma from "@/lib/prisma";
 
 export function cleanString(value) {
   if (typeof value !== "string") {
@@ -26,7 +27,6 @@ export function slugify(value) {
 }
 
 export async function ensureUniqueSlug(
-  supabase,
   table,
   rawSlug,
   fallbackTitle,
@@ -39,19 +39,18 @@ export async function ensureUniqueSlug(
   let counter = 1;
 
   while (true) {
-    let query = supabase.from(table).select("id").eq("slug", candidate);
+    // Check if slug exists using Prisma
+    // We assume the table name in Prisma matches the database table name
+    // or is mapped correctly in schema.prisma
+    const existing = await prisma[table].findFirst({
+      where: {
+        slug: candidate,
+        ...(currentId && { id: { not: currentId } }),
+      },
+      select: { id: true },
+    });
 
-    if (currentId) {
-      query = query.neq("id", currentId);
-    }
-
-    const { data, error } = await query.maybeSingle();
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data) {
+    if (!existing) {
       return candidate;
     }
 

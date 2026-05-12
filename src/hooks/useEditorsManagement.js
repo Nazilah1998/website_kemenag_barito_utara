@@ -349,6 +349,22 @@ export function useEditorsManagement(initialEditors = []) {
     });
   }
 
+  function handleUnlock(editor) {
+    openConfirmDialog({
+      title: "Buka Kunci Akun",
+      description: `Buka kunci akun ${editor.full_name}? Ini akan me-reset jumlah percobaan login yang gagal.`,
+      confirmLabel: "Buka Kunci",
+      confirmTone: "emerald",
+      onConfirm: () =>
+        updateEditor(
+          editor.user_id,
+          { action: "unlock" },
+          "unlock",
+          "Kunci akun berhasil dibuka.",
+        ),
+    });
+  }
+
   const pendingCount = useMemo(
     () => editors.filter((item) => item.status === "pending").length,
     [editors],
@@ -432,6 +448,7 @@ export function useEditorsManagement(initialEditors = []) {
     closeRoleModal,
     saveRole,
     handleDelete,
+    handleUnlock,
     pendingCount,
     filteredEditors,
     getPermissionCount,
