@@ -128,35 +128,33 @@ export async function PATCH(request, context) {
         );
       }
 
+      // Check if it's the super admin by email before deleting
       const targetProfile = await prisma.profiles.findUnique({
         where: { id: userId },
         select: { id: true, email: true }
       });
 
-      if (!targetProfile) return apiResponse({ message: "Profil tidak ditemukan." }, 404);
-
-      const targetEmail = String(targetProfile?.email || "")
-        .trim()
-        .toLowerCase();
-
-      if (targetEmail && targetEmail === SUPER_ADMIN_EMAIL) {
+      if (targetProfile && targetProfile.email === SUPER_ADMIN_EMAIL) {
         return apiResponse({ message: "Akun super admin tidak dapat dihapus." }, 403);
       }
 
       const { createAdminClient } = await import("@/lib/supabase/admin");
       const supabaseAdmin = createAdminClient();
-      const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
       
-      if (authDeleteError) {
-        console.warn("Supabase Auth Delete Warning:", authDeleteError.message);
-        // We continue anyway because we want to clean up Prisma tables
+      // Try to delete from Supabase Auth first
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+      } catch (authErr) {
+        console.warn("Supabase Auth Delete Warning:", authErr.message);
       }
 
+      // Delete from all Prisma tables
+      // Even if profile is missing, we try to clean up other tables
       await prisma.$transaction([
         prisma.user_permissions.deleteMany({ where: { user_id: userId } }),
         prisma.editor_requests.deleteMany({ where: { user_id: userId } }),
         prisma.admin_users.deleteMany({ where: { user_id: userId } }),
-        prisma.profiles.delete({ where: { id: userId } })
+        prisma.profiles.deleteMany({ where: { id: userId } }) // Use deleteMany to avoid 404 if already gone
       ]);
 
       await recordAudit({
@@ -164,11 +162,11 @@ export async function PATCH(request, context) {
         action: AUDIT_ACTIONS.DELETE,
         entity: AUDIT_ENTITIES.USER,
         entityId: userId,
-        summary: `Menghapus akun editor (Auth & DB): ${targetEmail || userId}`,
+        summary: `Menghapus akun editor (Auth & DB): ${targetProfile?.email || userId}`,
         request,
       });
 
-      return apiResponse({ message: "Akun editor berhasil dihapus." });
+      return apiResponse({ message: "Akun editor berhasil dihapus sepenuhnya." });
     }
 
     if (action === "reject") {

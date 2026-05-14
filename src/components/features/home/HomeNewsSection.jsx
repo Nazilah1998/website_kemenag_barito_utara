@@ -119,12 +119,12 @@ export default function HomeNewsSection({ latestBerita }) {
 
 function NewsCard({ item, index, t, className = "", isSlider = false }) {
   return (
-    <article className={`group relative h-full overflow-hidden rounded-none border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}>
+    <article className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}>
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
         <div className="relative h-48 w-full overflow-hidden">
           <Image
-            src={item.coverImage || "/kemenag.svg"}
+            src={item.coverImage || "/assets/branding/kemenag.svg"}
             alt={item.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

@@ -73,10 +73,26 @@ const PORTAL_LINKS = [
 export default function PortalPage() {
   const [time, setTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setMounted(true));
+    // Deteksi jika berjalan dalam mode PWA (standalone)
+    const detectPwa = () => {
+      if (typeof window !== 'undefined') {
+        const isPwa = window.matchMedia('(display-mode: standalone)').matches || 
+                      (window.navigator).standalone || 
+                      document.referrer.includes('android-app://');
+        setIsStandalone(isPwa);
+      }
+    };
+
+    const frame = requestAnimationFrame(() => {
+      setMounted(true);
+      detectPwa();
+    });
+
     const timer = setInterval(() => setTime(new Date()), 1000);
+
     return () => {
       cancelAnimationFrame(frame);
       clearInterval(timer);
@@ -109,7 +125,7 @@ export default function PortalPage() {
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/kantor-kemenag.jpg"
+          src="/assets/images/kantor-kemenag.jpg"
           alt="Kantor Kemenag Barito Utara"
           fill
           className="object-cover scale-105 blur-[2px] opacity-40 grayscale-[20%] transition-transform duration-1000"
@@ -171,8 +187,8 @@ export default function PortalPage() {
               <Link
                 key={link.title}
                 href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={isStandalone ? undefined : "_blank"}
+                rel={isStandalone ? undefined : "noopener noreferrer"}
                 className={`group relative p-4 rounded-3xl transition-all duration-500 hover:-translate-y-1 flex flex-col items-start text-left h-full ${link.primary
                   ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50 hover:bg-emerald-600/30"
                   : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10 hover:bg-white/10 hover:ring-white/20"
@@ -265,8 +281,8 @@ export default function PortalPage() {
               <Link
                 key={link.title}
                 href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={isStandalone ? undefined : "_blank"}
+                rel={isStandalone ? undefined : "noopener noreferrer"}
                 className={`group relative p-5 rounded-2xl transition-all duration-500 flex flex-col items-center text-center ${link.primary
                   ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50"
                   : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10"

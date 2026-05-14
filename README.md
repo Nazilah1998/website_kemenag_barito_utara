@@ -73,6 +73,7 @@ npm run test:coverage
 - Data sensitif tidak boleh diekspos ke client-side.
 - Audit log otomatis mencatat setiap perubahan data di panel admin.
 - Supabase khusus menangani Autentikasi dan Storage file.
+- **Middleware (proxy.js)**: Karena menggunakan Next.js v16, sistem middleware wajib menggunakan file `proxy.js` (dengan fungsi `proxy`) di tingkat root atau `src/`, bukan `middleware.js`. Jangan mengubah ini karena akan memutus sistem sesi dan keamanan admin.
 - **Konsistensi UI (Banner)**: Setiap halaman (terutama public pages) HARUS selalu menyertakan komponen `PageBanner` di bagian paling atas untuk menjaga keseragaman *header* dan *breadcrumb*.
 - **Konsistensi UI (Layout)**: DILARANG menggunakan `max-w-*` untuk wrapper konten utama. Semua halaman WAJIB menggunakan format *Full-Width* mengikuti padding layar (`w-full px-6 sm:px-10 lg:px-16 xl:px-20`).
 

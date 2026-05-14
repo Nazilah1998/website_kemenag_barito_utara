@@ -84,7 +84,7 @@ export const messages = {
         badge: "Portal Resmi Kemenag Barito Utara",
         title: "Layanan dan Informasi Keagamaan dalam Satu Portal Resmi.",
         description:
-          "Website resmi Kementerian Agama Kabupaten Barito Utara sebagai pusat informasi publik, berita, layanan, dan publikasi kelembagaan yang mudah diakses masyarakat.",
+          "Website Resmi Kementerian Agama Kabupaten Barito Utara sebagai Pusat Informasi Publik, Berita, Layanan, dan Publikasi Kelembagaan Yang Mudah Diakses Masyarakat.",
         ctaLayanan: "Akses Layanan PTSP",
         ctaBerita: "Lihat Berita",
       },

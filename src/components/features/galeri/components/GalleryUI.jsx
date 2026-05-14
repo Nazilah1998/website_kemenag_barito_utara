@@ -36,7 +36,7 @@ export function GalleryHeader({ count }) {
         </p>
       </div>
 
-      <div className="group relative overflow-hidden rounded-none border border-emerald-100 bg-white p-6 shadow-xl transition-all duration-500 hover:shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-900">
+      <div className="group relative overflow-hidden rounded-3xl border border-emerald-100 bg-white p-6 shadow-xl transition-all duration-500 hover:shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-900">
         <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-500/5 blur-2xl transition-all duration-500 group-hover:bg-emerald-500/15" />
         <div className="relative flex flex-col items-center md:items-end">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-emerald-600 transition-colors">
@@ -88,7 +88,7 @@ export function GalleryCard({ item, onOpen, isActive, onToggle }) {
   return (
     <article
       onClick={handleTap}
-      className="group relative aspect-[3/4] overflow-hidden rounded-none border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
+      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
     >
       {/* Image Layer */}
       <div className="absolute inset-0 z-0">

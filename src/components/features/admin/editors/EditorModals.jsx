@@ -4,6 +4,26 @@ import {
   getEditorPermissionGroupLabel,
 } from "@/lib/permissions";
 import { Button } from "./EditorUI";
+import { EyeIcon } from "../login/LoginUI";
+
+function getPasswordStrength(password) {
+  if (!password) return 0;
+  let strength = 0;
+  if (password.length > 7) strength += 1;
+  if (password.length > 11) strength += 1;
+  if (/[A-Z]/.test(password)) strength += 1;
+  if (/[0-9]/.test(password)) strength += 1;
+  if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+  return strength;
+}
+
+function getStrengthLabel(strength) {
+  if (strength <= 1) return { label: "Sangat Lemah", color: "bg-rose-500" };
+  if (strength === 2) return { label: "Lemah", color: "bg-orange-500" };
+  if (strength === 3) return { label: "Sedang", color: "bg-amber-500" };
+  if (strength === 4) return { label: "Kuat", color: "bg-emerald-500" };
+  return { label: "Sangat Kuat", color: "bg-blue-500" };
+}
 
 function ModalWrapper({ open, onClose, children, maxWidth = "max-w-2xl" }) {
   if (!open) return null;
@@ -307,3 +327,126 @@ export function RoleModal({
     </ModalWrapper>
   );
 }
+
+export function CreateEditorModal({
+  open,
+  onClose,
+  onSave,
+  saving,
+  formData,
+  onChange,
+}) {
+  const [showPassword, setShowPassword] = React.useState(false);
+  const strength = React.useMemo(() => getPasswordStrength(formData.password), [formData.password]);
+  const strengthInfo = React.useMemo(() => getStrengthLabel(strength), [strength]);
+
+  return (
+    <ModalWrapper open={open} onClose={onClose} maxWidth="max-w-xl">
+      <ModalHeader
+        title="Registrasi Editor"
+        subtitle="Daftarkan personil baru secara manual ke dalam sistem admin."
+        onClose={onClose}
+      />
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSave();
+        }}
+        className="space-y-6"
+      >
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nama Lengkap</label>
+            <input
+              type="text"
+              required
+              value={formData.fullName}
+              onChange={(e) => onChange("fullName", e.target.value)}
+              placeholder="Masukkan nama lengkap..."
+              className="h-12 w-full rounded-xl border-2 border-slate-100 bg-slate-50/50 px-4 text-sm font-bold text-slate-900 outline-none transition-all focus:border-emerald-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/50 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-950"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Unit Kerja</label>
+            <input
+              type="text"
+              required
+              value={formData.unitName}
+              onChange={(e) => onChange("unitName", e.target.value)}
+              placeholder="Contoh: Humas, Bimas..."
+              className="h-12 w-full rounded-xl border-2 border-slate-100 bg-slate-50/50 px-4 text-sm font-bold text-slate-900 outline-none transition-all focus:border-emerald-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/50 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-950"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Alamat Email</label>
+          <input
+            type="email"
+            required
+            autoComplete="off"
+            value={formData.email}
+            onChange={(e) => onChange("email", e.target.value)}
+            placeholder="nama@gmail.com"
+            className="h-12 w-full rounded-xl border-2 border-slate-100 bg-slate-50/50 px-4 text-sm font-bold text-slate-900 outline-none transition-all focus:border-emerald-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/50 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-950"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password Baru</label>
+          <div className="relative group">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="new-password"
+              minLength={8}
+              value={formData.password}
+              onChange={(e) => onChange("password", e.target.value)}
+              placeholder="Minimal 8 karakter..."
+              className="h-12 w-full rounded-xl border-2 border-slate-100 bg-slate-50/50 pl-4 pr-12 text-sm font-bold text-slate-900 outline-none transition-all focus:border-emerald-500 focus:bg-white dark:border-slate-800 dark:bg-slate-950/50 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-950"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/10 dark:hover:text-white transition-all"
+            >
+              <EyeIcon isOpen={showPassword} />
+            </button>
+          </div>
+          
+          {formData.password && (
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kekuatan Password</p>
+                <p className={`text-[9px] font-black uppercase tracking-widest ${strengthInfo.color.replace('bg-', 'text-')}`}>
+                  {strengthInfo.label}
+                </p>
+              </div>
+              <div className="flex h-1.5 w-full gap-1 rounded-full bg-slate-100 dark:bg-white/5 overflow-hidden">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <div
+                    key={level}
+                    className={`h-full flex-1 transition-all duration-500 ${level <= strength ? strengthInfo.color : "bg-transparent"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <p className="text-[10px] font-medium text-slate-400 italic">Berikan password ini kepada editor setelah akun berhasil dibuat.</p>
+        </div>
+
+        <div className="mt-10 flex flex-col gap-3 pt-8 border-t border-slate-100 dark:border-white/5">
+          <Button type="submit" tone="primary" size="lg" loading={saving}>
+            Buat Akun Editor
+          </Button>
+          <Button type="button" tone="ghost" size="lg" onClick={onClose} disabled={saving}>
+            Batal
+          </Button>
+        </div>
+      </form>
+    </ModalWrapper>
+  );
+}
+

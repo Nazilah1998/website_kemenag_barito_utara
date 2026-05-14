@@ -14,7 +14,7 @@ export default function HomeHeroSection() {
       {/* 1. LAYERED BACKGROUND SYSTEM */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/kantor-kemenag.jpg"
+          src="/assets/images/kantor-kemenag.jpg"
           alt="Kantor Kementerian Agama Kabupaten Barito Utara"
           fill
           sizes="100vw"

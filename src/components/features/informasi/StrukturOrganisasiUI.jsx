@@ -11,7 +11,7 @@ const ProfileNode = ({ data, variant = "secondary", className = "" }) => {
       ${variant === 'primary' ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700/50'}
     `}>
       <div className="relative h-16 w-16 sm:h-20 sm:w-20 mb-3 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center shrink-0">
-        {data.image && data.image !== "/kemenag.svg" ? (
+        {data.image && data.image !== "/assets/branding/kemenag.svg" ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={data.image} alt={data.name} className="h-full w-full object-cover" />
         ) : (

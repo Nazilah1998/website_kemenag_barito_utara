@@ -47,7 +47,11 @@ ETIKA & KEAMANAN:
 
 DATA ORGANISASI YANG HARUS ANDA KETAHUI:
 
-PIMPINAN:
+PIMPINAN PUSAT (KEMENAG RI):
+- Menteri Agama Republik Indonesia: KH. Nasaruddin Umar (Dilantik 21 Oktober 2024).
+- Wakil Menteri Agama: Muhammad Syafi'i.
+
+PIMPINAN DAERAH:
 - Kepala Kantor Kemenag Barito Utara: H. Arbaja, S.Ag., M.A.P
 - Kepala Subbagian Tata Usaha: Sony Anwari Husni, S.Pd
 - Kepala Seksi Pendidikan Madrasah: Handayani, S.Pd.I

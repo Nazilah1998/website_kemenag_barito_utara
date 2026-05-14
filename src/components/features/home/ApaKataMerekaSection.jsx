@@ -136,7 +136,7 @@ export default function ApaKataMerekaSection() {
                         return (
                             <article
                                 key={`${person.name}-${index}`}
-                                className={`group relative flex flex-col overflow-hidden rounded-none border p-6 lg:p-8 transition-all duration-500 hover:-translate-y-2 ${isCenter
+                                className={`group relative flex flex-col overflow-hidden rounded-3xl border p-6 lg:p-8 transition-all duration-500 hover:-translate-y-2 ${isCenter
                                         ? "bg-white border-emerald-200 shadow-[0_25px_50px_rgba(16,185,129,0.1)] dark:bg-slate-900 dark:border-emerald-500/30 z-10"
                                         : "bg-white/60 border-slate-100 shadow-lg dark:bg-slate-900/40 dark:border-slate-800"
                                     }`}

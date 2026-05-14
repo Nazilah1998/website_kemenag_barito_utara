@@ -31,7 +31,7 @@ export function FeaturedNewsCard({ item }) {
   const displayCategory = t(`berita.categories.${item.category}`) || item.category;
 
   return (
-    <article className="group relative overflow-hidden rounded-none border border-slate-200 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+    <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
       <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
         <Link
           href={`/berita/${item.slug}`}
@@ -94,7 +94,7 @@ export function NewsCard({ item }) {
   const displayCategory = t(`berita.categories.${item.category}`) || item.category;
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-none border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-white/5 dark:bg-slate-900 dark:hover:border-emerald-500/30">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-white/5 dark:bg-slate-900 dark:hover:border-emerald-500/30">
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
         <div className="relative h-48 w-full overflow-hidden">

@@ -76,56 +76,56 @@ export const leadershipProfiles = [
   {
     name: "H. Arbaja, S.Ag.,M.A.P",
     position: "Kepala Kantor Kementerian Agama Kabupaten Barito Utara",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Memimpin arah kebijakan, koordinasi pelayanan, dan penguatan tata kelola kelembagaan di lingkungan Kemenag Barito Utara.",
   },
   {
     name: "Sony Anwari Husni, S.Pd",
     position: "Kepala Subbagian Tata Usaha",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mengkoordinasikan administrasi umum, kepegawaian, perencanaan, serta dukungan manajemen internal kantor.",
   },
   {
     name: "Handayani, S.Pd.I",
     position: "Kepala Seksi Pendidikan Madrasah",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
     name: "H. Bakti Tawaddin, M.Pd",
     position: "Kepala Seksi Pendidikan Agama Islam",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
     name: "Supian, SE",
     position: "Kepala Seksi Pendidikan Diniyah & Pondok Pesantren",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
     name: "Almubasir, S.Pd.I",
     position: "Kepala Seksi Bimbingan Masyarakat Islam",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
     name: "Hasan Fauzi, S.Ag",
     position: "Penyelenggara Zakat & Wakaf",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },
   {
     name: "Wandi, SH.AH",
     position: "Penyelenggara Hindu",
-    image: "/pejabat.png",
+    image: "/assets/images/pejabat.png",
     description:
       "Mendukung pelaksanaan layanan keagamaan, pembinaan umat, dan penguatan program pelayanan masyarakat.",
   },

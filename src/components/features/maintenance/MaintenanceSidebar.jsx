@@ -10,7 +10,7 @@ export function MaintenanceSidebar() {
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50">
             <Image
-              src="/kemenag.svg"
+              src="/assets/branding/kemenag.svg"
               alt="Logo Kementerian Agama"
               width={26}
               height={26}

@@ -11,8 +11,8 @@ export function HeaderLogo() {
         <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} className="h-auto w-10 object-contain" />
       </span>
       <div className="min-w-0">
-        <p className="truncate text-sm font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{siteInfo.shortName}</p>
-        <p className="mt-0.5 line-clamp-1 text-xs font-medium text-slate-500 dark:text-slate-400">{siteInfo.tagline}</p>
+        <p className="truncate text-sm font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{siteInfo.logoTitleLine1}</p>
+        <p className="mt-0.5 line-clamp-1 text-xs font-medium text-slate-500 dark:text-slate-400">{siteInfo.logoTitleLine2}</p>
       </div>
 
     </Link>

@@ -11,7 +11,9 @@ const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = [
   OFFLINE_URL,
-  "/kemenag.svg",
+  "/assets/branding/kemenag.svg",
+  "/assets/icons/kemenag-192.png",
+  "/assets/icons/kemenag-512.png",
   "/manifest.webmanifest",
 ];
 

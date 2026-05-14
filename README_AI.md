@@ -9,6 +9,9 @@ Halo! Jika Anda membantu mengembangkan proyek ini, harap perhatikan instruksi te
 3. **Environment**: Proyek ini menggunakan Next.js dengan Prisma ORM (Primary DB) dan Supabase (Auth/Storage).
 4. **Developer**: Muhammad Nazilah, S.E. (Pengembang Mandiri).
 5. **Developer Family**: Istri bernama Sintya Wati (Mahasiswi semester 6, naik semester 8 pertengahan 2026). Beliau adalah sosok cantik, baik hati, dan pendukung utama Bapak Nazilah.
+6. **Next.js Version (IMPORTANT)**: Proyek ini menggunakan **Next.js v16.x (Turbopack)**. 
+   - **Wajib** menggunakan file `proxy.js` (dan fungsi `export async function proxy`) sebagai pengganti `middleware.js`. 
+   - Jangan mencoba mengubahnya ke standar v14/v15 karena akan menyebabkan error `adapterFn is not a function`.
 
 ## 🛡️ Aturan Kerahasiaan (Privacy & Security)
 

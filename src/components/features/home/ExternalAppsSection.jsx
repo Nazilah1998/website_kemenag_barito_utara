@@ -13,7 +13,7 @@ const getExternalApps = (locale) => [
                 ? "Portal layanan digital terintegrasi Kementerian Agama."
                 : "Integrated digital service portal of the Ministry of Religious Affairs.",
         href: "https://pusaka-v3.kemenag.go.id/",
-        icon: "/apps/pusaka.png",
+        icon: "/assets/apps/pusaka.png",
     },
     {
         title: "EMIS",
@@ -22,7 +22,7 @@ const getExternalApps = (locale) => [
                 ? "Layanan data dan informasi pendidikan Islam terpadu."
                 : "Integrated Islamic education data and information services.",
         href: "https://emisgtk.kemenag.go.id/",
-        icon: "/apps/emis.png",
+        icon: "/assets/apps/emis.png",
     },
     {
         title: "TTE KEMENAG",
@@ -31,7 +31,7 @@ const getExternalApps = (locale) => [
                 ? "Sistem tanda tangan elektronik terintegrasi Kementerian Agama."
                 : "Electronic signature system integrated with the Ministry of Religious Affairs.",
         href: "https://tte.kemenag.go.id/login",
-        icon: "/apps/logo-bsre.png?v=2",
+        icon: "/assets/apps/logo-bsre.png?v=2",
     },
     {
         title: "ASN DIGITAL",
@@ -40,7 +40,7 @@ const getExternalApps = (locale) => [
                 ? "Platform layanan ASN digital dari Badan Kepegawaian Negara."
                 : "Digital ASN service platform from the National Civil Service Agency.",
         href: "https://asndigital.bkn.go.id/",
-        icon: "/apps/asn-digital.png",
+        icon: "/assets/apps/asn-digital.png",
     },
     {
         title: "MOOC PINTAR",
@@ -49,7 +49,7 @@ const getExternalApps = (locale) => [
                 ? "Platform pelatihan mandiri (Massive Open Online Course) Kementerian Agama."
                 : "Ministry of Religious Affairs independent training platform (Massive Open Online Course).",
         href: "https://pintar.kemenag.go.id/",
-        icon: "/apps/pintar.png?v=2",
+        icon: "/assets/apps/pintar.png?v=2",
     },
     {
         title: "SIMPEG 5",
@@ -58,7 +58,7 @@ const getExternalApps = (locale) => [
                 ? "Sistem informasi manajemen kepegawaian Kementerian Agama."
                 : "Personnel management information system of the Ministry of Religious Affairs.",
         href: "https://simpeg5.kemenag.go.id/",
-        icon: "/apps/simpeg5.png",
+        icon: "/assets/apps/simpeg5.png",
     },
     {
         title: "SRIKANDI",
@@ -67,7 +67,7 @@ const getExternalApps = (locale) => [
                 ? "Aplikasi arsip dinamis terintegrasi nasional."
                 : "National integrated dynamic archive application.",
         href: "https://srikandi.arsip.go.id/",
-        icon: "/apps/srikandi.png",
+        icon: "/assets/apps/srikandi.png",
     },
 ];
 
@@ -182,10 +182,10 @@ export default function ExternalAppsSection() {
                         href={app.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative flex flex-col items-center rounded-none border border-slate-200 bg-white p-6 text-center transition-all duration-500 hover:-translate-y-3 hover:border-emerald-300 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)] dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:hover:border-emerald-500/50"
+                        className="group relative flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center transition-all duration-500 hover:-translate-y-3 hover:border-emerald-300 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)] dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:hover:border-emerald-500/50"
                     >
                         {/* Background Glow Effect */}
-                        <div className="absolute inset-0 -z-10 rounded-none bg-gradient-to-b from-emerald-50/0 to-emerald-50/0 opacity-0 transition-opacity duration-500 group-hover:from-emerald-50/50 group-hover:to-transparent dark:group-hover:from-emerald-900/10" />
+                        <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-b from-emerald-50/0 to-emerald-50/0 opacity-0 transition-opacity duration-500 group-hover:from-emerald-50/50 group-hover:to-transparent dark:group-hover:from-emerald-900/10" />
 
                         <div className="relative mb-6">
                             {/* Icon Container with Ring Animation */}

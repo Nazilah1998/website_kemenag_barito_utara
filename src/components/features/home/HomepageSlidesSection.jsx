@@ -19,7 +19,7 @@ import {
 
 function resolveImage(value = "") {
     const raw = String(value || "").trim();
-    return raw || "/kemenag.svg";
+    return raw || "/assets/branding/kemenag.svg";
 }
 
 export default function HomepageSlidesSection({ slides = [] }) {

@@ -77,7 +77,7 @@ function RelatedCard({ item, t, locale }) {
   return (
     <article className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <Link href={`/berita/${item.slug}`} className="relative block aspect-16/10 bg-slate-100 dark:bg-slate-800">
-        <Image src={item.coverImage || "/kemenag.svg"} alt={item.title} fill className="object-cover transition duration-500 group-hover:scale-[1.03]" sizes="(max-width: 1024px) 100vw, 33vw" />
+        <Image src={item.coverImage || "/assets/branding/kemenag.svg"} alt={item.title} fill className="object-cover transition duration-500 group-hover:scale-[1.03]" sizes="(max-width: 1024px) 100vw, 33vw" />
       </Link>
       <div className="p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">

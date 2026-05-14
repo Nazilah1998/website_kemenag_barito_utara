@@ -19,7 +19,7 @@ export function MaintenanceContent({ title, featureName, description }) {
           <div className="mb-5 flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 shadow-sm">
               <Image
-                src="/kemenag.svg"
+                src="/assets/branding/kemenag.svg"
                 alt="Logo Kementerian Agama"
                 width={40}
                 height={40}

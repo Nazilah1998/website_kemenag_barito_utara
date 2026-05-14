@@ -6,6 +6,7 @@ export function getNavigationItems(locale = "id") {
   const m = messages[locale]?.nav || messages.id.nav;
 
   return [
+    { label: m.home, href: "/beranda" },
     {
       label: m.profil,
       href: "/profil/sejarah",

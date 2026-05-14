@@ -9,6 +9,8 @@ const mapQuery = "Kantor Kementerian Agama Kabupaten Barito Utara";
 export const siteInfo = {
   name: "Kementerian Agama Kabupaten Barito Utara",
   shortName: "Kemenag Barito Utara",
+  logoTitleLine1: "KEMENTERIAN AGAMA",
+  logoTitleLine2: "KABUPATEN BARITO UTARA",
   tagline: "KABUPATEN BARITO UTARA",
 
   description:
@@ -24,7 +26,7 @@ export const siteInfo = {
   ],
   address: "Jl. Ahmad Yani No.126 Muara Teweh 73811",
   complaintHref: "/kontak",
-  logoSrc: "/kemenag-512.png",
+  logoSrc: "/assets/icons/kemenag-512.png",
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.kemenag-baritoutara.com",
 };

@@ -8,10 +8,13 @@ import Footer from "./Footer/Footer";
 export default function AppShell({ children }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
+  const isPortalPage = pathname === "/" || pathname === "" || !pathname;
+  const isAuthRoute = 
+    pathname?.startsWith("/login") || 
+    pathname?.startsWith("/auth") || 
+    pathname?.startsWith("/update-password");
 
-  const isPortalPage = pathname === "/";
-
-  if (isAdminRoute || isPortalPage) {
+  if (isAdminRoute || isPortalPage || isAuthRoute) {
     return <main id="konten-utama" className={isAdminRoute ? "bg-slate-100" : ""}>{children}</main>;
   }
 

@@ -15,8 +15,8 @@ export function FooterBrand() {
           <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} className="object-contain" />
         </div>
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong)">{siteInfo.shortName}</p>
-          <p className="theme-footer-muted text-xs">{siteInfo.tagline}</p>
+          <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong)">{siteInfo.logoTitleLine1}</p>
+          <p className="theme-footer-muted text-xs">{siteInfo.logoTitleLine2}</p>
         </div>
 
       </div>

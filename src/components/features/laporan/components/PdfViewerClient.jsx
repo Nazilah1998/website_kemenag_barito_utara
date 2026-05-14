@@ -7,7 +7,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 import { usePdfViewer } from "@/hooks/usePdfViewer";
 import { PdfViewerToolbar } from "./PdfViewerToolbar";
 
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+pdfjs.GlobalWorkerOptions.workerSrc = "/assets/workers/pdf.worker.min.mjs";
 
 try {
   if (typeof pdfjs.verbosityLevel !== "undefined" && typeof pdfjs.VerbosityLevel !== "undefined") {

@@ -72,8 +72,10 @@ export async function GET() {
         reviewed_at: item.reviewed_at,
         reviewed_by: item.reviewed_by,
         review_notes: item.review_notes,
-        role: status === "approved" ? "editor" : normalizedRole,
-        system_role: rawSystemRole || "editor",
+        role:
+          item.status === "approved"
+            ? profile?.role || "editor"
+            : "editor",
         is_active: Boolean(profile?.is_active),
         permissions: permissions,
         mfa_setup_disabled: !validUuid,

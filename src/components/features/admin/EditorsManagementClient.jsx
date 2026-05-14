@@ -10,6 +10,7 @@ import {
   VerifyStatusModal,
   ToggleActiveModal,
   RoleModal,
+  CreateEditorModal,
 } from "./editors/EditorModals";
 
 export default function EditorsManagementClient({ initialEditors = [] }) {
@@ -22,6 +23,7 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
           pendingCount={e.pendingCount}
           filteredCount={e.filteredEditors.length}
           totalCount={e.editors.length}
+          onAddEditor={e.openCreateModal}
         />
         <EditorFilters
           search={e.search} setSearch={e.setSearch}
@@ -63,6 +65,15 @@ export default function EditorsManagementClient({ initialEditors = [] }) {
           </div>
         )}
       </div>
+
+      <CreateEditorModal
+        open={e.createModalOpen}
+        onClose={e.closeCreateModal}
+        onSave={e.saveCreateEditor}
+        saving={e.creatingEditor}
+        formData={e.createFormData}
+        onChange={e.handleCreateFormDataChange}
+      />
 
       <PermissionsModal
         open={e.modalOpen} editor={e.activeEditor} selectedPermissions={e.selectedPermissions}

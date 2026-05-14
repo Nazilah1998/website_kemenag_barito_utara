@@ -107,47 +107,15 @@ const QUICK_ACTIONS = [
 const formatTime = (date) =>
   date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
-// ─── Typing Indicator ────────────────────────────────────────────────────────
 const TypingDots = () => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "4px",
-      padding: "4px 0",
-    }}
-  >
+  <div className="typing-dots-container">
     {[0, 1, 2].map((i) => (
       <span
         key={i}
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: "50%",
-          background: "#10b981",
-          display: "inline-block",
-          animation: `typingBounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-        }}
+        className="typing-dot"
+        style={{ animationDelay: `${i * 0.2}s` }}
       />
     ))}
-    <style>{`
-      @keyframes typingBounce {
-        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-        30% { transform: translateY(-6px); opacity: 1; }
-      }
-      @keyframes fadeSlideIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes scaleIn {
-        from { opacity: 0; transform: scale(0.95) translateY(8px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-      }
-      @keyframes pulseGreen {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
-        50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
-      }
-    `}</style>
   </div>
 );
 
@@ -168,6 +136,17 @@ const ChatWidget = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const [skipAutoFocus, setSkipAutoFocus] = useState(false);
+
+  useEffect(() => {
+    // Deteksi jika harus melewati auto-focus (Mobile, Tablet, atau PWA)
+    if (typeof window !== "undefined") {
+      const isPwa = window.matchMedia("(display-mode: standalone)").matches || 
+                    (window.navigator).standalone;
+      const isMobile = window.matchMedia("(max-width: 1024px)").matches;
+      setSkipAutoFocus(isPwa || isMobile);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -179,8 +158,10 @@ const ChatWidget = () => {
   }, [messages, isOpen]);
 
   useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
-  }, [isOpen]);
+    if (isOpen && !skipAutoFocus) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [isOpen, skipAutoFocus]);
 
   const sendMessage = async (text) => {
     const messageText = text || input;
@@ -253,13 +234,14 @@ const ChatWidget = () => {
   };
   const handleQuickAction = (text) => sendMessage(text);
 
-  // ─── FAB Button ──────────────────────────────────────────────────────────
-  if (!isOpen) {
-    return (
+  // ─── Render ─────────────────────────────────────────────────────────────
+  return (
+    <>
+      {/* ─── FAB Button ─────────────────── */}
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Buka Chat Asisten"
-        className="ai-fab-button"
+        className={`ai-fab-button ${isOpen ? "hidden" : "visible"}`}
         style={{
           position: "fixed",
           zIndex: 9999,
@@ -271,19 +253,8 @@ const ChatWidget = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow:
-            "0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2)",
-          transition: "transform 0.2s, box-shadow 0.2s",
-          animation: "pulseGreen 2.5s ease-in-out infinite",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "scale(1.1)";
-          e.currentTarget.style.animation = "none";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.animation =
-            "pulseGreen 2.5s ease-in-out infinite";
+          boxShadow: "0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2)",
+          animation: !isOpen ? "pulseGreen 2.5s ease-in-out infinite" : "none",
         }}
       >
         <Image
@@ -310,45 +281,27 @@ const ChatWidget = () => {
             border: "2px solid #fff",
           }}
         />
-        <style>{`
-          .ai-fab-button {
-            bottom: 28px; right: 28px;
-            width: 60px; height: 60px;
-          }
-          @media (max-width: 768px) {
-            .ai-fab-button {
-              bottom: 20px; right: 20px;
-              width: 52px; height: 52px;
-            }
-          }
-          @keyframes pulseGreen { 0%,100%{box-shadow:0 4px 24px rgba(5,150,105,0.45),0 2px 8px rgba(0,0,0,0.2)}50%{box-shadow:0 4px 32px rgba(5,150,105,0.7),0 2px 12px rgba(0,0,0,0.25)} }
-        `}</style>
       </button>
-    );
-  }
 
-  // ─── Chat Window ─────────────────────────────────────────────────────────
-  return (
-    <div
-      className="ai-chat-window"
-      style={{
-        position: "fixed",
-        bottom: 28,
-        right: 28,
-        zIndex: 9999,
-        background: "rgba(10, 15, 25, 0.97)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRadius: 28,
-        boxShadow:
-          "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        animation: "scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      }}
-    >
+      {/* ─── Chat Window ─────────────────── */}
+      <div
+        className={`ai-chat-window ${isOpen ? "open" : "closed"}`}
+        style={{
+          position: "fixed",
+          bottom: 28,
+          right: 28,
+          zIndex: 9999,
+          background: "rgba(10, 15, 25, 0.97)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRadius: 28,
+          boxShadow: "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        }}
+      >
       {/* ── Custom Reset Confirmation Modal ──────────────── */}
       {showResetConfirm && (
         <div
@@ -591,9 +544,9 @@ const ChatWidget = () => {
             <button
               onClick={() => setIsOpen(false)}
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 10,
+                width: 38,
+                height: 38,
+                borderRadius: 12,
                 border: "none",
                 background: "rgba(255,255,255,0.12)",
                 color: "#fff",
@@ -601,7 +554,7 @@ const ChatWidget = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "background 0.2s",
+                transition: "all 0.2s",
               }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "rgba(255,255,255,0.22)")
@@ -616,9 +569,9 @@ const ChatWidget = () => {
             <button
               onClick={() => setIsOpen(false)}
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 10,
+                width: 38,
+                height: 38,
+                borderRadius: 12,
                 border: "none",
                 background: "rgba(255,255,255,0.12)",
                 color: "#fff",
@@ -626,7 +579,7 @@ const ChatWidget = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "background 0.2s",
+                transition: "all 0.2s",
               }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.background = "rgba(239,68,68,0.3)")
@@ -870,43 +823,8 @@ const ChatWidget = () => {
         </p>
       </div>
 
-      <style>{`
-        .ai-chat-window {
-          width: 440px;
-          height: 700px;
-        }
-        @media (max-width: 1024px) {
-          .ai-chat-window {
-            width: 400px;
-            height: 650px;
-            bottom: 24px;
-            right: 24px;
-          }
-        }
-        @media (max-width: 768px) {
-          .ai-chat-window {
-            width: 380px;
-            height: 600px;
-            bottom: 20px;
-            right: 20px;
-            border-radius: 24px;
-          }
-        }
-        @media (max-width: 480px) {
-          .ai-chat-window {
-            left: 12px;
-            right: 12px;
-            width: auto;
-            height: min(650px, calc(100vh - 100px));
-            bottom: 12px;
-            border-radius: 24px;
-          }
-        }
-        @keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes scaleIn { from{opacity:0;transform:scale(0.92) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-        @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
-      `}</style>
     </div>
+    </>
   );
 };
 

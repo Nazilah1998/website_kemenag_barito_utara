@@ -38,7 +38,7 @@ const getCachedLatestGaleriHome = unstable_cache(
         return {
           id: item?.id ?? null,
           title: item?.title || "Dokumentasi kegiatan",
-          imageUrl: previewImage || "/kemenag.svg",
+          imageUrl: previewImage || "/assets/branding/kemenag.svg",
           linkUrl: item?.link_url && item.link_url !== "#" ? item.link_url : "",
           publishedAt: item?.published_at || item?.created_at || null,
         };

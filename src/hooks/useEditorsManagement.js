@@ -61,6 +61,15 @@ export function useEditorsManagement(initialEditors = []) {
   const [roleDraft, setRoleDraft] = useState("editor");
   const [savingRole, setSavingRole] = useState(false);
 
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [creatingEditor, setCreatingEditor] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    fullName: "",
+    email: "",
+    unitName: "",
+    password: "",
+  });
+
   const [toast, setToast] = useState(null);
 
   async function loadEditors() {
@@ -177,6 +186,12 @@ export function useEditorsManagement(initialEditors = []) {
       const successMessage = successText || data?.message || "Aksi berhasil.";
       setMessage(successMessage);
       pushToast("success", successMessage);
+
+      // If it was a delete action, remove from local state immediately for snappy UI
+      if (payload.action === "delete") {
+        setEditors((prev) => prev.filter((ed) => ed.user_id !== userId));
+      }
+
       await loadEditors();
     } catch (err) {
       const errorMessage =
@@ -365,6 +380,54 @@ export function useEditorsManagement(initialEditors = []) {
     });
   }
 
+  function openCreateModal() {
+    setCreateFormData({
+      fullName: "",
+      email: "",
+      unitName: "",
+      password: "",
+    });
+    setCreateModalOpen(true);
+  }
+
+  function closeCreateModal() {
+    setCreateModalOpen(false);
+  }
+
+  function handleCreateFormDataChange(key, value) {
+    setCreateFormData((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function saveCreateEditor() {
+    setCreatingEditor(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const res = await fetch("/api/admin/editors/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createFormData),
+      });
+
+      const data = await parseSafeJsonResponse(res);
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Gagal membuat akun editor.");
+      }
+
+      pushToast("success", "Akun editor baru berhasil dibuat dan langsung aktif.");
+      closeCreateModal();
+      await loadEditors();
+    } catch (err) {
+      const errorMessage = err?.message || "Terjadi kesalahan saat membuat akun.";
+      setError(errorMessage);
+      pushToast("error", errorMessage);
+    } finally {
+      setCreatingEditor(false);
+    }
+  }
+
   const pendingCount = useMemo(
     () => editors.filter((item) => item.status === "pending").length,
     [editors],
@@ -452,5 +515,12 @@ export function useEditorsManagement(initialEditors = []) {
     pendingCount,
     filteredEditors,
     getPermissionCount,
+    createModalOpen,
+    creatingEditor,
+    createFormData,
+    openCreateModal,
+    closeCreateModal,
+    handleCreateFormDataChange,
+    saveCreateEditor,
   };
 }

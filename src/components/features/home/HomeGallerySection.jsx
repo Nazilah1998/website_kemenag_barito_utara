@@ -193,7 +193,7 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
   return (
     <article
       onClick={handleTap}
-      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-none border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
+      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
     >
       {/* Image Layer */}
       <div className="absolute inset-0 z-0">
