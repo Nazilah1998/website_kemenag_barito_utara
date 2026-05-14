@@ -258,7 +258,7 @@ const ChatWidget = () => {
         }}
       >
         <Image
-          src="/kemenag-512.png"
+          src="/assets/icons/kemenag-512.png"
           alt="Kemenag"
           width={40}
           height={40}
@@ -465,7 +465,7 @@ const ChatWidget = () => {
               }}
             >
               <Image
-                src="/kemenag-512.png"
+                src="/assets/icons/kemenag-512.png"
                 alt="Logo"
                 width={32}
                 height={32}
