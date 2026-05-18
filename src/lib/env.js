@@ -25,8 +25,8 @@ export const env = {
   supabaseUrl,
   supabasePublishableKey,
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
-  recaptchaSiteKey: readEnv("NEXT_PUBLIC_RECAPTCHA_SITE_KEY", ""),
-  recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY ?? "",
+  turnstileSiteKey: readEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", ""),
+  turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY ?? "",
   r2: {
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID ?? "",
     secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY ?? "",

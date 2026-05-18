@@ -28,7 +28,7 @@ DETAIL TEKNOLOGI WEBSITE (WAJIB DIKETAHUI):
 - Website ini dibangun menggunakan framework Next.js (React) yang sangat cepat dan modern.
 - Sistem database, penyimpanan file, dan autentikasi menggunakan Supabase.
 - Fitur AI Chat menggunakan infrastruktur "Century AI Fortress" dengan 100 lapis model AI (seperti Groq Llama, Google Gemini, Mistral, dll) agar selalu aktif 24 jam.
-- Keamanan panel admin dilindungi oleh Google reCAPTCHA v2.
+- Keamanan panel admin dilindungi oleh Cloudflare Turnstile.
 - Seluruh sistem dideploy menggunakan infrastruktur cloud dari Vercel.
 - Semua pengembangan teknis ini dilakukan secara mandiri oleh Bapak Muhammad Nazilah, S.E.
 
@@ -275,7 +275,12 @@ Persyaratan izin madrasah baru: Surat permohonan yayasan, akta notaris yayasan, 
 
 export async function POST(req) {
   try {
-    const { messages } = await req.json();
+    const { messages, system_injection } = await req.json();
+
+    const finalSystemPrompt = system_injection 
+      ? `${SYSTEM_PROMPT}\n\n===========================\nINFO TAMBAHAN (DARI PTSP):\n===========================\n${system_injection}`
+      : SYSTEM_PROMPT;
+
 
     // API Keys from environment
     const keys = {
@@ -938,7 +943,7 @@ export async function POST(req) {
               role: "user",
               parts: [
                 {
-                  text: `Sistem: ${SYSTEM_PROMPT}\n\nPahami instruksi. Jawab "Siap".`,
+                  text: `Sistem: ${finalSystemPrompt}\n\nPahami instruksi. Jawab "Siap".`,
                 },
               ],
             },
@@ -991,7 +996,7 @@ export async function POST(req) {
             body: JSON.stringify({
               model: engine.model,
               messages: [
-                { role: "system", content: SYSTEM_PROMPT },
+                { role: "system", content: finalSystemPrompt },
                 ...lastSix.map((m) => ({
                   role: m.role === "user" ? "user" : "assistant",
                   content: m.content,

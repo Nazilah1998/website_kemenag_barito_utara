@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import ReCAPTCHA from "react-google-recaptcha";
+import Turnstile from "@/components/ui/Turnstile";
 import { siteInfo } from "@/data/site";
 import { useAdminLogin } from "@/hooks/useAdminLogin";
 import { EyeIcon, inputClassName, LoginLoading } from "./login/LoginUI";
@@ -51,12 +51,12 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               error={l.error}
             />
 
-            <div className="pt-2 flex justify-center">
-                <ReCAPTCHA
-                  sitekey="6LfPTeMsAAAAAHr-HVm6YcHa9HqAaIhxQAgCRLeZ"
-                  onChange={l.setRecaptchaToken}
-                  theme="light"
-                />
+            <div className="pt-2 flex justify-center w-full">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                onVerify={l.setTurnstileToken}
+                theme="light"
+              />
             </div>
 
             {l.error && (
@@ -70,7 +70,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               </div>
             )}
 
-            <SubmitButton submitting={l.submitting} disabled={!l.email || !l.password || !l.recaptchaToken} />
+            <SubmitButton submitting={l.submitting} disabled={!l.email || !l.password || !l.turnstileToken} />
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4 text-center">

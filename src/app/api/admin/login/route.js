@@ -9,9 +9,9 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}));
     const email = body?.email?.trim()?.toLowerCase();
     const password = body?.password;
-    const recaptchaToken = body?.recaptchaToken;
+    const turnstileToken = body?.turnstileToken;
 
-    if (!email || !password || !recaptchaToken) {
+    if (!email || !password || !turnstileToken) {
       return apiResponse(
         {
           ok: false,
@@ -21,10 +21,16 @@ export async function POST(request) {
       );
     }
 
-    // --- VERIFIKASI GOOGLE RECAPTCHA (SERVER-SIDE) ---
+    // --- VERIFIKASI CLOUDFLARE TURNSTILE (SERVER-SIDE) ---
     try {
-      const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`;
-      const verifyRes = await fetch(verifyUrl, { method: "POST" });
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          secret: process.env.TURNSTILE_SECRET_KEY,
+          response: turnstileToken,
+        }),
+      });
       const verifyJson = await verifyRes.json();
 
       if (!verifyJson.success) {
@@ -37,8 +43,7 @@ export async function POST(request) {
         );
       }
     } catch (err) {
-      console.error("ReCAPTCHA Verification Error:", err);
-      // Jika server Google bermasalah, kita beri peringatan tapi tetap amankan login
+      console.error("Turnstile Verification Error:", err);
     }
 
     const supabase = await createClient();

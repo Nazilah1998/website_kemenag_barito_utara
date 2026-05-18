@@ -26,7 +26,7 @@ export function useAdminLogin(initialUnauthorized) {
       : "",
   );
 
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [turnstileToken, setTurnstileToken] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -71,8 +71,8 @@ export function useAdminLogin(initialUnauthorized) {
     if (submitting) return;
     setError("");
 
-    if (!recaptchaToken) {
-      setError("Silakan centang 'I'm not a robot' terlebih dahulu.");
+    if (!turnstileToken) {
+      setError("Silakan lakukan verifikasi keamanan terlebih dahulu.");
       return;
     }
 
@@ -85,7 +85,7 @@ export function useAdminLogin(initialUnauthorized) {
         body: JSON.stringify({ 
           email: email.trim().toLowerCase(), 
           password,
-          recaptchaToken 
+          turnstileToken 
         }),
       });
 
@@ -114,8 +114,8 @@ export function useAdminLogin(initialUnauthorized) {
     capsLock,
     error,
     setError,
-    recaptchaToken,
-    setRecaptchaToken,
+    turnstileToken,
+    setTurnstileToken,
     handlePasswordKeyState,
     handleSubmit,
   };
