@@ -109,7 +109,7 @@ export async function DELETE(request) {
       action: AUDIT_ACTIONS.DELETE,
       entity: AUDIT_ENTITIES.KONTAK_PESAN,
       entityId: id,
-      summary: `Menghapus pesan dari: ${existing?.sender_name || id}`,
+      summary: `Menghapus pesan dari: ${existing?.nama || id}`,
       before: existing,
       request,
     });

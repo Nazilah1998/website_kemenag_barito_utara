@@ -30,7 +30,8 @@ export async function uploadBase64Image({
   };
 }
 
-export async function removeStorageFileByPublicUrl(publicUrl) {
+export async function removeStorageFileByPublicUrl(arg1, arg2) {
+  const publicUrl = arg2 !== undefined ? arg2 : arg1;
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {

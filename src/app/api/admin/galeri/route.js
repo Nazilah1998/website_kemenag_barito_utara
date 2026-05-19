@@ -8,6 +8,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { apiResponse } from "@/lib/prisma-helpers";
 import prisma from "@/lib/prisma";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { randomUUID } from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -114,7 +115,7 @@ export async function POST(request) {
         image_size_bytes: BigInt(base64Meta.sizeBytes),
         link_url: "",
         source_type: "manual",
-        source_id: auth.session.user.id,
+        source_id: randomUUID(),
         is_published: true,
         published_at: publishedAt,
       },
@@ -205,7 +206,6 @@ export async function PUT(request) {
         image_size_kb: finalSizeKB,
         image_size_bytes: finalSizeBytes,
         published_at: publishedAt,
-        source_id: auth.session.user.id,
         updated_at: new Date(),
       },
     });

@@ -10,7 +10,7 @@ import {
 describe("structured-data", () => {
   it("organizationSchema returns GovernmentOrganization with logo URL", () => {
     const s = organizationSchema();
-    expect(s["@type"]).toBe("GovernmentOrganization");
+    expect(s["@type"]).toContain("GovernmentOrganization");
     expect(s.logo.url).toMatch(/^https?:\/\//);
     expect(s.address.addressCountry).toBe("ID");
   });

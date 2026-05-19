@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import AdminLaporanCategoryManager from "../src/components/admin/AdminLaporanCategoryManager";
+import { render, screen, fireEvent } from "@testing-library/react";
+import AdminLaporanCategoryManager from "../src/components/features/admin/AdminLaporanCategoryManager";
 
 vi.mock("../src/lib/laporan-api", () => ({
     fetchCategoryDocuments: vi.fn(),
@@ -53,8 +53,8 @@ describe("AdminLaporanCategoryManager", () => {
         );
 
         expect(screen.getByText("Pilih Kategori")).toBeInTheDocument();
-        expect(screen.getByText("Upload Dokumen PDF")).toBeInTheDocument();
-        expect(screen.getByText("Daftar Dokumen")).toBeInTheDocument();
+        expect(screen.getByText("Upload Baru")).toBeInTheDocument();
+        expect(screen.getByText("Arsip Dokumen")).toBeInTheDocument();
 
         expect(
             screen.getByRole("button", { name: /laporan tahunan/i }),
@@ -73,11 +73,15 @@ describe("AdminLaporanCategoryManager", () => {
         );
 
         expect(
-            screen.getByRole("button", { name: /upload dokumen/i }),
+            screen.getByRole("button", { name: /simpan dokumen/i }),
         ).toBeInTheDocument();
 
+        // Click the Pilih Kategori trigger to open the dropdown
+        const trigger = screen.getByRole("button", { name: /pilih kategori/i });
+        fireEvent.click(trigger);
+
         expect(
-            screen.getByRole("button", { name: /laporan tahunan/i }),
+            screen.getAllByRole("button", { name: /laporan tahunan/i })[0],
         ).toBeInTheDocument();
 
         expect(

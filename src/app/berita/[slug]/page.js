@@ -143,15 +143,26 @@ export default async function DetailBeritaPage({ params }) {
                 href={coverImageDownloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative block min-h-80 cursor-pointer overflow-hidden md:min-h-115"
+                className="group relative block w-full aspect-[4/3] sm:aspect-video lg:aspect-[21/9] max-h-[550px] cursor-pointer overflow-hidden"
                 title="Buka atau unduh cover image"
               >
+                {/* Blurred Background to fill the banner container beautifully */}
+                <Image
+                  src={coverImage}
+                  alt=""
+                  fill
+                  priority
+                  className="object-cover blur-2xl scale-110 opacity-35 select-none pointer-events-none"
+                  sizes="100vw"
+                />
+
+                {/* Sharp Foreground Image using object-contain to prevent any cropping */}
                 <Image
                   src={coverImage}
                   alt={berita.title}
                   fill
                   priority
-                  className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                  className="object-contain transition duration-500 group-hover:scale-[1.01]"
                   sizes="100vw"
                 />
 

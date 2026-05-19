@@ -27,6 +27,12 @@ const LIMITS = {
 
 export const dynamic = "force-dynamic";
 
+function createHttpError(message, status = 500) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 const table = "berita";
 const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
