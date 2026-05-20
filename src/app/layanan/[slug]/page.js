@@ -51,7 +51,23 @@ export default async function LayananSubPage({ params }) {
       }
     });
   } catch (error) {
-    console.error("Error fetching seksi data from database:", error);
+    if (error?.code === 'P2021') {
+      // Tabel (e.g. layanan_ptsp) belum ada di database — query tanpa include
+      try {
+        seksiData = await prisma.seksi.findUnique({
+          where: { slug },
+          include: {
+            pegawai_seksi: {
+              orderBy: { sort_order: 'asc' }
+            }
+          }
+        });
+      } catch (fallbackError) {
+        console.error("Fallback query also failed:", fallbackError);
+      }
+    } else {
+      console.error("Error fetching seksi data from database:", error);
+    }
   }
 
   return (

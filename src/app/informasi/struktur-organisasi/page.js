@@ -76,7 +76,7 @@ export default async function StrukturOrganisasiPage() {
   } catch (error) {
     console.error("Error fetching seksi data for Struktur Organisasi:", error);
     // Fallback to static if error
-    const { leadershipProfiles } = require("@/data/profile");
+    const { leadershipProfiles } = await import("@/data/profile");
     leadershipData = leadershipProfiles;
   }
 

@@ -1,38 +1,46 @@
-"use client";
-
 import React from "react";
-import { useParams } from "next/navigation";
-import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
-import { useLanguage } from "@/context/LanguageContext";
+import prisma from "@/lib/prisma";
+import InformasiSlugClientPage from "./InformasiSlugClientPage";
 
-const INFORMASI_MAP = {
-  regulasi: "nav.regulasi",
-  "profil-pejabat": "nav.pejabat",
-  "struktur-organisasi": "nav.struktur",
-  "dasar-hukum": "nav.dasarHukum",
-};
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function InformasiSubPage() {
-  const { slug } = useParams();
-  const { t } = useLanguage();
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  try {
+    const page = await prisma.static_pages.findFirst({
+      where: { slug, is_published: true },
+    });
+    if (!page) {
+      return { title: "Informasi Publik | Kemenag Barito Utara" };
+    }
+    return {
+      title: `${page.title} | Kemenag Barito Utara`,
+      description: page.description || "",
+    };
+  } catch (error) {
+    console.error("generateMetadata error:", error);
+    return { title: "Informasi Publik | Kemenag Barito Utara" };
+  }
+}
 
-  const i18nKey = INFORMASI_MAP[slug];
-  const menuTitle = i18nKey
-    ? i18nKey.startsWith("nav.")
-      ? t(i18nKey)
-      : i18nKey
-    : "Informasi Publik";
+export default async function InformasiSubPage({ params }) {
+  const { slug } = await params;
 
-  return (
-    <MaintenancePage
-      title={`${menuTitle} Sedang Diperbarui`}
-      menuName={menuTitle}
-      description={`Konten dan dokumen resmi untuk ${menuTitle} sedang dalam proses verifikasi dan penataan ulang untuk memastikan akurasi informasi bagi masyarakat.`}
-      breadcrumb={[
-        { label: t("nav.home"), href: "/" },
-        { label: t("nav.informasi") },
-        { label: menuTitle },
-      ]}
-    />
-  );
+  let pageData = null;
+  try {
+    pageData = await prisma.static_pages.findFirst({
+      where: { slug, is_published: true },
+      select: {
+        title: true,
+        description: true,
+        content: true,
+        updated_at: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching static page from database:", error);
+  }
+
+  return <InformasiSlugClientPage slug={slug} pageData={pageData} />;
 }

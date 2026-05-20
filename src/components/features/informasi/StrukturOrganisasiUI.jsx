@@ -85,21 +85,26 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
     const interval = setInterval(fetchLatestData, 5000);
 
     // 2. Supabase Realtime: dengarkan sinyal broadcast dari admin
-    const supabase = createClient();
-    const channel = supabase.channel("site-updates");
-    channel
-      .on("broadcast", { event: "refresh-content" }, (payload) => {
-        // Langsung refresh jika sinyal terkait seksi/organisasi
-        const entity = payload?.payload?.entity;
-        if (!entity || entity === "seksi" || entity === "content") {
-          fetchLatestData();
-        }
-      })
-      .subscribe();
+    let supabase;
+    let channel;
+    try {
+      supabase = createClient();
+      channel = supabase.channel("site-updates");
+      channel
+        .on("broadcast", { event: "refresh-content" }, (payload) => {
+          const entity = payload?.payload?.entity;
+          if (!entity || entity === "seksi" || entity === "content") {
+            fetchLatestData();
+          }
+        })
+        .subscribe();
+    } catch (e) {
+      // Supabase env tidak tersedia — realtime skip
+    }
 
     return () => {
       clearInterval(interval);
-      supabase.removeChannel(channel);
+      if (channel) supabase?.removeChannel(channel);
     };
   }, []);
 
