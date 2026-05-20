@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export function MobileNavUtilities({
   locale, setLocale,
@@ -46,14 +48,108 @@ export function MobileNavUtilities({
         </div>
       </div>
 
+      <MobileAdminLoginButton adminState={adminState} />
+    </div>
+  );
+}
+
+function MobileAdminLoginButton({ adminState }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (adminState?.user) {
+    return (
       <Link
         href="/admin"
         className="mt-6 flex items-center justify-center gap-2 w-full rounded-2xl bg-emerald-700 py-4 text-center text-sm font-black text-white shadow-xl shadow-emerald-200 transition hover:bg-emerald-800 active:scale-95 dark:shadow-none"
       >
         <div className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
-        {adminState?.user ? "Panel Admin" : "Login Admin"}
+        Panel Admin
       </Link>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setShowConfirm(true)}
+        className="mt-6 flex items-center justify-center gap-2 w-full rounded-2xl bg-emerald-700 py-4 text-center text-sm font-black text-white shadow-xl shadow-emerald-200 transition hover:bg-emerald-800 active:scale-95 dark:shadow-none"
+      >
+        <div className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+        Login Admin
+      </button>
+
+      {/* Confirmation Modal via Portal */}
+      {mounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {showConfirm && (
+            <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm"
+                onClick={() => setShowConfirm(false)}
+              />
+
+              {/* Modal Panel */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"
+              >
+                {/* Top red warning accent */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-600" />
+
+                <div className="p-7">
+                  {/* Warning Triangle Icon */}
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-red-600 dark:text-red-400" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Peringatan Akses Terbatas
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    Halaman ini hanya untuk <strong className="text-red-600 dark:text-red-400">Admin Kantor Kemenag Barito Utara</strong>. Apakah Anda benar-benar admin kantor?
+                  </p>
+
+                  <div className="mt-6 flex gap-3">
+                    <button
+                      onClick={() => setShowConfirm(false)}
+                      className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    >
+                      Bukan, Kembali
+                    </button>
+                    <Link
+                      href="/admin"
+                      onClick={() => setShowConfirm(false)}
+                      className="flex-1 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 py-3 text-center text-[11px] font-black uppercase tracking-widest text-white transition hover:from-red-700 hover:to-rose-700 hover:shadow-lg hover:shadow-red-500/20"
+                    >
+                      Ya, Masuk
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
   );
 }
 

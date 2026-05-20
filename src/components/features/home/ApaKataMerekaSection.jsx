@@ -44,12 +44,28 @@ const cardVariants = {
     }
 };
 
-export default function ApaKataMerekaSection() {
+export default function ApaKataMerekaSection({ testimonials }) {
     const { t, locale } = useLanguage();
-    const rawData = getApaKataMereka(locale);
+
+    let rawData;
+    if (testimonials && testimonials.length > 0) {
+        const filtered = testimonials.filter(item => item.locale === locale);
+        if (filtered.length > 0) {
+            rawData = filtered.map(item => ({
+                name: item.name,
+                position: item.role,
+                image: item.avatar || "/assets/images/pejabat.png",
+                quote: item.content.split('\n'),
+            }));
+        }
+    }
+
+    if (!rawData) {
+        rawData = getApaKataMereka(locale);
+    }
 
     // Reorder data to: [Menteri, Arbaja, Kanwil] to match user's mental model
-    const data = [rawData[0], rawData[2], rawData[1]];
+    const data = rawData.length >= 3 ? [rawData[0], rawData[2], rawData[1]] : rawData;
 
     const [activeIndex, setActiveIndex] = useState(1); // Default to Arbaja
 

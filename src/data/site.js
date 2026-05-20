@@ -51,7 +51,7 @@ export const footerMenuLinks = [
   { label: "Beranda", href: "/" },
   { label: "Profil", href: "/profil" },
   { label: "Berita", href: "/berita" },
-  { label: "Layanan", href: "/layanan" },
+  { label: "Layanan", href: "/layanan/sekjen" },
   { label: "Kontak", href: "/kontak" },
 ];
 
@@ -64,7 +64,7 @@ export const homeQuickLinks = [
   {
     title: "Layanan Publik",
     description: "Lihat jenis layanan, persyaratan, dan alur yang tersedia.",
-    href: "/layanan",
+    href: "/layanan/sekjen",
   },
   {
     title: "Dokumen Publik",

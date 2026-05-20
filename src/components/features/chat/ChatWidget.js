@@ -97,7 +97,7 @@ const QUICK_ACTIONS = [
   "Siapa Kepala Kemenag?",
   "Layanan apa saja?",
   "Jam buka kantor?",
-  "Persyaratan daftar haji?",
+  "Layanan zakat & wakaf?",
   "Berapa biaya nikah?",
   "Layanan sertifikasi halal?",
   "Lokasi & Kontak kantor?",
@@ -142,8 +142,9 @@ const ChatWidget = () => {
   useEffect(() => {
     // Deteksi jika harus melewati auto-focus (Mobile, Tablet, atau PWA)
     if (typeof window !== "undefined") {
-      const isPwa = window.matchMedia("(display-mode: standalone)").matches || 
-                    (window.navigator).standalone;
+      const isPwa =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone;
       const isMobile = window.matchMedia("(max-width: 1024px)").matches;
       setSkipAutoFocus(isPwa || isMobile);
     }
@@ -262,7 +263,8 @@ const ChatWidget = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2)",
+              boxShadow:
+                "0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2)",
             }}
           >
             <Image
@@ -298,12 +300,22 @@ const ChatWidget = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.85, y: 60, x: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: 60, x: 20 }}
-            transition={{ type: "spring", stiffness: 140, damping: 17 }}
-            className="ai-chat-window open"
+            initial={{ opacity: 0, scale: 0.85, y: 40 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { type: "spring", stiffness: 200, damping: 20 },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.85,
+              y: 40,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            className="ai-chat-window"
             style={{
+              transformOrigin: "bottom right",
               position: "fixed",
               bottom: 28,
               right: 28,
@@ -312,11 +324,14 @@ const ChatWidget = () => {
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
               borderRadius: 28,
-              boxShadow: "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
+              boxShadow:
+                "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              fontFamily:
+                "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+              willChange: "transform, opacity",
             }}
           >
             {/* ── Custom Reset Confirmation Modal ──────────────── */}
@@ -390,7 +405,8 @@ const ChatWidget = () => {
                         marginBottom: 20,
                       }}
                     >
-                      Seluruh percakapan Anda akan dihapus dan tidak dapat dikembalikan.
+                      Seluruh percakapan Anda akan dihapus dan tidak dapat
+                      dikembalikan.
                     </p>
                     <div style={{ display: "flex", gap: 10 }}>
                       <button
@@ -495,7 +511,11 @@ const ChatWidget = () => {
                       alt="Logo"
                       width={32}
                       height={32}
-                      style={{ width: "70%", height: "70%", objectFit: "contain" }}
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        objectFit: "contain",
+                      }}
                     />
                   </div>
                   <div>
@@ -519,7 +539,11 @@ const ChatWidget = () => {
                     >
                       <motion.span
                         animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 2,
+                          ease: "easeInOut",
+                        }}
                         style={{
                           width: 7,
                           height: 7,
@@ -587,7 +611,10 @@ const ChatWidget = () => {
                     <IconChevronDown />
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.08, backgroundColor: "rgba(239,68,68,0.3)" }}
+                    whileHover={{
+                      scale: 1.08,
+                      backgroundColor: "rgba(239,68,68,0.3)",
+                    }}
                     whileTap={{ scale: 0.92 }}
                     onClick={() => setIsOpen(false)}
                     style={{
@@ -662,7 +689,33 @@ const ChatWidget = () => {
                           : "0 2px 8px rgba(0,0,0,0.2)",
                     }}
                   >
-                    {msg.content}
+                    {typeof msg.content === "string"
+                      ? msg.content
+                          .split(/(https?:\/\/[^\s]+)/g)
+                          .map((part, idx) => {
+                            if (part.match(/(https?:\/\/[^\s]+)/)) {
+                              return (
+                                <a
+                                  key={idx}
+                                  href={part}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    color: "#86efac",
+                                    textDecoration: "underline",
+                                    fontWeight: 600,
+                                    wordBreak: "break-all",
+                                  }}
+                                >
+                                  {part}
+                                </a>
+                              );
+                            }
+                            return (
+                              <React.Fragment key={idx}>{part}</React.Fragment>
+                            );
+                          })
+                      : msg.content}
                   </div>
                   <span
                     style={{
@@ -718,7 +771,10 @@ const ChatWidget = () => {
                     {QUICK_ACTIONS.map((qa) => (
                       <motion.button
                         key={qa}
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(16,185,129,0.2)" }}
+                        whileHover={{
+                          scale: 1.05,
+                          backgroundColor: "rgba(16,185,129,0.2)",
+                        }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleQuickAction(qa)}
                         style={{
@@ -805,8 +861,11 @@ const ChatWidget = () => {
                         ? "linear-gradient(135deg, #059669, #10b981)"
                         : "rgba(255,255,255,0.08)",
                     color:
-                      input.trim() && !isLoading ? "#fff" : "rgba(255,255,255,0.25)",
-                    cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
+                      input.trim() && !isLoading
+                        ? "#fff"
+                        : "rgba(255,255,255,0.25)",
+                    cursor:
+                      input.trim() && !isLoading ? "pointer" : "not-allowed",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -834,7 +893,6 @@ const ChatWidget = () => {
                 Kecerdasan Buatan Terpadu (100 Model AI) · Kemenag Barito Utara
               </p>
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>

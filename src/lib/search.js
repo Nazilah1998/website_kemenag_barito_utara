@@ -142,7 +142,7 @@ const searchIndex = [
     description: item.description,
     section: "Layanan",
     category: item.category,
-    href: safeHref(item.href, "/layanan"),
+    href: safeHref(item.href, "/layanan/sekjen"),
     keywords: buildKeywords(item.title, item.description, item.category),
   })),
 
@@ -152,7 +152,7 @@ const searchIndex = [
     description: item.description,
     section: "Layanan",
     category: "Kategori",
-    href: "/layanan",
+    href: "/layanan/sekjen",
     keywords: buildKeywords(item.title, item.description, item.items),
   })),
 
@@ -162,7 +162,7 @@ const searchIndex = [
     description: toSearchText(item.items).split(",").join(" • "),
     section: "Layanan",
     category: "Persyaratan",
-    href: "/layanan",
+    href: "/layanan/sekjen",
     keywords: buildKeywords(item.title, item.items),
   })),
 
@@ -172,7 +172,7 @@ const searchIndex = [
     description: item.description,
     section: "Layanan",
     category: "Alur",
-    href: "/layanan",
+    href: "/layanan/sekjen",
     keywords: buildKeywords(item.step, item.title, item.description),
   })),
 
@@ -182,7 +182,7 @@ const searchIndex = [
     description: item.answer,
     section: "Layanan",
     category: "FAQ",
-    href: "/layanan",
+    href: "/layanan/sekjen",
     keywords: buildKeywords(item.question, item.answer),
   })),
 

@@ -17,7 +17,7 @@ const fungsiLayanan = [
   },
   {
     title: "Pelayanan Keagamaan",
-    desc: "Memberikan layanan publik di bidang nikah, rujuk, haji, umrah, zakat, wakaf, bimbingan masyarakat, dan layanan keagamaan lainnya.",
+    desc: "Memberikan layanan publik di bidang nikah, rujuk, zakat, wakaf, bimbingan masyarakat, dan layanan keagamaan lainnya.",
   },
   {
     title: "Pembinaan Pendidikan",

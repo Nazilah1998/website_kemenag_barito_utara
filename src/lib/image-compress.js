@@ -1,8 +1,8 @@
 export async function compressImageToBase64(
   file,
   {
-    targetSizeKB = 90,
-    hardMaxSizeKB = 100,
+    targetSizeKB = 450,
+    hardMaxSizeKB = 500,
     throwIfOverHardLimit = true,
     maxWidth = 1600,
     maxHeight = 1600,

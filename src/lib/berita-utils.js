@@ -1,10 +1,15 @@
 export const BERITA_CATEGORIES = [
   "Umum",
   "Kegiatan",
-  "Madrasah",
-  "Pelayanan",
-  "Pendidikan",
-  "Keagamaan",
+  "Sub Tata Usaha",
+  "Pendidikan Madrasah",
+  "Pendidikan Agama Islam",
+  "Pendidikan Diniyah & Pontren",
+  "Bimas Islam",
+  "Bimas Kristen",
+  "Penyelenggara Zakat & Wakaf",
+  "Penyelenggara Hindu",
+  "Kantor Urusan Agama",
 ];
 
 export function formatDate(value) {

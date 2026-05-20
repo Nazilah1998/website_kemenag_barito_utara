@@ -11,7 +11,7 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const MAX_IMAGE_SIZE_KB = 100;
+const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
 
 function cleanString(value = "") {

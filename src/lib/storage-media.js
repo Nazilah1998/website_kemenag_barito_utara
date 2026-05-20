@@ -1,4 +1,5 @@
 import { uploadToR2, deleteFromR2, getR2PublicUrl } from "./r2";
+import { createAdminClient } from "./supabase/admin";
 
 export const CMS_MEDIA_BUCKET =
   process.env.NEXT_PUBLIC_SUPABASE_CMS_BUCKET || "cms-media";
@@ -28,6 +29,71 @@ export async function uploadBase64Image({
     mimeType: parsed.mimeType,
     sizeBytes: parsed.buffer.length,
   };
+}
+
+export async function uploadBase64ImageToSupabase({
+  dataUrl,
+  folder = "seksi",
+  fileNameStem = "image",
+}) {
+  const parsed = parseDataUrl(dataUrl);
+
+  if (!ALLOWED_MIME_TYPES.includes(parsed.mimeType)) {
+    throw new Error("Tipe file gambar tidak didukung.");
+  }
+
+  const ext = mimeTypeToExt(parsed.mimeType);
+  const path = buildStoragePath(folder, fileNameStem, ext);
+
+  const supabase = createAdminClient();
+  const bucketName = CMS_MEDIA_BUCKET;
+
+  const { data, error } = await supabase
+    .storage
+    .from(bucketName)
+    .upload(path, parsed.buffer, {
+      contentType: parsed.mimeType,
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(`Gagal mengupload ke Supabase Storage: ${error.message}`);
+  }
+
+  const { data: publicUrlData } = supabase
+    .storage
+    .from(bucketName)
+    .getPublicUrl(path);
+
+  return {
+    path,
+    publicUrl: publicUrlData?.publicUrl || "",
+    mimeType: parsed.mimeType,
+    sizeBytes: parsed.buffer.length,
+  };
+}
+
+export async function removeSupabaseFileByPublicUrl(publicUrl = "") {
+  const path = extractStoragePathFromPublicUrl(publicUrl);
+
+  if (!path) {
+    return false;
+  }
+
+  const supabase = createAdminClient();
+  const bucketName = CMS_MEDIA_BUCKET;
+
+  const { data, error } = await supabase
+    .storage
+    .from(bucketName)
+    .remove([path]);
+
+  if (error) {
+    console.error("Gagal menghapus file dari Supabase Storage:", error.message);
+    return false;
+  }
+
+  return true;
 }
 
 export async function removeStorageFileByPublicUrl(arg1, arg2) {

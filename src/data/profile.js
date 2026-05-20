@@ -51,11 +51,6 @@ export const organizationStructure = [
     level: "secondary",
   },
   {
-    position: "Penyelenggara Haji dan Umrah",
-    name: "Nama Pejabat",
-    level: "secondary",
-  },
-  {
     position: "Penyelenggara Zakat dan Wakaf",
     name: "Nama Pejabat",
     level: "secondary",

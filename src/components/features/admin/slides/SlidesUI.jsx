@@ -71,6 +71,15 @@ export function ActionIconButton({
 }
 
 export function FloatingFeedback({ message, error, onClose }) {
+  React.useEffect(() => {
+    if (message || error) {
+      const timer = setTimeout(() => {
+        if (onClose) onClose();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, error, onClose]);
+
   if (!message && !error) return null;
 
   const isError = Boolean(error);

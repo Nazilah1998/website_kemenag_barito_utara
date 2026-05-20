@@ -8,6 +8,7 @@ import ApaKataMerekaSection from "@/components/features/home/ApaKataMerekaSectio
 import HomepageSlidesSection from "@/components/features/home/HomepageSlidesSection";
 import ExternalAppsSection from "@/components/features/home/ExternalAppsSection";
 import { siteInfo } from "@/data/site";
+import prisma from "@/lib/prisma";
 
 // Halaman ini sekarang mendukung update real-time penuh
 export const dynamic = "force-dynamic";
@@ -37,10 +38,17 @@ function SectionDivider() {
 }
 
 export default async function HomePage() {
-  const [latestBerita, latestGaleri, homepageSlides] = await Promise.all([
+  const [latestBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
     getLatestBeritaHome(),
     getLatestGaleriHome(),
     getPublicHomepageSlides(),
+    prisma.testimonials.findMany({
+      where: { is_active: true },
+      orderBy: { sort_order: 'asc' }
+    }).catch((err) => {
+      console.error("Error fetching testimonials:", err);
+      return [];
+    })
   ]);
 
   return (
@@ -51,7 +59,7 @@ export default async function HomePage() {
         <SectionDivider />
       </div>
 
-      <ApaKataMerekaSection />
+      <ApaKataMerekaSection testimonials={testimonials} />
 
       <SectionDivider />
 

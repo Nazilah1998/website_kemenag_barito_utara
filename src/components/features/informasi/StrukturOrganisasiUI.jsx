@@ -1,44 +1,115 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { User } from "lucide-react";
+import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
+import { createClient } from "@/lib/supabase/client";
+
 
 // Sub-component for individual Profile Cards
-const ProfileNode = ({ data, variant = "secondary", className = "" }) => {
+const ProfileNode = ({ data, variant = "secondary", className = "", delay = 0 }) => {
   if (!data) return null;
   
+  const isPrimary = variant === 'primary';
+
   return (
-    <div className={`w-[160px] sm:w-[180px] lg:w-[200px] flex flex-col items-center text-center p-3 sm:p-4 rounded-xl border bg-white shadow-sm transition-all hover:shadow-md dark:bg-[#0B1120] relative z-10 ${className}
-      ${variant === 'primary' ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-slate-200 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700/50'}
+    <motion.div 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay, ease: "easeOut" }}
+      className={`w-[160px] sm:w-[180px] lg:w-[200px] flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 relative z-10 ${className}
+      ${isPrimary 
+        ? 'bg-gradient-to-br from-[#052033] via-[#0b3b46] to-[#0e5f55] border-transparent shadow-2xl shadow-emerald-900/30 ring-4 ring-emerald-500/20' 
+        : 'bg-white border-slate-100 shadow-lg shadow-slate-100/80 hover:shadow-xl hover:border-emerald-200 dark:bg-slate-900/80 dark:border-slate-800 dark:hover:border-emerald-800'}
     `}>
-      <div className="relative h-16 w-16 sm:h-20 sm:w-20 mb-3 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-inner flex items-center justify-center shrink-0">
+      <div className={`relative h-20 w-20 sm:h-24 sm:w-24 mb-4 rounded-full overflow-hidden border-4 shadow-lg flex items-center justify-center shrink-0 
+        ${isPrimary ? 'border-white/20 ring-4 ring-emerald-400/20' : 'border-slate-50 ring-4 ring-slate-100 dark:border-slate-800 dark:ring-slate-700/50'}`}>
         {data.image && data.image !== "/assets/branding/kemenag.svg" ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.image} alt={data.name} className="h-full w-full object-cover" />
+          <img src={data.image} alt={data.name} className="h-full w-full object-cover" style={{ objectPosition: `50% ${data.imageY ?? 50}%` }} />
         ) : (
-          <User className="h-8 w-8 sm:h-10 sm:w-10 text-slate-400" />
+          <User className={`h-10 w-10 sm:h-12 sm:w-12 ${isPrimary ? 'text-white/60' : 'text-slate-400'}`} />
         )}
       </div>
-      {/* Name Container with fixed min-height to ensure consistent baseline for job titles */}
-      <div className="min-h-[40px] flex items-start justify-center w-full mb-2">
-        <h4 className="font-bold text-[12px] sm:text-[13px] text-slate-900 dark:text-white leading-tight">{data.name}</h4>
+      {/* Name Container */}
+      <div className="min-h-[44px] flex flex-col items-center justify-start w-full mb-2">
+        <h4 className={`font-black text-[13px] sm:text-[14px] leading-tight ${isPrimary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+          {data.name}
+        </h4>
+        {data.nip && data.nip !== "-" && (
+          <div className={`mt-1.5 inline-flex items-center gap-1 rounded-md px-2 py-0.5 border ${isPrimary ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700'}`}>
+            <p className={`text-[9px] sm:text-[10px] font-mono tracking-wide ${isPrimary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
+              NIP. {data.nip}
+            </p>
+          </div>
+        )}
       </div>
       
-      {/* Job Title Container - Aligned to the top, extra space falls to the bottom of the card */}
-      <div className="w-full pt-2 border-t border-slate-100 dark:border-slate-800/50 flex flex-col items-center">
-        <p className="text-[10px] sm:text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider leading-relaxed">{data.position}</p>
+      {/* Job Title Container */}
+      <div className={`w-full pt-2.5 border-t flex flex-col items-center ${isPrimary ? 'border-white/10' : 'border-slate-100 dark:border-slate-800/50'}`}>
+        <p className={`text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] leading-relaxed ${isPrimary ? 'text-emerald-300' : 'text-emerald-600 dark:text-emerald-400'}`}>
+          {data.position}
+        </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }) {
-  // Extract specific roles based on data
-  const kepalaKantor = leadershipData.find(p => p.position.includes("Kepala Kantor"));
-  const kasubbag = leadershipData.find(p => p.position.includes("Kepala Subbagian") || p.position.includes("Kasubbag"));
-  const kasiList = leadershipData.filter(p => !p.position.includes("Kepala Kantor") && !p.position.includes("Kepala Subbagian") && !p.position.includes("Kasubbag"));
+  // Local state - diinisialisasi dari data SSR (initial load cepat, SEO-friendly)
+  const [leadershipList, setLeadershipList] = useState(leadershipData);
+
+  useEffect(() => {
+    // Sync jika prop server-side berubah (misal navigasi)
+    setLeadershipList(leadershipData);
+  }, [leadershipData]);
+
+  // Fungsi untuk mengambil data terbaru dari API publik
+  const fetchLatestData = async () => {
+    try {
+      const res = await fetch("/api/seksi", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setLeadershipList(data);
+      }
+    } catch (e) {
+      // Silent fail – jangan ganggu UX pengguna
+    }
+  };
+
+  useEffect(() => {
+    // 1. Polling periodik setiap 5 detik sebagai fallback handal
+    const interval = setInterval(fetchLatestData, 5000);
+
+    // 2. Supabase Realtime: dengarkan sinyal broadcast dari admin
+    const supabase = createClient();
+    const channel = supabase.channel("site-updates");
+    channel
+      .on("broadcast", { event: "refresh-content" }, (payload) => {
+        // Langsung refresh jika sinyal terkait seksi/organisasi
+        const entity = payload?.payload?.entity;
+        if (!entity || entity === "seksi" || entity === "content") {
+          fetchLatestData();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Extract specific roles based on live state
+  const kepalaKantor = leadershipList.find(p => p.position.includes("Kepala Kantor"));
+  const kasubbag = leadershipList.find(p => p.position.includes("Kepala Subbagian") || p.position.includes("Kasubbag"));
+  const kasiList = leadershipList.filter(p => !p.position.includes("Kepala Kantor") && !p.position.includes("Kepala Subbagian") && !p.position.includes("Kasubbag"));
 
   // Jabatan Fungsional (Fallback if not in data)
-  let jabatanFungsional = leadershipData.find(p => p.position.toLowerCase().includes("fungsional") || (p.name && p.name.toLowerCase().includes("fungsional")));
+  let jabatanFungsional = leadershipList.find(p => p.position.toLowerCase().includes("fungsional") || (p.name && p.name.toLowerCase().includes("fungsional")));
   if (!jabatanFungsional) {
     jabatanFungsional = {
       name: "Kelompok Jabatan",
@@ -81,7 +152,7 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
             
             {/* LEVEL 1: Kepala Kantor */}
             <div className="relative z-10">
-              <ProfileNode data={kepalaKantor} variant="primary" />
+              <ProfileNode data={kepalaKantor} variant="primary" delay={0.1} />
             </div>
 
             {/* MAIN VERTICAL STEM & KASUBBAG BRANCH */}
@@ -92,9 +163,9 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
               {/* Horizontal line extending right */}
               <div className="absolute top-1/2 left-1/2 w-24 sm:w-32 lg:w-48 h-[2px] bg-emerald-500 dark:bg-emerald-600 -translate-y-1/2"></div>
               
-              {/* Kasubbag Node (Perfectly centered vertically on the line) */}
-              <div className="absolute top-1/2 left-[calc(50%+6rem)] sm:left-[calc(50%+8rem)] lg:left-[calc(50%+12rem)] -translate-y-1/2 z-10">
-                <ProfileNode data={kasubbag} />
+              {/* Kasubbag Node (Perfectly centered on the profile image) */}
+              <div className="absolute top-1/2 left-[calc(50%+6rem)] sm:left-[calc(50%+8rem)] lg:left-[calc(50%+12rem)] -translate-y-[56px] sm:-translate-y-[68px] z-10">
+                <ProfileNode data={kasubbag} delay={0.3} />
               </div>
             </div>
 
@@ -117,7 +188,7 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
 
                   {/* Node Wrapper with top padding and flex-grow to stretch */}
                   <div className="pt-10 w-full flex justify-center relative z-10 grow">
-                    <ProfileNode data={kasi} className="h-full flex-1" />
+                    <ProfileNode data={kasi} className="h-full flex-1" delay={0.5 + (idx * 0.1)} />
                   </div>
                 </div>
               ))}
@@ -129,9 +200,9 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
             </div>
 
             {/* LEVEL 4: Jabatan Fungsional */}
-            <div className="relative z-10">
-              <ProfileNode data={jabatanFungsional} />
-            </div>
+              <div className="w-full flex justify-end relative z-10 mt-12 pr-4 sm:pr-8 lg:pr-12">
+                <ProfileNode data={jabatanFungsional} delay={0.8} />
+              </div>
 
           </div>
         </div>

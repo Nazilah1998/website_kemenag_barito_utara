@@ -10,21 +10,14 @@ export const serviceHighlights = [
     description:
       "Informasi dasar mengenai layanan pencatatan nikah dan layanan yang terkait dengan KUA.",
     category: "KUA",
-    href: "/layanan",
-  },
-  {
-    title: "Layanan Haji & Umrah",
-    description:
-      "Informasi layanan terkait haji, umrah, pembinaan, dan administrasi keagamaan.",
-    category: "Haji & Umrah",
-    href: "/layanan",
+    href: "/layanan/kua-kantor-urusan-agama",
   },
   {
     title: "Layanan Pendidikan Madrasah",
     description:
       "Informasi umum mengenai pembinaan, koordinasi, dan layanan pendidikan madrasah.",
     category: "Madrasah",
-    href: "/layanan",
+    href: "/layanan/seksi-pendidikan-madrasah",
   },
   {
     title: "Layanan Informasi Publik",
@@ -44,16 +37,6 @@ export const serviceCategories = [
       "Informasi layanan nikah",
       "Konsultasi layanan keagamaan",
       "Informasi jadwal dan mekanisme pelayanan KUA",
-    ],
-  },
-  {
-    title: "Layanan Haji dan Umrah",
-    description:
-      "Memberikan informasi dan pendampingan administratif terkait layanan haji dan umrah.",
-    items: [
-      "Informasi pendaftaran dan pembinaan",
-      "Dokumen administrasi awal",
-      "Informasi jadwal dan tahapan pelayanan",
     ],
   },
   {

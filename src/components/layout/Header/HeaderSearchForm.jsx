@@ -50,7 +50,7 @@ export function HeaderSearchForm({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ type: "spring", stiffness: 220, damping: 18 }}
-            className="absolute mt-3 w-full sm:w-[450px] sm:-right-0 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95"
+            className="absolute z-[50] mt-3 w-full sm:w-[450px] sm:-right-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{t("searchPage.title")}</div>
             <ul role="listbox" className="space-y-0.5">

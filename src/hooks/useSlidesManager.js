@@ -151,9 +151,9 @@ export function useSlidesManager() {
       setError("");
 
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 100,
-        hardMaxSizeKB: 120,
-        throwIfOverHardLimit: true,
+        targetSizeKB: 400,
+        hardMaxSizeKB: 500,
+        throwIfOverHardLimit: false,
         maxWidth: 1920,
         maxHeight: 1080,
       });

@@ -172,7 +172,7 @@ export function contactPageSchema() {
 export function navigationSchema() {
   const items = [
     { name: "Berita Terbaru", url: "/berita" },
-    { name: "Layanan Publik", url: "/layanan" },
+    { name: "Layanan Publik", url: "/layanan/sekjen" },
     { name: "Galeri Foto", url: "/galeri" },
     { name: "Kontak Kantor", url: "/kontak" },
   ];

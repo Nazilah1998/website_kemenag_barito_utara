@@ -41,7 +41,7 @@ export function FooterMenu() {
     { label: t("nav.home"), href: "/" },
     { label: t("nav.profil"), href: "/profil/sejarah" },
     { label: t("nav.berita"), href: "/berita" },
-    { label: t("nav.layanan"), href: "/layanan" },
+    { label: t("nav.layanan"), href: "/layanan/sekjen" },
     { label: t("nav.informasi"), href: "/informasi" },
     { label: t("nav.galeri"), href: "/galeri" },
     { label: t("nav.kontak"), href: "/kontak" },

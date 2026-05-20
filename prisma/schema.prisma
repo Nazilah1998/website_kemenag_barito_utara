@@ -833,6 +833,102 @@ model user_permissions {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model seksi {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                String                @unique
+  judul               String
+  nama_kepala         String
+  nip_kepala          String?
+  foto_kepala         String?
+  foto_kepala_y       Int                   @default(50)
+  deskripsi           String
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime              @default(now()) @db.Timestamptz(6)
+  layanan_ptsp        layanan_ptsp[]
+  pegawai_seksi       pegawai_seksi[]
+  link_aplikasi_seksi link_aplikasi_seksi[]
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model pegawai_seksi {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  seksi_id   String   @db.Uuid
+  nama       String
+  nip        String?
+  jabatan    String
+  foto       String?
+  foto_y     Int      @default(50)
+  sort_order Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  seksi      seksi    @relation(fields: [seksi_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([seksi_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model layanan_ptsp {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  seksi_id   String   @db.Uuid
+  nama       String
+  estimasi   String
+  sort_order Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  seksi      seksi    @relation(fields: [seksi_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([seksi_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model link_aplikasi_seksi {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  seksi_id   String   @db.Uuid
+  nama       String
+  url        String
+  icon       String
+  sort_order Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  seksi      seksi    @relation(fields: [seksi_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([seksi_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model layanan_publik {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String
+  items       Json     @default("[]")
+  sort_order  Int      @default(0)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model testimonials {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  locale     String   @default("id")
+  name       String
+  role       String
+  content    String
+  rating     Int      @default(5)
+  avatar     String?
+  sort_order Int      @default(0)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
 enum aal_level {
   aal1
   aal2

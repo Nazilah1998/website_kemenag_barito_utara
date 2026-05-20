@@ -20,7 +20,7 @@ export default async function sitemap() {
       priority: 0.5,
     },
     { path: "/profil/struktur", changeFrequency: "monthly", priority: 0.6 },
-    { path: "/layanan", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/layanan/sekjen", changeFrequency: "weekly", priority: 0.8 },
     { path: "/galeri", changeFrequency: "weekly", priority: 0.7 },
     { path: "/kontak", changeFrequency: "monthly", priority: 0.7 },
     { path: "/informasi", changeFrequency: "weekly", priority: 0.7 },

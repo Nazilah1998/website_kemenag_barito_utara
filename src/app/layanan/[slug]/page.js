@@ -1,56 +1,60 @@
-"use client";
-
 import React from "react";
-import { useParams } from "next/navigation";
-import MaintenancePage from "@/components/features/maintenance/MaintenancePage";
-import { useLanguage } from "@/context/LanguageContext";
+import prisma from "@/lib/prisma";
+import LayananSlugClientPage from "./LayananSlugClientPage";
 
-import { getSeksiBySlug } from "@/data/seksi";
-import SeksiDetailUI from "@/components/features/layanan/SeksiDetailUI";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-const LAYANAN_MAP = {
-  sekjen: "nav.sekjen",
-  "seksi-bimas-islam": "nav.bimasIslam",
-  "seksi-pendidikan-agama-islam": "nav.pai",
-  "seksi-pendidikan-diniyah-dan-pondok-pesantren": "nav.pdpontren",
-  "seksi-pendidikan-madrasah": "nav.penmad",
-  "penyelenggara-hindu": "nav.hindu",
-  "penyelenggara-zakat-wakaf": "nav.zakat",
-  "kua-kantor-urusan-agama": "nav.kua",
-  "agen-perubahan": "Agen Perubahan",
-  "maklumat-pelayanan": "Maklumat Pelayanan",
-  pengaduan: "Pengaduan Masyarakat",
-};
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  try {
+    const seksi = await prisma.seksi.findUnique({
+      where: { slug }
+    });
 
-export default function LayananSubPage() {
-  const { slug } = useParams();
-  const { t } = useLanguage();
+    if (!seksi) {
+      return {
+        title: "Layanan Publik | Kemenag Barito Utara",
+        description: "Layanan Publik Kantor Kementerian Agama Kabupaten Barito Utara.",
+      };
+    }
 
-  const i18nKey = LAYANAN_MAP[slug];
-  const menuTitle = i18nKey
-    ? i18nKey.startsWith("nav.")
-      ? t(i18nKey)
-      : i18nKey
-    : "Layanan Publik";
+    return {
+      title: `${seksi.judul} | Kemenag Barito Utara`,
+      description: seksi.deskripsi,
+    };
+  } catch (error) {
+    console.error("generateMetadata error:", error);
+    return {
+      title: "Layanan Publik | Kemenag Barito Utara",
+    };
+  }
+}
 
-  const breadcrumb = [
-    { label: t("nav.home"), href: "/" },
-    { label: t("nav.layanan") },
-    { label: menuTitle },
-  ];
+export default async function LayananSubPage({ params }) {
+  const { slug } = await params;
 
-  const seksiData = getSeksiBySlug(slug);
-
-  if (seksiData) {
-    return <SeksiDetailUI data={seksiData} breadcrumb={breadcrumb} menuTitle={menuTitle} />;
+  let seksiData = null;
+  try {
+    seksiData = await prisma.seksi.findUnique({
+      where: { slug },
+      include: {
+        pegawai_seksi: {
+          orderBy: { sort_order: 'asc' }
+        },
+        layanan_ptsp: {
+          orderBy: { sort_order: 'asc' }
+        },
+        link_aplikasi_seksi: {
+          orderBy: { sort_order: 'asc' }
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching seksi data from database:", error);
   }
 
   return (
-    <MaintenancePage
-      title={`${menuTitle} Sedang Disiapkan`}
-      menuName={menuTitle}
-      description={`Informasi mengenai ${menuTitle} di Kementerian Agama Kabupaten Barito Utara sedang dalam proses penataan ulang agar dapat ditampilkan dengan lebih rapi, modern, dan nyaman diakses.`}
-      breadcrumb={breadcrumb}
-    />
+    <LayananSlugClientPage slug={slug} initialData={seksiData} />
   );
 }

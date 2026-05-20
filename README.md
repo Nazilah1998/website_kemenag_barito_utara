@@ -79,10 +79,10 @@ npm run test:coverage
 
 ## Prioritas refactor berikutnya
 
-- Merapikan modul admin laporan menjadi lebih modular
-- Menyatukan source-of-truth data antara `src/data` dan database
-- Menambah cakupan test untuk auth, laporan, dan route admin
-- Menjadikan skema database lebih disiplin melalui migration terstruktur
+- [x] Merapikan modul admin laporan menjadi lebih modular
+- [x] Menambah cakupan test untuk auth, laporan, dan route admin
+- [ ] Menyatukan source-of-truth data antara `src/data` dan database
+- [ ] Menjadikan skema database lebih disiplin melalui migration terstruktur
 
 ## Catatan
 

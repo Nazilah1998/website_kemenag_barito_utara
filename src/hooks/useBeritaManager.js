@@ -422,9 +422,9 @@ export function useBeritaManager() {
       setMessage("");
 
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 90,
-        hardMaxSizeKB: 100,
-        throwIfOverHardLimit: true,
+        targetSizeKB: 400,
+        hardMaxSizeKB: 500,
+        throwIfOverHardLimit: false,
         maxWidth: 1280,
         maxHeight: 1280,
       });
@@ -458,9 +458,9 @@ export function useBeritaManager() {
       setMessage("");
 
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 95,
-        hardMaxSizeKB: 180, // Lebih longgar agar tidak gampang error saat kirim ke galeri
-        throwIfOverHardLimit: false, // Jangan throw error, biarkan API yang memvalidasi hasil terbaik
+        targetSizeKB: 400,
+        hardMaxSizeKB: 500,
+        throwIfOverHardLimit: false,
         maxWidth: 1200,
         maxHeight: 1600,
       });

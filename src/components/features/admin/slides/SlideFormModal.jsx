@@ -110,7 +110,7 @@ export function SlideFormModal({
                     <span className="text-[10px] font-black uppercase tracking-widest">
                       {uploadingImage ? "Memproses..." : "Klik untuk Pilih Gambar"}
                     </span>
-                    <span className="text-[9px] font-medium text-slate-400">JPG, PNG, WEBP (Maks 1MB)</span>
+                    <span className="text-[9px] font-medium text-slate-400">JPG, PNG, WEBP (Kompresi Otomatis &lt; 500KB)</span>
                   </div>
                 </label>
               </div>

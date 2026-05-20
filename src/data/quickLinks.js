@@ -8,7 +8,7 @@ export const quickLinks = [
   {
     title: "Layanan Publik",
     description: "Akses informasi layanan utama yang tersedia untuk masyarakat.",
-    href: "/layanan",
+    href: "/layanan/sekjen",
     badge: "Layanan",
   },
   {

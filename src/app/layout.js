@@ -29,7 +29,7 @@ export const metadata = {
     "Kemenag Barito Utara",
     "Kementerian Agama Barito Utara",
     "Kemenag Muara Teweh",
-    "Layanan Haji Barito Utara",
+    "Layanan Kemenag Barito Utara",
     "Zakat Barito Utara",
     "Pendidikan Madrasah Barut",
     "PTSP Kemenag Barut",

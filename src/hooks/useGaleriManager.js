@@ -88,7 +88,9 @@ export function useGaleriManager() {
     try {
       setUploadingImage(true);
       const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 120,
+        targetSizeKB: 400,
+        hardMaxSizeKB: 500,
+        throwIfOverHardLimit: false,
         maxWidth: 1200,
         maxHeight: 1600,
       });
