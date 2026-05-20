@@ -1,9 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 35 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 90,
+      damping: 18
+    }
+  }
+};
 
 export default function HomeNewsSection({ latestBerita }) {
   const { t } = useLanguage();
@@ -18,7 +41,7 @@ export default function HomeNewsSection({ latestBerita }) {
   };
 
   return (
-    <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20">
+    <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20 overflow-hidden">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.32em] text-emerald-700 dark:text-emerald-300">
@@ -32,13 +55,18 @@ export default function HomeNewsSection({ latestBerita }) {
           </p>
         </div>
 
-        <Link
-          href="/berita"
-          className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+        <motion.div
+          whileHover={{ y: -3, scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {t("actions.viewAll") || "Lihat Semua Berita"}
-          <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </Link>
+          <Link
+            href="/berita"
+            className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+          >
+            {t("actions.viewAll") || "Lihat Semua Berita"}
+            <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </motion.div>
       </div>
 
       {latestBerita.length > 0 ? (
@@ -94,7 +122,13 @@ export default function HomeNewsSection({ latestBerita }) {
           </div>
 
           {/* 2. DESKTOP GRID - 6 KOLOM */}
-          <div className="mt-10 hidden lg:grid lg:grid-cols-6 lg:gap-4 xl:gap-5">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="mt-10 hidden lg:grid lg:grid-cols-6 lg:gap-4 xl:gap-5"
+          >
             {latestBerita.slice(0, 12).map((item, index) => (
               <NewsCard
                 key={item.slug}
@@ -103,7 +137,7 @@ export default function HomeNewsSection({ latestBerita }) {
                 t={t}
               />
             ))}
-          </div>
+          </motion.div>
         </>
       ) : (
         <div className="theme-news-empty mt-10 rounded-2xl p-10 text-center">
@@ -119,7 +153,12 @@ export default function HomeNewsSection({ latestBerita }) {
 
 function NewsCard({ item, index, t, className = "", isSlider = false }) {
   return (
-    <article className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}>
+    <motion.article
+      variants={cardVariants}
+      whileHover={{ y: -8, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 120, damping: 16 }}
+      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}
+    >
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
         <div className="relative h-48 w-full overflow-hidden">
@@ -170,7 +209,7 @@ function NewsCard({ item, index, t, className = "", isSlider = false }) {
           </div>
         </div>
       </Link>
-    </article>
+    </motion.article>
   );
 }
 

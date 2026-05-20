@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { getApaKataMereka } from "@/data/apaKataMereka";
 import { useLanguage } from "@/context/LanguageContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 function ChevronLeftIcon() {
     return (
@@ -20,6 +21,28 @@ function ChevronRightIcon() {
         </svg>
     );
 }
+
+const containerVariants = {
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: 0.15
+        }
+    }
+};
+
+const cardVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 90,
+            damping: 18
+        }
+    }
+};
 
 export default function ApaKataMerekaSection() {
     const { t, locale } = useLanguage();
@@ -43,7 +66,7 @@ export default function ApaKataMerekaSection() {
     };
 
     return (
-        <section className="py-8 lg:py-12 bg-slate-50/50 dark:bg-slate-900/20">
+        <section className="py-8 lg:py-12 bg-slate-50/50 dark:bg-slate-900/20 overflow-hidden">
             <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-20">
                 <div className="text-center">
                     <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">
@@ -60,38 +83,47 @@ export default function ApaKataMerekaSection() {
                 {/* MOBILE SLIDER */}
                 <div className="mt-8 block md:hidden">
                     <div className="relative">
-                        <article className="theme-news-card relative flex flex-col overflow-hidden rounded-[2.5rem] border bg-white p-6 dark:bg-slate-900 animate-in fade-in zoom-in duration-500">
-                            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/10 blur-3xl" />
+                        <AnimatePresence mode="wait">
+                            <motion.article
+                                key={activeIndex}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="theme-news-card relative flex flex-col overflow-hidden rounded-[2.5rem] border bg-white p-6 dark:bg-slate-900"
+                            >
+                                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/10 blur-3xl" />
 
-                            <div className="relative flex flex-col items-center">
-                                {/* Quote Content */}
-                                <div className="min-h-[160px] text-center text-xs font-bold italic leading-relaxed text-slate-600 dark:text-slate-300">
-                                    <span className="mb-2 block text-3xl text-emerald-500 opacity-20">&quot;</span>
-                                    {data[activeIndex].quote.map((line, idx) => (
-                                        <p key={idx} className="mb-2 last:mb-0">{line}</p>
-                                    ))}
-                                </div>
-
-                                {/* Identity */}
-                                <div className="mt-6 flex flex-col items-center border-t border-slate-100 pt-6 dark:border-white/5 w-full">
-                                    <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white shadow-xl ring-4 ring-emerald-500/10 dark:border-slate-800">
-                                        <Image
-                                            src={data[activeIndex].image}
-                                            alt={data[activeIndex].name}
-                                            width={64}
-                                            height={64}
-                                            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
-                                        />
+                                <div className="relative flex flex-col items-center">
+                                    {/* Quote Content */}
+                                    <div className="min-h-[160px] text-center text-xs font-bold italic leading-relaxed text-slate-600 dark:text-slate-300">
+                                        <span className="mb-2 block text-3xl text-emerald-500 opacity-20">&quot;</span>
+                                        {data[activeIndex].quote.map((line, idx) => (
+                                            <p key={idx} className="mb-2 last:mb-0">{line}</p>
+                                        ))}
                                     </div>
-                                    <h3 className="mt-3 text-sm font-black text-slate-900 dark:text-white tracking-tight">
-                                        {data[activeIndex].name}
-                                    </h3>
-                                    <p className="mt-1 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
-                                        {data[activeIndex].position}
-                                    </p>
+
+                                    {/* Identity */}
+                                    <div className="mt-6 flex flex-col items-center border-t border-slate-100 pt-6 dark:border-white/5 w-full">
+                                        <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white shadow-xl ring-4 ring-emerald-500/10 dark:border-slate-800">
+                                            <Image
+                                                src={data[activeIndex].image}
+                                                alt={data[activeIndex].name}
+                                                width={64}
+                                                height={64}
+                                                className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        </div>
+                                        <h3 className="mt-3 text-sm font-black text-slate-900 dark:text-white tracking-tight">
+                                            {data[activeIndex].name}
+                                        </h3>
+                                        <p className="mt-1 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                                            {data[activeIndex].position}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </article>
+                            </motion.article>
+                        </AnimatePresence>
 
                         {/* Navigation Buttons Mobile */}
                         <div className="mt-6 flex items-center justify-center gap-4">
@@ -130,13 +162,22 @@ export default function ApaKataMerekaSection() {
                 </div>
 
                 {/* DESKTOP PREMIUM GRID */}
-                <div className="mt-12 hidden md:grid md:grid-cols-3 gap-6">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    className="mt-12 hidden md:grid md:grid-cols-3 gap-6"
+                >
                     {data.map((person, index) => {
                         const isCenter = index === 1;
                         return (
-                            <article
+                            <motion.article
                                 key={`${person.name}-${index}`}
-                                className={`group relative flex flex-col overflow-hidden rounded-3xl border p-6 lg:p-8 transition-all duration-500 hover:-translate-y-2 ${isCenter
+                                variants={cardVariants}
+                                whileHover={{ y: isCenter ? -10 : -6, scale: 1.01 }}
+                                transition={{ type: "spring", stiffness: 150, damping: 18 }}
+                                className={`group relative flex flex-col overflow-hidden rounded-3xl border p-6 lg:p-8 ${isCenter
                                         ? "bg-white border-emerald-200 shadow-[0_25px_50px_rgba(16,185,129,0.1)] dark:bg-slate-900 dark:border-emerald-500/30 z-10"
                                         : "bg-white/60 border-slate-100 shadow-lg dark:bg-slate-900/40 dark:border-slate-800"
                                     }`}
@@ -190,10 +231,10 @@ export default function ApaKataMerekaSection() {
                                         </div>
                                     </div>
                                 </div>
-                            </article>
+                            </motion.article>
                         );
                     })}
-                </div>
+                </motion.div>
             </div>
         </section>
     );

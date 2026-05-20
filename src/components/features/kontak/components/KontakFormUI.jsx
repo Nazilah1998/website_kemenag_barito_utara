@@ -20,18 +20,24 @@ export function KontakFormHeader() {
   );
 }
 
+import { motion } from "framer-motion";
+
 export function KontakFormStatus({ result }) {
   if (!result) return null;
   return (
-    <div
+    <motion.div
       role="status"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
       className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${result.ok
         ? "border-emerald-200 bg-emerald-50 text-emerald-800"
         : "border-rose-200 bg-rose-50 text-rose-800"
         }`}
     >
       {result.message}
-    </div>
+    </motion.div>
   );
 }
 
@@ -39,13 +45,15 @@ export function KontakFormActions({ loading }) {
   const { t } = useLanguage();
   return (
     <div className="mt-6 flex flex-wrap items-center gap-3">
-      <button
+      <motion.button
         type="submit"
         disabled={loading}
+        whileHover={!loading ? { scale: 1.02, y: -1 } : {}}
+        whileTap={!loading ? { scale: 0.98 } : {}}
         className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? t("actions.loading") : t("contact.sendButton")}
-      </button>
+      </motion.button>
 
       <p className="text-xs text-slate-500 dark:text-slate-400">
         {t("contact.consentText")}

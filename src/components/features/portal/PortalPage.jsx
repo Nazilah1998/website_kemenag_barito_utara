@@ -5,6 +5,46 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteInfo } from "@/data/site";
 import { Clock, Calendar, ShieldCheck, ShieldAlert } from "lucide-react";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.15,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 25 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 90,
+      damping: 14,
+    },
+  },
+};
+
+const headerVariants = {
+  hidden: { opacity: 0, y: -20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 80,
+      damping: 15,
+      delay: 0.05,
+    },
+  },
+};
+
 
 const PORTAL_LINKS = [
   {
@@ -135,9 +175,14 @@ export default function PortalPage() {
       </div>
 
       {/* DESKTOP VERSION */}
-      <div className="hidden md:flex relative z-10 w-full max-w-7xl px-8 pt-8 pb-4 flex-col items-center h-full overflow-hidden">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="hidden md:flex relative z-10 w-full max-w-7xl px-8 pt-8 pb-4 flex-col items-center h-full overflow-hidden"
+      >
         {/* Logo & Title Section */}
-        <div className="flex flex-col items-center text-center mb-4">
+        <motion.div variants={headerVariants} className="flex flex-col items-center text-center mb-4">
           <div className="w-20 h-20 mb-4 relative bg-white/10 backdrop-blur-md p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500">
             <Image src={siteInfo.logoSrc} alt="Logo" width={120} height={120} className="w-full h-full object-contain drop-shadow-lg" />
           </div>
@@ -152,10 +197,10 @@ export default function PortalPage() {
           <p className="mt-2 text-slate-400 text-base max-w-none font-medium px-4 whitespace-nowrap">
             Akses cepat informasi dan layanan keagamaan Kabupaten Barito Utara dalam satu pintu.
           </p>
-        </div>
+        </motion.div>
 
         {/* Status & Time Indicator - Desktop (Above Grid) */}
-        <div className="flex items-center gap-6 bg-white/5 backdrop-blur-xl px-6 py-2 rounded-full ring-1 ring-white/10 shadow-2xl mb-4">
+        <motion.div variants={headerVariants} className="flex items-center gap-6 bg-white/5 backdrop-blur-xl px-6 py-2 rounded-full ring-1 ring-white/10 shadow-2xl mb-4">
           <div className="flex items-center gap-3 border-r border-white/10 pr-6">
             <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg tabular-nums">
               <Clock className="w-5 h-5" />
@@ -176,62 +221,76 @@ export default function PortalPage() {
               {time.getDay() === 5 ? "Jam Kerja: 07:30 - 16:30" : "Jam Kerja: 07:30 - 16:00"}
             </p>
           </div>
-        </div>
-
-        {/* Portal Grid Section */}
+        </motion.div>
 
         {/* Portal Grid Section */}
         <div className="flex-1 flex items-center justify-center w-full">
-          <div className="grid grid-cols-3 gap-x-10 gap-y-3 w-full max-w-6xl">
+          <motion.div 
+            variants={containerVariants}
+            className="grid grid-cols-3 gap-x-10 gap-y-3 w-full max-w-6xl"
+          >
             {PORTAL_LINKS.map((link) => (
-              <Link
+              <motion.div
                 key={link.title}
-                href={link.href}
-                target={isStandalone ? undefined : "_blank"}
-                rel={isStandalone ? undefined : "noopener noreferrer"}
-                className={`group relative p-4 rounded-3xl transition-all duration-500 hover:-translate-y-1 flex flex-col items-start text-left h-full ${link.primary
-                  ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50 hover:bg-emerald-600/30"
-                  : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10 hover:bg-white/10 hover:ring-white/20"
-                  }`}
+                variants={itemVariants}
+                whileHover={{ y: -6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="h-full"
               >
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 shrink-0 ${link.primary ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800/50 text-slate-300 group-hover:text-emerald-400"
-                  }`}>
-                  {link.icon}
-                </div>
-                <div className="flex flex-col items-start">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors line-clamp-1">
-                    {link.title}
-                  </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed line-clamp-2">
-                    {link.description}
-                  </p>
-                </div>
-
-                {/* Arrow Icon */}
-                <div className="flex mt-auto pt-6 w-full justify-end">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${link.primary ? "bg-emerald-500 text-white" : "bg-white/10 text-white group-hover:bg-emerald-500 group-hover:translate-x-1"
+                <Link
+                  href={link.href}
+                  target={isStandalone ? undefined : "_blank"}
+                  rel={isStandalone ? undefined : "noopener noreferrer"}
+                  className={`group relative p-4 rounded-3xl transition-all duration-300 flex flex-col items-start text-left h-full ${link.primary
+                    ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50 hover:bg-emerald-600/30"
+                    : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10 hover:bg-white/10 hover:ring-white/20"
+                    }`}
+                >
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 group-hover:scale-110 shrink-0 ${link.primary ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800/50 text-slate-300 group-hover:text-emerald-400"
                     }`}>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
+                    {link.icon}
                   </div>
-                </div>
-              </Link>
+                  <div className="flex flex-col items-start">
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors line-clamp-1">
+                      {link.title}
+                    </h3>
+                    <p className="text-slate-400 text-sm leading-relaxed line-clamp-2">
+                      {link.description}
+                    </p>
+                  </div>
+
+                  {/* Arrow Icon */}
+                  <div className="flex mt-auto pt-6 w-full justify-end">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${link.primary ? "bg-emerald-500 text-white" : "bg-white/10 text-white group-hover:bg-emerald-500 group-hover:translate-x-1"
+                      }`}>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Footer info */}
-        <div className="mt-4 text-center opacity-60 hover:opacity-100 transition-opacity pb-4">
+        <motion.div variants={headerVariants} className="mt-4 text-center opacity-60 hover:opacity-100 transition-opacity pb-4">
           <p className="text-slate-500 text-sm font-medium tracking-widest uppercase">
             &copy; {new Date().getFullYear()} {siteInfo.name}
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="flex md:hidden relative z-10 w-full px-4 pt-10 pb-8 flex-col items-center h-full overflow-hidden">
+      {/* MOBILE VERSION */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="flex md:hidden relative z-10 w-full px-4 pt-10 pb-8 flex-col items-center h-full overflow-hidden"
+      >
         {/* Logo & Title Section */}
-        <div className="flex flex-col items-center text-center mb-6">
+        <motion.div variants={headerVariants} className="flex flex-col items-center text-center mb-6">
           <div className="w-20 h-20 mb-4 relative bg-white/10 backdrop-blur-md p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl">
             <Image src={siteInfo.logoSrc} alt="Logo" width={120} height={120} className="w-full h-full object-contain drop-shadow-lg" />
           </div>
@@ -249,10 +308,10 @@ export default function PortalPage() {
           <p className="mt-4 text-slate-400 text-[10px] max-w-[280px] font-medium px-2 leading-relaxed">
             Akses cepat informasi dan layanan keagamaan Kabupaten Barito Utara dalam satu pintu.
           </p>
-        </div>
+        </motion.div>
 
         {/* Enhanced Status & Time - Mobile (Above Grid) */}
-        <div className="flex flex-col items-center bg-white/5 backdrop-blur-lg px-4 py-2.5 rounded-2xl ring-1 ring-white/10 mb-6 w-full max-w-[280px]">
+        <motion.div variants={headerVariants} className="flex flex-col items-center bg-white/5 backdrop-blur-lg px-4 py-2.5 rounded-2xl ring-1 ring-white/10 mb-6 w-full max-w-[280px]">
           <div className="flex items-center justify-between w-full border-b border-white/5 pb-2 mb-2">
             <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-sm tabular-nums">
               <Clock className="w-3.5 h-3.5" />
@@ -272,41 +331,51 @@ export default function PortalPage() {
               {time.getDay() === 5 ? "07:30 - 16:30" : "07:30 - 16:00"}
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Portal Grid Section */}
         <div className="flex-1 flex items-center justify-center w-full">
-          <div className="grid grid-cols-2 gap-4 w-full px-2">
+          <motion.div 
+            variants={containerVariants}
+            className="grid grid-cols-2 gap-4 w-full px-2"
+          >
             {PORTAL_LINKS.map((link) => (
-              <Link
+              <motion.div
                 key={link.title}
-                href={link.href}
-                target={isStandalone ? undefined : "_blank"}
-                rel={isStandalone ? undefined : "noopener noreferrer"}
-                className={`group relative p-5 rounded-2xl transition-all duration-500 flex flex-col items-center text-center ${link.primary
-                  ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50"
-                  : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10"
-                  }`}
+                variants={itemVariants}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full"
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 shrink-0 ${link.primary ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800/50 text-slate-300"
-                  }`}>
-                  {link.icon}
-                </div>
-                <h3 className="text-[11px] font-bold text-white line-clamp-1">
-                  {link.title}
-                </h3>
-              </Link>
+                <Link
+                  href={link.href}
+                  target={isStandalone ? undefined : "_blank"}
+                  rel={isStandalone ? undefined : "noopener noreferrer"}
+                  className={`group relative p-5 rounded-2xl transition-all duration-300 flex flex-col items-center text-center w-full h-full ${link.primary
+                    ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50"
+                    : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10"
+                    }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 shrink-0 ${link.primary ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800/50 text-slate-300"
+                    }`}>
+                    {link.icon}
+                  </div>
+                  <h3 className="text-[11px] font-bold text-white line-clamp-1">
+                    {link.title}
+                  </h3>
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Footer info */}
-        <div className="mt-4 text-center opacity-60 pb-2">
+        <motion.div variants={headerVariants} className="mt-4 text-center opacity-60 pb-2">
           <p className="text-slate-500 text-[8px] font-medium tracking-widest uppercase">
             &copy; {new Date().getFullYear()} {siteInfo.name}
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

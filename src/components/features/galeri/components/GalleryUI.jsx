@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 
 function formatDate(value, locale = "id") {
@@ -86,9 +87,13 @@ export function GalleryCard({ item, onOpen, isActive, onToggle }) {
   };
 
   return (
-    <article
+    <motion.article
+      layout
       onClick={handleTap}
-      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
+      whileHover={{ y: -6, scale: 1.015 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 90, damping: 16 }}
+      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 cursor-pointer"
     >
       {/* Image Layer */}
       <div className="absolute inset-0 z-0">
@@ -147,7 +152,7 @@ export function GalleryCard({ item, onOpen, isActive, onToggle }) {
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 

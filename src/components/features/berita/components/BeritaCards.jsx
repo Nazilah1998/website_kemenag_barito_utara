@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import BeritaViewsBadge from "./BeritaViewsBadge";
 
@@ -31,7 +32,13 @@ export function FeaturedNewsCard({ item }) {
   const displayCategory = t(`berita.categories.${item.category}`) || item.category;
 
   return (
-    <article className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+    <motion.article 
+      layout
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 70, damping: 14 }}
+      className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+    >
       <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
         <Link
           href={`/berita/${item.slug}`}
@@ -84,7 +91,7 @@ export function FeaturedNewsCard({ item }) {
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -94,7 +101,13 @@ export function NewsCard({ item }) {
   const displayCategory = t(`berita.categories.${item.category}`) || item.category;
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-3 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-white/5 dark:bg-slate-900 dark:hover:border-emerald-500/30">
+    <motion.article 
+      layout
+      whileHover={{ y: -8, scale: 1.015 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: "spring", stiffness: 90, damping: 16 }}
+      className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-colors duration-300 dark:border-white/5 dark:bg-slate-900"
+    >
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
         <div className="relative h-48 w-full overflow-hidden">
@@ -102,7 +115,7 @@ export function NewsCard({ item }) {
             src={getCoverImage(item)}
             alt={item.title}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 16vw"
           />
 
@@ -151,6 +164,6 @@ export function NewsCard({ item }) {
           </div>
         </div>
       </Link>
-    </article>
+    </motion.article>
   );
 }

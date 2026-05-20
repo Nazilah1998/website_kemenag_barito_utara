@@ -1,5 +1,6 @@
 import { useLanguage } from "@/context/LanguageContext";
 import { SearchIcon } from "./HeaderIcons";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function HeaderSearchForm({
   value,
@@ -41,43 +42,49 @@ export function HeaderSearchForm({
         </div>
       </form>
 
-      {showSuggestions && suggestions.length > 0 && (
-        <div
-          id={listboxId}
-          className="absolute mt-3 w-full sm:w-[450px] sm:-right-0 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200 dark:border-slate-800 dark:bg-slate-900/95"
-        >
-          <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{t("searchPage.title")}</div>
-          <ul role="listbox" className="space-y-0.5">
-            {suggestions.map((item, index) => (
-              <li
-                key={item.id || index}
-                role="option"
-                aria-selected={index === activeIndex}
-                onMouseDown={() => onSelectSuggestion(item)}
-                className={`group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 transition-all ${index === activeIndex
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none"
-                  : "text-slate-700 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-800/80"
-                  }`}
-              >
-                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === activeIndex ? "bg-white/20" : "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"}`}>
-                  <SectionIcon section={item.section} className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`truncate text-sm font-bold ${index === activeIndex ? "text-white" : "text-slate-900 dark:text-slate-100"}`}>{item.title}</span>
-                    <span className={`text-[9px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded ${index === activeIndex ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-200"}`}>
-                      {item.category}
-                    </span>
+      <AnimatePresence>
+        {showSuggestions && suggestions.length > 0 && (
+          <motion.div
+            id={listboxId}
+            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+            transition={{ type: "spring", stiffness: 220, damping: 18 }}
+            className="absolute mt-3 w-full sm:w-[450px] sm:-right-0 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95"
+          >
+            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">{t("searchPage.title")}</div>
+            <ul role="listbox" className="space-y-0.5">
+              {suggestions.map((item, index) => (
+                <li
+                  key={item.id || index}
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  onMouseDown={() => onSelectSuggestion(item)}
+                  className={`group flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 transition-all ${index === activeIndex
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none"
+                    : "text-slate-700 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-800/80"
+                    }`}
+                >
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === activeIndex ? "bg-white/20" : "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"}`}>
+                    <SectionIcon section={item.section} className="h-4 w-4" />
                   </div>
-                  <p className={`mt-0.5 line-clamp-1 text-[11px] ${index === activeIndex ? "text-white/80" : "text-slate-500 dark:text-slate-200"}`}>
-                    {item.description}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`truncate text-sm font-bold ${index === activeIndex ? "text-white" : "text-slate-900 dark:text-slate-100"}`}>{item.title}</span>
+                      <span className={`text-[9px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded ${index === activeIndex ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-200"}`}>
+                        {item.category}
+                      </span>
+                    </div>
+                    <p className={`mt-0.5 line-clamp-1 text-[11px] ${index === activeIndex ? "text-white/80" : "text-slate-500 dark:text-slate-200"}`}>
+                      {item.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

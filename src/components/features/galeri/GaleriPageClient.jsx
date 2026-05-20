@@ -7,6 +7,8 @@ import PageBanner from "@/components/common/PageBanner";
 import { GalleryHeader, GalleryCard, GalleryEmpty, GalleryPagination } from "./components/GalleryUI";
 import { GalleryLightbox } from "./components/GalleryLightbox";
 
+import { AnimatePresence } from "framer-motion";
+
 export default function GaleriPageClient({ items = [] }) {
   const g = useGallery(items);
   const { t } = useLanguage();
@@ -54,14 +56,18 @@ export default function GaleriPageClient({ items = [] }) {
         )}
       </section>
 
-      <GalleryLightbox
-        item={g.selectedItem}
-        index={g.selectedIndex}
-        total={g.safeItems.length}
-        onClose={g.handleClose}
-        onPrev={g.handlePrev}
-        onNext={g.handleNext}
-      />
+      <AnimatePresence>
+        {g.selectedItem && (
+          <GalleryLightbox
+            item={g.selectedItem}
+            index={g.selectedIndex}
+            total={g.safeItems.length}
+            onClose={g.handleClose}
+            onPrev={g.handlePrev}
+            onNext={g.handleNext}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

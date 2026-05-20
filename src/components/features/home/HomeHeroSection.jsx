@@ -5,6 +5,45 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { siteInfo } from "@/data/site";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.05
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 120,
+      damping: 18
+    }
+  }
+};
+
+const floatCardVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 30 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 90,
+      damping: 16,
+      delay: 0.35
+    }
+  }
+};
 
 export default function HomeHeroSection() {
   const { t } = useLanguage();
@@ -36,9 +75,17 @@ export default function HomeHeroSection() {
         <div className="mx-auto grid max-w-[1600px] items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
 
           {/* Left Column: Text & Stats */}
-          <div className="flex flex-col animate-fade-in">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col"
+          >
             {/* Badge */}
-            <div className="group flex w-fit items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/50">
+            <motion.div
+              variants={itemVariants}
+              className="group flex w-fit items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/50"
+            >
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
@@ -46,25 +93,33 @@ export default function HomeHeroSection() {
               <span className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">
                 {t("home.hero.badge")}
               </span>
-            </div>
+            </motion.div>
 
             {/* Title */}
-            <h1 className="mt-6 max-w-3xl text-3xl font-black leading-[1.1] tracking-tight text-white md:text-4xl lg:text-5xl xl:text-6xl">
+            <motion.h1
+              variants={itemVariants}
+              className="mt-6 max-w-3xl text-3xl font-black leading-[1.1] tracking-tight text-white md:text-4xl lg:text-5xl xl:text-6xl"
+            >
               {t("home.hero.title").split('.').map((part, i) => (
                 <span key={i} className={i === 0 ? "block" : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"}>
                   {part}{i === 0 && part ? "." : ""}
                 </span>
               ))}
-            </h1>
+            </motion.h1>
 
             {/* Description */}
-            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose">
+            <motion.p
+              variants={itemVariants}
+              className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose"
+            >
               {t("home.hero.description")}
-            </p>
+            </motion.p>
 
             {/* CTAs */}
-            <div className="mt-8 flex flex-wrap gap-4">
-              <a
+            <motion.div variants={itemVariants} className="mt-8 flex flex-wrap gap-4">
+              <motion.a
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 href="https://ptsp.kemenag-baritoutara.com/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -73,24 +128,37 @@ export default function HomeHeroSection() {
                 <span className="relative z-10">{t("home.hero.ctaLayanan")}</span>
                 <ArrowRightIcon className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-transform duration-500 group-hover:translate-x-0" />
-              </a>
+              </motion.a>
 
-              <Link
-                href="/berita"
-                className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20"
+              <motion.div
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex"
               >
-                {t("home.hero.ctaBerita")}
-              </Link>
-            </div>
+                <Link
+                  href="/berita"
+                  className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20"
+                >
+                  {t("home.hero.ctaBerita")}
+                </Link>
+              </motion.div>
+            </motion.div>
 
             {/* Stats - Grid Modern */}
-            <div className="mt-12 grid grid-cols-3 gap-6 sm:max-w-lg">
+            <motion.div
+              variants={itemVariants}
+              className="mt-12 grid grid-cols-3 gap-6 sm:max-w-lg"
+            >
               {[
                 { number: "24+", label: t("home.stats.layanan"), icon: "⚡" },
                 { number: "120+", label: t("home.stats.berita"), icon: "📰" },
                 { number: "100%", label: t("home.stats.dokumen"), icon: "🛡️" },
               ].map((stat, i) => (
-                <div key={i} className="group flex flex-col gap-1 transition-transform hover:-translate-y-1">
+                <motion.div
+                  key={i}
+                  whileHover={{ y: -4 }}
+                  className="group flex flex-col gap-1 cursor-pointer"
+                >
                   <div className="flex items-center gap-2">
                     <span className="text-xl font-black text-white lg:text-3xl">{stat.number}</span>
                     <span className="hidden opacity-0 transition-opacity group-hover:opacity-100 sm:inline text-lg">{stat.icon}</span>
@@ -99,13 +167,18 @@ export default function HomeHeroSection() {
                   <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
                     {stat.label}
                   </p>
-                </div>
+                </motion.div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Right Column: Premium Focus Card */}
-          <div className="relative perspective-1000 hidden lg:block">
+          <motion.div
+            variants={floatCardVariants}
+            initial="hidden"
+            animate="visible"
+            className="relative perspective-1000 hidden lg:block"
+          >
             <div className="animate-float">
               <HomeFocusCard t={t} />
             </div>
@@ -113,23 +186,31 @@ export default function HomeHeroSection() {
             {/* Floating Accent Elements */}
             <div className="absolute -right-6 -top-6 h-20 w-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm animate-pulse" />
             <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm animate-bounce-slow" />
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* 3. SCROLL INDICATOR */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce opacity-30">
+      <motion.div
+        animate={{ y: [0, 8, 0] }}
+        transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30"
+      >
         <div className="h-8 w-5 rounded-full border-2 border-white/20 p-1">
           <div className="mx-auto h-1.5 w-0.5 rounded-full bg-white" />
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 function HomeFocusCard({ t }) {
   return (
-    <div className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/40 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-700 hover:border-emerald-500/30 hover:bg-slate-900/60">
+    <motion.div
+      whileHover={{ y: -6, rotateX: 1, rotateY: -1 }}
+      transition={{ type: "spring", stiffness: 100, damping: 18 }}
+      className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/40 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-700 hover:border-emerald-500/30 hover:bg-slate-900/60"
+    >
       {/* Inner Glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
 
@@ -183,19 +264,23 @@ function HomeFocusCard({ t }) {
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 function StatusBox({ label, value, color, glow }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/5 p-4 transition-transform hover:scale-[1.02]">
+    <motion.div
+      whileHover={{ scale: 1.03, y: -2 }}
+      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      className="rounded-2xl border border-white/5 bg-white/5 p-4 cursor-pointer"
+    >
       <p className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-400/70">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         <div className={`h-2 w-2 rounded-full ${color} ${glow} shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse`} />
         <p className="text-base font-black text-white">{value}</p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

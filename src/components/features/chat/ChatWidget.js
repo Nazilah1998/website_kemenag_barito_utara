@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Inline SVG Icons ───────────────────────────────────────────────────────
 const IconBot = () => (
@@ -238,592 +239,605 @@ const ChatWidget = () => {
   return (
     <>
       {/* ─── FAB Button ─────────────────── */}
-      <button
-        onClick={() => setIsOpen(true)}
-        aria-label="Buka Chat Asisten"
-        className={`ai-fab-button ${isOpen ? "hidden" : "visible"}`}
-        style={{
-          position: "fixed",
-          zIndex: 9999,
-          background: "linear-gradient(135deg, #059669 0%, #10b981 100%)",
-          border: "none",
-          borderRadius: "50%",
-          color: "#fff",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2)",
-          animation: !isOpen ? "pulseGreen 2.5s ease-in-out infinite" : "none",
-        }}
-      >
-        <Image
-          src="/assets/icons/kemenag-512.png"
-          alt="Kemenag"
-          width={40}
-          height={40}
-          style={{
-            width: "65%",
-            height: "65%",
-            objectFit: "contain",
-            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
-          }}
-        />
-        <span
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: 14,
-            height: 14,
-            background: "#ef4444",
-            borderRadius: "50%",
-            border: "2px solid #fff",
-          }}
-        />
-      </button>
-
-      {/* ─── Chat Window ─────────────────── */}
-      <div
-        className={`ai-chat-window ${isOpen ? "open" : "closed"}`}
-        style={{
-          position: "fixed",
-          bottom: 28,
-          right: 28,
-          zIndex: 9999,
-          background: "rgba(10, 15, 25, 0.97)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderRadius: 28,
-          boxShadow: "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        }}
-      >
-      {/* ── Custom Reset Confirmation Modal ──────────────── */}
-      {showResetConfirm && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 100,
-            background: "rgba(0,0,0,0.7)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-            animation: "fadeSlideIn 0.2s ease",
-          }}
-        >
-          <div
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.button
+            initial={{ scale: 0, rotate: -45 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 45 }}
+            whileHover={{ scale: 1.08, y: -4 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+            onClick={() => setIsOpen(true)}
+            aria-label="Buka Chat Asisten"
+            className="ai-fab-button"
             style={{
-              background: "#1a2234",
-              borderRadius: 20,
-              padding: "24px 20px",
-              width: "100%",
-              maxWidth: 300,
-              textAlign: "center",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              position: "fixed",
+              zIndex: 9999,
+              background: "linear-gradient(135deg, #059669 0%, #10b981 100%)",
+              border: "none",
+              borderRadius: "50%",
+              color: "#fff",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2)",
             }}
           >
-            <div
+            <Image
+              src="/assets/icons/kemenag-512.png"
+              alt="Kemenag"
+              width={40}
+              height={40}
+              priority
               style={{
-                width: 50,
-                height: 50,
-                background: "rgba(239,68,68,0.15)",
+                width: "65%",
+                height: "65%",
+                objectFit: "contain",
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+              }}
+            />
+            <span
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: 14,
+                height: 14,
+                background: "#ef4444",
                 borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 16px",
-                color: "#ef4444",
+                border: "2px solid #fff",
               }}
-            >
-              <IconTrash />
-            </div>
-            <h3
-              style={{
-                color: "#fff",
-                fontSize: 17,
-                fontWeight: 600,
-                marginBottom: 8,
-              }}
-            >
-              Hapus Riwayat?
-            </h3>
-            <p
-              style={{
-                color: "rgba(255,255,255,0.6)",
-                fontSize: 13,
-                lineHeight: 1.5,
-                marginBottom: 20,
-              }}
-            >
-              Seluruh percakapan Anda akan dihapus dan tidak dapat dikembalikan.
-            </p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "transparent",
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleReset}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  borderRadius: 12,
-                  border: "none",
-                  background: "#ef4444",
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Hapus
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ── Header ─────────────────────────────────────────── */}
-      <div
-        style={{
-          background:
-            "linear-gradient(135deg, #065f46 0%, #059669 60%, #10b981 100%)",
-          padding: "18px 20px 16px",
-          position: "relative",
-          flexShrink: 0,
-          overflow: "hidden",
-        }}
-      >
-        {/* Decorative circles */}
-        <div
-          style={{
-            position: "absolute",
-            top: -20,
-            right: -20,
-            width: 100,
-            height: 100,
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: "50%",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: -30,
-            left: 60,
-            width: 80,
-            height: 80,
-            background: "rgba(255,255,255,0.04)",
-            borderRadius: "50%",
-          }}
-        />
+            />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            position: "relative",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Avatar */}
+      {/* ─── Chat Window ─────────────────── */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: 60, x: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 60, x: 20 }}
+            transition={{ type: "spring", stiffness: 140, damping: 17 }}
+            className="ai-chat-window open"
+            style={{
+              position: "fixed",
+              bottom: 28,
+              right: 28,
+              zIndex: 9999,
+              background: "rgba(10, 15, 25, 0.97)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              borderRadius: 28,
+              boxShadow: "0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            }}
+          >
+            {/* ── Custom Reset Confirmation Modal ──────────────── */}
+            <AnimatePresence>
+              {showResetConfirm && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 100,
+                    background: "rgba(0,0,0,0.7)",
+                    backdropFilter: "blur(4px)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 24,
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    transition={{ type: "spring", stiffness: 160, damping: 16 }}
+                    style={{
+                      background: "#1a2234",
+                      borderRadius: 20,
+                      padding: "24px 20px",
+                      width: "100%",
+                      maxWidth: 300,
+                      textAlign: "center",
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 50,
+                        height: 50,
+                        background: "rgba(239,68,68,0.15)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        margin: "0 auto 16px",
+                        color: "#ef4444",
+                      }}
+                    >
+                      <IconTrash />
+                    </div>
+                    <h3
+                      style={{
+                        color: "#fff",
+                        fontSize: 17,
+                        fontWeight: 600,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Hapus Riwayat?
+                    </h3>
+                    <p
+                      style={{
+                        color: "rgba(255,255,255,0.6)",
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        marginBottom: 20,
+                      }}
+                    >
+                      Seluruh percakapan Anda akan dihapus dan tidak dapat dikembalikan.
+                    </p>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button
+                        onClick={() => setShowResetConfirm(false)}
+                        style={{
+                          flex: 1,
+                          padding: "10px",
+                          borderRadius: 12,
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: "transparent",
+                          color: "#fff",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Batal
+                      </button>
+                      <button
+                        onClick={handleReset}
+                        style={{
+                          flex: 1,
+                          padding: "10px",
+                          borderRadius: 12,
+                          border: "none",
+                          background: "#ef4444",
+                          color: "#fff",
+                          fontSize: 13,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ── Header ─────────────────────────────────────────── */}
             <div
               style={{
-                width: 44,
-                height: 44,
-                background: "rgba(255,255,255,0.15)",
-                borderRadius: 14,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1.5px solid rgba(255,255,255,0.2)",
-                backdropFilter: "blur(10px)",
+                background:
+                  "linear-gradient(135deg, #065f46 0%, #059669 60%, #10b981 100%)",
+                padding: "18px 20px 16px",
+                position: "relative",
                 flexShrink: 0,
+                overflow: "hidden",
               }}
             >
-              <Image
-                src="/assets/icons/kemenag-512.png"
-                alt="Logo"
-                width={32}
-                height={32}
-                style={{ width: "70%", height: "70%", objectFit: "contain" }}
-              />
-            </div>
-            <div>
+              {/* Decorative circles */}
               <div
                 style={{
-                  color: "#fff",
-                  fontWeight: 700,
-                  fontSize: 15,
-                  letterSpacing: "-0.2px",
+                  position: "absolute",
+                  top: -20,
+                  right: -20,
+                  width: 100,
+                  height: 100,
+                  background: "rgba(255,255,255,0.06)",
+                  borderRadius: "50%",
                 }}
-              >
-                Asisten Kemenag
-              </div>
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: -30,
+                  left: 60,
+                  width: 80,
+                  height: 80,
+                  background: "rgba(255,255,255,0.04)",
+                  borderRadius: "50%",
+                }}
+              />
+
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 5,
-                  marginTop: 3,
+                  justifyContent: "space-between",
+                  position: "relative",
                 }}
               >
-                <span
-                  style={{
-                    width: 7,
-                    height: 7,
-                    background: "#86efac",
-                    borderRadius: "50%",
-                    display: "inline-block",
-                    boxShadow: "0 0 6px #86efac",
-                  }}
-                />
-                <span
-                  style={{
-                    color: "rgba(255,255,255,0.75)",
-                    fontSize: 11.5,
-                    fontWeight: 500,
-                  }}
-                >
-                  Online • Siap Membantu
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  {/* Avatar */}
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      background: "rgba(255,255,255,0.15)",
+                      borderRadius: 14,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "1.5px solid rgba(255,255,255,0.2)",
+                      backdropFilter: "blur(10px)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Image
+                      src="/assets/icons/kemenag-512.png"
+                      alt="Logo"
+                      width={32}
+                      height={32}
+                      style={{ width: "70%", height: "70%", objectFit: "contain" }}
+                    />
+                  </div>
+                  <div>
+                    <div
+                      style={{
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: 15,
+                        letterSpacing: "-0.2px",
+                      }}
+                    >
+                      Asisten Kemenag
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        marginTop: 3,
+                      }}
+                    >
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                        style={{
+                          width: 7,
+                          height: 7,
+                          background: "#86efac",
+                          borderRadius: "50%",
+                          display: "inline-block",
+                          boxShadow: "0 0 6px #86efac",
+                        }}
+                      />
+                      <span
+                        style={{
+                          color: "rgba(255,255,255,0.75)",
+                          fontSize: 11.5,
+                          fontWeight: 500,
+                        }}
+                      >
+                        Online • Siap Membantu
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {/* Action buttons */}
+                <div style={{ display: "flex", gap: 6 }}>
+                  <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => setShowResetConfirm(true)}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 10,
+                      border: "none",
+                      background: "rgba(255,255,255,0.12)",
+                      color: "#fff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "background 0.2s",
+                    }}
+                    title="Hapus Riwayat"
+                    aria-label="Hapus Riwayat"
+                  >
+                    <IconTrash />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 12,
+                      border: "none",
+                      background: "rgba(255,255,255,0.12)",
+                      color: "#fff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s",
+                    }}
+                    aria-label="Tutup"
+                  >
+                    <IconChevronDown />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.08, backgroundColor: "rgba(239,68,68,0.3)" }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 12,
+                      border: "none",
+                      background: "rgba(255,255,255,0.12)",
+                      color: "#fff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s",
+                    }}
+                    aria-label="Tutup"
+                  >
+                    <IconX />
+                  </motion.button>
+                </div>
               </div>
             </div>
-          </div>
-          {/* Action buttons */}
-          <div style={{ display: "flex", gap: 6 }}>
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 10,
-                border: "none",
-                background: "rgba(255,255,255,0.12)",
-                color: "#fff",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "background 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.22)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.12)")
-              }
-              title="Hapus Riwayat"
-              aria-label="Hapus Riwayat"
-            >
-              <IconTrash />
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 12,
-                border: "none",
-                background: "rgba(255,255,255,0.12)",
-                color: "#fff",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.22)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.12)")
-              }
-              aria-label="Tutup"
-            >
-              <IconChevronDown />
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 12,
-                border: "none",
-                background: "rgba(255,255,255,0.12)",
-                color: "#fff",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(239,68,68,0.3)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.12)")
-              }
-              aria-label="Tutup"
-            >
-              <IconX />
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* ── Messages ───────────────────────────────────────── */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          padding: "16px 14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(255,255,255,0.1) transparent",
-        }}
-      >
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: msg.role === "user" ? "flex-end" : "flex-start",
-              animation: "fadeSlideIn 0.3s ease",
-            }}
-          >
+            {/* ── Messages ───────────────────────────────────────── */}
             <div
               style={{
-                maxWidth: "82%",
-                background:
-                  msg.role === "user"
-                    ? "linear-gradient(135deg, #059669, #10b981)"
-                    : "rgba(255,255,255,0.07)",
-                border:
-                  msg.role === "user"
-                    ? "none"
-                    : "1px solid rgba(255,255,255,0.09)",
-                borderRadius:
-                  msg.role === "user"
-                    ? "18px 18px 4px 18px"
-                    : "18px 18px 18px 4px",
-                padding: "11px 14px",
-                color: "#fff",
-                fontSize: 13.5,
-                lineHeight: 1.55,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                boxShadow:
-                  msg.role === "user"
-                    ? "0 4px 16px rgba(5,150,105,0.3)"
-                    : "0 2px 8px rgba(0,0,0,0.2)",
+                flex: 1,
+                overflowY: "auto",
+                overflowX: "hidden",
+                padding: "16px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(255,255,255,0.1) transparent",
               }}
             >
-              {msg.content}
-            </div>
-            <span
-              style={{
-                fontSize: 10.5,
-                color: "rgba(255,255,255,0.3)",
-                marginTop: 4,
-                paddingLeft: 4,
-                paddingRight: 4,
-              }}
-            >
-              {formatTime(msg.time)}
-            </span>
-          </div>
-        ))}
-
-        {/* Typing Indicator */}
-        {isLoading && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 8,
-              animation: "fadeSlideIn 0.3s ease",
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.09)",
-                borderRadius: "18px 18px 18px 4px",
-                padding: "10px 14px",
-              }}
-            >
-              <TypingDots />
-            </div>
-          </div>
-        )}
-
-        {/* Quick Actions */}
-        {showQuickActions && messages.length === 1 && (
-          <div style={{ animation: "fadeSlideIn 0.4s ease 0.2s both" }}>
-            <p
-              style={{
-                fontSize: 11.5,
-                color: "rgba(255,255,255,0.35)",
-                marginBottom: 8,
-                paddingLeft: 2,
-              }}
-            >
-              Pertanyaan Populer:
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {QUICK_ACTIONS.map((qa) => (
-                <button
-                  key={qa}
-                  onClick={() => handleQuickAction(qa)}
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
                   style={{
-                    background: "rgba(16,185,129,0.1)",
-                    border: "1px solid rgba(16,185,129,0.25)",
-                    borderRadius: 20,
-                    padding: "6px 12px",
-                    color: "#6ee7b7",
-                    fontSize: 12,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    whiteSpace: "nowrap",
-                    fontFamily: "inherit",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(16,185,129,0.2)";
-                    e.currentTarget.style.borderColor = "rgba(16,185,129,0.5)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(16,185,129,0.1)";
-                    e.currentTarget.style.borderColor = "rgba(16,185,129,0.25)";
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: msg.role === "user" ? "flex-end" : "flex-start",
+                    animation: "fadeSlideIn 0.3s ease",
                   }}
                 >
-                  {qa}
-                </button>
+                  <div
+                    style={{
+                      maxWidth: "82%",
+                      background:
+                        msg.role === "user"
+                          ? "linear-gradient(135deg, #059669, #10b981)"
+                          : "rgba(255,255,255,0.07)",
+                      border:
+                        msg.role === "user"
+                          ? "none"
+                          : "1px solid rgba(255,255,255,0.09)",
+                      borderRadius:
+                        msg.role === "user"
+                          ? "18px 18px 4px 18px"
+                          : "18px 18px 18px 4px",
+                      padding: "11px 14px",
+                      color: "#fff",
+                      fontSize: 13.5,
+                      lineHeight: 1.55,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                      boxShadow:
+                        msg.role === "user"
+                          ? "0 4px 16px rgba(5,150,105,0.3)"
+                          : "0 2px 8px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    {msg.content}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 10.5,
+                      color: "rgba(255,255,255,0.3)",
+                      marginTop: 4,
+                      paddingLeft: 4,
+                      paddingRight: 4,
+                    }}
+                  >
+                    {formatTime(msg.time)}
+                  </span>
+                </div>
               ))}
+
+              {/* Typing Indicator */}
+              {isLoading && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 8,
+                    animation: "fadeSlideIn 0.3s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      borderRadius: "18px 18px 18px 4px",
+                      padding: "10px 14px",
+                    }}
+                  >
+                    <TypingDots />
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Actions */}
+              {showQuickActions && messages.length === 1 && (
+                <div style={{ animation: "fadeSlideIn 0.4s ease 0.2s both" }}>
+                  <p
+                    style={{
+                      fontSize: 11.5,
+                      color: "rgba(255,255,255,0.35)",
+                      marginBottom: 8,
+                      paddingLeft: 2,
+                    }}
+                  >
+                    Pertanyaan Populer:
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {QUICK_ACTIONS.map((qa) => (
+                      <motion.button
+                        key={qa}
+                        whileHover={{ scale: 1.05, backgroundColor: "rgba(16,185,129,0.2)" }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleQuickAction(qa)}
+                        style={{
+                          background: "rgba(16,185,129,0.1)",
+                          border: "1px solid rgba(16,185,129,0.25)",
+                          borderRadius: 20,
+                          padding: "6px 12px",
+                          color: "#6ee7b7",
+                          fontSize: 12,
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          whiteSpace: "nowrap",
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        {qa}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
             </div>
-          </div>
+
+            {/* ── Input ──────────────────────────────────────────── */}
+            <div
+              style={{
+                padding: "12px 14px 16px",
+                background: "rgba(255,255,255,0.03)",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                flexShrink: 0,
+              }}
+            >
+              <form
+                onSubmit={handleSubmit}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 16,
+                  padding: "8px 8px 8px 16px",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(16,185,129,0.4)")
+                }
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
+                }
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Tulis pesan..."
+                  disabled={isLoading}
+                  style={{
+                    flex: 1,
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    color: "#fff",
+                    fontSize: 13.5,
+                    fontFamily: "inherit",
+                    caretColor: "#10b981",
+                  }}
+                />
+                <motion.button
+                  type="submit"
+                  disabled={!input.trim() || isLoading}
+                  whileHover={input.trim() && !isLoading ? { scale: 1.08 } : {}}
+                  whileTap={input.trim() && !isLoading ? { scale: 0.92 } : {}}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 12,
+                    border: "none",
+                    background:
+                      input.trim() && !isLoading
+                        ? "linear-gradient(135deg, #059669, #10b981)"
+                        : "rgba(255,255,255,0.08)",
+                    color:
+                      input.trim() && !isLoading ? "#fff" : "rgba(255,255,255,0.25)",
+                    cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s",
+                    flexShrink: 0,
+                    boxShadow:
+                      input.trim() && !isLoading
+                        ? "0 2px 12px rgba(5,150,105,0.4)"
+                        : "none",
+                  }}
+                >
+                  <IconSend />
+                </motion.button>
+              </form>
+
+              <p
+                style={{
+                  textAlign: "center",
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.18)",
+                  marginTop: 8,
+                  letterSpacing: "0.3px",
+                }}
+              >
+                Kecerdasan Buatan Terpadu (100 Model AI) · Kemenag Barito Utara
+              </p>
+            </div>
+
+          </motion.div>
         )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* ── Input ──────────────────────────────────────────── */}
-      <div
-        style={{
-          padding: "12px 14px 16px",
-          background: "rgba(255,255,255,0.03)",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          flexShrink: 0,
-        }}
-      >
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: "rgba(255,255,255,0.07)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 16,
-            padding: "8px 8px 8px 16px",
-            transition: "border-color 0.2s",
-          }}
-          onFocus={(e) =>
-            (e.currentTarget.style.borderColor = "rgba(16,185,129,0.4)")
-          }
-          onBlur={(e) =>
-            (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")
-          }
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tulis pesan..."
-            disabled={isLoading}
-            style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              color: "#fff",
-              fontSize: 13.5,
-              fontFamily: "inherit",
-              caretColor: "#10b981",
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 12,
-              border: "none",
-              background:
-                input.trim() && !isLoading
-                  ? "linear-gradient(135deg, #059669, #10b981)"
-                  : "rgba(255,255,255,0.08)",
-              color:
-                input.trim() && !isLoading ? "#fff" : "rgba(255,255,255,0.25)",
-              cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.2s",
-              flexShrink: 0,
-              boxShadow:
-                input.trim() && !isLoading
-                  ? "0 2px 12px rgba(5,150,105,0.4)"
-                  : "none",
-            }}
-          >
-            <IconSend />
-          </button>
-        </form>
-
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: 10,
-            color: "rgba(255,255,255,0.18)",
-            marginTop: 8,
-            letterSpacing: "0.3px",
-          }}
-        >
-          Kecerdasan Buatan Terpadu (100 Model AI) · Kemenag Barito Utara
-        </p>
-      </div>
-
-    </div>
+      </AnimatePresence>
     </>
   );
 };

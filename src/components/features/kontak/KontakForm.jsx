@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AnimatePresence } from "framer-motion";
 import { useKontakForm } from "@/hooks/useKontakForm";
 import { KontakFormHeader, KontakFormActions, KontakFormStatus } from "./components/KontakFormUI";
 import { KontakFormFields } from "./components/KontakFormFields";
@@ -31,7 +32,9 @@ export default function KontakForm() {
 
       <KontakFormActions loading={loading} />
 
-      <KontakFormStatus result={result} />
+      <AnimatePresence mode="wait">
+        {result && <KontakFormStatus result={result} />}
+      </AnimatePresence>
     </form>
   );
 }

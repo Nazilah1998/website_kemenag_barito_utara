@@ -1,5 +1,6 @@
 import React from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 
 const PdfViewer = dynamic(() => import("./PdfViewerClient"), { ssr: false });
 
@@ -136,48 +137,58 @@ export default function DocumentItem({
                     </button>
                 </div>
 
-                {isOpen && (
-                    <div className="mt-12 animate-in fade-in zoom-in slide-in-from-top-4 duration-500">
-                        <div className="mx-auto max-w-4xl overflow-hidden rounded-[2.5rem] border border-slate-100 bg-slate-50 shadow-2xl dark:border-white/5 dark:bg-slate-950">
-                            <div className="flex items-center justify-between border-b border-white/10 bg-emerald-950 p-4 lg:px-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">PDF Reader v2.0</span>
-                                </div>
-                                <button onClick={onClosePreview} className="text-white/40 hover:text-white transition-colors">
-                                    <CloseIcon />
-                                </button>
-                            </div>
-
-                            <div className="p-4 sm:p-8 dark:bg-black/20">
-                                {failed ? (
-                                    <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 text-center">
-                                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500 dark:bg-rose-900/30">
-                                            <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <AnimatePresence initial={false}>
+                    {isOpen && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 100, damping: 18 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="mt-12">
+                                <div className="mx-auto max-w-4xl overflow-hidden rounded-[2.5rem] border border-slate-100 bg-slate-50 shadow-2xl dark:border-white/5 dark:bg-slate-950">
+                                    <div className="flex items-center justify-between border-b border-white/10 bg-emerald-950 p-4 lg:px-8">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">PDF Reader v2.0</span>
                                         </div>
-                                        <h4 className="text-lg font-bold text-slate-900 dark:text-white">Pratinjau Gagal</h4>
-                                        <p className="max-w-xs text-xs text-slate-500 dark:text-slate-400">
-                                            Dokumen tidak dapat dimuat. Silakan unduh file untuk melihat rincian lengkap.
-                                        </p>
-                                        <button
-                                            type="button"
-                                            onClick={onRetryPreview}
-                                            className="mt-2 rounded-full bg-emerald-600 px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20"
-                                        >
-                                            Coba Muat Ulang
+                                        <button onClick={onClosePreview} className="text-white/40 hover:text-white transition-colors">
+                                            <CloseIcon />
                                         </button>
                                     </div>
-                                ) : (
-                                    <PdfViewer
-                                        fileUrl={doc.href}
-                                        fileName={`${doc.title || "dokumen"}.pdf`}
-                                        onError={() => onRetryPreview(true)}
-                                    />
-                                )}
+
+                                    <div className="p-4 sm:p-8 dark:bg-black/20">
+                                        {failed ? (
+                                            <div className="flex min-h-[300px] flex-col items-center justify-center gap-4 text-center">
+                                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-50 text-rose-500 dark:bg-rose-900/30">
+                                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                </div>
+                                                <h4 className="text-lg font-bold text-slate-900 dark:text-white">Pratinjau Gagal</h4>
+                                                <p className="max-w-xs text-xs text-slate-500 dark:text-slate-400">
+                                                    Dokumen tidak dapat dimuat. Silakan unduh file untuk melihat rincian lengkap.
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={onRetryPreview}
+                                                    className="mt-2 rounded-full bg-emerald-600 px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20"
+                                                >
+                                                    Coba Muat Ulang
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <PdfViewer
+                                                fileUrl={doc.href}
+                                                fileName={`${doc.title || "dokumen"}.pdf`}
+                                                onError={() => onRetryPreview(true)}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </article>
     );

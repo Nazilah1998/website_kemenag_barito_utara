@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function DesktopNav({
   navigationItems,
@@ -61,30 +62,38 @@ export function DesktopNav({
                   </Link>
                 )}
 
-                {hasChildren && isOpen && (
-                  <div className="absolute left-0 top-full z-50 pt-2 min-w-[240px] animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
-                      {/* Decorative Background for Dropdown */}
-                      <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl" />
+                <AnimatePresence>
+                  {hasChildren && isOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      transition={{ type: "spring", stiffness: 220, damping: 18 }}
+                      className="absolute left-0 top-full z-50 pt-2 min-w-[240px]"
+                    >
+                      <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
+                        {/* Decorative Background for Dropdown */}
+                        <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl" />
 
-                      <ul className="relative z-10 space-y-0.5">
-                        {item.children.map((child) => (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              className="group/item flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
-                            >
-                              <span>{child.label}</span>
-                              <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0" stroke="currentColor" strokeWidth="3">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                              </svg>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
+                        <ul className="relative z-10 space-y-0.5">
+                          {item.children.map((child) => (
+                            <li key={child.href}>
+                              <Link
+                                href={child.href}
+                                className="group/item flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+                              >
+                                <span>{child.label}</span>
+                                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0" stroke="currentColor" strokeWidth="3">
+                                  <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </li>
             );
           })}

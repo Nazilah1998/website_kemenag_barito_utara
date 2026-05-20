@@ -8,6 +8,8 @@ import BeritaFilters from "./components/BeritaFilters";
 import { FeaturedNewsCard, NewsCard } from "./components/BeritaCards";
 import NewsPagination from "./components/NewsPagination";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 export default function BeritaPageClient({
   categories,
   months,
@@ -33,7 +35,7 @@ export default function BeritaPageClient({
         ]}
       />
 
-      <main className="bg-slate-50 transition-colors dark:bg-slate-950">
+      <main className="bg-slate-50 transition-colors dark:bg-slate-950 overflow-hidden">
         <section className="w-full px-6 py-10 sm:px-10 lg:px-16 xl:px-20">
           <BeritaFilters
             categories={categories}
@@ -63,11 +65,16 @@ export default function BeritaPageClient({
 
           {paginatedNews.length > 0 ? (
             <>
-              <div className="mt-6 grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                {paginatedNews.map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
+              <motion.div 
+                layout
+                className="mt-6 grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+              >
+                <AnimatePresence mode="popLayout">
+                  {paginatedNews.map((item) => (
+                    <NewsCard key={item.id} item={item} />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
 
               <NewsPagination
                 currentPage={currentPage}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { motion } from "framer-motion";
 
 const getExternalApps = (locale) => [
     {
@@ -71,6 +72,30 @@ const getExternalApps = (locale) => [
     },
 ];
 
+const containerVariants = {
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: 0.07
+        }
+    }
+};
+
+const cardVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 90,
+            damping: 16
+        }
+    }
+};
+
+const MotionLink = motion.create(Link);
+
 export default function ExternalAppsSection() {
     const { locale } = useLanguage();
     const apps = getExternalApps(locale);
@@ -102,7 +127,7 @@ export default function ExternalAppsSection() {
                 </p>
             </div>
 
-            {/* MOBILE SLIDER (KEMBALI KE TAMPILAN FIX SEBELUMNYA) */}
+            {/* MOBILE SLIDER */}
             <div className="relative lg:hidden overflow-hidden py-4">
                 <div
                     className="flex transition-transform duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]"
@@ -175,14 +200,24 @@ export default function ExternalAppsSection() {
             </div>
 
             {/* DESKTOP PREMIUM GRID (7 KOLOM - 1 BARIS) */}
-            <div className="hidden lg:grid mt-12 gap-5 xl:grid-cols-7">
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                className="hidden lg:grid mt-12 gap-5 xl:grid-cols-7"
+            >
                 {apps.map((app) => (
-                    <Link
+                    <MotionLink
                         key={app.title}
                         href={app.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center transition-all duration-500 hover:-translate-y-3 hover:border-emerald-300 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)] dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:hover:border-emerald-500/50"
+                        variants={cardVariants}
+                        whileHover={{ y: -10, scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 150, damping: 15 }}
+                        className="group relative flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center transition-all duration-500 hover:border-emerald-300 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)] dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:hover:border-emerald-500/50"
                     >
                         {/* Background Glow Effect */}
                         <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-b from-emerald-50/0 to-emerald-50/0 opacity-0 transition-opacity duration-500 group-hover:from-emerald-50/50 group-hover:to-transparent dark:group-hover:from-emerald-900/10" />
@@ -223,9 +258,9 @@ export default function ExternalAppsSection() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </div>
-                    </Link>
+                    </MotionLink>
                 ))}
-            </div>
+            </motion.div>
         </section>
     );
 }

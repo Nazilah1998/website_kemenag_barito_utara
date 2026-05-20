@@ -5,6 +5,30 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { GalleryLightbox } from "@/components/features/galeri/components/GalleryLightbox";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 30 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 90,
+      damping: 18
+    }
+  }
+};
 
 export default function HomeGallerySection({ latestGaleri = [] }) {
   const { t, locale } = useLanguage();
@@ -40,7 +64,7 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
   };
 
   return (
-    <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20">
+    <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20 overflow-hidden">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="relative">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">
@@ -54,13 +78,18 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
           </p>
         </div>
 
-        <Link
-          href="/galeri"
-          className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+        <motion.div
+          whileHover={{ y: -3, scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {t("actions.viewAll") || "Lihat Semua Galeri"}
-          <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </Link>
+          <Link
+            href="/galeri"
+            className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+          >
+            {t("actions.viewAll") || "Lihat Semua Galeri"}
+            <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </motion.div>
       </div>
 
       {/* 1. MOBILE & TABLET SLIDER */}
@@ -123,7 +152,13 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
       </div>
 
       {/* 2. DESKTOP GRID - 6 KOLOM 2 BARIS */}
-      <div className="mt-12 hidden lg:grid lg:grid-cols-6 lg:gap-4 xl:gap-5">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        className="mt-12 hidden lg:grid lg:grid-cols-6 lg:gap-4 xl:gap-5"
+      >
         {latestGaleri.slice(0, 12).map((item, index) => (
           <GalleryCard
             key={item.id || index}
@@ -133,7 +168,7 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
             onPreview={() => setSelectedIndex(index)}
           />
         ))}
-      </div>
+      </motion.div>
 
       {currentItem && (
         <GalleryLightbox
@@ -171,7 +206,6 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `kemenag-barut-${item.id || "gallery"}.jpg`;
       link.download = `Kemenag_Barut_Galeri_${new Date(item.publishedAt).getTime()}.jpg`;
       document.body.appendChild(link);
       link.click();
@@ -191,9 +225,12 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
   };
 
   return (
-    <article
+    <motion.article
+      variants={cardVariants}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 150, damping: 16 }}
       onClick={handleTap}
-      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
+      className="group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.2)] dark:border-slate-800 dark:bg-slate-900"
     >
       {/* Image Layer */}
       <div className="absolute inset-0 z-0">
@@ -243,7 +280,7 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
