@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Struktur Organisasi - Kementerian Agama Kabupaten Barito Utara",
+  title: "Struktur Organisasi",
   description: "Bagan struktur organisasi dan profil pimpinan Kantor Kementerian Agama Kabupaten Barito Utara.",
 };
 

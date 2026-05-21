@@ -28,7 +28,7 @@ export const siteInfo = {
   complaintHref: "/kontak",
   logoSrc: "/assets/icons/kemenag-512.png",
   siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.kemenag-baritoutara.com",
+    process.env.NEXT_PUBLIC_SITE_URL || "https://baritoutara.kemenag.go.id",
 };
 
 export const siteLinks = {

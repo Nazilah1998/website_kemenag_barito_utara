@@ -2,7 +2,7 @@ import PageBanner from "@/components/common/PageBanner";
 import SearchResultsClient from "@/components/features/search/SearchResultsClient";
 
 export const metadata = {
-  title: "Pencarian | Kemenag Barito Utara",
+  title: "Pencarian",
   description: "Halaman pencarian website Kemenag Barito Utara",
 };
 

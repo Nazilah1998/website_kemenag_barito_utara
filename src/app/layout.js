@@ -21,7 +21,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   metadataBase: new URL(siteInfo.siteUrl),
   title: {
-    default: `${siteInfo.name}`,
+    default: `${siteInfo.shortName}`,
     template: `%s | ${siteInfo.shortName}`,
   },
   description: siteInfo.description,
@@ -48,6 +48,9 @@ export const metadata = {
     ],
   },
   alternates: { canonical: "/" },
+  verification: {
+    google: "3ZH4iRGfl0Jurquu3gczAWNvE_-NQRDlEERr_ZDwJjA",
+  },
   manifest: "/manifest.webmanifest",
   applicationName: "Kemenag Barito Utara",
   appleWebApp: {

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Profil Pejabat - Kementerian Agama Kabupaten Barito Utara",
+  title: "Profil Pejabat",
   description:
     "Kenali para pemimpin dan pejabat struktural yang mengabdi di Kantor Kementerian Agama Kabupaten Barito Utara.",
 };

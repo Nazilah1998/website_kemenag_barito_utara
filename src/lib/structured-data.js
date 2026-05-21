@@ -77,7 +77,7 @@ export function websiteSchema() {
     alternateName: [
       "Kementerian Agama Kabupaten Barito Utara",
       "Kemenag Barut",
-      "kemenag-baritoutara.com",
+      "baritoutara.kemenag.go.id",
     ],
     description: siteInfo.description,
     inLanguage: "id-ID",

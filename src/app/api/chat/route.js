@@ -122,7 +122,7 @@ FAQ & INFORMASI PENTING TAMBAHAN:
 - Istirahat: 12.00 - 13.00 WIB (Jumat 11.30 - 13.00 WIB).
 - Semua layanan di PTSP diproses sesuai SOP yang berlaku.
 - Pengaduan bisa melalui menu Kontak atau langsung ke meja pengaduan PTSP.
-- Website Utama: https://www.kemenag-baritoutara.com
+- Website Utama: https://baritoutara.kemenag.go.id
 - Link Laporan: /laporan (isi: Renstra, PK, RKT, Capaian Kinerja, dll).
 
 ===========================
@@ -971,7 +971,7 @@ export async function POST(req) {
               "Content-Type": "application/json",
               Authorization: `Bearer ${key}`,
               ...(engine.provider === "openrouter" && {
-                "HTTP-Referer": "https://kemenag-baritoutara.com",
+                "HTTP-Referer": "https://baritoutara.kemenag.go.id",
                 "X-Title": "Kemenag Barut AI",
               }),
             },

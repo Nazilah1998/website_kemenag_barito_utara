@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Informasi Publik - Kementerian Agama Kabupaten Barito Utara",
+  title: "Informasi Publik",
   description:
     "Informasi publik, regulasi, profil pejabat, struktur organisasi, dan dasar hukum di lingkungan Kantor Kementerian Agama Kabupaten Barito Utara.",
 };

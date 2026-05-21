@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Galeri | Kemenag Barito Utara",
+  title: "Galeri",
   description:
     "Galeri dokumentasi kegiatan dan publikasi Kementerian Agama Barito Utara.",
 };
