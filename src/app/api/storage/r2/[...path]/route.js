@@ -11,7 +11,6 @@ export async function GET(request, { params }) {
     const pathParts = resolvedParams.path || [];
     const path = pathParts.join("/");
     currentPath = path;
-    console.log("R2 Proxy Request path:", path);
 
     const client = getR2Client();
 

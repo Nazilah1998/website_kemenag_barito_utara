@@ -1,4 +1,4 @@
-import { getLatestBeritaHome } from "../../lib/berita-home";
+import { getLatestBeritaHome, getPopularBeritaHome } from "../../lib/berita-home";
 import { getLatestGaleriHome } from "../../lib/galeri-home";
 import { getPublicHomepageSlides } from "../../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
@@ -38,8 +38,9 @@ function SectionDivider() {
 }
 
 export default async function HomePage() {
-  const [latestBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
+  const [latestBerita, popularBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
     getLatestBeritaHome(),
+    getPopularBeritaHome(),
     getLatestGaleriHome(),
     getPublicHomepageSlides(),
     prisma.testimonials.findMany({
@@ -63,7 +64,7 @@ export default async function HomePage() {
 
       <SectionDivider />
 
-      <HomeNewsSection latestBerita={latestBerita} />
+      <HomeNewsSection latestBerita={latestBerita} popularBerita={popularBerita} />
 
       <SectionDivider />
 

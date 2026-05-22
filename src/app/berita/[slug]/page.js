@@ -121,7 +121,7 @@ export default async function DetailBeritaPage({ params }) {
   ];
 
   const [relatedItems, adjacent] = await Promise.all([
-    getRelatedBerita(berita.slug, berita.category, 3),
+    getRelatedBerita(berita.slug, berita.category, 4),
     getAdjacentBerita(berita.slug),
   ]);
 
@@ -138,58 +138,52 @@ export default async function DetailBeritaPage({ params }) {
           <BeritaDetailBackLink />
 
           <article className="mt-6 space-y-8">
-            <div className="overflow-hidden rounded-4xl border border-slate-200 bg-slate-900 shadow-xl dark:border-slate-800">
-              <a
-                href={coverImageDownloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative block w-full aspect-[4/3] sm:aspect-video lg:aspect-[21/9] max-h-[550px] cursor-pointer overflow-hidden"
-                title="Buka atau unduh cover image"
-              >
-                {/* Blurred Background to fill the banner container beautifully */}
-                <Image
-                  src={coverImage}
-                  alt=""
-                  fill
-                  priority
-                  className="object-cover blur-2xl scale-110 opacity-35 select-none pointer-events-none"
-                  sizes="100vw"
-                />
-
-                {/* Sharp Foreground Image using object-contain to prevent any cropping */}
-                <Image
-                  src={coverImage}
-                  alt={berita.title}
-                  fill
-                  priority
-                  className="object-contain transition duration-500 group-hover:scale-[1.01]"
-                  sizes="100vw"
-                />
-
-                <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
-
-                <div className="absolute left-6 top-6 md:left-10 md:top-10">
-                  <BeritaDetailCategoryBadge category={berita.category} />
-                </div>
-
-                <div className="absolute inset-x-0 bottom-0 p-6 md:p-10">
-                  <BeritaDetailMetaPills isoDate={berita.isoDate}>
-                    <BeritaViewCounter
-                      slug={berita.slug}
-                      initialViews={berita.views}
-                    />
-                  </BeritaDetailMetaPills>
-                </div>
-              </a>
-            </div>
-
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_300px]">
               <div className="min-w-0">
                 <article
                   className="prose prose-slate max-w-none rounded-4xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm md:p-8 lg:p-10 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-white dark:prose-strong:text-white dark:prose-a:text-emerald-300 dark:prose-a:no-underline hover:dark:prose-a:text-emerald-200 dark:prose-li:text-white dark:prose-blockquote:text-white dark:prose-figcaption:text-slate-200 dark:prose-hr:border-slate-700 dark:prose-code:text-emerald-300 dark:prose-pre:bg-slate-950 **:text-inherit! [&_p]:text-inherit! [&_li]:text-inherit! [&_blockquote]:text-inherit! [&_span]:text-inherit!"
                   style={{ color: "inherit" }}
-                  dangerouslySetInnerHTML={{ __html: berita.content || "" }}
-                />
+                >
+                  {/* Category and Metadata Pills at the top */}
+                  <div className="not-prose mb-5 flex flex-wrap items-center gap-3">
+                    <BeritaDetailCategoryBadge category={berita.category} />
+                    <BeritaDetailMetaPills isoDate={berita.isoDate}>
+                      <BeritaViewCounter
+                        slug={berita.slug}
+                        initialViews={berita.views}
+                      />
+                    </BeritaDetailMetaPills>
+                  </div>
+
+                  {/* Premium Featured Image inside the news content form card - Float Left (occupies half of the card, 16:9 landscape) */}
+                  <div className="not-prose float-none sm:float-left mb-6 sm:mr-6 sm:mb-4 w-full sm:w-1/2 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+                    <a
+                      href={coverImageDownloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block w-full aspect-[16/9] cursor-pointer overflow-hidden bg-slate-50 dark:bg-slate-900"
+                      title="Buka atau unduh gambar"
+                    >
+                      <Image
+                        src={coverImage}
+                        alt={berita.title}
+                        width={800}
+                        height={450}
+                        priority
+                        className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 600px"
+                      />
+                    </a>
+                    {/* Caption like the reference */}
+                    <div className="bg-slate-50 dark:bg-slate-900/60 px-4 py-3 border-t border-slate-200 dark:border-slate-800 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                      Foto Berita: {berita.title}
+                    </div>
+                  </div>
+
+                  <div
+                    dangerouslySetInnerHTML={{ __html: berita.content || "" }}
+                  />
+                </article>
               </div>
 
               <BeritaDetailSidebar

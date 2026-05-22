@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SORT_OPTIONS = [
   { value: "newest", labelId: "Terbaru", labelEn: "Newest" },
@@ -141,6 +142,16 @@ export default function BeritaFilters({
 
   const [searchQuery, setSearchQuery] = useState(values.q || "");
   const [isPending, setIsPending] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Monitor screen width to automatically manage mobile state vs desktop layout
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const updateFilters = useCallback((newParams) => {
     setIsPending(true);
@@ -216,88 +227,136 @@ export default function BeritaFilters({
       <div className="p-5 sm:p-6">
 
         {/* ── Header row ── */}
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="block h-[3px] w-5 rounded-full bg-emerald-500" />
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400">
               {t("berita.filterSystem")}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {isPending && (
-              <span className="text-[10px] font-semibold text-emerald-600 animate-pulse">
+              <span className="text-[10px] font-semibold text-emerald-600 animate-pulse mr-1">
                 Memproses...
               </span>
             )}
+            
+            {/* Beautiful Animated Mobile Filter Toggle */}
+            <button
+              onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+              className="
+                flex lg:hidden items-center gap-2 rounded-xl
+                bg-emerald-50 px-3.5 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-700
+                border border-emerald-200/60 shadow-sm
+                transition-all duration-300
+                active:scale-95 hover:bg-emerald-100/70
+                dark:bg-emerald-950/20 dark:border-emerald-800/60 dark:text-emerald-400
+                dark:hover:bg-emerald-950/40
+              "
+              aria-label="Toggle Filters"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-3.5 w-3.5"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c-1.2 0-2.4 0-3.6 0M3 12c0-1.2 0-2.4 0-3.6M21 12c0 1.2 0 2.4 0 3.6M12 21c1.2 0 2.4 0 3.6 0" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M6 12h12M10 18h4" />
+              </svg>
+              <span>{isMobileFiltersOpen ? t("berita.hideFilters") : t("berita.showFilters")}</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className={`h-3 w-3 transition-transform duration-300 ${isMobileFiltersOpen ? "rotate-180" : ""}`}
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
             <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-black tabular-nums text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-900/30 dark:text-emerald-400">
               {totalResults} {t("berita.found")}
             </span>
           </div>
         </div>
 
-        {/* ── Filter Grid ── */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12">
-
-          {/* Search — spans 5 cols */}
-          <div className="lg:col-span-5">
-            <SearchField
-              id="q"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("berita.searchPlaceholder")}
-            />
-          </div>
-
-          {/* Category — spans 3 cols */}
-          <div className="lg:col-span-3">
-            <SelectField
-              id="category"
-              label={t("berita.categoryLabel")}
-              value={values.category || ""}
-              onChange={(e) => updateFilters({ category: e.target.value })}
+        {/* ── Filter Grid with smooth height animation on mobile ── */}
+        <AnimatePresence initial={false}>
+          {(!isMobile || isMobileFiltersOpen) && (
+            <motion.div
+              initial={isMobile ? { height: 0, opacity: 0 } : false}
+              animate={isMobile ? { height: "auto", opacity: 1 } : false}
+              exit={isMobile ? { height: 0, opacity: 0 } : false}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="overflow-hidden"
             >
-              <option value="">{t("berita.allCategories")}</option>
-              {translatedCategories.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </SelectField>
-          </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12 pt-1 pb-2">
+                {/* Search — spans 5 cols */}
+                <div className="lg:col-span-5">
+                  <SearchField
+                    id="q"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t("berita.searchPlaceholder")}
+                  />
+                </div>
 
-          {/* Month — spans 2 cols */}
-          <div className="lg:col-span-2">
-            <SelectField
-              id="month"
-              label={t("berita.monthLabel")}
-              value={values.month || ""}
-              onChange={(e) => updateFilters({ month: e.target.value })}
-            >
-              <option value="">{t("berita.allMonths")}</option>
-              {translatedMonths.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </SelectField>
-          </div>
+                {/* Category — spans 3 cols */}
+                <div className="lg:col-span-3">
+                  <SelectField
+                    id="category"
+                    label={t("berita.categoryLabel")}
+                    value={values.category || ""}
+                    onChange={(e) => updateFilters({ category: e.target.value })}
+                  >
+                    <option value="">{t("berita.allCategories")}</option>
+                    {translatedCategories.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </SelectField>
+                </div>
 
-          {/* Sort — spans 2 cols */}
-          <div className="lg:col-span-2">
-            <SelectField
-              id="sort"
-              label={t("berita.sortLabel")}
-              value={values.sort || "newest"}
-              onChange={(e) => updateFilters({ sort: e.target.value })}
-            >
-              {sortOptions.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </SelectField>
-          </div>
-        </div>
+                {/* Month — spans 2 cols */}
+                <div className="lg:col-span-2">
+                  <SelectField
+                    id="month"
+                    label={t("berita.monthLabel")}
+                    value={values.month || ""}
+                    onChange={(e) => updateFilters({ month: e.target.value })}
+                  >
+                    <option value="">{t("berita.allMonths")}</option>
+                    {translatedMonths.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </SelectField>
+                </div>
+
+                {/* Sort — spans 2 cols */}
+                <div className="lg:col-span-2">
+                  <SelectField
+                    id="sort"
+                    label={t("berita.sortLabel")}
+                    value={values.sort || "newest"}
+                    onChange={(e) => updateFilters({ sort: e.target.value })}
+                  >
+                    {sortOptions.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </SelectField>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Active Filters Row ── */}
         <div className={`mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800 transition-all ${hasActiveFilters ? "opacity-100" : "opacity-60"}`}>

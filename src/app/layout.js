@@ -4,17 +4,19 @@ import Providers from "@/components/layout/Providers";
 import AppShell from "@/components/layout/AppShell";
 import ThemeInitializer from "@/components/layout/ThemeInitializer";
 import { siteInfo } from "@/data/site";
-import VercelAnalytics from "@/components/layout/VercelAnalytics";
-import VercelSpeedInsights from "@/components/layout/VercelSpeedInsights";
-import PwaRegister from "@/components/layout/PwaRegister";
-import JsonLd from "@/components/features/seo/JsonLd";
-import ChatWidget from "@/components/features/chat/ChatWidget";
-import RealtimeSync from "@/components/common/RealtimeSync";
+import dynamic from "next/dynamic";
 import {
   organizationSchema,
   websiteSchema,
   navigationSchema,
 } from "@/lib/structured-data";
+
+const VercelAnalytics = dynamic(() => import("@/components/layout/VercelAnalytics"));
+const VercelSpeedInsights = dynamic(() => import("@/components/layout/VercelSpeedInsights"));
+const PwaRegister = dynamic(() => import("@/components/layout/PwaRegister"));
+const ChatWidget = dynamic(() => import("@/components/features/chat/ChatWidget"));
+const RealtimeSync = dynamic(() => import("@/components/common/RealtimeSync"));
+import JsonLd from "@/components/features/seo/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
 

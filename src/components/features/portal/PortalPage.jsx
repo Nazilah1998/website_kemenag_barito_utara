@@ -184,7 +184,7 @@ export default function PortalPage() {
         {/* Logo & Title Section */}
         <motion.div variants={headerVariants} className="flex flex-col items-center text-center mb-4">
           <div className="w-20 h-20 mb-4 relative bg-white/10 backdrop-blur-md p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500">
-            <Image src={siteInfo.logoSrc} alt="Logo" width={120} height={120} className="w-full h-full object-contain drop-shadow-lg" />
+            <Image src={siteInfo.logoSrc} alt="Logo" width={56} height={56} className="w-full h-full object-contain drop-shadow-lg" />
           </div>
           <p className="mb-2 text-base font-black uppercase tracking-[0.4em] text-emerald-500/90">
             Portal Resmi
@@ -213,12 +213,12 @@ export default function PortalPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 font-bold text-xs uppercase tracking-widest ${isOpen ? "text-emerald-400" : "text-rose-400"}`}>
-              <div className={`w-2 h-2 rounded-full animate-pulse ${isOpen ? "bg-emerald-400" : "bg-rose-400"}`} />
-              {isOpen ? "Layanan Buka" : "Layanan Tutup"}
+            <div className={`flex items-center gap-2 font-bold text-xs uppercase tracking-widest ${mounted ? (isOpen ? "text-emerald-400" : "text-rose-400") : "text-slate-400"}`}>
+              <div className={`w-2 h-2 rounded-full ${mounted ? 'animate-pulse' : ''} ${mounted ? (isOpen ? "bg-emerald-400" : "bg-rose-400") : "bg-slate-400"}`} />
+              {mounted ? (isOpen ? "Layanan Buka" : "Layanan Tutup") : "Memuat..."}
             </div>
             <p className="text-slate-500 text-[10px] font-medium border-l border-white/10 pl-4">
-              {time.getDay() === 5 ? "Jam Kerja: 07:30 - 16:30" : "Jam Kerja: 07:30 - 16:00"}
+              {mounted ? (time.getDay() === 5 ? "Jam Kerja: 07:30 - 16:30" : "Jam Kerja: 07:30 - 16:00") : "Memuat..."}
             </p>
           </div>
         </motion.div>
@@ -251,9 +251,9 @@ export default function PortalPage() {
                     {link.icon}
                   </div>
                   <div className="flex flex-col items-start">
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors line-clamp-1">
+                    <h2 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors line-clamp-1">
                       {link.title}
-                    </h3>
+                    </h2>
                     <p className="text-slate-400 text-sm leading-relaxed line-clamp-2">
                       {link.description}
                     </p>
@@ -292,7 +292,7 @@ export default function PortalPage() {
         {/* Logo & Title Section */}
         <motion.div variants={headerVariants} className="flex flex-col items-center text-center mb-6">
           <div className="w-20 h-20 mb-4 relative bg-white/10 backdrop-blur-md p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl">
-            <Image src={siteInfo.logoSrc} alt="Logo" width={120} height={120} className="w-full h-full object-contain drop-shadow-lg" />
+            <Image src={siteInfo.logoSrc} alt="Logo" width={56} height={56} className="w-full h-full object-contain drop-shadow-lg" />
           </div>
           <p className="mb-1 text-xs font-black uppercase tracking-[0.4em] text-emerald-500/90">
             Portal Resmi
@@ -317,9 +317,9 @@ export default function PortalPage() {
               <Clock className="w-3.5 h-3.5" />
               {mounted ? time.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
             </div>
-            <div className={`flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider ${isOpen ? "text-emerald-400" : "text-rose-400"}`}>
-              <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isOpen ? "bg-emerald-400" : "bg-rose-400"}`} />
-              {isOpen ? "Layanan Buka" : "Layanan Tutup"}
+            <div className={`flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider ${mounted ? (isOpen ? "text-emerald-400" : "text-rose-400") : "text-slate-400"}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${mounted ? 'animate-pulse' : ''} ${mounted ? (isOpen ? "bg-emerald-400" : "bg-rose-400") : "bg-slate-400"}`} />
+              {mounted ? (isOpen ? "Layanan Buka" : "Layanan Tutup") : "Memuat"}
             </div>
           </div>
           <div className="flex items-center justify-between w-full">
@@ -328,7 +328,7 @@ export default function PortalPage() {
               {mounted ? time.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" }) : "---"}
             </div>
             <p className="text-slate-500 text-[9px] font-bold uppercase tracking-tighter">
-              {time.getDay() === 5 ? "07:30 - 16:30" : "07:30 - 16:00"}
+              {mounted ? (time.getDay() === 5 ? "07:30 - 16:30" : "07:30 - 16:00") : "Memuat"}
             </p>
           </div>
         </motion.div>
@@ -360,9 +360,9 @@ export default function PortalPage() {
                     }`}>
                     {link.icon}
                   </div>
-                  <h3 className="text-[11px] font-bold text-white line-clamp-1">
+                  <h2 className="text-[11px] font-bold text-white line-clamp-1">
                     {link.title}
-                  </h3>
+                  </h2>
                 </Link>
               </motion.div>
             ))}

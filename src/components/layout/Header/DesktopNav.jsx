@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
+import { HeaderSearchForm } from "./HeaderSearchForm";
 
 export function DesktopNav({
   navigationItems,
@@ -9,18 +10,22 @@ export function DesktopNav({
   openDesktopDropdown,
   toggleDesktopDropdown,
   setOpenDesktopDropdown,
-  locale,
-  setLocale,
-  theme,
-  setLightTheme,
-  setDarkTheme,
-  adminState,
   desktopDropdownRef,
+  searchQuery,
+  setSearchQuery,
+  handleSearchSubmit,
+  handleSearchKeyDown,
+  handleSearchBlur,
+  t,
+  suggestions,
+  showSuggestions,
+  handleSuggestionSelect,
+  activeSuggestionIndex
 }) {
   return (
-    <nav className="hidden border-t border-slate-100/50 py-1 dark:border-white/5 lg:block">
-      <div className="flex items-center justify-between">
-        <ul className="flex flex-nowrap items-center gap-1" ref={desktopDropdownRef}>
+    <nav className="hidden border-t border-slate-100/50 py-2.5 dark:border-white/5 lg:block">
+      <div className="flex items-center justify-end">
+        <ul className="flex flex-nowrap items-center justify-start gap-3 xl:gap-6 mr-6" ref={desktopDropdownRef}>
           {navigationItems.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
             const isOpen = openDesktopDropdown === item.label;
@@ -100,51 +105,64 @@ export function DesktopNav({
           })}
         </ul>
 
-        <div className="flex items-center gap-4">
-          {/* Controls Group */}
-          <div className="flex items-center gap-4 border-r border-slate-200/50 pr-4 dark:border-white/5">
-            {/* Language Switcher */}
-            <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
-              {["id", "en"].map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setLocale(l)}
-                  className={`rounded-full px-3 py-1 text-[10px] font-black uppercase transition-all duration-300 ${locale === l
-                    ? "bg-white text-emerald-700 shadow-sm dark:bg-emerald-600 dark:text-white"
-                    : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
-                    }`}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-
-            {/* Theme Switcher */}
-            <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
-              <button
-                onClick={setLightTheme}
-                className={`rounded-full p-1.5 transition-all duration-300 ${theme === "light" ? "bg-white text-amber-500 shadow-sm" : "text-slate-400 hover:text-slate-600"
-                  }`}
-                aria-label="Light Mode"
-              >
-                <SunIcon className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={setDarkTheme}
-                className={`rounded-full p-1.5 transition-all duration-300 ${theme === "dark" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
-                  }`}
-                aria-label="Dark Mode"
-              >
-                <MoonIcon className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Admin Link / Login */}
-          <AdminLoginButton adminState={adminState} />
+        <div className="flex items-center pl-4 border-l border-slate-200/50 dark:border-white/5">
+          <HeaderSearchForm
+            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+            onSubmit={handleSearchSubmit} onKeyDown={handleSearchKeyDown}
+            onBlur={handleSearchBlur} placeholder={t("header.searchPlaceholder")}
+            buttonLabel={t("common.search")} suggestions={suggestions}
+            showSuggestions={showSuggestions} onSelectSuggestion={handleSuggestionSelect}
+            listboxId="desktop-nav-search-listbox" activeIndex={activeSuggestionIndex}
+            collapsible={true}
+          />
         </div>
       </div>
     </nav>
+  );
+}
+
+export function HeaderControls({ locale, setLocale, theme, setLightTheme, setDarkTheme, adminState }) {
+  return (
+    <div className="hidden lg:flex items-center gap-4">
+      {/* Controls Group */}
+      <div className="flex items-center gap-4 border-r border-slate-200/50 pr-4 dark:border-white/5">
+        {/* Language Switcher */}
+        <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
+          {["id", "en"].map((l) => (
+            <button
+              key={l}
+              onClick={() => setLocale(l)}
+              className={`rounded-full px-3 py-1 text-[10px] font-black uppercase transition-all duration-300 ${locale === l ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"}`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {/* Theme Switcher */}
+        <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
+          <button
+            onClick={setLightTheme}
+            className={`rounded-full p-1.5 transition-all duration-300 ${theme === "light" ? "bg-white text-amber-500 shadow-sm" : "text-slate-400 hover:text-slate-600"
+              }`}
+            aria-label="Light Mode"
+          >
+            <SunIcon className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={setDarkTheme}
+            className={`rounded-full p-1.5 transition-all duration-300 ${theme === "dark" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+              }`}
+            aria-label="Dark Mode"
+          >
+            <MoonIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Admin Link / Login */}
+      <AdminLoginButton adminState={adminState} />
+    </div>
   );
 }
 

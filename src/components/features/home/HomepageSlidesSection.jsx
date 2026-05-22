@@ -66,7 +66,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                     onClick={() => setActiveTab(id)}
                                     className={`relative flex min-w-[60px] flex-col items-center justify-center gap-1 rounded-full py-2.5 transition-all duration-300 z-10 ${isActive
                                         ? "text-white scale-105"
-                                        : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                                        : "text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                                         }`}
                                 >
                                     {isActive && (
@@ -80,7 +80,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                     <div className={`transition-transform duration-300 ${isActive ? "scale-105" : "scale-90"}`}>
                                         <Icon />
                                     </div>
-                                    <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-60"}`}>
+                                    <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-80"}`}>
                                         {label}
                                     </span>
                                 </button>
@@ -114,13 +114,13 @@ export default function HomepageSlidesSection({ slides = [] }) {
                     `}</style>
 
                     {/* 1. KATOLIK (Ujung Kiri) */}
-                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-24 lg:scale-[0.85] lg:opacity-60 hover:opacity-100 hover:scale-90 ${activeTab === "katolik" ? "active" : "inactive lg:flex"}`}>
+                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-24 lg:scale-[0.85] lg:opacity-100 hover:scale-90 ${activeTab === "katolik" ? "active" : "inactive lg:flex"}`}>
                         <div className="absolute -inset-4 -z-10 rounded-[3rem] bg-gradient-to-b from-purple-100/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-purple-950/20" />
                         <div className="relative flex flex-col">
                             <SectionHeader
                                 label={t("home.katolikSection.subtitle")}
                                 title={t("home.katolikSection.title")}
-                                color="text-purple-700 dark:text-purple-300"
+                                color="text-purple-800 dark:text-purple-200"
                             />
                             <motion.div
                                 whileHover={{ y: -6 }}
@@ -133,13 +133,13 @@ export default function HomepageSlidesSection({ slides = [] }) {
                     </div>
 
                     {/* 2. KRISTEN (Kiri Tengah) */}
-                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-12 lg:scale-[0.95] lg:opacity-85 hover:opacity-100 hover:scale-100 ${activeTab === "kristen" ? "active" : "inactive lg:flex"}`}>
+                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-12 lg:scale-[0.95] lg:opacity-100 hover:scale-100 ${activeTab === "kristen" ? "active" : "inactive lg:flex"}`}>
                         <div className="absolute -inset-4 -z-10 rounded-[3rem] bg-gradient-to-b from-blue-100/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-blue-950/20" />
                         <div className="relative flex flex-col">
                             <SectionHeader
                                 label={t("home.christianSection.subtitle")}
                                 title={t("home.christianSection.title")}
-                                color="text-blue-700 dark:text-blue-300"
+                                color="text-blue-800 dark:text-blue-200"
                             />
                             <motion.div
                                 whileHover={{ y: -6 }}
@@ -179,14 +179,13 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                                     fill
                                                     sizes="(max-width: 1024px) 100vw, 40vw"
                                                     className="object-cover lg:object-contain"
-                                                    priority
                                                 />
                                             </motion.div>
                                         </AnimatePresence>
 
                                         {sliderSlides.length > 1 && (
                                             <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between">
-                                                <div className="rounded-full bg-black/55 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur">
+                                                <div className="rounded-full bg-black/75 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur">
                                                     {safeActiveIndex + 1} / {sliderSlides.length}
                                                 </div>
 
@@ -258,13 +257,13 @@ export default function HomepageSlidesSection({ slides = [] }) {
                     </div>
 
                     {/* 4. ISLAM (Kanan Tengah) */}
-                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-12 lg:scale-[0.95] lg:opacity-85 hover:opacity-100 hover:scale-100 ${activeTab === "islam" ? "active" : "inactive lg:flex"}`}>
+                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-12 lg:scale-[0.95] lg:opacity-100 hover:scale-100 ${activeTab === "islam" ? "active" : "inactive lg:flex"}`}>
                         <div className="absolute -inset-4 -z-10 rounded-[3rem] bg-gradient-to-b from-amber-100/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-amber-950/20" />
                         <div className="relative flex flex-col">
                             <SectionHeader
                                 label={t("home.islamicSection.subtitle")}
                                 title={t("home.islamicSection.title")}
-                                color="text-amber-700 dark:text-amber-300"
+                                color="text-amber-800 dark:text-amber-200"
                                 align="right"
                             />
                             <motion.div
@@ -278,13 +277,13 @@ export default function HomepageSlidesSection({ slides = [] }) {
                     </div>
 
                     {/* 5. HINDU (Ujung Kanan) */}
-                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-24 lg:scale-[0.85] lg:opacity-60 hover:opacity-100 hover:scale-90 ${activeTab === "hindu" ? "active" : "inactive lg:flex"}`}>
+                    <div className={`mobile-tab-content group relative flex flex-col lg:col-span-1 transition-all duration-700 lg:mt-24 lg:scale-[0.85] lg:opacity-100 hover:scale-90 ${activeTab === "hindu" ? "active" : "inactive lg:flex"}`}>
                         <div className="absolute -inset-4 -z-10 rounded-[3rem] bg-gradient-to-b from-rose-100/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-rose-950/20" />
                         <div className="relative flex flex-col">
                             <SectionHeader
                                 label={t("home.hinduSection.subtitle")}
                                 title={t("home.hinduSection.title")}
-                                color="text-rose-700 dark:text-rose-300"
+                                color="text-rose-800 dark:text-rose-200"
                                 align="right"
                             />
                             <motion.div

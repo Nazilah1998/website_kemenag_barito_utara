@@ -146,6 +146,7 @@ export default function ApaKataMerekaSection({ testimonials }) {
                             {activeIndex > 0 ? (
                                 <button
                                     onClick={prevPerson}
+                                    aria-label="Testimoni sebelumnya"
                                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-slate-200/50 text-slate-400 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none dark:hover:bg-emerald-500"
                                 >
                                     <ChevronLeftIcon />
@@ -166,6 +167,7 @@ export default function ApaKataMerekaSection({ testimonials }) {
                             {activeIndex < data.length - 1 ? (
                                 <button
                                     onClick={nextPerson}
+                                    aria-label="Testimoni berikutnya"
                                     className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-slate-200/50 text-slate-400 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none dark:hover:bg-emerald-500"
                                 >
                                     <ChevronRightIcon />

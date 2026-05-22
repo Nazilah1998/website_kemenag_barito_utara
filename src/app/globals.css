@@ -41,7 +41,7 @@
   --footer-badge-bg: rgba(255, 255, 255, 0.72);
   --footer-badge-border: rgba(148, 163, 184, 0.24);
   --footer-badge-accent-bg: rgba(16, 185, 129, 0.12);
-  --footer-badge-accent-fg: #047857;
+  --footer-badge-accent-fg: #065f46;
   --footer-badge-accent-border: rgba(16, 185, 129, 0.22);
 
   --section-contrast-bg: #0f172a;
@@ -351,7 +351,7 @@ summary {
 }
 
 .theme-primary-button {
-  background: var(--primary);
+  background: var(--primary-strong);
   color: var(--primary-fg);
   box-shadow: 0 12px 30px rgba(5, 150, 105, 0.22);
 }

@@ -119,8 +119,9 @@ if (isProd) {
 
 const nextConfig = {
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns,
-    qualities: [100, 70, 75, 85],
+    qualities: [60, 70, 75, 85, 100],
   },
   allowedDevOrigins: ["127.0.0.1"],
   async headers() {

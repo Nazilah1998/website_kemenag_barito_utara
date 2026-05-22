@@ -11,7 +11,7 @@ const getCachedLatestBeritaHome = unstable_cache(
           { published_at: 'desc' },
           { created_at: 'desc' }
         ],
-        take: 12
+        take: 6
       });
 
       return (data || []).map(normalizeBerita);
@@ -27,6 +27,35 @@ const getCachedLatestBeritaHome = unstable_cache(
   },
 );
 
+const getCachedPopularBeritaHome = unstable_cache(
+  async () => {
+    try {
+      const data = await prisma.berita.findMany({
+        where: { is_published: true },
+        orderBy: [
+          { views: 'desc' },
+          { published_at: 'desc' }
+        ],
+        take: 6
+      });
+
+      return (data || []).map(normalizeBerita);
+    } catch (error) {
+      console.error("getCachedPopularBeritaHome error:", error);
+      return [];
+    }
+  },
+  ["home-popular-berita"],
+  {
+    revalidate: 300,
+    tags: ["home-popular-berita"],
+  },
+);
+
 export async function getLatestBeritaHome() {
   return getCachedLatestBeritaHome();
+}
+
+export async function getPopularBeritaHome() {
+  return getCachedPopularBeritaHome();
 }

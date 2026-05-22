@@ -127,6 +127,7 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
           <button
             onClick={prevSlide}
             disabled={activeIndex === 0}
+            aria-label="Galeri sebelumnya"
             className={`flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 ${activeIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
           >
             <ChevronLeftIcon className="h-4 w-4" />
@@ -144,6 +145,7 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
           <button
             onClick={nextSlide}
             disabled={activeIndex === latestGaleri.length - 1}
+            aria-label="Galeri berikutnya"
             className={`flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 ${activeIndex === latestGaleri.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
           >
             <ChevronRightIcon className="h-4 w-4" />
@@ -240,7 +242,6 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 16vw"
           className="object-cover transition duration-700 group-hover:scale-110"
-          unoptimized
         />
         {/* Multi-layered Overlays */}
         <div className={`absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent transition-opacity duration-500 ${isActive ? 'opacity-90' : 'opacity-70 lg:group-hover:opacity-90'}`} />
@@ -273,7 +274,7 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
                 e.stopPropagation();
                 onPreview();
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 py-2.5 text-[9px] font-black uppercase tracking-widest text-white transition-all duration-300 hover:bg-emerald-500 shadow-lg shadow-emerald-900/20"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-emerald-700 py-2.5 text-[9px] font-black uppercase tracking-widest text-white transition-all duration-300 hover:bg-emerald-600 shadow-lg shadow-emerald-900/20"
             >
               {t("gallery.preview") || "PRATINJAU"}
             </button>

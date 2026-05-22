@@ -48,7 +48,7 @@ export function BeritaDetailNavigation({ adjacent, relatedItems }) {
               {t("newsDetail.relatedNews")}
             </h2>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {relatedItems.map((item) => (
               <RelatedCard key={item.id} item={item} t={t} locale={locale} />
             ))}

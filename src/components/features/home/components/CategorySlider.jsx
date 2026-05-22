@@ -27,7 +27,7 @@ export default function CategorySlider({ slides = [], fallbackTitle }) {
                         <path d="M21 15l-5-5L5 21" />
                     </svg>
                 </div>
-                <p className="mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Segera Hadir</p>
+                <p className="mt-4 text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Segera Hadir</p>
             </div>
         );
     }

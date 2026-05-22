@@ -3,7 +3,7 @@
 import React from "react";
 import { useHeader } from "@/hooks/useHeader";
 import { HeaderSearchForm } from "./HeaderSearchForm";
-import { DesktopNav } from "./DesktopNav";
+import { DesktopNav, HeaderControls } from "./DesktopNav";
 import { MobileNav } from "./MobileNav";
 import { HeaderLogo, MobileMenuToggle } from "./HeaderUI";
 
@@ -17,28 +17,28 @@ export default function Header() {
         <div className="flex items-center justify-between py-2.5 lg:py-4">
           <HeaderLogo />
 
-          <div className="mx-8 hidden max-w-sm flex-1 lg:block">
-            <HeaderSearchForm
-              value={h.searchQuery} onChange={(e) => h.setSearchQuery(e.target.value)}
-              onSubmit={h.handleSearchSubmit} onKeyDown={h.handleSearchKeyDown}
-              onBlur={h.handleSearchBlur} placeholder={h.t("header.searchPlaceholder")}
-              buttonLabel={h.t("common.search")} suggestions={h.suggestions}
-              showSuggestions={h.showSuggestions} onSelectSuggestion={h.handleSuggestionSelect}
-              listboxId="desktop-search-listbox" activeIndex={h.activeSuggestionIndex}
-            />
-          </div>
 
-          <MobileMenuToggle isOpen={h.isMobileMenuOpen} onToggle={h.toggleMobileMenu} />
+
+          <div className="flex items-center gap-4">
+            <HeaderControls 
+              locale={h.locale} setLocale={h.setLocale} 
+              theme={h.theme} setLightTheme={h.setLightTheme} setDarkTheme={h.setDarkTheme} 
+              adminState={h.adminState} 
+            />
+            <MobileMenuToggle isOpen={h.isMobileMenuOpen} onToggle={h.toggleMobileMenu} />
+          </div>
         </div>
 
         {/* Desktop Navigation Row */}
         <DesktopNav
           navigationItems={h.navigationItems} pathname={h.pathname}
           openDesktopDropdown={h.openDesktopDropdown} toggleDesktopDropdown={h.toggleDesktopDropdown}
-          setOpenDesktopDropdown={h.setOpenDesktopDropdown} locale={h.locale}
-          setLocale={h.setLocale} theme={h.theme}
-          setLightTheme={h.setLightTheme} setDarkTheme={h.setDarkTheme}
-          adminState={h.adminState} desktopDropdownRef={h.desktopDropdownRef}
+          setOpenDesktopDropdown={h.setOpenDesktopDropdown} desktopDropdownRef={h.desktopDropdownRef}
+          searchQuery={h.searchQuery} setSearchQuery={h.setSearchQuery}
+          handleSearchSubmit={h.handleSearchSubmit} handleSearchKeyDown={h.handleSearchKeyDown}
+          handleSearchBlur={h.handleSearchBlur} t={h.t}
+          suggestions={h.suggestions} showSuggestions={h.showSuggestions}
+          handleSuggestionSelect={h.handleSuggestionSelect} activeSuggestionIndex={h.activeSuggestionIndex}
         />
       </div>
 

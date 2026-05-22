@@ -49,7 +49,7 @@ export default function HomeHeroSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative h-[calc(100vh-140px)] min-h-[600px] max-h-[900px] w-full overflow-hidden bg-slate-950 flex items-center">
+    <section className="relative h-auto lg:h-[calc(100vh-140px)] min-h-[500px] lg:min-h-[600px] max-h-[900px] w-full overflow-hidden bg-slate-950 flex items-center py-16 sm:py-24 lg:py-0">
       {/* 1. LAYERED BACKGROUND SYSTEM */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -57,9 +57,10 @@ export default function HomeHeroSection() {
           alt="Kantor Kementerian Agama Kabupaten Barito Utara"
           fill
           sizes="100vw"
-          quality={100}
+          quality={70}
           className="object-cover opacity-30 mix-blend-luminosity scale-105"
           priority
+          fetchPriority="high"
         />
         {/* Dynamic Gradients */}
         <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/90 to-emerald-950/60" />
@@ -71,7 +72,7 @@ export default function HomeHeroSection() {
       </div>
 
       {/* 2. CONTENT CONTAINER */}
-      <div className="relative z-10 w-full px-6 py-8 sm:px-10 lg:px-16 xl:px-24">
+      <div className="relative z-10 w-full px-6 py-12 sm:px-10 sm:py-16 lg:py-8 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1600px] items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
 
           {/* Left Column: Text & Stats */}
@@ -98,7 +99,7 @@ export default function HomeHeroSection() {
             {/* Title */}
             <motion.h1
               variants={itemVariants}
-              className="mt-6 max-w-3xl text-3xl font-black leading-[1.1] tracking-tight text-white md:text-4xl lg:text-5xl xl:text-6xl"
+              className="mt-6 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl"
             >
               {t("home.hero.title").split('.').map((part, i) => (
                 <span key={i} className={i === 0 ? "block" : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"}>
@@ -123,7 +124,7 @@ export default function HomeHeroSection() {
                 href="https://ptsp.kemenag-baritoutara.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-emerald-600 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition-all hover:bg-emerald-500 hover:shadow-[0_0_20px_-5px_rgba(16,185,129,0.5)]"
+                className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-emerald-700 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition-all hover:bg-emerald-600 hover:shadow-[0_0_20px_-5px_rgba(4,120,87,0.5)]"
               >
                 <span className="relative z-10">{t("home.hero.ctaLayanan")}</span>
                 <ArrowRightIcon className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
@@ -194,7 +195,7 @@ export default function HomeHeroSection() {
       <motion.div
         animate={{ y: [0, 8, 0] }}
         transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30 hidden lg:block"
       >
         <div className="h-8 w-5 rounded-full border-2 border-white/20 p-1">
           <div className="mx-auto h-1.5 w-0.5 rounded-full bg-white" />
