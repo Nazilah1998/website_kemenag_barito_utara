@@ -62,6 +62,7 @@ function buildCsp() {
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
+      "https://us-assets.i.posthog.com",
     ],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     "img-src": ["'self'", "data:", "blob:", "https:"],
@@ -73,6 +74,8 @@ function buildCsp() {
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
+      "https://us.i.posthog.com",
+      "https://us-assets.i.posthog.com",
       supabase,
       wsSupabase,
       r2Endpoint,
@@ -129,6 +132,23 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+    ];
+  },
+  // PostHog reverse proxy — menghindari ad-blocker
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+      {
+        source: "/ingest/decide",
+        destination: "https://us.i.posthog.com/decide",
       },
     ];
   },

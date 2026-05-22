@@ -16,6 +16,7 @@ const VercelSpeedInsights = dynamic(() => import("@/components/layout/VercelSpee
 const PwaRegister = dynamic(() => import("@/components/layout/PwaRegister"));
 const ChatWidget = dynamic(() => import("@/components/features/chat/ChatWidget"));
 const RealtimeSync = dynamic(() => import("@/components/common/RealtimeSync"));
+const PostHogProvider = dynamic(() => import("@/components/layout/PostHogProvider"));
 import JsonLd from "@/components/features/seo/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -114,17 +115,20 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <head>
         <ThemeInitializer />
         <JsonLd
           data={[organizationSchema(), websiteSchema(), navigationSchema()]}
         />
-
-        <Providers>
-          <AppShell>{children}</AppShell>
-          <ChatWidget />
-          <RealtimeSync />
-        </Providers>
+      </head>
+      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+        <PostHogProvider>
+          <Providers>
+            <AppShell>{children}</AppShell>
+            <ChatWidget />
+            <RealtimeSync />
+          </Providers>
+        </PostHogProvider>
 
         <VercelAnalytics />
         <VercelSpeedInsights />
