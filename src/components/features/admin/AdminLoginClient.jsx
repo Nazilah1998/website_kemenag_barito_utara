@@ -74,7 +74,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4 text-center">
-            <Link href="/" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+            <Link href="/beranda" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
               Kembali ke Beranda
             </Link>
           </div>

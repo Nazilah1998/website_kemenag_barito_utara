@@ -42,3 +42,28 @@
 - [ ] 2. Menjadikan skema database lebih disiplin melalui migration terstruktur (`prisma migrate dev`)
 - [ ] 3. Peningkatan aksesibilitas (A11y) untuk keseluruhan halaman publik
 - [ ] 4. Optimasi SEO & Metadata Dinamis pada halaman `/berita` dan `/informasi`
+
+# TODO - Audit Keamanan Admin (Login + Reset/Update Password + Proxy Guard)
+
+- [ ] 1. Perbaiki `src/app/api/admin/reset-password/route.js`
+  - [ ] Hapus branch `action === "reset-password"` (anti bypass token)
+  - [ ] Pastikan endpoint hanya mendukung `verify-email`
+  - [ ] Samakan respons agar tidak memfasilitasi user enumeration
+
+- [ ] 2. Perbaiki `src/app/api/admin/update-password/route.js`
+  - [ ] Tambahkan rate limiting per IP
+  - [ ] Gunakan `env.supabaseUrl/env.supabasePublishableKey`
+  - [ ] Validasi token fail-closed (token invalid => 401)
+  - [ ] Pastikan hanya user dari token yang boleh diupdate
+
+- [ ] 3. Perbaiki `src/proxy.js` (fail-closed untuk admin)
+  - [ ] Jika Supabase Edge client tidak tersedia, jangan skip guard admin
+  - [ ] Tetapkan public paths yang benar untuk flow forgot password (atau paksa require session)
+
+- [ ] 4. Perbaiki fail-open Turnstile di `src/app/api/admin/login/route.js`
+  - [ ] Turnstile verification error => return error (fail-closed)
+
+- [ ] 5. Pengujian minimal via curl (setelah perubahan)
+  - [ ] `/api/admin/reset-password` tanpa token (harus gagal)
+  - [ ] `/api/admin/update-password` dengan token invalid (harus 401)
+  - [ ] Validasi `/admin/*` dan `/api/admin/*` fail-closed saat guard edge tidak tersedia

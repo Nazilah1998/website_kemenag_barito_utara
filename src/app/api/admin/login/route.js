@@ -23,42 +23,59 @@ export async function POST(request) {
 
     // --- VERIFIKASI CLOUDFLARE TURNSTILE (SERVER-SIDE) ---
     try {
-      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          secret: process.env.TURNSTILE_SECRET_KEY,
-          response: turnstileToken,
-        }),
-      });
+      const verifyRes = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            secret: process.env.TURNSTILE_SECRET_KEY,
+            response: turnstileToken,
+          }),
+        },
+      );
       const verifyJson = await verifyRes.json();
 
       if (!verifyJson.success) {
         return apiResponse(
           {
             ok: false,
-            message: "Verifikasi keamanan gagal atau kadaluarsa. Silakan coba lagi.",
+            message:
+              "Verifikasi keamanan gagal atau kadaluarsa. Silakan coba lagi.",
           },
           400,
         );
       }
     } catch (err) {
       console.error("Turnstile Verification Error:", err);
+      return apiResponse(
+        { ok: false, message: "Gagal memverifikasi keamanan. Coba lagi." },
+        429,
+      );
     }
 
     const supabase = await createClient();
 
     // 1. Cek profil untuk status lockout (Menggunakan Prisma)
     const profile = await prisma.profiles.findUnique({
-      where: { email }
+      where: { email },
     });
 
-    if (profile && profile.lockout_until && new Date(profile.lockout_until) > new Date()) {
-      const remainingMinutes = Math.ceil((new Date(profile.lockout_until) - new Date()) / 60000);
-      return apiResponse({
-        ok: false,
-        message: `Akun dikunci karena terlalu banyak percobaan gagal. Silakan coba lagi dalam ${remainingMinutes} menit.`
-      }, 403);
+    if (
+      profile &&
+      profile.lockout_until &&
+      new Date(profile.lockout_until) > new Date()
+    ) {
+      const remainingMinutes = Math.ceil(
+        (new Date(profile.lockout_until) - new Date()) / 60000,
+      );
+      return apiResponse(
+        {
+          ok: false,
+          message: `Akun dikunci karena terlalu banyak percobaan gagal. Silakan coba lagi dalam ${remainingMinutes} menit.`,
+        },
+        403,
+      );
     }
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -70,14 +87,15 @@ export async function POST(request) {
       // 2. Catat kegagalan login
       if (profile) {
         const newAttempts = (profile.failed_login_attempts || 0) + 1;
-        const lockoutUntil = newAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // Kunci 15 menit jika >= 5 kali
-        
+        const lockoutUntil =
+          newAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // Kunci 15 menit jika >= 5 kali
+
         await prisma.profiles.update({
           where: { id: profile.id },
-          data: { 
+          data: {
             failed_login_attempts: newAttempts,
-            lockout_until: lockoutUntil
-          }
+            lockout_until: lockoutUntil,
+          },
         });
       }
 
@@ -94,10 +112,10 @@ export async function POST(request) {
     if (profile && profile.failed_login_attempts > 0) {
       await prisma.profiles.update({
         where: { id: profile.id },
-        data: { 
+        data: {
           failed_login_attempts: 0,
-          lockout_until: null
-        }
+          lockout_until: null,
+        },
       });
     }
 

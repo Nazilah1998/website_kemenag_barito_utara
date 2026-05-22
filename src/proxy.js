@@ -60,7 +60,22 @@ async function guardAdmin(request) {
 
   const response = NextResponse.next({ request });
   const supabase = createEdgeSupabase(request, response);
-  if (!supabase) return null;
+
+  // FAIL-CLOSED:
+  // Jika tidak bisa membuat client Supabase edge (mis. env tidak ada),
+  // maka admin page/admin api harus tetap ditahan.
+  if (!supabase) {
+    if (adminApi) {
+      return NextResponse.json(
+        { message: "Unauthorized.", code: "AUTH_REQUIRED" },
+        {
+          status: 401,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
+    return buildLoginRedirect(request);
+  }
 
   const {
     data: { user },

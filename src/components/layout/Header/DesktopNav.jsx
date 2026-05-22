@@ -224,21 +224,33 @@ function AdminLoginButton({ adminState }) {
                 {/* Top red warning accent */}
                 <div className="h-1.5 w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-600" />
 
-                <div className="p-8">
+                <div className="p-7">
                   {/* Warning Triangle Icon */}
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-                    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7 text-red-600 dark:text-red-400" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30 ring-1 ring-red-100/80 dark:ring-red-900/40">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="h-7 w-7 text-red-600 dark:text-red-400"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                       <line x1="12" y1="9" x2="12" y2="13" />
                       <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                   </div>
 
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                    Peringatan Akses Terbatas
-                  </h3>
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                      Peringatan Akses Terbatas
+                    </h3>
+                  </div>
+
                   <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    Halaman ini hanya diperuntukkan bagi <strong className="text-red-600 dark:text-red-400">Admin Kantor Kemenag Barito Utara</strong>. Apakah Anda benar-benar admin kantor?
+                    Halaman ini hanya dapat diakses oleh <strong className="text-red-600 dark:text-red-400">Admin Kantor Kemenag Barito Utara</strong>.
+                    Apakah Anda admin kantor yang berwenang?
                   </p>
 
                   <div className="mt-7 flex gap-3">
