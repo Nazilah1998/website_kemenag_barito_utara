@@ -91,6 +91,7 @@ function buildCsp() {
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
     "form-action": ["'self'"],
+    "worker-src": ["'self'"],
     "upgrade-insecure-requests": [],
   };
 

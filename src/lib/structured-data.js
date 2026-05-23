@@ -20,6 +20,12 @@ export function organizationSchema() {
       width: 512,
       height: 512,
     },
+    image: [
+      `${BASE}/assets/icons/kemenag-512.png`,
+      `${BASE}/assets/images/logo-share.png`,
+      `${BASE}/assets/images/kantor-kemenag.jpg`,
+    ],
+    priceRange: "Gratis",
     description: siteInfo.description,
     email: siteInfo.email,
     telephone: siteInfo.phone,
