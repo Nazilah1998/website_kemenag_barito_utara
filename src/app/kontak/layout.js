@@ -9,11 +9,11 @@ const description =
 export const metadata = {
   title: "Kontak Kami",
   description,
-  alternates: { canonical: "/kontak" },
+  alternates: { canonical: `${siteInfo.siteUrl}/kontak` },
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "/kontak",
+    url: `${siteInfo.siteUrl}/kontak`,
     siteName: siteInfo.shortName,
     title,
     description,

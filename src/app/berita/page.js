@@ -4,6 +4,7 @@ import {
   getAllBerita,
   getAvailableBeritaCategories,
 } from "../../lib/berita";
+import { siteInfo } from "@/data/site";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -49,13 +50,13 @@ export const metadata = {
   description:
     "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
   alternates: {
-    canonical: "/berita",
+    canonical: `${siteInfo.siteUrl}/berita`,
   },
   openGraph: {
     title: "Berita",
     description:
       "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
-    url: "/berita",
+    url: `${siteInfo.siteUrl}/berita`,
     type: "website",
   },
   twitter: {

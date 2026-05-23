@@ -11,12 +11,20 @@ import {
   navigationSchema,
 } from "@/lib/structured-data";
 
-const VercelAnalytics = dynamic(() => import("@/components/layout/VercelAnalytics"));
-const VercelSpeedInsights = dynamic(() => import("@/components/layout/VercelSpeedInsights"));
+const VercelAnalytics = dynamic(
+  () => import("@/components/layout/VercelAnalytics"),
+);
+const VercelSpeedInsights = dynamic(
+  () => import("@/components/layout/VercelSpeedInsights"),
+);
 const PwaRegister = dynamic(() => import("@/components/layout/PwaRegister"));
-const ChatWidget = dynamic(() => import("@/components/features/chat/ChatWidget"));
+const ChatWidget = dynamic(
+  () => import("@/components/features/chat/ChatWidget"),
+);
 const RealtimeSync = dynamic(() => import("@/components/common/RealtimeSync"));
-const PostHogProvider = dynamic(() => import("@/components/layout/PostHogProvider"));
+const PostHogProvider = dynamic(
+  () => import("@/components/layout/PostHogProvider"),
+);
 import JsonLd from "@/components/features/seo/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -42,15 +50,27 @@ export const metadata = {
   publisher: siteInfo.shortName,
   icons: {
     icon: [
-      { url: "/assets/icons/kemenag-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/assets/icons/kemenag-512.png", sizes: "512x512", type: "image/png" },
+      {
+        url: "/assets/icons/kemenag-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/assets/icons/kemenag-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
       { url: "/assets/branding/kemenag.svg", type: "image/svg+xml" },
     ],
     apple: [
-      { url: "/assets/icons/kemenag-192.png", sizes: "192x192", type: "image/png" },
+      {
+        url: "/assets/icons/kemenag-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
     ],
   },
-  alternates: { canonical: "/" },
+  alternates: { canonical: new URL("/", siteInfo.siteUrl).toString() },
   verification: {
     google: "3ZH4iRGfl0Jurquu3gczAWNvE_-NQRDlEERr_ZDwJjA",
   },
@@ -64,7 +84,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
-    url: "/",
+    url: new URL("/", siteInfo.siteUrl).toString(),
     siteName: "Kemenag Barito Utara",
     title: `${siteInfo.name}`,
     description: siteInfo.description,
@@ -111,7 +131,6 @@ export const viewport = {
   initialScale: 1,
 };
 
-
 export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
@@ -121,7 +140,10 @@ export default function RootLayout({ children }) {
           data={[organizationSchema(), websiteSchema(), navigationSchema()]}
         />
       </head>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${inter.className} antialiased`}
+        suppressHydrationWarning
+      >
         <PostHogProvider>
           <Providers>
             <AppShell>{children}</AppShell>

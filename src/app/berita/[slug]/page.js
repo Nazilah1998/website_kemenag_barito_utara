@@ -73,6 +73,7 @@ export async function generateMetadata({ params }) {
     180,
   );
   const url = `/berita/${berita.slug}`;
+  const canonicalUrl = `${siteInfo.siteUrl}${url}`;
   const image = berita.coverImage || `${siteInfo.siteUrl}${siteInfo.logoSrc}`;
   const publishedTime =
     berita.publishedAt || berita.isoDate || berita.createdAt;
@@ -81,11 +82,11 @@ export async function generateMetadata({ params }) {
   return {
     title: berita.title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       type: "article",
       locale: "id_ID",
-      url,
+      url: canonicalUrl,
       siteName: siteInfo.shortName,
       title: berita.title,
       description,
