@@ -22,9 +22,6 @@ const ChatWidget = dynamic(
   () => import("@/components/features/chat/ChatWidget"),
 );
 const RealtimeSync = dynamic(() => import("@/components/common/RealtimeSync"));
-const PostHogProvider = dynamic(
-  () => import("@/components/layout/PostHogProvider"),
-);
 import JsonLd from "@/components/features/seo/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -70,7 +67,6 @@ export const metadata = {
       },
     ],
   },
-  alternates: { canonical: new URL("/", siteInfo.siteUrl).toString() },
   verification: {
     google: "3ZH4iRGfl0Jurquu3gczAWNvE_-NQRDlEERr_ZDwJjA",
   },
@@ -144,13 +140,11 @@ export default function RootLayout({ children }) {
         className={`${inter.className} antialiased`}
         suppressHydrationWarning
       >
-        <PostHogProvider>
-          <Providers>
-            <AppShell>{children}</AppShell>
-            <ChatWidget />
-            <RealtimeSync />
-          </Providers>
-        </PostHogProvider>
+        <Providers>
+          <AppShell>{children}</AppShell>
+          <ChatWidget />
+          <RealtimeSync />
+        </Providers>
 
         <VercelAnalytics />
         <VercelSpeedInsights />

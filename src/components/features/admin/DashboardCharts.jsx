@@ -151,7 +151,12 @@ function RecentActivity({ items = [] }) {
   );
 }
 
-export default function DashboardCharts({ trend, topBerita, recentActivity }) {
+export default function DashboardCharts({
+  trend,
+  topBerita,
+  recentActivity,
+  showRecentActivity = false,
+}) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/80">
@@ -175,14 +180,16 @@ export default function DashboardCharts({ trend, topBerita, recentActivity }) {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3 dark:border-slate-800 dark:bg-slate-900/80">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Aktivitas Terbaru
-        </h2>
-        <div className="mt-4">
-          <RecentActivity items={recentActivity} />
+      {showRecentActivity && (
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3 dark:border-slate-800 dark:bg-slate-900/80">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Aktivitas Terbaru
+          </h2>
+          <div className="mt-4">
+            <RecentActivity items={recentActivity} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

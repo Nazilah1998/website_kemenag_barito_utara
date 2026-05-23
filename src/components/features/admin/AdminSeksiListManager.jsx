@@ -2,17 +2,39 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Briefcase, User, Users, ChevronRight, Loader2 } from "lucide-react";
-import { FloatingFeedback } from "./slides/SlidesUI";
+import {
+  Briefcase,
+  User,
+  Users,
+  ChevronRight,
+  Loader2,
+  Trash2,
+} from "lucide-react";
+import { FloatingFeedback, DeleteConfirmModal } from "./slides/SlidesUI";
 
 export default function AdminSeksiListManager() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ open: false, id: null, judul: "" });
 
   useEffect(() => {
-    fetchSeksi();
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/session");
+        if (res.ok) {
+          const data = await res.json();
+          setIsSuperAdmin(data?.permissions?.role === "super_admin");
+        }
+      } catch (e) {
+        console.warn("Failed to load admin session:", e);
+      } finally {
+        fetchSeksi();
+      }
+    })();
   }, []);
 
   const fetchSeksi = async () => {
@@ -36,6 +58,44 @@ export default function AdminSeksiListManager() {
     }
   };
 
+  const handleDelete = (id, judul) => {
+    if (!id) return;
+    setConfirmModal({ open: true, id, judul: judul || "-" });
+  };
+
+  const handleConfirmDelete = async () => {
+    const { id } = confirmModal;
+    setConfirmModal({ open: false, id: null, judul: "" });
+
+    setDeletingId(id);
+    setError("");
+    setMessage("");
+
+    try {
+      const res = await fetch(`/api/admin/seksi/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Gagal menghapus seksi.");
+      }
+
+      setMessage(data?.message || "Seksi berhasil dihapus.");
+      await fetchSeksi();
+    } catch (err) {
+      console.error(err);
+      setError(err?.message || "Gagal menghapus seksi.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmModal({ open: false, id: null, judul: "" });
+  };
+
   return (
     <section className="space-y-12">
       <FloatingFeedback
@@ -45,6 +105,15 @@ export default function AdminSeksiListManager() {
           setMessage("");
           setError("");
         }}
+      />
+
+      <DeleteConfirmModal
+        open={confirmModal.open}
+        loading={deletingId === confirmModal.id}
+        title="Hapus Seksi / Bidang?"
+        description={`Anda akan menghapus seksi "${confirmModal.judul}" beserta seluruh data pegawai di dalamnya. Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
 
       {/* Header Section */}
@@ -198,13 +267,27 @@ export default function AdminSeksiListManager() {
                       </span>
                     </td>
                     <td className="px-6 py-6">
-                      <Link
-                        href={`/admin/seksi/${item.id}`}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 active:scale-95"
-                      >
-                        <span>Kelola Seksi</span>
-                        <ChevronRight className="h-3.5 w-3.5 stroke-[3]" />
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                          href={`/admin/seksi/${item.id}`}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 active:scale-95"
+                        >
+                          <span>Kelola Seksi</span>
+                          <ChevronRight className="h-3.5 w-3.5 stroke-[3]" />
+                        </Link>
+
+                        {isSuperAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item.id, item.judul)}
+                            disabled={deletingId === item.id}
+                            className="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-rose-600/20 transition-all hover:bg-rose-700 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            {deletingId === item.id ? "Menghapus..." : "Hapus"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

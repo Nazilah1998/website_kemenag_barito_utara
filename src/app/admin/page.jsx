@@ -38,7 +38,10 @@ export default async function AdminDashboardPage({ searchParams }) {
     (!permissionContext?.approved || !permissionContext?.isActive);
 
   const user = session.profile;
-  const stats = await getDashboardStats({ days: 14 });
+  const stats = await getDashboardStats({
+    days: 14,
+    isSuperAdmin: session?.role === "super_admin",
+  });
 
   const summary = stats.summary || {
     totalBerita: 0,
@@ -153,6 +156,7 @@ export default async function AdminDashboardPage({ searchParams }) {
           trend={stats.trend}
           topBerita={stats.topBerita}
           recentActivity={stats.recentActivity}
+          showRecentActivity={session?.role === "super_admin"}
         />
       </div>
     </div>

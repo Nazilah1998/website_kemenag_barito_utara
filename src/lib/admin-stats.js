@@ -21,7 +21,10 @@ function daysAgo(n) {
   return d;
 }
 
-export async function getDashboardStats({ days = 14 } = {}) {
+export async function getDashboardStats({
+  days = 14,
+  isSuperAdmin = false,
+} = {}) {
   try {
     const since = daysAgo(days - 1);
 
@@ -33,7 +36,7 @@ export async function getDashboardStats({ days = 14 } = {}) {
       totalKontak,
       kontakBaru,
       totalReportDocs,
-      recentActivity
+      recentActivity,
     ] = await Promise.all([
       // Data Berita
       prisma.berita.findMany({
@@ -44,29 +47,31 @@ export async function getDashboardStats({ days = 14 } = {}) {
           is_published: true,
           published_at: true,
           views: true,
-          created_at: true
+          created_at: true,
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: "desc" },
       }),
       // Counter lainnya
       prisma.homepage_slides.count(),
       prisma.galeri.count(),
       prisma.kontak_pesan.count(),
-      prisma.kontak_pesan.count({ where: { status: 'baru' } }),
+      prisma.kontak_pesan.count({ where: { status: "baru" } }),
       prisma.report_documents.count({ where: { is_published: true } }),
-      // Aktivitas Audit Log
-      prisma.admin_audit_log.findMany({
-        take: 8,
-        orderBy: { created_at: 'desc' },
-        select: {
-          id: true,
-          action: true,
-          entity: true,
-          summary: true,
-          actor_email: true,
-          created_at: true
-        }
-      })
+      // Aktivitas Audit Log (hanya untuk super admin)
+      isSuperAdmin
+        ? prisma.admin_audit_log.findMany({
+            take: 8,
+            orderBy: { created_at: "desc" },
+            select: {
+              id: true,
+              action: true,
+              entity: true,
+              summary: true,
+              actor_email: true,
+              created_at: true,
+            },
+          })
+        : Promise.resolve([]),
     ]);
 
     const totalBerita = beritaList.length;
@@ -100,8 +105,13 @@ export async function getDashboardStats({ days = 14 } = {}) {
       count,
     }));
 
-    // Top 5 berita berdasarkan views.
-    const topBerita = [...beritaList]
+    // Top 5 berita berdasarkan views, mengikuti rentang `days` (konsisten dengan trend/recent7).
+    const beritaPublishedInRange = beritaList.filter((b) => {
+      const d = safeDate(b.published_at);
+      return d && d >= since;
+    });
+
+    const topBerita = [...beritaPublishedInRange]
       .sort((a, b) => Number(b.views || 0) - Number(a.views || 0))
       .slice(0, 5)
       .map((b) => ({

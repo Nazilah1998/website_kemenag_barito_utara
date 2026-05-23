@@ -54,6 +54,8 @@ export function EditorFilters({
           <SearchIcon />
         </span>
         <input
+          id="editor-search"
+          name="search"
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}

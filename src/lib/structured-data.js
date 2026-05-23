@@ -16,11 +16,10 @@ export function organizationSchema() {
     url: `${BASE}/`,
     logo: {
       "@type": "ImageObject",
-      url: `${BASE}/kemenag-512.png`,
+      url: `${BASE}/assets/icons/kemenag-512.png`,
       width: 512,
       height: 512,
     },
-    image: `${BASE}/kantor-kemenag.jpg`,
     description: siteInfo.description,
     email: siteInfo.email,
     telephone: siteInfo.phone,
@@ -123,7 +122,7 @@ export function newsArticleSchema(berita, { canonicalUrl } = {}) {
       name: siteInfo.name,
       logo: {
         "@type": "ImageObject",
-        url: `${BASE}/kemenag-512.png`,
+        url: `${BASE}/assets/icons/kemenag-512.png`,
         width: 512,
         height: 512,
       },
