@@ -33,21 +33,26 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 
 ## Architecture
 - **Alias**: `@/*` → `./src/*` (jsconfig.json + vitest.config.mjs)
-- **Root layout**: `src/app/layout.js` — includes ChatWidget, RealtimeSync, Providers
+- **Root layout**: `src/app/layout.js` — includes ChatWidget, RealtimeSync, Providers, JsonLd structured data
 - **Entrypoints**: `src/app/page.js` (home), `src/app/admin/` (14 sub-routes)
-- **API routes**: `src/app/api/` (12 public dirs); admin APIs under `src/app/api/admin/` (19 entries)
+- **API routes**: `src/app/api/` (12 public dirs); admin APIs under `src/app/api/admin/` (18 entries incl. audit, berita, dashboard, editors, galeri, galeri-berita, halaman, homepage-slides, laporan, login, logout, my-permissions, pesan, register-editor, reset-password, seksi, session, update-password)
 - **Prisma client**: `src/lib/prisma.js` (singleton, `prisma/adapter-pg` pool via `pg.Pool`, `'server-only'`)
 - **Env validation**: `src/lib/env.js` — checks `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - **API responses** MUST use `apiResponse()` from `src/lib/prisma-helpers.js` (BigInt serialization)
 - **Audit log**: `recordAudit()` / `listAudit()` / `deleteAudit()` from `src/lib/audit.js` — auto-log admin CRUD
 - **Admin auth guard**: `validateAdmin()` from `src/lib/cms-utils.js` (role/permission check in API routes)
 - **Rate limit**: `rateLimit()` from `src/lib/rate-limit.js` — Upstash Redis or in-memory Map fallback
+- **SEO structured data**: `src/lib/structured-data.js` — `organizationSchema()`, `websiteSchema()`, `newsArticleSchema()`, `breadcrumbSchema()`, `contactPageSchema()`, `navigationSchema()`
 
 ## UI / Layout
 - Every public page MUST use `<PageBanner />` from `src/components/common/PageBanner.jsx` at top
 - **DO NOT** use `max-w-*` wrappers — use `w-full px-6 sm:px-10 lg:px-16 xl:px-20`
 - Chatbot AI widget: `src/components/features/chat/ChatWidget.js`
 - CSS: Tailwind v4 (`@import "tailwindcss"` in `globals.css`; `postcss.config.mjs` uses `@tailwindcss/postcss`)
+- **Shared Admin UI components** in `src/components/features/admin/slides/SlidesUI.jsx`:
+  - `<FloatingFeedback />` — floating toast (success/error)
+  - `<DeleteConfirmModal />` — premium delete confirmation modal — **ALWAYS use this instead of `window.confirm()`**
+  - `<StatCard />`, `<StatusPill />`, `<ActionIconButton />`, `<ToggleSwitch />`, `<SlidePagination />`
 
 ## Database
 - Prisma ORM only — never raw SQL
@@ -60,7 +65,18 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 ## Testing
 - Vitest: happy-dom, `@testing-library/jest-dom/vitest`, `next/navigation` mocked (see `vitest.setup.js`)
 - Playwright: single project (chromium), base URL `http://127.0.0.1:3000`, auto-starts dev server
-- 7 unit test files in `tests/`; 1 E2E spec in `tests/e2e/`
+- 7 unit test files in `tests/`: `admin-laporan-manager`, `laporan-admin-reducer`, `laporan-admin-utils`, `permissions`, `rate-limit`, `structured-data`, `validation`
+- 1 E2E spec in `tests/e2e/`
+
+## SEO & PWA
+- JSON-LD injected at root layout via `<JsonLd />` from `src/components/features/seo/JsonLd.jsx`
+- Active schemas: `organizationSchema` (GovernmentOrganization + GovernmentOffice) + `websiteSchema` + `navigationSchema`
+- Organization schema includes: `logo` (`/assets/icons/kemenag-512.png`), `image` array (logo + logo-share + kantor photo), `priceRange: "Gratis"`
+- Google Rich Results Test: **2 valid items — Organization + Local businesses** (0 errors, 0 warnings)
+- Sitemap: `src/app/sitemap.js` (dynamic — static routes + berita from DB, revalidate 300s)
+- Robots: `src/app/robots.js` (disallow: /admin, /api/, /auth/, /login, /debug-error)
+- PWA: `/public/sw.js` (cache-first static, network-first navigation), `/public/manifest.webmanifest`
+- CSP includes `worker-src 'self'` to allow Service Worker registration
 
 ## Environment
 - `.env*` files are gitignored — create `.env.local` from scratch
@@ -68,12 +84,15 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - AI keys: `GEMINI_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`
 - Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`
 - R2: `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_ENDPOINT`, `CLOUDFLARE_R2_BUCKET_NAME`
-- Optional: `NEXT_PUBLIC_SITE_URL` (defaults to `http://localhost:3000`), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (fallback to `ANON_KEY`)
+- Optional: `NEXT_PUBLIC_SITE_URL` (defaults to `https://baritoutara.kemenag.go.id`), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (fallback to `ANON_KEY`)
 - Optional rate limit: `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (in-memory used if absent)
 
 ## Notes
 - ESLint: flat config (`eslint.config.mjs`), `eslint-config-next/core-web-vitals`
-- Security headers (CSP, HSTS) configured in `next.config.mjs`
+- Security headers (CSP, HSTS, X-Frame-Options, Referrer-Policy) configured in `next.config.mjs`
+- CSP includes `worker-src 'self'` for PWA Service Worker support
 - Prisma separate config: `prisma.config.js` (uses `DIRECT_URL` || `DATABASE_URL`)
 - `prisma generate` runs automatically as part of `npm run build`
+- Root canonical removed from layout.js — set canonical per-page only (homepage: `src/app/page.js`)
+- Google Search Console: verified, indexing requested
 - Dev by Muhammad Nazilah, S.E.
