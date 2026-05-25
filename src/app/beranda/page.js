@@ -19,6 +19,9 @@ export const revalidate = 300;
 export const metadata = {
   title: "Kementerian Agama Kabupaten Barito Utara",
   description: siteInfo.description,
+  alternates: {
+    canonical: siteInfo.siteUrl.replace(/\/$/, "") + "/beranda",
+  },
 };
 
 function SectionDivider() {

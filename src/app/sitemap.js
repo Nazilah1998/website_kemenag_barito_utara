@@ -9,7 +9,8 @@ export default async function sitemap() {
   const now = new Date();
 
   const staticRoutes = [
-    { path: "/", changeFrequency: "weekly", priority: 1.0 },
+    { path: "/", changeFrequency: "weekly", priority: 0.5 },
+    { path: "/beranda", changeFrequency: "weekly", priority: 1.0 },
     { path: "/berita", changeFrequency: "daily", priority: 0.9 },
     { path: "/profil", changeFrequency: "monthly", priority: 0.8 },
     { path: "/profil/sejarah", changeFrequency: "yearly", priority: 0.5 },
