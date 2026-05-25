@@ -1,5 +1,5 @@
 import { apiResponse } from "@/lib/prisma-helpers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateAdmin } from "@/lib/cms-utils";
 import {
@@ -86,6 +86,9 @@ function revalidateGaleriPaths(slug = "") {
   revalidatePath("/galeri");
   revalidatePath("/admin");
   revalidatePath("/admin/berita");
+  revalidateTag("home-latest-berita");
+  revalidateTag("home-popular-berita");
+  revalidateTag("home-latest-galeri-v2");
 
   if (slug) {
     revalidatePath(`/berita/${slug}`);

@@ -3,6 +3,7 @@ import { validateAdmin } from "@/lib/cms-utils";
 import { uploadBase64ImageToSupabase } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import prisma from "@/lib/prisma";
+import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ function toNumber(value, fallback = 0) {
 }
 
 export async function POST(request, context) {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({ permission: PERMISSIONS.SEKSI_MANAGE });
   if (!auth.ok) return auth.response;
 
   try {

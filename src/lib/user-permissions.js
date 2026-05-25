@@ -17,7 +17,6 @@ export async function getUserPermissionContext({
   const normalizedRole = String(role || "")
     .trim()
     .toLowerCase();
-  const basePermissions = new Set(getRolePermissions(normalizedRole));
 
   if (!userId) {
     return {
@@ -32,26 +31,12 @@ export async function getUserPermissionContext({
       permissions: [],
     };
   }
-
   if (normalizedRole === ROLES.SUPER_ADMIN) {
+    const basePermissions = new Set(getRolePermissions(normalizedRole));
     return {
       role: normalizedRole,
       email,
       isSuperAdmin: true,
-      isAdmin: true,
-      isEditor: true,
-      isActive: true,
-      approved: true,
-      requestStatus: "approved",
-      permissions: [...basePermissions],
-    };
-  }
-
-  if (normalizedRole === ROLES.ADMIN) {
-    return {
-      role: normalizedRole,
-      email,
-      isSuperAdmin: false,
       isAdmin: true,
       isEditor: true,
       isActive: true,
@@ -150,10 +135,6 @@ export async function requirePermission(
   }
 
   if (permissionContext.isSuperAdmin) {
-    return { session, permissionContext };
-  }
-
-  if (session?.role === ROLES.ADMIN) {
     return { session, permissionContext };
   }
 

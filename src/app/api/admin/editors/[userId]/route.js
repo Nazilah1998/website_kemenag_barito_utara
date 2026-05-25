@@ -4,7 +4,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-const SUPER_ADMIN_EMAIL = "nazilahmuhammad1998@gmail.com";
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "";
 
 export async function PATCH(request, context) {
   try {

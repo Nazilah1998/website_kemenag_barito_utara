@@ -2,8 +2,7 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import ProfilPejabatUI from "@/components/features/informasi/ProfilPejabatUI";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 600;
 
 export const metadata = {
   title: "Profil Pejabat",

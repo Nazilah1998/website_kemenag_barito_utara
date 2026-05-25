@@ -1,8 +1,6 @@
 import { useState } from "react";
 
 export function useDocumentActions() {
-  const [openDocId, setOpenDocId] = useState(null);
-  const [failedPreviewById, setFailedPreviewById] = useState({});
   const [isDownloading, setIsDownloading] = useState(null);
 
   const handleDownload = async (url, fileName) => {
@@ -30,26 +28,8 @@ export function useDocumentActions() {
     }
   };
 
-  const togglePreview = (docId) => {
-    if (openDocId === docId) {
-      setOpenDocId(null);
-    } else {
-      setFailedPreviewById((prev) => ({ ...prev, [docId]: false }));
-      setOpenDocId(docId);
-    }
-  };
-
-  const setFailedPreview = (docId, state) => {
-    setFailedPreviewById((prev) => ({ ...prev, [docId]: state }));
-  };
-
   return {
-    openDocId,
-    setOpenDocId,
-    failedPreviewById,
     isDownloading,
     handleDownload,
-    togglePreview,
-    setFailedPreview,
   };
 }

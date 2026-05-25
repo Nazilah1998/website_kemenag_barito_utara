@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getNavigationItems } from "../data/navigation";
 import { useLanguage } from "../context/LanguageContext";
@@ -22,17 +22,18 @@ export function useHeader() {
   const [openMobileDropdown, setOpenMobileDropdown] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const deferredQuery = useDeferredValue(searchQuery);
 
   const desktopDropdownRef = useRef(null);
 
   const suggestions = useMemo(() => {
-    const query = searchQuery.trim();
+    const query = deferredQuery.trim();
     if (!query) return [];
     return searchSite(query).slice(0, 5);
-  }, [searchQuery]);
+  }, [deferredQuery]);
 
   const showSuggestions =
-    searchQuery.trim().length > 0 && suggestions.length > 0;
+    deferredQuery.trim().length > 0 && suggestions.length > 0;
 
   function setLightTheme() {
     if (theme === "dark") toggleTheme();

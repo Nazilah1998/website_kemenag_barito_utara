@@ -2,10 +2,12 @@ import { apiResponse } from "@/lib/prisma-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import prisma from "@/lib/prisma";
 
+import { PERMISSIONS } from "@/lib/permissions";
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({ permission: PERMISSIONS.SEKSI_MANAGE });
   if (!auth.ok) return auth.response;
 
   try {

@@ -1,17 +1,20 @@
+import { unstable_cache } from "next/cache";
+import dynamic from "next/dynamic";
 import { getLatestBeritaHome, getPopularBeritaHome } from "../../lib/berita-home";
 import { getLatestGaleriHome } from "../../lib/galeri-home";
 import { getPublicHomepageSlides } from "../../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
-import HomeNewsSection from "@/components/features/home/HomeNewsSection";
-import HomeGallerySection from "@/components/features/home/HomeGallerySection";
 import ApaKataMerekaSection from "@/components/features/home/ApaKataMerekaSection";
-import HomepageSlidesSection from "@/components/features/home/HomepageSlidesSection";
-import ExternalAppsSection from "@/components/features/home/ExternalAppsSection";
 import { siteInfo } from "@/data/site";
 import prisma from "@/lib/prisma";
 
-// Halaman ini sekarang mendukung update real-time penuh
-export const dynamic = "force-dynamic";
+const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNewsSection"));
+const HomeGallerySection = dynamic(() => import("@/components/features/home/HomeGallerySection"));
+const HomepageSlidesSection = dynamic(() => import("@/components/features/home/HomepageSlidesSection"));
+const ExternalAppsSection = dynamic(() => import("@/components/features/home/ExternalAppsSection"));
+
+// Cache 5 menit — konten jarang berubah
+export const revalidate = 300;
 
 export const metadata = {
   title: "Kementerian Agama Kabupaten Barito Utara",
@@ -37,19 +40,32 @@ function SectionDivider() {
   );
 }
 
+const getCachedTestimonials = unstable_cache(
+  async () => {
+    try {
+      return await prisma.testimonials.findMany({
+        where: { is_active: true },
+        orderBy: { sort_order: 'asc' }
+      });
+    } catch (err) {
+      console.error("Error fetching testimonials:", err);
+      return [];
+    }
+  },
+  ["home-testimonials"],
+  {
+    revalidate: 600,
+    tags: ["home-testimonials"],
+  },
+);
+
 export default async function HomePage() {
   const [latestBerita, popularBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
     getLatestBeritaHome(),
     getPopularBeritaHome(),
     getLatestGaleriHome(),
     getPublicHomepageSlides(),
-    prisma.testimonials.findMany({
-      where: { is_active: true },
-      orderBy: { sort_order: 'asc' }
-    }).catch((err) => {
-      console.error("Error fetching testimonials:", err);
-      return [];
-    })
+    getCachedTestimonials(),
   ]);
 
   return (

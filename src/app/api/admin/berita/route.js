@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { hasUserPermission } from "@/lib/user-permissions";
 import { apiResponse } from "@/lib/prisma-helpers";
 import prisma from "@/lib/prisma";
 import { broadcastRefresh } from "@/lib/realtime-service";
@@ -248,6 +249,8 @@ function revalidateBeritaPaths(slug) {
   revalidatePath("/berita");
   revalidatePath("/admin");
   revalidatePath("/admin/berita");
+  revalidateTag("home-latest-berita");
+  revalidateTag("home-popular-berita");
 
   if (slug) {
     revalidatePath(`/berita/${slug}`);
@@ -320,10 +323,10 @@ export async function POST(request) {
     // Editor tidak boleh langsung publish tanpa izin.
     if (
       payload.is_published &&
-      !hasPermission(auth.session?.role, PERMISSIONS.BERITA_PUBLISH)
+      !hasUserPermission(auth.permissionContext, PERMISSIONS.BERITA_PUBLISH)
     ) {
       payload.is_published = false;
-      payload.published_at = null;
+      payload.published_at = undefined;
     }
 
     const slug = await ensureUniqueSlug(
@@ -360,6 +363,7 @@ export async function POST(request) {
       201,
     );
   } catch (error) {
+    console.error("POST Berita Error:", error);
     if (error instanceof ValidationError) {
       const resp = validationErrorResponse(error);
       return apiResponse(resp.body, resp.status);

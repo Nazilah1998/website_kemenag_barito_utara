@@ -28,8 +28,8 @@ export function DashboardHeader({ user, session }) {
           <h1 className="text-4xl font-black tracking-tight leading-none sm:text-5xl uppercase">
             Halo, {user?.full_name || "Admin"}
           </h1>
-          <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-slate-400">
-            {user?.email} · Level Akses: <span className="font-black text-white uppercase tracking-widest">{session.role}</span>
+          <p className="mt-4 max-w-2xl text-[10px] font-bold uppercase tracking-widest leading-relaxed text-slate-400">
+            Level Akses: <span className="font-black text-white">{session.role?.replace(/_/g, " ")}</span>
           </p>
         </div>
       </div>
@@ -47,18 +47,18 @@ export function StatCard({ label, value, helper, icon, tone = "emerald" }) {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-[2.5rem] border-2 border-slate-100 bg-white p-8 transition-all hover:border-slate-900 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-white">
-      <div className="flex items-start justify-between mb-6">
-        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${tones[tone]}`}>
-          {icon}
+    <div className="group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border border-slate-200 bg-white p-5 sm:p-8 shadow-md shadow-slate-200/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/80 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none dark:hover:border-white">
+      <div className="flex items-start justify-between mb-4 sm:mb-6">
+        <div className={`flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl ${tones[tone]}`}>
+          <div className="scale-75 sm:scale-100">{icon}</div>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white group-hover:scale-110 transition-transform">{value}</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-1">{label}</span>
+          <span className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 dark:text-white group-hover:scale-110 transition-transform">{value}</span>
+          <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5 sm:mt-1">{label}</span>
         </div>
       </div>
-      <div className="h-px w-full bg-slate-50 dark:bg-white/5 mb-4" />
-      <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+      <div className="h-px w-full bg-slate-50 dark:bg-white/5 mb-3 sm:mb-4" />
+      <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
         {helper}
       </p>
     </div>

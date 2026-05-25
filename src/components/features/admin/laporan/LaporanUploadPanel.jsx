@@ -4,10 +4,22 @@
 import React from "react";
 import { Button, Feedback, Input, Textarea } from "./LaporanUi";
 
+const BIDANG_LIST = [
+    "Layanan Sub Bagian Tata Usaha",
+    "Layanan Pendidikan Madrasah",
+    "Layanan Pendidikan Agama Islam",
+    "Layanan Pendidikan Diniyah dan Pontren",
+    "Layanan Bimbingan Masyarakat Islam",
+    "Layanan Bimbingan Masyarakat Kristen & Katolik",
+    "Layanan Penyelenggara Zakat dan Wakaf",
+    "Layanan Penyelenggara Hindu"
+];
+
 export default function LaporanUploadPanel({
     activeCategory,
     docForm,
     setDocForm,
+    selectedFile,
     setSelectedFile,
     savingDocument,
     uploadFeedback,
@@ -15,6 +27,34 @@ export default function LaporanUploadPanel({
     resetForm,
 }) {
     const currentYear = new Date().getFullYear();
+    const [isDragging, setIsDragging] = React.useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+                setSelectedFile(file);
+            } else {
+                alert("Hanya file PDF yang diizinkan.");
+            }
+        }
+    };
 
     return (
         <section
@@ -41,6 +81,52 @@ export default function LaporanUploadPanel({
 
             <form className="flex-1 space-y-6" onSubmit={handleUpload} noValidate>
                 <div className="space-y-6">
+                    {activeCategory?.slug === "sop-dan-standar-pelayanan" && (
+                        <div className="space-y-2 relative">
+                            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-slate-100 ml-1">
+                                SOP Bidang <span className="text-rose-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                    className="flex w-full h-12 items-center justify-between rounded-2xl border-2 bg-slate-50/50 px-4 text-xs font-bold text-slate-700 outline-none transition-all border-slate-200 hover:border-slate-900 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-350 dark:hover:border-white text-left"
+                                >
+                                    <span>{docForm.description || "Layanan Sub Bagian Tata Usaha"}</span>
+                                    <svg viewBox="0 0 24 24" className={`h-4 w-4 text-slate-400 transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="3">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                
+                                {isDropdownOpen && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            tabIndex={-1}
+                                            className="fixed inset-0 z-20 cursor-default"
+                                            onClick={() => setIsDropdownOpen(false)}
+                                        />
+                                        <div className="absolute left-0 right-0 mt-2 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-30 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                            {BIDANG_LIST.map((bidang) => (
+                                                <button
+                                                    key={bidang}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setDocForm((prev) => ({ ...prev, description: bidang }));
+                                                        setIsDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50 ${docForm.description === bidang || (!docForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20" : "text-slate-700 dark:text-slate-300"}`}
+                                                >
+                                                    {bidang}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     <Input
                         inputId="laporan-title"
                         label="Judul Dokumen"
@@ -50,15 +136,6 @@ export default function LaporanUploadPanel({
                         hint="Gunakan bahasa Indonesia yang baku."
                         value={docForm.title}
                         onChange={(e) => setDocForm((prev) => ({ ...prev, title: e.target.value }))}
-                    />
-
-                    <Textarea
-                        inputId="laporan-description"
-                        label="Ringkasan / Deskripsi"
-                        placeholder="Jelaskan isi dokumen secara singkat (Opsional)..."
-                        className="!min-h-[100px]"
-                        value={docForm.description}
-                        onChange={(e) => setDocForm((prev) => ({ ...prev, description: e.target.value }))}
                     />
 
                     <div className="grid gap-6 md:grid-cols-2">
@@ -71,27 +148,50 @@ export default function LaporanUploadPanel({
                             value={docForm.year}
                             onChange={(e) => setDocForm((prev) => ({ ...prev, year: e.target.value }))}
                         />
+                    </div>
 
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-slate-100 ml-1">
-                                File PDF <span className="text-rose-500">*</span>
-                            </label>
-                            <div className="relative group">
-                                <input
-                                    id="pdf-upload-input"
-                                    type="file"
-                                    accept="application/pdf,.pdf"
-                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                />
-                                <div className="flex h-12 w-full items-center justify-between rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-5 transition-all group-hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/30 dark:group-hover:border-white">
-                                    <span className="text-xs font-bold text-slate-400 truncate pr-4 uppercase tracking-widest">
-                                        {docForm.file_name || "Pilih File PDF..."}
-                                    </span>
-                                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white" fill="none" stroke="currentColor" strokeWidth="4">
-                                        <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.414a4 4 0 00-5.656-5.656l-6.415 6.414a6 6 0 108.486 8.486L20.5 13" />
-                                    </svg>
-                                </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-slate-100 ml-1">
+                            File PDF <span className="text-rose-500">*</span>
+                        </label>
+                        <div 
+                            className="relative group mt-1"
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                        >
+                            <input
+                                id="pdf-upload-input"
+                                type="file"
+                                accept="application/pdf,.pdf"
+                                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <div className={`flex flex-col items-center justify-center min-h-[120px] w-full rounded-2xl border-2 border-dashed px-5 py-6 transition-all ${isDragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20" : "border-slate-200 bg-slate-50/50 group-hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/30 dark:group-hover:border-white"}`}>
+                                {selectedFile || docForm.file_name ? (
+                                    <>
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mb-3">
+                                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <path d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-full px-2 text-center">
+                                            {selectedFile?.name || docForm.file_name}
+                                        </span>
+                                        <span className="text-[10px] font-medium text-slate-400 mt-1">Klik atau seret file PDF lain untuk mengganti</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors mb-3 ${isDragging ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black"}`}>
+                                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
+                                            </svg>
+                                        </div>
+                                        <span className={`text-[11px] font-black uppercase tracking-widest text-center ${isDragging ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"}`}>
+                                            {isDragging ? "Lepaskan File PDF di sini" : "Pilih / Drag File PDF"}
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 import {
@@ -29,6 +29,8 @@ function revalidateBeritaPaths(slug) {
   revalidatePath("/berita");
   revalidatePath("/admin");
   revalidatePath("/admin/berita");
+  revalidateTag("home-latest-berita");
+  revalidateTag("home-popular-berita");
 
   if (slug) {
     revalidatePath(`/berita/${slug}`);

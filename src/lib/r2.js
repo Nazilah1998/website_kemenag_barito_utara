@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "./env";
 
 const { accessKeyId, secretAccessKey, endpoint, bucketName } = env.r2;
@@ -62,6 +62,27 @@ export async function deleteFromR2(path) {
   });
 
   await client.send(command);
+}
+
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+/**
+ * Get a presigned download URL directly from Cloudflare R2
+ * @param {string} path Path in bucket
+ * @param {number} expiresIn Time in seconds until URL expires
+ * @returns {Promise<string>}
+ */
+export async function getPresignedR2Url(path, expiresIn = 3600) {
+  const client = getR2Client();
+  if (!client) throw new Error("R2 Client not initialized");
+
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: path,
+  });
+
+  const url = await getSignedUrl(client, command, { expiresIn });
+  return url;
 }
 
 /**

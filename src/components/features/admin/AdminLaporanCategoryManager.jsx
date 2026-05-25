@@ -46,7 +46,7 @@ export default function AdminLaporanCategoryManager({
             {/* Content Area: Form & List */}
             <div className="grid gap-8 xl:grid-cols-12">
                 {/* Left Side: Upload Form */}
-                <div className="xl:col-span-4 flex flex-col h-full">
+                <div className="xl:col-span-5 flex flex-col h-full">
                     <div className="flex-1 rounded-[3rem] border border-slate-100 bg-white p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
                         <LaporanUploadPanel
                             activeCategory={admin.activeCategory}
@@ -63,7 +63,7 @@ export default function AdminLaporanCategoryManager({
                 </div>
 
                 {/* Right Side: Document List */}
-                <div className="xl:col-span-8 flex flex-col h-full">
+                <div className="xl:col-span-7 flex flex-col h-full">
                     <div className="flex-1 rounded-[3rem] border border-slate-100 bg-white p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
                         <LaporanDocumentPanel
                             activeCategory={admin.activeCategory}

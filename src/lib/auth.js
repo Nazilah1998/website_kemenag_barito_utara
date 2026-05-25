@@ -6,7 +6,13 @@ import prisma from "@/lib/prisma";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
 const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
-const SUPER_ADMIN_EMAIL = "nazilahmuhammad1998@gmail.com";
+// PENGAMANAN DARURAT (EMERGENCY FALLBACK)
+// Jika Anda kehilangan akses ke database atau terjadi masalah peretasan (hack),
+// Anda dapat menetapkan email penyelamat secara paksa.
+// Caranya: Tambahkan baris berikut di file .env.local Anda:
+// SUPER_ADMIN_EMAIL=email_rahasia_baru@domain.com
+// Akun dengan email tersebut akan otomatis mendapatkan akses super_admin.
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || null;
 
 export function normalizeRole(role) {
   if (!role || typeof role !== "string") return null;
@@ -53,21 +59,21 @@ async function getUserProfile(userId) {
   try {
     // Try profiles first
     const profile = await prisma.profiles.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (profile) return profile;
 
     // Fallback to admin_users if needed (though profiles should have it)
     const adminUser = await prisma.admin_users.findUnique({
-      where: { user_id: userId }
+      where: { user_id: userId },
     });
 
     if (adminUser) {
       return {
         ...adminUser,
         id: adminUser.user_id,
-        role: adminUser.role
+        role: adminUser.role,
       };
     }
 
@@ -112,13 +118,13 @@ export async function getCurrentSessionContext() {
 
   let profileRole = normalizeRole(profile?.role);
 
-  if (currentEmail === SUPER_ADMIN_EMAIL) {
+  if (SUPER_ADMIN_EMAIL && currentEmail === SUPER_ADMIN_EMAIL) {
     profileRole = "super_admin";
   } else if (!profileRole) {
     try {
       const adminRow = await prisma.admin_users.findUnique({
         where: { user_id: user.id },
-        select: { role: true }
+        select: { role: true },
       });
 
       if (adminRow) {

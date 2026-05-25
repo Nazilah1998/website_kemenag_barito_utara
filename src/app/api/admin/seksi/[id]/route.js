@@ -7,6 +7,7 @@ import {
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import prisma from "@/lib/prisma";
+import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
 
@@ -18,7 +19,7 @@ function toText(value, fallback = "") {
 }
 
 export async function GET(request, context) {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({ permission: PERMISSIONS.SEKSI_MANAGE });
   if (!auth.ok) return auth.response;
 
   try {
@@ -50,7 +51,7 @@ export async function GET(request, context) {
 }
 
 export async function PUT(request, context) {
-  const auth = await validateAdmin();
+  const auth = await validateAdmin({ permission: PERMISSIONS.SEKSI_MANAGE });
   if (!auth.ok) return auth.response;
 
   try {

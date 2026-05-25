@@ -1,18 +1,14 @@
 import prisma from "@/lib/prisma";
 import { apiResponse } from "@/lib/prisma-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
+import { PERMISSIONS } from "@/lib/permissions";
 
 export async function GET(request) {
   try {
-    const validation = await validateAdmin();
+    const validation = await validateAdmin({ permission: PERMISSIONS.AUDIT_VIEW });
     if (!validation.ok) return validation.response;
 
     const { session, permissionContext } = validation;
-    
-    // Only allow if has AUDIT_VIEW permission or is super_admin
-    if (session.role !== "super_admin" && !permissionContext?.permissions?.includes("audit_view")) {
-      return apiResponse({ error: "Unauthorized. Audit access required." }, 403);
-    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");

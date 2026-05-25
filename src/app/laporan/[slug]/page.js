@@ -140,9 +140,13 @@ export default async function LaporanCategoryPage({ params }) {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <LaporanDocumentsClient documents={documents} />
-          </div>
+          {slug === "sop-dan-standar-pelayanan" ? (
+            <LaporanDocumentsClient documents={documents} categorySlug={slug} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <LaporanDocumentsClient documents={documents} categorySlug={slug} />
+            </div>
+          )}
         </section>
       </main>
     </>

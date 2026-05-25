@@ -2,8 +2,7 @@ import React from "react";
 import prisma from "@/lib/prisma";
 import InformasiIndexClient from "./InformasiIndexClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 600;
 
 export const metadata = {
   title: "Informasi Publik",

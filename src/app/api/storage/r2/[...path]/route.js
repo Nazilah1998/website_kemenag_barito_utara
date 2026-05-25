@@ -12,10 +12,11 @@ export async function GET(request, { params }) {
     const path = pathParts.join("/");
     currentPath = path;
 
+    // Kita ambil file langsung dari R2 tanpa redirect ke CDN.
+    // Hal ini memastikan next/image selalu bisa memproses gambar tanpa terblokir domain external.
     const client = getR2Client();
-
     if (!client) {
-      return new Response("Storage not configured", { status: 500 });
+      return new Response("R2 Client not configured", { status: 500 });
     }
 
     const command = new GetObjectCommand({
@@ -24,14 +25,13 @@ export async function GET(request, { params }) {
     });
 
     const response = await client.send(command);
+    
+    // Convert Node.js stream to Web Stream to prevent Next.js Response object errors
+    const stream = response.Body.transformToWebStream ? response.Body.transformToWebStream() : response.Body;
 
-    // Get body as byte array
-    const data = await response.Body.transformToByteArray();
-
-    return new Response(data, {
+    return new Response(stream, {
       headers: {
         "Content-Type": response.ContentType || "application/octet-stream",
-        "Content-Length": response.ContentLength?.toString() || "",
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });

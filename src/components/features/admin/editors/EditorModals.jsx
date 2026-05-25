@@ -280,8 +280,8 @@ export function RoleModal({
 
       <div className="space-y-4">
         {[
-          { id: "editor", label: "Editor Konten", desc: "Akses terbatas hanya pada modul yang diizinkan saja." },
-          { id: "admin", label: "Administrator", desc: "Akses lebih luas mencakup pengaturan dan manajemen umum." }
+          { id: "admin", label: "Admin", desc: "Akses lebih luas mencakup pengaturan dan manajemen umum." },
+          { id: "editor", label: "Editor", desc: "Akses terbatas hanya pada modul yang diizinkan saja." }
         ].map((opt) => {
           const isActive = roleDraft === opt.id;
           return (

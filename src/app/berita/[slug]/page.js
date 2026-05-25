@@ -1,12 +1,10 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import PageBanner from "@/components/common/PageBanner";
-import BeritaViewCounter from "@/components/features/berita/components/BeritaViewCounter";
 import {
   BeritaDetailBackLink,
-  BeritaDetailMetaPills,
+  BeritaDetailDateText,
   BeritaDetailSidebar,
-  BeritaDetailCategoryBadge,
 } from "@/components/features/berita/components/BeritaDetailLocalized";
 import { BeritaDetailNavigation } from "@/components/features/berita/components/BeritaDetailNavigation";
 import BeritaDetailHeader from "@/components/features/berita/components/BeritaDetailHeader";
@@ -54,7 +52,7 @@ function toIso(value) {
   return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -145,19 +143,10 @@ export default async function DetailBeritaPage({ params }) {
                   className="prose prose-slate max-w-none rounded-4xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm md:p-8 lg:p-10 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:prose-invert dark:prose-headings:text-white dark:prose-p:text-white dark:prose-strong:text-white dark:prose-a:text-emerald-300 dark:prose-a:no-underline hover:dark:prose-a:text-emerald-200 dark:prose-li:text-white dark:prose-blockquote:text-white dark:prose-figcaption:text-slate-200 dark:prose-hr:border-slate-700 dark:prose-code:text-emerald-300 dark:prose-pre:bg-slate-950 **:text-inherit! [&_p]:text-inherit! [&_li]:text-inherit! [&_blockquote]:text-inherit! [&_span]:text-inherit!"
                   style={{ color: "inherit" }}
                 >
-                  {/* Category and Metadata Pills at the top */}
-                  <div className="not-prose mb-5 flex flex-wrap items-center gap-3">
-                    <BeritaDetailCategoryBadge category={berita.category} />
-                    <BeritaDetailMetaPills isoDate={berita.isoDate}>
-                      <BeritaViewCounter
-                        slug={berita.slug}
-                        initialViews={berita.views}
-                      />
-                    </BeritaDetailMetaPills>
-                  </div>
 
-                  {/* Premium Featured Image inside the news content form card - Float Left (occupies half of the card, 16:9 landscape) */}
-                  <div className="not-prose float-none sm:float-left mb-6 sm:mr-6 sm:mb-4 w-full sm:w-1/2 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+
+                  {/* Cover Image — float left so text wraps beside it and continues below */}
+                  <div className="not-prose float-left mr-6 mb-4 w-full sm:w-[44%] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
                     <a
                       href={coverImageDownloadUrl}
                       target="_blank"
@@ -172,18 +161,27 @@ export default async function DetailBeritaPage({ params }) {
                         height={450}
                         priority
                         className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.02]"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 600px"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 44vw, 560px"
                       />
                     </a>
-                    {/* Caption like the reference */}
-                    <div className="bg-slate-50 dark:bg-slate-900/60 px-4 py-3 border-t border-slate-200 dark:border-slate-800 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                      Foto Berita: {berita.title}
+                    <div className="bg-slate-50 dark:bg-slate-900/60 px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-1.5">
+                      <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Foto Berita: {berita.title}
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                        <BeritaDetailDateText isoDate={berita.isoDate} />
+                      </span>
                     </div>
                   </div>
 
+                  {/* Content flows beside the float, then below it */}
                   <div
+                    className="[&_*]:clear-none [&_div]:!w-auto [&_div]:!block [&_div]:!max-w-none break-words"
                     dangerouslySetInnerHTML={{ __html: berita.content || "" }}
                   />
+
+                  {/* Clearfix — ensures article card wraps around the float */}
+                  <div className="not-prose clear-both" />
                 </article>
               </div>
 

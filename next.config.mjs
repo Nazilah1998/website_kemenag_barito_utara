@@ -9,6 +9,10 @@ const remotePatterns = [
     protocol: "https",
     hostname: "docs.google.com",
   },
+  {
+    protocol: "https",
+    hostname: "cdn.kemenag-baritoutara.com",
+  },
 ];
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -62,7 +66,6 @@ function buildCsp() {
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
-      "https://us-assets.i.posthog.com",
     ],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     "img-src": ["'self'", "data:", "blob:", "https:"],
@@ -74,8 +77,6 @@ function buildCsp() {
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
-      "https://us.i.posthog.com",
-      "https://us-assets.i.posthog.com",
       supabase,
       wsSupabase,
       r2Endpoint,
@@ -121,35 +122,123 @@ if (isProd) {
   });
 }
 
+const cachePublic = (sMaxAge, staleRevalidate) => ({
+  key: "Cache-Control",
+  value: `public, max-age=0, s-maxage=${sMaxAge}, stale-while-revalidate=${staleRevalidate}`,
+});
+
+const cacheImmutable = {
+  key: "Cache-Control",
+  value: "public, max-age=31536000, immutable",
+};
+
+const cacheNoStore = {
+  key: "Cache-Control",
+  value: "no-store, no-cache, must-revalidate, proxy-revalidate",
+};
+
 const nextConfig = {
+  compress: true,
+  poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns,
     qualities: [60, 70, 75, 85, 100],
   },
+  serverExternalPackages: [
+    "@aws-sdk/client-s3",
+    "@aws-sdk/s3-request-presigner",
+    "pg",
+    "@prisma/client",
+    "@prisma/adapter-pg",
+    "pdfjs-dist",
+  ],
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+    ],
+  },
   allowedDevOrigins: ["127.0.0.1"],
   async headers() {
     return [
       {
+        source: "/assets/:path*",
+        headers: [...securityHeaders, cacheImmutable],
+      },
+      // Service worker — selalu fresh
+      {
+        source: "/sw.js",
+        headers: [...securityHeaders, { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+      },
+      // Admin & API — jangan cache
+      {
+        source: "/api/:path*",
+        headers: [...securityHeaders, cacheNoStore],
+      },
+      {
+        source: "/admin/:path*",
+        headers: [...securityHeaders, cacheNoStore],
+      },
+      {
+        source: "/login/:path*",
+        headers: [...securityHeaders, cacheNoStore],
+      },
+      {
+        source: "/auth/:path*",
+        headers: [...securityHeaders, cacheNoStore],
+      },
+      // Berita — ISR 60s
+      {
+        source: "/berita/:path*",
+        headers: [...securityHeaders, cachePublic(60, 120)],
+      },
+      // Galeri — ISR 300s
+      {
+        source: "/galeri/:path*",
+        headers: [...securityHeaders, cachePublic(300, 600)],
+      },
+      // Laporan — ISR 300s
+      {
+        source: "/laporan/:path*",
+        headers: [...securityHeaders, cachePublic(300, 600)],
+      },
+      // Informasi — ISR 600s
+      {
+        source: "/informasi/:path*",
+        headers: [...securityHeaders, cachePublic(600, 1200)],
+      },
+      // Beranda — ISR 300s
+      {
+        source: "/beranda",
+        headers: [...securityHeaders, cachePublic(300, 600)],
+      },
+      // Halaman profil & layanan — statis, jarang berubah
+      {
+        source: "/profil/:path*",
+        headers: [...securityHeaders, cachePublic(600, 1200)],
+      },
+      {
+        source: "/layanan/:path*",
+        headers: [...securityHeaders, cachePublic(600, 1200)],
+      },
+      {
+        source: "/zona-integritas/:path*",
+        headers: [...securityHeaders, cachePublic(600, 1200)],
+      },
+      {
+        source: "/(kontak|pencarian|ppid|survey)",
+        headers: [...securityHeaders, cachePublic(600, 1200)],
+      },
+      // Root homepage
+      {
+        source: "/",
+        headers: [...securityHeaders, cachePublic(300, 600)],
+      },
+      // Catch-all — semua halaman lain (security headers saja)
+      {
         source: "/:path*",
         headers: securityHeaders,
-      },
-    ];
-  },
-  // PostHog reverse proxy — menghindari ad-blocker
-  async rewrites() {
-    return [
-      {
-        source: "/ingest/static/:path*",
-        destination: "https://us-assets.i.posthog.com/static/:path*",
-      },
-      {
-        source: "/ingest/:path*",
-        destination: "https://us.i.posthog.com/:path*",
-      },
-      {
-        source: "/ingest/decide",
-        destination: "https://us.i.posthog.com/decide",
       },
     ];
   },

@@ -2,8 +2,7 @@ import React from "react";
 import StrukturOrganisasiUI from "@/components/features/informasi/StrukturOrganisasiUI";
 import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 600;
 
 export const metadata = {
   title: "Struktur Organisasi",

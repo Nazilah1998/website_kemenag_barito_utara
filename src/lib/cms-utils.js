@@ -82,35 +82,21 @@ export async function validateAdmin(options = {}) {
   const isAdmin = session?.isAdmin === true;
   const isSuperAdmin = role === "super_admin";
 
-  if (isAdmin || isSuperAdmin) {
-    if (permission && !hasPermission(role, permission)) {
-      return {
-        ok: false,
-        response: NextResponse.json(
-          {
-            message: "Anda tidak memiliki izin untuk tindakan ini.",
-            code: "PERMISSION_DENIED",
-            required: permission,
-          },
-          { status: 403 },
-        ),
-      };
-    }
-
+  if (isSuperAdmin) {
     return {
       ok: true,
       session,
       permissionContext: {
-        isSuperAdmin,
-        isAdmin,
-        isEditor: isEditor || isAdmin || isSuperAdmin,
+        isSuperAdmin: true,
+        isAdmin: true,
+        isEditor: true,
         approved: true,
         isActive: true,
       },
     };
   }
 
-  if (isEditor && allowEditor) {
+  if ((isEditor || isAdmin) && allowEditor) {
     const userId = session?.profile?.id || session?.user?.id || null;
     const email = session?.profile?.email || session?.user?.email || null;
 

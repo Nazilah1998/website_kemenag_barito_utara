@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import {
   isCmsStoragePublicUrl,
@@ -119,6 +119,7 @@ export async function PATCH(request, context) {
 
     revalidatePath("/");
     revalidatePath("/beranda");
+    revalidateTag("home-public-slides");
     broadcastRefresh("slider");
 
     return apiResponse({
@@ -175,6 +176,7 @@ export async function DELETE(request, context) {
 
     revalidatePath("/");
     revalidatePath("/beranda");
+    revalidateTag("home-public-slides");
     broadcastRefresh("slider");
 
     return apiResponse({

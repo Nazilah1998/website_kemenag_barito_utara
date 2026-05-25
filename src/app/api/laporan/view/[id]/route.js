@@ -47,7 +47,11 @@ export async function GET(request, { params }) {
       targetUrl = `${baseUrl}${targetUrl}`;
     }
 
-    return NextResponse.redirect(targetUrl);
+    const response = NextResponse.redirect(targetUrl);
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "*");
+    return response;
   } catch (error) {
     console.error("GET Laporan View Redirect Error:", error);
     return apiResponse(

@@ -66,14 +66,27 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith(
       (async () => {
+        const cache = await caches.open(RUNTIME_CACHE);
+        const cached = await caches.match(request);
+
+        // Serve cached version immediately, fetch fresh in background
+        if (cached) {
+          fetch(request)
+            .then((fresh) => {
+              if (fresh && fresh.ok) {
+                cache.put(request, fresh);
+              }
+            })
+            .catch(() => {});
+          return cached;
+        }
+
+        // No cache — fetch from network
         try {
           const fresh = await fetch(request);
-          const cache = await caches.open(RUNTIME_CACHE);
           cache.put(request, fresh.clone());
           return fresh;
         } catch {
-          const cached = await caches.match(request);
-          if (cached) return cached;
           const offline = await caches.match(OFFLINE_URL);
           return (
             offline ||

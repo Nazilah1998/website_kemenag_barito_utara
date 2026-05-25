@@ -14,7 +14,6 @@ export default function BeritaDetailHeader({ title }) {
       breadcrumb={[
         { label: t("nav.home"), href: "/" },
         { label: t("nav.berita"), href: "/berita" },
-        { label: title },
       ]}
     />
   );

@@ -16,6 +16,7 @@ export async function GET() {
             email: session.profile?.email ?? session.user?.email ?? null,
             full_name: session.profile?.full_name ?? null,
             role: session.profile?.role ?? session.role ?? null,
+            avatar_url: session.profile?.avatar_url ?? null,
           }
         : null,
       permissions: {

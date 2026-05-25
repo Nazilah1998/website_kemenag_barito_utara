@@ -68,26 +68,30 @@ export function BeritaDetailBackLink() {
   );
 }
 
-export function BeritaDetailMetaPills({ isoDate, children }) {
+export function BeritaDetailViewsPill({ children }) {
+  return (
+    <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-white/15 dark:bg-white/10 dark:text-white sm:px-4 sm:py-2 sm:text-sm">
+      {children}
+    </div>
+  );
+}
+
+export function BeritaDetailDateText({ isoDate }) {
   const { t, locale } = useLanguage();
   const displayDate = formatDate(isoDate, locale);
-
   return (
-    <div className="flex flex-wrap gap-3">
-      <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur">
-        {t("berita.published")} {displayDate}
-      </div>
-      <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur">
-        {children}
-      </div>
-    </div>
+    <>{t("berita.published")} {displayDate}</>
   );
 }
 
 export function BeritaDetailCategoryBadge({ category }) {
   const { t } = useLanguage();
   return (
-    <div className="inline-flex rounded-full border border-white/15 bg-emerald-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 shadow-sm backdrop-blur-md dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-400 sm:px-4 sm:py-2 sm:text-sm">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+      </span>
       {t(`berita.categories.${category}`) || category}
     </div>
   );

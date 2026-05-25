@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { apiResponse } from "@/lib/prisma-helpers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export async function GET(request) {
   try {
@@ -25,7 +25,7 @@ export async function GET(request) {
       return apiResponse({ items: [], q });
     }
 
-    // Pencarian paralel menggunakan Prisma
+    // Pencarian paralel menggunakan Prisma — tanpa full-text content (HTML panjang)
     const [beritaResults, reportResults] = await Promise.all([
       prisma.berita.findMany({
         where: {
@@ -33,7 +33,6 @@ export async function GET(request) {
           OR: [
             { title: { contains: q, mode: 'insensitive' } },
             { excerpt: { contains: q, mode: 'insensitive' } },
-            { content: { contains: q, mode: 'insensitive' } }
           ]
         },
         take: limit,

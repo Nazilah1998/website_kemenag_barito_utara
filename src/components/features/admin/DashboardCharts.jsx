@@ -159,7 +159,7 @@ export default function DashboardCharts({
 }) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/80">
+      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/50 transition-all hover:shadow-lg hover:shadow-slate-200/80 lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-900">
             Tren Publikasi 14 Hari
@@ -171,7 +171,7 @@ export default function DashboardCharts({
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+      <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/50 transition-all hover:shadow-lg hover:shadow-slate-200/80 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
           Berita Terpopuler
         </h2>
@@ -181,7 +181,7 @@ export default function DashboardCharts({
       </div>
 
       {showRecentActivity && (
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3 dark:border-slate-800 dark:bg-slate-900/80">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/50 transition-all hover:shadow-lg hover:shadow-slate-200/80 lg:col-span-3 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Aktivitas Terbaru
           </h2>

@@ -14,9 +14,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-function buildStoragePath(filename, categorySlug) {
-  const safeSlug = categorySlug || "media";
-  return `laporan/${safeSlug}/${filename}`;
+function buildStoragePath(filename) {
+  return `laporan/files/${filename}`;
 }
 
 export async function PUT(request, context) {
@@ -72,7 +71,7 @@ export async function PUT(request, context) {
           existingDoc?.title || "dokumen-laporan",
         );
 
-        const storagePath = buildStoragePath(safeFilename, existingDoc?.category_slug || "laporan");
+        const storagePath = buildStoragePath(safeFilename);
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 

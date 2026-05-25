@@ -3,7 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import { PERMISSIONS } from "@/lib/permissions";
-import { SidebarNavLink, SidebarProfile } from "./SidebarUI";
+import { SidebarNavLink } from "./SidebarUI";
 import { DashboardIcon, NewsIcon, FolderIcon, SliderIcon, UsersIcon, AuditIcon, MailIcon, GalleryIcon, SeksiIcon } from "./SidebarIcons";
 
 function hasAccess(context, permission) {
@@ -19,7 +19,7 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
   const links = [
     { href: "/admin", label: "Dashboard", icon: <DashboardIcon />, active: pathname === "/admin", show: hasAccess(ctx, PERMISSIONS.DASHBOARD_VIEW) },
     { href: "/admin/berita", label: "Berita", icon: <NewsIcon />, active: pathname.startsWith("/admin/berita"), show: hasAccess(ctx, PERMISSIONS.BERITA_VIEW) },
-    { href: "/admin/seksi", label: "Kepegawaian & Seksi", icon: <SeksiIcon />, active: pathname.startsWith("/admin/seksi"), show: role === "super_admin" || role === "admin" },
+    { href: "/admin/seksi", label: "Kepegawaian & Seksi", icon: <SeksiIcon />, active: pathname.startsWith("/admin/seksi"), show: hasAccess(ctx, PERMISSIONS.SEKSI_MANAGE) },
     { href: "/admin/galeri", label: "Galeri Visual", icon: <GalleryIcon />, active: pathname.startsWith("/admin/galeri"), show: hasAccess(ctx, PERMISSIONS.GALERI_VIEW) },
     { href: "/admin/laporan", label: "Dokumen Laporan", icon: <FolderIcon />, active: pathname === "/admin/laporan" || pathname.startsWith("/admin/laporan/"), show: hasAccess(ctx, PERMISSIONS.LAPORAN_VIEW) },
     { href: "/admin/homepage-slides", label: "Slider Beranda", icon: <SliderIcon />, active: pathname.startsWith("/admin/homepage-slides"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
@@ -39,7 +39,6 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
           ))}
         </nav>
       </div>
-      <SidebarProfile profile={profile} role={role} permissionContext={ctx} />
     </div>
   );
 }

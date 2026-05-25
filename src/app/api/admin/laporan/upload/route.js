@@ -64,7 +64,7 @@ export async function POST(request) {
     const filename = buildSafePdfFilename(file.name, category.slug);
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const storagePath = `laporan/${category.slug}/${filename}`;
+    const storagePath = `laporan/files/${filename}`;
 
     // Upload to Cloudflare R2
     const fileUrl = await uploadToR2(buffer, storagePath, "application/pdf");

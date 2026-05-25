@@ -184,7 +184,7 @@ export default function PortalPage() {
         {/* Logo & Title Section */}
         <motion.div variants={headerVariants} className="flex flex-col items-center text-center mb-4">
           <div className="w-20 h-20 mb-4 relative bg-white/10 backdrop-blur-md p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500">
-            <Image src={siteInfo.logoSrc} alt="Logo" width={56} height={56} className="w-full h-full object-contain drop-shadow-lg" />
+            <Image src={siteInfo.logoSrc} alt="Logo" width={56} height={56} className="w-full h-full object-contain drop-shadow-lg" priority />
           </div>
           <p className="mb-2 text-base font-black uppercase tracking-[0.4em] text-emerald-500/90">
             Portal Resmi
@@ -292,7 +292,7 @@ export default function PortalPage() {
         {/* Logo & Title Section */}
         <motion.div variants={headerVariants} className="flex flex-col items-center text-center mb-6">
           <div className="w-20 h-20 mb-4 relative bg-white/10 backdrop-blur-md p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl">
-            <Image src={siteInfo.logoSrc} alt="Logo" width={56} height={56} className="w-full h-full object-contain drop-shadow-lg" />
+            <Image src={siteInfo.logoSrc} alt="Logo" width={56} height={56} className="w-full h-full object-contain drop-shadow-lg" priority />
           </div>
           <p className="mb-1 text-xs font-black uppercase tracking-[0.4em] text-emerald-500/90">
             Portal Resmi

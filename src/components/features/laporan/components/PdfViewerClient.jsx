@@ -23,6 +23,31 @@ const DOCUMENT_OPTIONS = {
 };
 
 export default function PdfViewerClient({ fileUrl, fileName = "dokumen.pdf", onError }) {
+  const [pdfData, setPdfData] = React.useState(null);
+  const [fetchError, setFetchError] = React.useState(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    async function loadPdf() {
+      try {
+        const res = await fetch(fileUrl);
+        if (!res.ok) throw new Error(`Gagal mengunduh dokumen (Status: ${res.status})`);
+        const blob = await res.blob();
+        if (isMounted) {
+          setPdfData(blob);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error("PDF Fetch Error:", err);
+          setFetchError(err);
+          if (onError) onError(err);
+        }
+      }
+    }
+    loadPdf();
+    return () => { isMounted = false; };
+  }, [fileUrl, onError]);
+
   const {
     numPages,
     setNumPages,
@@ -58,10 +83,17 @@ export default function PdfViewerClient({ fileUrl, fileName = "dokumen.pdf", onE
         onScroll={onScrollUpdateCurrentPage}
         className="max-h-[56vh] overflow-y-auto overflow-x-hidden p-2 sm:max-h-[70vh] sm:p-3"
       >
-        <Document
-          file={fileUrl}
-          options={DOCUMENT_OPTIONS}
-          loading={<div className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">Memuat dokumen...</div>}
+        {fetchError ? (
+            <div className="py-10 text-center text-sm text-rose-500 dark:text-rose-400">
+                Gagal memuat dokumen. Silakan coba muat ulang.
+            </div>
+        ) : !pdfData ? (
+            <div className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">Mengambil dokumen...</div>
+        ) : (
+            <Document
+              file={pdfData}
+              options={DOCUMENT_OPTIONS}
+              loading={<div className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">Membaca dokumen...</div>}
           onLoadError={onError}
           onSourceError={onError}
           onLoadSuccess={({ numPages: total }) => {
@@ -88,6 +120,7 @@ export default function PdfViewerClient({ fileUrl, fileName = "dokumen.pdf", onE
             );
           })}
         </Document>
+        )}
       </div>
     </div>
   );

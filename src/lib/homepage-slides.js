@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import prisma from "@/lib/prisma";
 
 function toNumber(value, fallback = 0) {
@@ -45,21 +46,32 @@ function sortSlides(items = []) {
   });
 }
 
-export async function getPublicHomepageSlides() {
-  try {
-    const data = await prisma.homepage_slides.findMany({
-      where: { is_published: true },
-      orderBy: [
-        { sort_order: 'asc' },
-        { updated_at: 'desc' }
-      ]
-    });
+const getCachedPublicSlides = unstable_cache(
+  async () => {
+    try {
+      const data = await prisma.homepage_slides.findMany({
+        where: { is_published: true },
+        orderBy: [
+          { sort_order: 'asc' },
+          { updated_at: 'desc' }
+        ]
+      });
 
-    return sortSlides((data || []).map(normalizeHomepageSlide));
-  } catch (error) {
-    console.error("getPublicHomepageSlides error:", error);
-    return [];
-  }
+      return sortSlides((data || []).map(normalizeHomepageSlide));
+    } catch (error) {
+      console.error("getPublicHomepageSlides error:", error);
+      return [];
+    }
+  },
+  ["home-public-slides"],
+  {
+    revalidate: 300,
+    tags: ["home-public-slides"],
+  },
+);
+
+export async function getPublicHomepageSlides() {
+  return getCachedPublicSlides();
 }
 
 export async function getAdminHomepageSlides() {

@@ -5,52 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { siteInfo } from "@/data/site";
-import { motion } from "framer-motion";
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.05
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 120,
-      damping: 18
-    }
-  }
-};
-
-const floatCardVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 30 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 90,
-      damping: 16,
-      delay: 0.35
-    }
-  }
-};
 
 export default function HomeHeroSection() {
   const { t } = useLanguage();
 
   return (
     <section className="relative h-auto lg:h-[calc(100vh-140px)] min-h-[500px] lg:min-h-[600px] max-h-[900px] w-full overflow-hidden bg-slate-950 flex items-center py-16 sm:py-24 lg:py-0">
-      {/* 1. LAYERED BACKGROUND SYSTEM */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/assets/images/kantor-kemenag.jpg"
@@ -62,31 +22,16 @@ export default function HomeHeroSection() {
           priority
           fetchPriority="high"
         />
-        {/* Dynamic Gradients */}
         <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/90 to-emerald-950/60" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(5,150,105,0.08),transparent_30%)]" />
-
-        {/* Animated Orbs */}
         <div className="absolute -left-20 top-10 h-[400px] w-[400px] rounded-full bg-emerald-500/10 blur-[100px] animate-pulse" />
         <div className="absolute -right-20 bottom-10 h-[300px] w-[300px] rounded-full bg-blue-500/5 blur-[80px] animate-pulse delay-700" />
       </div>
 
-      {/* 2. CONTENT CONTAINER */}
       <div className="relative z-10 w-full px-6 py-12 sm:px-10 sm:py-16 lg:py-8 lg:px-16 xl:px-24">
         <div className="mx-auto grid max-w-[1600px] items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-
-          {/* Left Column: Text & Stats */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col"
-          >
-            {/* Badge */}
-            <motion.div
-              variants={itemVariants}
-              className="group flex w-fit items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/50"
-            >
+          <div className="flex flex-col">
+            <div className="group flex w-fit items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/50 animate-fade-in-up">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
@@ -94,129 +39,82 @@ export default function HomeHeroSection() {
               <span className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">
                 {t("home.hero.badge")}
               </span>
-            </motion.div>
+            </div>
 
-            {/* Title */}
-            <motion.h1
-              variants={itemVariants}
-              className="mt-6 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl"
-            >
+            <h1 className="mt-6 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl animate-fade-in-up animate-delay-100">
               {t("home.hero.title").split('.').map((part, i) => (
                 <span key={i} className={i === 0 ? "block" : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"}>
                   {part}{i === 0 && part ? "." : ""}
                 </span>
               ))}
-            </motion.h1>
+            </h1>
 
-            {/* Description */}
-            <motion.p
-              variants={itemVariants}
-              className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose"
-            >
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose animate-fade-in-up animate-delay-200">
               {t("home.hero.description")}
-            </motion.p>
+            </p>
 
-            {/* CTAs */}
-            <motion.div variants={itemVariants} className="mt-8 flex flex-wrap gap-4">
-              <motion.a
-                whileHover={{ y: -3, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+            <div className="mt-8 flex flex-wrap gap-4 animate-fade-in-up animate-delay-300">
+              <a
                 href="https://ptsp.kemenag-baritoutara.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-emerald-700 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition-all hover:bg-emerald-600 hover:shadow-[0_0_20px_-5px_rgba(4,120,87,0.5)]"
+                className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-emerald-700 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition-all hover:bg-emerald-600 hover:-translate-y-0.5 hover:shadow-[0_0_20px_-5px_rgba(4,120,87,0.5)] active:scale-[0.98]"
               >
                 <span className="relative z-10">{t("home.hero.ctaLayanan")}</span>
                 <ArrowRightIcon className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-transform duration-500 group-hover:translate-x-0" />
-              </motion.a>
+              </a>
 
-              <motion.div
-                whileHover={{ y: -3, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex"
+              <Link
+                href="/berita"
+                className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20 hover:-translate-y-0.5 active:scale-[0.98]"
               >
-                <Link
-                  href="/berita"
-                  className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20"
-                >
-                  {t("home.hero.ctaBerita")}
-                </Link>
-              </motion.div>
-            </motion.div>
+                {t("home.hero.ctaBerita")}
+              </Link>
+            </div>
 
-            {/* Stats - Grid Modern */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-12 grid grid-cols-3 gap-6 sm:max-w-lg"
-            >
+            <div className="mt-12 grid grid-cols-3 gap-6 sm:max-w-lg animate-fade-in-up animate-delay-400">
               {[
-                { number: "24+", label: t("home.stats.layanan"), icon: "⚡" },
-                { number: "120+", label: t("home.stats.berita"), icon: "📰" },
-                { number: "100%", label: t("home.stats.dokumen"), icon: "🛡️" },
+                { number: "24+", label: t("home.stats.layanan") },
+                { number: "120+", label: t("home.stats.berita") },
+                { number: "100%", label: t("home.stats.dokumen") },
               ].map((stat, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ y: -4 }}
-                  className="group flex flex-col gap-1 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-black text-white lg:text-3xl">{stat.number}</span>
-                    <span className="hidden opacity-0 transition-opacity group-hover:opacity-100 sm:inline text-lg">{stat.icon}</span>
-                  </div>
+                <div key={i} className="group flex flex-col gap-1 cursor-pointer transition-transform hover:-translate-y-1">
+                  <span className="text-xl font-black text-white lg:text-3xl">{stat.number}</span>
                   <div className="h-0.5 w-6 rounded-full bg-emerald-500/50 transition-all group-hover:w-full group-hover:bg-emerald-500" />
                   <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
                     {stat.label}
                   </p>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          {/* Right Column: Premium Focus Card */}
-          <motion.div
-            variants={floatCardVariants}
-            initial="hidden"
-            animate="visible"
-            className="relative perspective-1000 hidden lg:block"
-          >
+          <div className="relative hidden lg:block animate-fade-in animate-delay-500">
             <div className="animate-float">
               <HomeFocusCard t={t} />
             </div>
-
-            {/* Floating Accent Elements */}
             <div className="absolute -right-6 -top-6 h-20 w-20 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm animate-pulse" />
-            <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm animate-bounce-slow" />
-          </motion.div>
+            <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full border border-blue-500/20 bg-blue-500/5 backdrop-blur-sm" />
+          </div>
         </div>
       </div>
 
-      {/* 3. SCROLL INDICATOR */}
-      <motion.div
-        animate={{ y: [0, 8, 0] }}
-        transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30 hidden lg:block"
-      >
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30 hidden lg:block">
         <div className="h-8 w-5 rounded-full border-2 border-white/20 p-1">
           <div className="mx-auto h-1.5 w-0.5 rounded-full bg-white" />
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
 function HomeFocusCard({ t }) {
   return (
-    <motion.div
-      whileHover={{ y: -6, rotateX: 1, rotateY: -1 }}
-      transition={{ type: "spring", stiffness: 100, damping: 18 }}
-      className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/40 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-700 hover:border-emerald-500/30 hover:bg-slate-900/60"
-    >
-      {/* Inner Glow */}
+    <div className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/40 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-700 hover:border-emerald-500/30 hover:bg-slate-900/60 hover:-translate-y-1">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
 
       <div className="relative rounded-[28px] bg-slate-950/50 p-6 xl:p-8">
-        {/* Header Content */}
         <div className="flex items-center gap-5">
           <div className="relative">
             <div className="absolute -inset-1.5 rounded-2xl bg-emerald-500/20 blur-lg animate-pulse" />
@@ -230,7 +128,6 @@ function HomeFocusCard({ t }) {
           </div>
         </div>
 
-        {/* Highlight Section */}
         <div className="mt-8 space-y-5 rounded-[24px] border border-white/5 bg-white/5 p-6 transition-colors group-hover:bg-white/[0.08]">
           <div className="flex items-center gap-3">
             <div className="h-1 w-6 rounded-full bg-emerald-500" />
@@ -249,7 +146,6 @@ function HomeFocusCard({ t }) {
           </div>
         </div>
 
-        {/* Footer Stats/Status */}
         <div className="mt-6 grid grid-cols-2 gap-3">
           <StatusBox
             label={t("home.focus.statusTitle")}
@@ -265,23 +161,19 @@ function HomeFocusCard({ t }) {
           />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 function StatusBox({ label, value, color, glow }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.03, y: -2 }}
-      transition={{ type: "spring", stiffness: 200, damping: 15 }}
-      className="rounded-2xl border border-white/5 bg-white/5 p-4 cursor-pointer"
-    >
+    <div className="rounded-2xl border border-white/5 bg-white/5 p-4 cursor-pointer transition-all hover:scale-[1.03] hover:-translate-y-0.5">
       <p className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-400/70">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         <div className={`h-2 w-2 rounded-full ${color} ${glow} shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse`} />
         <p className="text-base font-black text-white">{value}</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

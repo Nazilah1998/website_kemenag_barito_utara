@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { validateAdmin } from "@/lib/cms-utils";
 import {
   removeStorageFileByPublicUrl,
@@ -47,6 +47,7 @@ function revalidateGaleriPaths() {
   revalidatePath("/beranda");
   revalidatePath("/galeri");
   revalidatePath("/admin/galeri");
+  revalidateTag("home-latest-galeri-v2");
   broadcastRefresh("galeri");
 }
 

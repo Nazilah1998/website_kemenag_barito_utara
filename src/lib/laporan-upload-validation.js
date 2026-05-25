@@ -10,8 +10,7 @@ export function sanitizeBaseFilename(value = "") {
     .normalize("NFKD")
     .replace(/[^\w\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
+    .replace(/[_\-\s]+/g, "&")
     .slice(0, 80);
 }
 
@@ -43,12 +42,7 @@ export function buildSafePdfFilename(originalName = "", prefix = "laporan") {
   const safeBase =
     sanitizeBaseFilename(originalName.replace(/\.pdf$/i, "")) || prefix;
 
-  const unique =
-    typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-  return `${prefix}-${safeBase}-${unique}.pdf`;
+  return `${safeBase}.pdf`;
 }
 
 export function validateDocumentPayload(

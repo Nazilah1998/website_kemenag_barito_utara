@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +45,8 @@ async function runScheduledPublish() {
     }
     revalidatePath("/berita");
     revalidatePath("/");
+    revalidateTag("home-latest-berita");
+    revalidateTag("home-popular-berita");
   }
 
   return {

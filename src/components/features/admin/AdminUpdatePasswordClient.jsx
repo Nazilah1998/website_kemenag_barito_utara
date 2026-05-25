@@ -26,6 +26,7 @@ export default function AdminUpdatePasswordClient() {
                 label="Password baru" value={u.password} placeholder="Minimal 8 karakter"
                 onChange={(e) => u.setPassword(e.target.value)} show={u.showPassword}
                 onToggle={() => u.setShowPassword(!u.showPassword)}
+                showStrength={true}
               />
               <PasswordInput
                 label="Konfirmasi password baru" value={u.confirmPassword} placeholder="Ulangi password baru"

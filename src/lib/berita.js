@@ -1,6 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 import prisma from "@/lib/prisma";
-import { normalizeCoverImageUrl } from "@/lib/cover-image";
+import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
 
 export function formatDateIndonesia(value) {
   if (!value) return "-";
@@ -33,7 +33,7 @@ export function normalizeBerita(item = {}) {
     category: item.category || "Umum",
     date: formatDateIndonesia(isoDate),
     isoDate,
-    coverImage: normalizeCoverImageUrl(rawCoverImage),
+    coverImage: toCoverPreviewUrl(rawCoverImage),
     cover_image: rawCoverImage,
     content: item.content || "",
     isPublished,

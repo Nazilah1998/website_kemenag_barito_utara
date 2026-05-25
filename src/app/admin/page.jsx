@@ -4,7 +4,6 @@ import { getDashboardStats } from "@/lib/admin-stats";
 import { redirect } from "next/navigation";
 import AdminLoginClient from "@/components/features/admin/AdminLoginClient";
 import {
-  DashboardHeader,
   StatCard,
   RecentActivity,
   TopContent,
@@ -56,8 +55,7 @@ export default async function AdminDashboardPage({ searchParams }) {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700 delay-100">
-      {/* 1. Greeting & Hero Area */}
-      <DashboardHeader user={user} session={session} />
+      {/* 1. Greeting & Hero Area (Removed) */}
 
       {isPendingEditor && (
         <div className="rounded-[2rem] border-2 border-amber-100 bg-amber-50 p-8 dark:border-amber-900/30 dark:bg-amber-950/20">

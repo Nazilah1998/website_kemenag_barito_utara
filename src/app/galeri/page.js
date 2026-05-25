@@ -3,8 +3,7 @@ import GaleriPageClient from "@/components/features/galeri/GaleriPageClient";
 import prisma from "@/lib/prisma";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 300;
 
 export const metadata = {
   title: "Galeri",
