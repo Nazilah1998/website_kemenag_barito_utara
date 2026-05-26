@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { apiResponse } from "@/lib/prisma-helpers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {
