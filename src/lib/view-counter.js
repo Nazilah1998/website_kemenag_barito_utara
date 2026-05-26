@@ -8,17 +8,20 @@ async function flushViews() {
   const batch = new Map(viewBuffer);
   viewBuffer.clear();
 
-  const { default: prisma } = await import("@/lib/prisma");
+  const { db } = await import("@/lib/drizzle");
+  const { berita } = await import("@/db/schema");
+  const { eq, sql } = await import("drizzle-orm");
 
   await Promise.all(
     Array.from(batch.entries()).map(([slug, count]) =>
-      prisma.berita.update({
-        where: { slug },
-        data: { views: { increment: count } },
-      }).catch((err) => {
-        console.error(`view-counter flush error for ${slug}:`, err.message);
-      })
-    )
+      db
+        .update(berita)
+        .set({ views: sql`${berita.views} + ${count}` })
+        .where(eq(berita.slug, slug))
+        .catch((err) => {
+          console.error(`view-counter flush error for ${slug}:`, err.message);
+        }),
+    ),
   );
 }
 

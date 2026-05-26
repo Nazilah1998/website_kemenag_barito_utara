@@ -8,7 +8,7 @@ Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js 16 App
 |----------|-----------|
 | Framework | Next.js 16 (App Router, Turbopack) |
 | UI | React 19, Tailwind CSS 4 |
-| Database | Prisma ORM → PostgreSQL (via Supabase) |
+| Database | Drizzle ORM → PostgreSQL (via Supabase) |
 | Auth & Realtime | Supabase |
 | File Storage | Cloudflare R2 |
 | AI Chatbot | Google Gemini / Groq / Mistral / OpenRouter (multi-model fallback) |
@@ -20,7 +20,6 @@ Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js 16 App
 
 ```bash
 .
-├── prisma/               # Skema database & konfigurasi Prisma (~1000 baris, 104+ model)
 ├── public/               # Aset statis, sw.js, manifest.webmanifest, offline.html
 │   └── assets/           # icons/, images/, branding/, apps/, workers/
 ├── src/
@@ -35,7 +34,7 @@ Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js 16 App
 │   │   ├── features/     # admin/, chat/, portal/, seo/
 │   │   └── layout/       # AppShell, Providers, PwaRegister, dll.
 │   ├── data/             # Data statis (site.js, laporan.js, navigasi, dll.)
-│   └── lib/              # Business logic, Prisma, Auth, Storage, SEO
+│   └── lib/              # Business logic, Drizzle, Auth, Storage, SEO
 ├── tests/                # 7 unit test (Vitest) + 1 E2E spec (Playwright)
 ├── proxy.js              # Root middleware (session refresh, delegasi ke src/lib/supabase/proxy)
 └── src/proxy.js          # Full middleware (admin guard + updateSession)
@@ -90,7 +89,7 @@ npm run dev
 
 ```bash
 npm run dev           # Dev server (Turbopack)
-npm run build         # Production build (auto: prisma generate)
+npm run build         # Production build
 npm run start         # Production server
 npm run lint          # ESLint (flat config)
 npm run test          # Unit test (Vitest)
@@ -98,15 +97,15 @@ npm run test:watch    # Unit test watch mode
 npm run test:coverage # Coverage report
 npm run test:e2e      # E2E test (Playwright, Chromium)
 npm run test:e2e:ui   # E2E dengan UI interaktif
-npm run db:push       # Prisma db push
+npm run db:push       # Push Drizzle schema to DB
 ```
 
 > ⚠️ Script `lint:fix` dan `typecheck` **tidak ada** meskipun disebutkan di dokumentasi lama.
 
 ## Prinsip arsitektur proyek
 
-- **Database**: Semua akses data wajib melalui Prisma ORM — tidak boleh raw SQL.
-- **API Response**: Semua API route wajib menggunakan `apiResponse()` dari `src/lib/prisma-helpers.js` untuk serialisasi BigInt yang konsisten.
+- **Database**: Semua akses data wajib melalui Drizzle ORM — tidak boleh raw SQL.
+- **API Response**: Semua API route wajib menggunakan `apiResponse()` dari `src/lib/api-helpers.js` untuk serialisasi BigInt yang konsisten.
 - **Audit Log**: Setiap operasi CRUD di panel admin wajib dicatat via `recordAudit()` dari `src/lib/audit.js`.
 - **Admin Auth**: Semua API admin wajib memanggil `validateAdmin()` dari `src/lib/cms-utils.js`.
 - **Rate Limit**: Gunakan `rateLimit()` dari `src/lib/rate-limit.js` — otomatis fallback ke in-memory jika Redis tidak tersedia.

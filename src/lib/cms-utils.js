@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentSessionContext } from "@/lib/auth";
-import { hasPermission } from "@/lib/permissions";
 import {
   getUserPermissionContext,
   hasUserPermission,
 } from "@/lib/user-permissions";
-import prisma from "@/lib/prisma";
-
-export function cleanString(value) {
-  if (typeof value !== "string") {
-    return "";
-  }
-
-  return value.trim();
-}
+import { cleanString } from "@/lib/validation";
+import { db } from "@/lib/drizzle";
+import * as schema from "@/db/schema";
+import { eq, ne, and } from "drizzle-orm";
 
 export function slugify(value) {
   return cleanString(value)
@@ -39,14 +33,24 @@ export async function ensureUniqueSlug(
   let counter = 1;
   const MAX_ITERATIONS = 100;
 
+  const camelTable = table.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+  const schemaTable = schema[camelTable] || schema[table];
+
+  if (!schemaTable) {
+    throw new Error(`Tabel ${table} tidak ditemukan di schema`);
+  }
+
   while (counter <= MAX_ITERATIONS) {
-    const existing = await prisma[table].findFirst({
-      where: {
-        slug: candidate,
-        ...(currentId && { id: { not: currentId } }),
-      },
-      select: { id: true },
-    });
+    let conditions = [eq(schemaTable.slug, candidate)];
+    if (currentId) {
+      conditions.push(ne(schemaTable.id, currentId));
+    }
+
+    const [existing] = await db
+      .select({ id: schemaTable.id })
+      .from(schemaTable)
+      .where(and(...conditions))
+      .limit(1);
 
     if (!existing) {
       return candidate;

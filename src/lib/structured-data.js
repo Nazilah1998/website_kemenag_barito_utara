@@ -65,7 +65,7 @@ export function organizationSchema() {
       name: "Kementerian Agama Republik Indonesia",
       url: "https://kemenag.go.id",
     },
-    sameAs: [siteLinks.mapDirectionUrl, siteLinks.instagram],
+    sameAs: [siteLinks.instagram, siteLinks.youtube].filter(Boolean),
   };
 }
 

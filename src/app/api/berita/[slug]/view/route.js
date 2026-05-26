@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { incrementView } from "@/lib/view-counter";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 

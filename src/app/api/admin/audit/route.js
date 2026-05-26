@@ -1,5 +1,7 @@
-import prisma from "@/lib/prisma";
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
+import { db } from "@/lib/drizzle";
+import { admin_audit_log } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { validateAdmin } from "@/lib/cms-utils";
 import { PERMISSIONS } from "@/lib/permissions";
 
@@ -15,13 +17,14 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const skip = (page - 1) * limit;
 
-    const [logs, total] = await Promise.all([
-      prisma.admin_audit_log.findMany({
-        orderBy: { created_at: "desc" },
-        take: limit,
-        skip: skip,
-      }),
-      prisma.admin_audit_log.count()
+    const [logs, [{ count: total }]] = await Promise.all([
+      db
+        .select()
+        .from(admin_audit_log)
+        .orderBy(desc(admin_audit_log.created_at))
+        .limit(limit)
+        .offset(skip),
+      db.select({ count: sql`count(*)` }).from(admin_audit_log)
     ]);
 
     return apiResponse({
@@ -55,12 +58,10 @@ export async function DELETE(request) {
     const id = searchParams.get("id");
 
     if (id) {
-      await prisma.admin_audit_log.delete({
-        where: { id }
-      });
+      await db.delete(admin_audit_log).where(eq(admin_audit_log.id, id));
       return apiResponse({ message: "Log berhasil dihapus." });
     } else {
-      await prisma.admin_audit_log.deleteMany();
+      await db.delete(admin_audit_log);
       return apiResponse({ message: "Seluruh riwayat log berhasil dibersihkan." });
     }
   } catch (error) {

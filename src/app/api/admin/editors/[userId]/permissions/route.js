@@ -1,8 +1,10 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { PERMISSIONS } from "@/lib/permissions";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { user_permissions } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -45,23 +47,20 @@ export async function PUT(request, context) {
 
     const now = new Date();
 
-    // Use transaction to delete old and insert new permissions
-    await prisma.$transaction(async (tx) => {
-      await tx.user_permissions.deleteMany({
-        where: { user_id: userId }
-      });
+    // Delete old permissions
+    await db.delete(user_permissions).where(eq(user_permissions.user_id, userId));
 
-      if (permissions.length) {
-        await tx.user_permissions.createMany({
-          data: permissions.map((permission) => ({
-            user_id: userId,
-            permission,
-            created_at: now,
-            updated_at: now,
-          }))
-        });
-      }
-    });
+    // Insert new permissions
+    if (permissions.length) {
+      await db.insert(user_permissions).values(
+        permissions.map((permission) => ({
+          user_id: userId,
+          permission,
+          created_at: now,
+          updated_at: now,
+        }))
+      );
+    }
 
     await recordAudit({
       session: auth.session,

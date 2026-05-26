@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { seksi } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const seksiList = await prisma.seksi.findMany();
+    const seksiList = await db.select().from(seksi);
 
     // Urutan slug sesuai dengan struktur hirarki organisasi Kemenag
     const slugOrder = [
@@ -32,14 +33,14 @@ export async function GET() {
     const kepalaKantor = kepalaKantorDb ? {
       name: kepalaKantorDb.nama_kepala,
       position: "Kepala Kantor Kementerian Agama Kabupaten Barito Utara",
-      image: kepalaKantorDb.foto_kepala || "/assets/images/pejabat.png",
+      image: kepalaKantorDb.foto_kepala || "",
       imageY: kepalaKantorDb.foto_kepala_y ?? 50,
       description: kepalaKantorDb.deskripsi,
       nip: kepalaKantorDb.nip_kepala || "",
     } : {
       name: "H. Arbaja, S.Ag.,M.A.P",
       position: "Kepala Kantor Kementerian Agama Kabupaten Barito Utara",
-      image: "/assets/images/pejabat.png",
+      image: "",
       imageY: 50,
       description: "Memimpin arah kebijakan, koordinasi pelayanan, dan penguatan tata kelola kelembagaan di lingkungan Kemenag Barito Utara.",
       nip: "-",
@@ -50,7 +51,7 @@ export async function GET() {
       .map(s => ({
         name: s.nama_kepala,
         position: s.slug === 'sekjen' ? 'Kepala Subbagian Tata Usaha' : s.judul,
-        image: s.foto_kepala || "/assets/images/pejabat.png",
+        image: s.foto_kepala || "",
         imageY: s.foto_kepala_y ?? 50,
         description: s.deskripsi,
         nip: s.nip_kepala || "",

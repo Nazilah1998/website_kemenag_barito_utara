@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 
 export function GaleriFormModal({
@@ -8,11 +8,16 @@ export function GaleriFormModal({
   imagePreview,
   saving,
   uploadingImage,
+  isDraggingImage,
   onClose,
   onChange,
   onFileChange,
+  onImageDragOver,
+  onImageDragLeave,
+  onImageDrop,
   onSave,
 }) {
+  const fileInputRef = useRef(null);
   if (!open) return null;
 
   return (
@@ -77,8 +82,18 @@ export function GaleriFormModal({
               <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
                 Visual (3:4)
               </label>
-              <label className="relative flex aspect-[3/4] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-6 transition-all hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-white">
-                <input type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+              <div
+                onDragOver={onImageDragOver}
+                onDragLeave={onImageDragLeave}
+                onDrop={onImageDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`relative flex aspect-[3/4] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed p-6 transition-all ${
+                  isDraggingImage
+                    ? "border-emerald-500 bg-emerald-500/10 scale-[1.02]"
+                    : "border-slate-200 bg-white hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-white"
+                }`}
+              >
+                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={onFileChange} />
 
                 {imagePreview ? (
                   <Image
@@ -96,6 +111,7 @@ export function GaleriFormModal({
                       </svg>
                     </div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Upload Foto</p>
+                    <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">Tarik & lepas atau klik untuk pilih</p>
                   </div>
                 )}
 
@@ -104,7 +120,7 @@ export function GaleriFormModal({
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900 dark:border-slate-800 dark:border-t-white" />
                   </div>
                 )}
-              </label>
+              </div>
             </div>
           </div>
         </div>

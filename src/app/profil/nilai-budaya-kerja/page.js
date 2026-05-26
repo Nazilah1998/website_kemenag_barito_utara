@@ -1,34 +1,50 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageBanner from "@/components/common/PageBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
-const values = [
+const FALLBACK_VALUES = [
   {
     title: "Integritas",
-    desc: "Keselarasan antara hati, pikiran, perkataan, dan perbuatan yang baik dan benar.",
+    description: "Keselarasan antara hati, pikiran, perkataan, dan perbuatan yang baik dan benar.",
   },
   {
     title: "Profesionalitas",
-    desc: "Bekerja secara disiplin, kompeten, bertanggung jawab, dan berorientasi pada hasil terbaik.",
+    description: "Bekerja secara disiplin, kompeten, bertanggung jawab, dan berorientasi pada hasil terbaik.",
   },
   {
     title: "Inovasi",
-    desc: "Menyempurnakan proses kerja agar layanan semakin cepat, mudah, adaptif, dan relevan.",
+    description: "Menyempurnakan proses kerja agar layanan semakin cepat, mudah, adaptif, dan relevan.",
   },
   {
     title: "Tanggung Jawab",
-    desc: "Melaksanakan amanah pekerjaan dengan sungguh-sungguh, tuntas, dan dapat dipertanggungjawabkan.",
+    description: "Melaksanakan amanah pekerjaan dengan sungguh-sungguh, tuntas, dan dapat dipertanggungjawabkan.",
   },
   {
     title: "Keteladanan",
-    desc: "Menjadi contoh dalam sikap, perilaku, etika kerja, dan pelayanan kepada masyarakat.",
+    description: "Menjadi contoh dalam sikap, perilaku, etika kerja, dan pelayanan kepada masyarakat.",
   },
 ];
 
 export default function NilaiBudayaKerjaPage() {
   const { t } = useLanguage();
+  const [values, setValues] = useState(FALLBACK_VALUES);
+
+  useEffect(() => {
+    fetch("/api/static-pages?slug=nilai-budaya-kerja")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.content) {
+          try {
+            const parsed = JSON.parse(data.content);
+            if (Array.isArray(parsed.values) && parsed.values.length > 0)
+              setValues(parsed.values);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
@@ -58,7 +74,7 @@ export default function NilaiBudayaKerjaPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
-                {value.desc}
+                {value.description || value.desc}
               </p>
             </div>
           ))}

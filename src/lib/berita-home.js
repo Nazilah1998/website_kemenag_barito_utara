@@ -1,18 +1,18 @@
 import { unstable_cache } from "next/cache";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { berita } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { normalizeBerita } from "./berita";
 
 const getCachedLatestBeritaHome = unstable_cache(
   async () => {
     try {
-      const data = await prisma.berita.findMany({
-        where: { is_published: true },
-        orderBy: [
-          { published_at: 'desc' },
-          { created_at: 'desc' }
-        ],
-        take: 6
-      });
+      const data = await db
+        .select()
+        .from(berita)
+        .where(eq(berita.is_published, true))
+        .orderBy(desc(berita.published_at), desc(berita.created_at))
+        .limit(6);
 
       return (data || []).map(normalizeBerita);
     } catch (error) {
@@ -30,14 +30,12 @@ const getCachedLatestBeritaHome = unstable_cache(
 const getCachedPopularBeritaHome = unstable_cache(
   async () => {
     try {
-      const data = await prisma.berita.findMany({
-        where: { is_published: true },
-        orderBy: [
-          { views: 'desc' },
-          { published_at: 'desc' }
-        ],
-        take: 6
-      });
+      const data = await db
+        .select()
+        .from(berita)
+        .where(eq(berita.is_published, true))
+        .orderBy(desc(berita.views), desc(berita.published_at))
+        .limit(6);
 
       return (data || []).map(normalizeBerita);
     } catch (error) {

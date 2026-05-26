@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { berita } from "@/db/schema";
+import { eq, and, lte, isNotNull, inArray, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -18,26 +20,25 @@ function isAuthorized(request) {
 async function runScheduledPublish() {
   const now = new Date();
 
-  // Berita dengan publish_at <= sekarang tapi belum publish.
-  const beritaPending = await prisma.berita.findMany({
-    where: {
-      is_published: false,
-      published_at: {
-        not: null,
-        lte: now,
-      },
-    },
-    select: { id: true, slug: true, title: true },
-  });
+  const beritaPending = await db
+    .select({ id: berita.id, slug: berita.slug, title: berita.title })
+    .from(berita)
+    .where(
+      and(
+        eq(berita.is_published, false),
+        isNotNull(berita.published_at),
+        lte(berita.published_at, now)
+      )
+    );
 
   let beritaPublished = 0;
   if (beritaPending && beritaPending.length > 0) {
     const ids = beritaPending.map((b) => b.id);
     
-    await prisma.berita.updateMany({
-      where: { id: { in: ids } },
-      data: { is_published: true },
-    });
+    await db
+      .update(berita)
+      .set({ is_published: true })
+      .where(inArray(berita.id, ids));
 
     beritaPublished = ids.length;
     for (const item of beritaPending) {

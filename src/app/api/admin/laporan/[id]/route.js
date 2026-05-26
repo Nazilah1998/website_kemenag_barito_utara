@@ -1,4 +1,4 @@
-import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { uploadToR2, deleteFromR2 } from "@/lib/r2";
 import {
@@ -7,10 +7,11 @@ import {
   validatePdfFile,
 } from "@/lib/laporan-upload-validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { db } from "@/lib/drizzle";
+import { report_documents } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -28,9 +29,11 @@ export async function PUT(request, context) {
       return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const existingDoc = await prisma.report_documents.findUnique({
-      where: { id: id }
-    });
+    const [existingDoc] = await db
+      .select()
+      .from(report_documents)
+      .where(eq(report_documents.id, id))
+      .limit(1);
 
     if (!existingDoc) {
       return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
@@ -39,7 +42,6 @@ export async function PUT(request, context) {
     const contentType = request.headers.get("content-type") || "";
     let payload = {};
     let replacementFileData = null;
-    const supabase = createAdminClient();
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -82,7 +84,7 @@ export async function PUT(request, context) {
           file_path: storagePath,
           file_url: fileUrl,
           mime_type: "application/pdf",
-          file_size: BigInt(file.size || 0),
+          file_size: file.size || 0,
         };
       }
     } else {
@@ -104,15 +106,16 @@ export async function PUT(request, context) {
 
     const updatePayload = {
       ...payload,
-      year: payload.year ? Number(payload.year) : null,
+      year: payload.year !== undefined && payload.year !== null && payload.year !== '' ? Number(payload.year) : null,
       ...(replacementFileData || {}),
       updated_at: new Date(),
     };
 
-    const updatedDoc = await prisma.report_documents.update({
-      where: { id: id },
-      data: updatePayload
-    });
+    const [updatedDoc] = await db
+      .update(report_documents)
+      .set(updatePayload)
+      .where(eq(report_documents.id, id))
+      .returning();
 
     if (replacementFileData && existingDoc?.file_path) {
       await deleteFromR2(existingDoc.file_path);
@@ -155,17 +158,17 @@ export async function DELETE(request, context) {
       return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const existingDoc = await prisma.report_documents.findUnique({
-      where: { id: id }
-    });
+    const [existingDoc] = await db
+      .select()
+      .from(report_documents)
+      .where(eq(report_documents.id, id))
+      .limit(1);
 
     if (!existingDoc) {
       return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
     }
 
-    await prisma.report_documents.delete({
-      where: { id: id }
-    });
+    await db.delete(report_documents).where(eq(report_documents.id, id));
 
     if (existingDoc.file_path) {
       await deleteFromR2(existingDoc.file_path);

@@ -1,5 +1,7 @@
 import React from "react";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { static_pages } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import InformasiIndexClient from "./InformasiIndexClient";
 
 export const revalidate = 600;
@@ -13,11 +15,16 @@ export const metadata = {
 export default async function InformasiPage() {
   let staticPages = [];
   try {
-    staticPages = await prisma.static_pages.findMany({
-      where: { is_published: true },
-      select: { slug: true, title: true, description: true, updated_at: true },
-      orderBy: { updated_at: "desc" },
-    });
+    staticPages = await db
+      .select({
+        slug: static_pages.slug,
+        title: static_pages.title,
+        description: static_pages.description,
+        updated_at: static_pages.updated_at,
+      })
+      .from(static_pages)
+      .where(eq(static_pages.is_published, true))
+      .orderBy(desc(static_pages.updated_at));
   } catch (error) {
     console.error("Error fetching static pages:", error);
   }

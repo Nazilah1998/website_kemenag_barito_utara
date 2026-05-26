@@ -1,43 +1,27 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageBanner from "@/components/common/PageBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
-const tugasUtama = [
+const FALLBACK_INDIKATOR = ["Responsif", "Akuntabel", "Transparan", "Profesional"];
+
+const FALLBACK_TUGAS_UTAMA = [
   "Melaksanakan pelayanan dan pembinaan di bidang urusan agama Islam, Kristen, Katolik, Hindu, Buddha, dan kepercayaan sesuai ketentuan yang berlaku.",
   "Menyelenggarakan pelayanan administrasi keagamaan yang cepat, transparan, akuntabel, dan berorientasi pada kebutuhan masyarakat.",
   "Mendorong peningkatan kualitas pendidikan agama dan pendidikan keagamaan di wilayah Kabupaten Barito Utara.",
 ];
 
-const fungsiLayanan = [
-  {
-    title: "Perumusan Kebijakan Teknis",
-    desc: "Menyusun arah pelaksanaan program dan layanan keagamaan sesuai kebijakan Kementerian Agama.",
-  },
-  {
-    title: "Pelayanan Keagamaan",
-    desc: "Memberikan layanan publik di bidang nikah, rujuk, zakat, wakaf, bimbingan masyarakat, dan layanan keagamaan lainnya.",
-  },
-  {
-    title: "Pembinaan Pendidikan",
-    desc: "Melakukan pembinaan madrasah, pendidikan agama, pendidikan keagamaan, serta peningkatan mutu kelembagaan pendidikan.",
-  },
-  {
-    title: "Kerukunan Umat Beragama",
-    desc: "Memperkuat moderasi beragama, toleransi, dan harmoni sosial di tengah masyarakat.",
-  },
-  {
-    title: "Tata Kelola Organisasi",
-    desc: "Mengelola administrasi, kepegawaian, keuangan, data, informasi, dan aset secara profesional.",
-  },
-  {
-    title: "Pengawasan dan Evaluasi",
-    desc: "Melaksanakan monitoring, evaluasi, dan pelaporan untuk memastikan layanan berjalan efektif dan akuntabel.",
-  },
-];
+const FALLBACK_ORIENTASI = ["Pelayanan Publik", "Moderasi Beragama", "Pendidikan Agama", "Tata Kelola Bersih"];
 
-const indikator = ["Responsif", "Akuntabel", "Transparan", "Profesional"];
+const FALLBACK_FUNGSI = [
+  { title: "Perumusan Kebijakan Teknis", description: "Menyusun arah pelaksanaan program dan layanan keagamaan sesuai kebijakan Kementerian Agama." },
+  { title: "Pelayanan Keagamaan", description: "Memberikan layanan publik di bidang nikah, rujuk, zakat, wakaf, bimbingan masyarakat, dan layanan keagamaan lainnya." },
+  { title: "Pembinaan Pendidikan", description: "Melakukan pembinaan madrasah, pendidikan agama, pendidikan keagamaan, serta peningkatan mutu kelembagaan pendidikan." },
+  { title: "Kerukunan Umat Beragama", description: "Memperkuat moderasi beragama, toleransi, dan harmoni sosial di tengah masyarakat." },
+  { title: "Tata Kelola Organisasi", description: "Mengelola administrasi, kepegawaian, keuangan, data, informasi, dan aset secara profesional." },
+  { title: "Pengawasan dan Evaluasi", description: "Melaksanakan monitoring, evaluasi, dan pelaporan untuk memastikan layanan berjalan efektif dan akuntabel." },
+];
 
 function CheckIcon() {
   return (
@@ -55,6 +39,27 @@ function CheckIcon() {
 
 export default function TugasFungsiPage() {
   const { t } = useLanguage();
+  const [indikatorList, setIndikatorList] = useState(FALLBACK_INDIKATOR);
+  const [tugasUtamaList, setTugasUtamaList] = useState(FALLBACK_TUGAS_UTAMA);
+  const [orientasiList, setOrientasiList] = useState(FALLBACK_ORIENTASI);
+  const [fungsiList, setFungsiList] = useState(FALLBACK_FUNGSI);
+
+  useEffect(() => {
+    fetch("/api/static-pages?slug=tugas-fungsi")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.content) {
+          try {
+            const parsed = JSON.parse(data.content);
+            if (Array.isArray(parsed.indikator) && parsed.indikator.length > 0) setIndikatorList(parsed.indikator);
+            if (Array.isArray(parsed.tugasUtama) && parsed.tugasUtama.length > 0) setTugasUtamaList(parsed.tugasUtama);
+            if (Array.isArray(parsed.orientasiKerja) && parsed.orientasiKerja.length > 0) setOrientasiList(parsed.orientasiKerja);
+            if (Array.isArray(parsed.fungsiLayanan) && parsed.fungsiLayanan.length > 0) setFungsiList(parsed.fungsiLayanan);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
@@ -70,7 +75,7 @@ export default function TugasFungsiPage() {
 
       <section className="relative w-full px-6 py-14 sm:px-10 lg:px-16 xl:px-20">
         <div className="grid gap-4 md:grid-cols-4">
-          {indikator.map((item) => (
+          {indikatorList.map((item) => (
             <div
               key={item}
               className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"
@@ -96,7 +101,7 @@ export default function TugasFungsiPage() {
             </h2>
 
             <div className="mt-8 space-y-5">
-              {tugasUtama.map((item, index) => (
+              {tugasUtamaList.map((item, index) => (
                 <div key={item} className="flex gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-sm font-black text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                     {index + 1}
@@ -125,12 +130,7 @@ export default function TugasFungsiPage() {
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {[
-                "Pelayanan Publik",
-                "Moderasi Beragama",
-                "Pendidikan Agama",
-                "Tata Kelola Bersih",
-              ].map((item) => (
+              {orientasiList.map((item) => (
                 <div
                   key={item}
                   className="rounded-2xl border border-white/10 bg-white/10 p-4 text-sm font-bold text-white backdrop-blur-sm"
@@ -153,7 +153,7 @@ export default function TugasFungsiPage() {
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {fungsiLayanan.map((item) => (
+            {fungsiList.map((item) => (
               <div
                 key={item.title}
                 className="group rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
@@ -167,7 +167,7 @@ export default function TugasFungsiPage() {
                 </h3>
 
                 <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400">
-                  {item.desc}
+                  {item.description || item.desc}
                 </p>
               </div>
             ))}

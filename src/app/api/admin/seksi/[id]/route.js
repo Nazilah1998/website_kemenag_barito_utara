@@ -1,4 +1,4 @@
-import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin, ensureUniqueSlug } from "@/lib/cms-utils";
 import {
   uploadBase64ImageToSupabase,
@@ -6,10 +6,12 @@ import {
   isCmsStoragePublicUrl,
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
 import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { db } from "@/lib/drizzle";
+import { seksi, pegawai_seksi } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -25,13 +27,11 @@ export async function GET(request, context) {
   try {
     const id = await getSafeIdFromContext(context);
 
-    const data = await prisma.seksi.findUnique({
-      where: { id },
-      include: {
-        pegawai_seksi: {
-          orderBy: {
-            sort_order: "asc",
-          },
+    const data = await db.query.seksi.findFirst({
+      where: eq(seksi.id, id),
+      with: {
+        pegawai_seksis: {
+          orderBy: [asc(pegawai_seksi.sort_order)],
         },
       },
     });
@@ -58,9 +58,11 @@ export async function PUT(request, context) {
     const id = await getSafeIdFromContext(context);
     const body = await request.json().catch(() => ({}));
 
-    const existing = await prisma.seksi.findUnique({
-      where: { id },
-    });
+    const [existing] = await db
+      .select()
+      .from(seksi)
+      .where(eq(seksi.id, id))
+      .limit(1);
 
     if (!existing) {
       return apiResponse({ message: "Seksi tidak ditemukan." }, 404);
@@ -113,9 +115,9 @@ export async function PUT(request, context) {
       }
     }
 
-    const updated = await prisma.seksi.update({
-      where: { id },
-      data: {
+    const [updated] = await db
+      .update(seksi)
+      .set({
         judul,
         slug,
         deskripsi,
@@ -124,8 +126,9 @@ export async function PUT(request, context) {
         foto_kepala: finalFotoKepala,
         foto_kepala_y: Number.isInteger(foto_kepala_y) ? foto_kepala_y : 50,
         updated_at: new Date(),
-      },
-    });
+      })
+      .where(eq(seksi.id, id))
+      .returning();
 
     await recordAudit({
       session: auth.session,
@@ -178,23 +181,21 @@ export async function DELETE(request, context) {
   try {
     const id = await getSafeIdFromContext(context);
 
-    const existing = await prisma.seksi.findUnique({
-      where: { id },
-      include: {
-        pegawai_seksi: true,
-      },
-    });
+    const [existing] = await db
+      .select()
+      .from(seksi)
+      .where(eq(seksi.id, id))
+      .limit(1);
 
     if (!existing) {
       return apiResponse({ message: "Seksi tidak ditemukan." }, 404);
     }
 
-    // Hapus relasi pegawai (jika tidak cascade di DB)
-    if (existing.pegawai_seksi?.length) {
-      await prisma.pegawai_seksi.deleteMany({
-        where: { seksi_id: id },
-      });
-    }
+    // Cek pegawai terkait
+    const pegawaiList = await db
+      .select()
+      .from(pegawai_seksi)
+      .where(eq(pegawai_seksi.seksi_id, id));
 
     // Hapus file foto kepala (jika tersimpan di storage CMS)
     if (existing.foto_kepala && isCmsStoragePublicUrl(existing.foto_kepala)) {
@@ -208,9 +209,7 @@ export async function DELETE(request, context) {
       }
     }
 
-    await prisma.seksi.delete({
-      where: { id },
-    });
+    await db.delete(seksi).where(eq(seksi.id, id));
 
     await recordAudit({
       session: auth.session,

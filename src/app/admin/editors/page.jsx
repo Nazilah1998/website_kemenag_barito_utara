@@ -1,15 +1,17 @@
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 import EditorsManagementClient from "@/components/features/admin/EditorsManagementClient";
+import { db } from "@/lib/drizzle";
+import { editor_requests, user_permissions, profiles } from "@/db/schema";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
 async function getEditors() {
-    const requests = await prisma.editor_requests.findMany({
-        include: {
-            profiles_editor_requests_user_idToprofiles: {
-                select: {
+    const requests = await db.query.editor_requests.findMany({
+        with: {
+            profile_user_id: {
+                columns: {
                     id: true,
                     role: true,
                     is_active: true,
@@ -21,7 +23,7 @@ async function getEditors() {
                 }
             }
         },
-        orderBy: { requested_at: 'desc' }
+        orderBy: [desc(editor_requests.requested_at)]
     });
 
     if (!requests?.length) {
@@ -30,10 +32,10 @@ async function getEditors() {
 
     const userIds = requests.map((item) => item.user_id).filter(Boolean);
 
-    const permissionRows = await prisma.user_permissions.findMany({
-        where: { user_id: { in: userIds } },
-        select: { user_id: true, permission: true }
-    });
+    const permissionRows = await db
+        .select({ user_id: user_permissions.user_id, permission: user_permissions.permission })
+        .from(user_permissions)
+        .where(inArray(user_permissions.user_id, userIds));
 
     const permissionMap = new Map();
 
@@ -44,7 +46,7 @@ async function getEditors() {
     }
 
     return requests.map((item) => {
-        const profile = item.profiles_editor_requests_user_idToprofiles;
+        const profile = item.profile_user_id;
         return {
             user_id: item.user_id,
             full_name: profile?.full_name || item.full_name,

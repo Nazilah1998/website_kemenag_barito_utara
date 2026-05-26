@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { apiResponse } from "@/lib/prisma-helpers";
-import prisma from "@/lib/prisma";
+import { apiResponse } from "@/lib/api-helpers";
+import { db } from "@/lib/drizzle";
+import { report_documents } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +26,15 @@ export async function GET(request, { params }) {
       return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const doc = await prisma.report_documents.findUnique({
-      where: { id: id },
-      select: { id: true, file_url: true, is_published: true }
-    });
+    const [doc] = await db
+      .select({
+        id: report_documents.id,
+        file_url: report_documents.file_url,
+        is_published: report_documents.is_published,
+      })
+      .from(report_documents)
+      .where(eq(report_documents.id, id))
+      .limit(1);
 
     if (!doc) {
       return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
@@ -41,15 +48,13 @@ export async function GET(request, { params }) {
       return apiResponse({ message: "URL file dokumen tidak tersedia." }, 404);
     }
 
-    // Increment view count atomically
-    await prisma.report_documents.update({
-      where: { id: id },
-      data: {
-        view_count: {
-          increment: 1
-        }
-      }
-    });
+    // Increment view count atomically using Drizzle sql template
+    await db
+      .update(report_documents)
+      .set({
+        view_count: sql`${report_documents.view_count} + 1`
+      })
+      .where(eq(report_documents.id, id));
 
     // Construct absolute URL if the path is relative
     let targetUrl = doc.file_url;

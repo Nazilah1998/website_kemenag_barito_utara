@@ -1,6 +1,8 @@
-import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { report_documents } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +13,11 @@ export async function GET(request, context) {
       return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const doc = await prisma.report_documents.findUnique({
-      where: { id: id },
-      select: { id: true, file_url: true, is_published: true, view_count: true }
-    });
+    const [doc] = await db
+      .select({ id: report_documents.id, file_url: report_documents.file_url, is_published: report_documents.is_published, view_count: report_documents.view_count })
+      .from(report_documents)
+      .where(eq(report_documents.id, id))
+      .limit(1);
 
     if (!doc) {
       return apiResponse({ message: "Dokumen tidak ditemukan." }, 404);
@@ -28,15 +31,10 @@ export async function GET(request, context) {
       return apiResponse({ message: "File dokumen tidak tersedia." }, 404);
     }
 
-    await prisma.report_documents.update({
-      where: { id: id },
-      data: {
-        view_count: {
-          increment: 1
-        },
-        updated_at: new Date(),
-      }
-    });
+    await db
+      .update(report_documents)
+      .set({ view_count: sql`${report_documents.view_count} + 1`, updated_at: new Date() })
+      .where(eq(report_documents.id, id));
 
     return NextResponse.redirect(doc.file_url, 302);
   } catch (error) {

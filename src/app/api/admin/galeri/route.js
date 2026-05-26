@@ -5,8 +5,11 @@ import {
   uploadBase64Image,
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import { apiResponse } from "@/lib/prisma-helpers";
-import prisma from "@/lib/prisma";
+import { cleanString } from "@/lib/validation";
+import { apiResponse } from "@/lib/api-helpers";
+import { db } from "@/lib/drizzle";
+import { galeri } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { randomUUID } from "crypto";
 
@@ -14,10 +17,6 @@ export const dynamic = "force-dynamic";
 
 const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
-
-function cleanString(value = "") {
-  return String(value || "").trim();
-}
 
 function toSafeSizeNumber(value) {
   const parsed = Number(value || 0);
@@ -61,13 +60,14 @@ export async function GET(request) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
-      prisma.galeri.findMany({
-        orderBy: { published_at: "desc" },
-        skip,
-        take: limit,
-      }),
-      prisma.galeri.count()
+    const [data, [{ count: total }]] = await Promise.all([
+      db
+        .select()
+        .from(galeri)
+        .orderBy(desc(galeri.published_at))
+        .limit(limit)
+        .offset(skip),
+      db.select({ count: sql`count(*)` }).from(galeri)
     ]);
 
     return apiResponse({
@@ -124,19 +124,20 @@ export async function POST(request) {
       fileNameStem: `galeri-${Date.now()}`,
     });
 
-    const insertedItem = await prisma.galeri.create({
-      data: {
+    const [insertedItem] = await db
+      .insert(galeri)
+      .values({
         title: "",
         image_url: uploaded.publicUrl,
         image_size_kb: base64Meta.sizeKB,
-        image_size_bytes: BigInt(base64Meta.sizeBytes),
+        image_size_bytes: base64Meta.sizeBytes,
         link_url: "",
         source_type: "manual",
         source_id: randomUUID(),
         is_published: true,
         published_at: publishedAt,
-      },
-    });
+      })
+      .returning();
 
     revalidateGaleriPaths();
 
@@ -177,9 +178,11 @@ export async function PUT(request) {
 
     const body = await request.json();
 
-    const existingItem = await prisma.galeri.findUnique({
-      where: { id: id },
-    });
+    const [existingItem] = await db
+      .select()
+      .from(galeri)
+      .where(eq(galeri.id, id))
+      .limit(1);
 
     if (!existingItem)
       return apiResponse({ message: "Item tidak ditemukan." }, 404);
@@ -211,19 +214,20 @@ export async function PUT(request) {
 
       finalImageUrl = uploaded.publicUrl;
       finalSizeKB = base64Meta.sizeKB;
-      finalSizeBytes = BigInt(base64Meta.sizeBytes);
+      finalSizeBytes = base64Meta.sizeBytes;
     }
 
-    const data = await prisma.galeri.update({
-      where: { id: id },
-      data: {
+    const [data] = await db
+      .update(galeri)
+      .set({
         image_url: finalImageUrl,
         image_size_kb: finalSizeKB,
         image_size_bytes: finalSizeBytes,
         published_at: publishedAt,
         updated_at: new Date(),
-      },
-    });
+      })
+      .where(eq(galeri.id, id))
+      .returning();
 
     revalidateGaleriPaths();
 
@@ -258,9 +262,11 @@ export async function DELETE(request) {
     const id = searchParams.get("id");
     if (!id) return apiResponse({ message: "ID galeri wajib ada." }, 400);
 
-    const item = await prisma.galeri.findUnique({
-      where: { id: id },
-    });
+    const [item] = await db
+      .select()
+      .from(galeri)
+      .where(eq(galeri.id, id))
+      .limit(1);
 
     if (!item) return apiResponse({ message: "Item tidak ditemukan." }, 404);
 
@@ -270,9 +276,7 @@ export async function DELETE(request) {
       );
     }
 
-    await prisma.galeri.delete({
-      where: { id: id },
-    });
+    await db.delete(galeri).where(eq(galeri.id, id));
 
     revalidateGaleriPaths();
 

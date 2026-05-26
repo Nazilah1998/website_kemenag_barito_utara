@@ -63,6 +63,7 @@ export function useBeritaManager() {
   const [deletingId, setDeletingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [isDraggingCover, setIsDraggingCover] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
 
   async function loadItems() {
@@ -412,9 +413,12 @@ export function useBeritaManager() {
     handleEditorInput();
   }
 
-  async function handleCoverFileChange(event) {
-    const file = event.target.files?.[0];
+  async function processCoverFile(file) {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("File harus berupa gambar.");
+      return;
+    }
 
     try {
       setUploadingCover(true);
@@ -444,9 +448,30 @@ export function useBeritaManager() {
       setError(err.message || "Gagal memproses cover berita.");
     } finally {
       setUploadingCover(false);
-      event.target.value = "";
     }
   }
+
+  async function handleCoverFileChange(event) {
+    const file = event.target.files?.[0];
+    if (file) await processCoverFile(file);
+    event.target.value = "";
+  }
+
+  const handleCoverDragOver = (e) => {
+    e.preventDefault();
+    setIsDraggingCover(true);
+  };
+
+  const handleCoverDragLeave = () => {
+    setIsDraggingCover(false);
+  };
+
+  const handleCoverDrop = (e) => {
+    e.preventDefault();
+    setIsDraggingCover(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processCoverFile(file);
+  };
 
   async function handleGalleryFileChange(event) {
     const file = event.target.files?.[0];
@@ -693,6 +718,10 @@ export function useBeritaManager() {
     onRunCommand: runEditorCommand,
     onInsertLink: handleInsertLink,
     onCoverChange: handleCoverFileChange,
+    isDraggingCover,
+    handleCoverDragOver,
+    handleCoverDragLeave,
+    handleCoverDrop,
     onClearCover: clearCoverImage,
     onSave: saveForm,
     handleAskDelete,

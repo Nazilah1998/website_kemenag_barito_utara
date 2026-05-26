@@ -1,22 +1,20 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { cleanString } from "@/lib/validation";
+import { apiResponse } from "@/lib/api-helpers";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { validateAdmin } from "@/lib/cms-utils";
 import {
   removeStorageFileByPublicUrl,
   uploadBase64Image,
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { galeri, berita } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
 const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
-
-function cleanString(value = "") {
-  return String(value || "").trim();
-}
 
 function normalizeSlug(value = "") {
   return cleanString(value)
@@ -96,7 +94,6 @@ function revalidateGaleriPaths(slug = "") {
 }
 
 async function resolveGaleriImage({
-  supabase,
   body,
   currentUrl = null,
   currentSizeKB = 0,
@@ -131,7 +128,6 @@ async function resolveGaleriImage({
   const base64Meta = getBase64PayloadMeta(uploadBase64);
 
   const uploaded = await uploadBase64Image({
-    supabase,
     dataUrl: uploadBase64,
     folder: "galeri",
     fileNameStem: slugSeed || uploadName,
@@ -164,14 +160,16 @@ export async function GET(request) {
       return apiResponse({ message: "ID berita wajib ada." }, 400);
     }
 
-    const data = await prisma.galeri.findUnique({
-      where: {
-        source_type_source_id: {
-          source_type: "berita",
-          source_id: beritaId
-        }
-      }
-    });
+    const [data] = await db
+      .select()
+      .from(galeri)
+      .where(
+        and(
+          eq(galeri.source_type, "berita"),
+          eq(galeri.source_id, beritaId)
+        )
+      )
+      .limit(1);
 
     return apiResponse({
       item: data,
@@ -191,7 +189,6 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const supabase = createAdminClient();
 
     const beritaId = cleanString(body?.berita_id);
     const title = cleanString(body?.title);
@@ -212,22 +209,24 @@ export async function POST(request) {
 
     const publishedAt = resolvePublishedAt(body?.published_at);
 
-    const beritaItem = await prisma.berita.findUnique({
-      where: { id: beritaId },
-      select: { id: true, slug: true, cover_image: true, cover_size_kb: true, cover_size_bytes: true }
-    });
+    const [beritaItem] = await db
+      .select({ id: berita.id, slug: berita.slug, cover_image: berita.cover_image, cover_size_kb: berita.cover_size_kb, cover_size_bytes: berita.cover_size_bytes })
+      .from(berita)
+      .where(eq(berita.id, beritaId))
+      .limit(1);
 
-    const existingItem = await prisma.galeri.findUnique({
-      where: {
-        source_type_source_id: {
-          source_type: "berita",
-          source_id: beritaId
-        }
-      }
-    });
+    const [existingItem] = await db
+      .select()
+      .from(galeri)
+      .where(
+        and(
+          eq(galeri.source_type, "berita"),
+          eq(galeri.source_id, beritaId)
+        )
+      )
+      .limit(1);
 
     const finalImage = await resolveGaleriImage({
-      supabase,
       body,
       currentUrl: existingItem?.image_url || null,
       currentSizeKB: existingItem?.image_size_kb || 0,
@@ -243,21 +242,22 @@ export async function POST(request) {
     }
 
     if (existingItem) {
-      const data = await prisma.galeri.update({
-        where: { id: existingItem.id },
-        data: {
+      const [data] = await db
+        .update(galeri)
+        .set({
           title,
           image_url: finalImage.publicUrl,
           image_size_kb: finalImage.sizeKB,
-          image_size_bytes: BigInt(finalImage.sizeBytes),
+          image_size_bytes: finalImage.sizeBytes,
           link_url: linkUrl,
           source_type: "berita",
           source_id: beritaId,
           is_published: true,
           published_at: publishedAt,
           updated_at: new Date(),
-        }
-      });
+        })
+        .where(eq(galeri.id, existingItem.id))
+        .returning();
 
       revalidateGaleriPaths(slug);
 
@@ -279,19 +279,20 @@ export async function POST(request) {
       });
     }
 
-    const insertedItem = await prisma.galeri.create({
-      data: {
+    const [insertedItem] = await db
+      .insert(galeri)
+      .values({
         title,
         image_url: finalImage.publicUrl,
         image_size_kb: finalImage.sizeKB,
-        image_size_bytes: BigInt(finalImage.sizeBytes),
+        image_size_bytes: finalImage.sizeBytes,
         link_url: linkUrl,
         source_type: "berita",
         source_id: beritaId,
         is_published: true,
         published_at: publishedAt,
-      }
-    });
+      })
+      .returning();
 
     revalidateGaleriPaths(slug);
 
@@ -332,11 +333,11 @@ export async function DELETE(request) {
       return apiResponse({ message: "ID galeri wajib ada." }, 400);
     }
 
-    const supabase = createAdminClient();
-
-    const item = await prisma.galeri.findUnique({
-      where: { id: id }
-    });
+    const [item] = await db
+      .select()
+      .from(galeri)
+      .where(eq(galeri.id, id))
+      .limit(1);
 
     if (!item) {
       return apiResponse({ message: "Item galeri tidak ditemukan." }, 404);
@@ -350,9 +351,7 @@ export async function DELETE(request) {
       }
     }
 
-    await prisma.galeri.delete({
-      where: { id: id }
-    });
+    await db.delete(galeri).where(eq(galeri.id, id));
 
     revalidateGaleriPaths();
 

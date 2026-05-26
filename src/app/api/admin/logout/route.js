@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {

@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 
 export const dynamic = "force-dynamic";

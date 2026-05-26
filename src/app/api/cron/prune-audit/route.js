@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { admin_audit_log } from "@/db/schema";
+import { lt, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -27,15 +29,13 @@ export async function GET(request) {
   try {
     const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
 
-    const result = await prisma.admin_audit_log.deleteMany({
-      where: {
-        created_at: { lt: cutoff },
-      },
-    });
+    const result = await db
+      .delete(admin_audit_log)
+      .where(lt(admin_audit_log.created_at, cutoff));
 
     return NextResponse.json({
       message: "OK",
-      deleted: result.count,
+      deleted: result.count || 0,
       retentionDays: RETENTION_DAYS,
       cutoffDate: cutoff.toISOString(),
       ranAt: new Date().toISOString(),

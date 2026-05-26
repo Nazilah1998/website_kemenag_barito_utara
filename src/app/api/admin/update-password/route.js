@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { env } from "@/lib/env";

@@ -1,10 +1,12 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { uploadBase64ImageToSupabase, removeSupabaseFileByPublicUrl, isCmsStoragePublicUrl } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
 import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
+import { db } from "@/lib/drizzle";
+import { seksi, pegawai_seksi } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -31,17 +33,21 @@ export async function PUT(request, context) {
       return apiResponse({ message: "Parameter tidak lengkap." }, 400);
     }
 
-    const seksi = await prisma.seksi.findUnique({
-      where: { id: seksiId }
-    });
+    const [seksiData] = await db
+      .select()
+      .from(seksi)
+      .where(eq(seksi.id, seksiId))
+      .limit(1);
 
-    if (!seksi) {
+    if (!seksiData) {
       return apiResponse({ message: "Seksi tidak ditemukan." }, 404);
     }
 
-    const existing = await prisma.pegawai_seksi.findUnique({
-      where: { id: pegawaiId }
-    });
+    const [existing] = await db
+      .select()
+      .from(pegawai_seksi)
+      .where(eq(pegawai_seksi.id, pegawaiId))
+      .limit(1);
 
     if (!existing || existing.seksi_id !== seksiId) {
       return apiResponse({ message: "Staf pegawai tidak ditemukan di seksi ini." }, 404);
@@ -85,24 +91,25 @@ export async function PUT(request, context) {
       }
     }
 
-    const updated = await prisma.pegawai_seksi.update({
-      where: { id: pegawaiId },
-      data: {
+    const [updated] = await db
+      .update(pegawai_seksi)
+      .set({
         nama,
         nip: nip || null,
         jabatan,
         foto: finalFoto || null,
         foto_y: Number.isInteger(foto_y) ? foto_y : 50,
         sort_order,
-      }
-    });
+      })
+      .where(eq(pegawai_seksi.id, pegawaiId))
+      .returning();
 
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.UPDATE,
       entity: AUDIT_ENTITIES.SETTINGS,
       entityId: pegawaiId,
-      summary: `Memperbarui staf pegawai seksi (${seksi.judul}): ${nama}`,
+      summary: `Memperbarui staf pegawai seksi (${seksiData.judul}): ${nama}`,
       before: existing,
       after: updated,
       request,
@@ -111,7 +118,7 @@ export async function PUT(request, context) {
     // Revalidate public routes
     revalidatePath("/");
     revalidatePath("/informasi/struktur-organisasi");
-    revalidatePath(`/layanan/${seksi.slug}`);
+    revalidatePath(`/layanan/${seksiData.slug}`);
 
     return apiResponse({
       message: "Data staf pegawai berhasil diperbarui.",
@@ -139,17 +146,21 @@ export async function DELETE(request, context) {
       return apiResponse({ message: "Parameter tidak lengkap." }, 400);
     }
 
-    const seksi = await prisma.seksi.findUnique({
-      where: { id: seksiId }
-    });
+    const [seksiData] = await db
+      .select()
+      .from(seksi)
+      .where(eq(seksi.id, seksiId))
+      .limit(1);
 
-    if (!seksi) {
+    if (!seksiData) {
       return apiResponse({ message: "Seksi tidak ditemukan." }, 404);
     }
 
-    const existing = await prisma.pegawai_seksi.findUnique({
-      where: { id: pegawaiId }
-    });
+    const [existing] = await db
+      .select()
+      .from(pegawai_seksi)
+      .where(eq(pegawai_seksi.id, pegawaiId))
+      .limit(1);
 
     if (!existing || existing.seksi_id !== seksiId) {
       return apiResponse({ message: "Staf pegawai tidak ditemukan di seksi ini." }, 404);
@@ -164,16 +175,14 @@ export async function DELETE(request, context) {
       }
     }
 
-    await prisma.pegawai_seksi.delete({
-      where: { id: pegawaiId }
-    });
+    await db.delete(pegawai_seksi).where(eq(pegawai_seksi.id, pegawaiId));
 
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.DELETE,
       entity: AUDIT_ENTITIES.SETTINGS,
       entityId: pegawaiId,
-      summary: `Menghapus staf pegawai seksi (${seksi.judul}): ${existing.nama}`,
+      summary: `Menghapus staf pegawai seksi (${seksiData.judul}): ${existing.nama}`,
       before: existing,
       after: null,
       request,
@@ -182,7 +191,7 @@ export async function DELETE(request, context) {
     // Revalidate public routes
     revalidatePath("/");
     revalidatePath("/informasi/struktur-organisasi");
-    revalidatePath(`/layanan/${seksi.slug}`);
+    revalidatePath(`/layanan/${seksiData.slug}`);
 
     return apiResponse({
       message: "Data staf pegawai berhasil dihapus secara permanen.",

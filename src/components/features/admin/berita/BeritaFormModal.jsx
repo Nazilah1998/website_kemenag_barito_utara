@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   ToolbarButton,
   ToggleSwitch,
@@ -43,9 +43,15 @@ export function BeritaFormModal({
   onRunCommand,
   onInsertLink,
   onCoverChange,
+  isDraggingCover,
+  onCoverDragOver,
+  onCoverDragLeave,
+  onCoverDrop,
   onClearCover,
   onSave,
 }) {
+  const fileInputRef = useRef(null);
+
   // Prevent body scroll when modal is open
   React.useEffect(() => {
     if (open) {
@@ -213,13 +219,24 @@ export function BeritaFormModal({
                     )}
                   </div>
 
-                  <label className="group relative flex h-32 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-all hover:border-slate-900 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-white">
-                    <input type="file" accept="image/*" className="hidden" onChange={onCoverChange} />
+                  <div
+                    onDragOver={onCoverDragOver}
+                    onDragLeave={onCoverDragLeave}
+                    onDrop={onCoverDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative flex h-32 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed transition-all ${
+                      isDraggingCover
+                        ? "border-emerald-500 bg-emerald-500/10 scale-[1.02]"
+                        : "border-slate-200 bg-slate-50 hover:border-slate-900 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-white"
+                    }`}
+                  >
+                    <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={onCoverChange} />
                     <div className="flex flex-col items-center gap-1.5 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white">
                       <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
                       <span className="text-[9px] font-black uppercase tracking-widest">Pilih Gambar</span>
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Tarik & lepas atau klik</span>
                     </div>
-                  </label>
+                  </div>
 
                   {coverPreviewSrc && (
                     <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">

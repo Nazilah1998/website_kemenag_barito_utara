@@ -9,7 +9,7 @@ Halo! Jika Anda membantu mengembangkan proyek ini, harap perhatikan instruksi be
    - ❌ Salah: `git add . && git commit`
    - ✅ Benar: `git add . ; git commit`
 3. **Framework**: Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS 4
-4. **Database**: Prisma ORM → PostgreSQL via Supabase. Jangan pernah menulis raw SQL.
+4. **Database**: Drizzle ORM → PostgreSQL via Supabase. Jangan pernah menulis raw SQL.
 5. **Developer**: Muhammad Nazilah, S.E. (Pengembang Mandiri)
 
 ## 🛡️ Aturan Kerahasiaan (Privacy & Security)
@@ -29,9 +29,9 @@ Next.js 16 menggunakan **`proxy.js`** (bukan `middleware.js`). Ada dua file:
 
 | File | Fungsi |
 |------|--------|
-| `prisma/schema.prisma` | Source of truth database (~1000 baris, 104+ model) |
-| `src/lib/prisma.js` | Singleton Prisma Client (`server-only`) |
-| `src/lib/prisma-helpers.js` | `apiResponse()` — serialisasi BigInt, standarisasi response |
+| `src/db/schema.ts` | Source of truth database (~104 tabel, Drizzle ORM) |
+| `src/lib/drizzle.js` | Singleton Drizzle Client (`server-only`) |
+| `src/lib/api-helpers.js` | `apiResponse()` — serialisasi BigInt, standarisasi response |
 | `src/lib/audit.js` | `recordAudit()` / `listAudit()` / `deleteAudit()` — audit log admin |
 | `src/lib/cms-utils.js` | `validateAdmin()` — auth guard untuk API admin |
 | `src/lib/rate-limit.js` | `rateLimit()` — Upstash Redis atau in-memory fallback |

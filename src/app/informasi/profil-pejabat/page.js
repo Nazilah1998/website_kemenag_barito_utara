@@ -1,5 +1,7 @@
 import React from "react";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { seksi, pegawai_seksi } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 import ProfilPejabatUI from "@/components/features/informasi/ProfilPejabatUI";
 
 export const revalidate = 600;
@@ -34,13 +36,19 @@ export default async function ProfilPejabatPage() {
   let pejabatList = [];
 
   try {
-    const seksiList = await prisma.seksi.findMany({
-      include: {
-        _count: {
-          select: { pegawai_seksi: true },
-        },
-      },
-    });
+    const rawSeksiList = await db.select().from(seksi);
+
+    const seksiWithCounts = await Promise.all(
+      rawSeksiList.map(async (item) => {
+        const [{ count }] = await db
+          .select({ count: sql`count(*)` })
+          .from(pegawai_seksi)
+          .where(eq(pegawai_seksi.seksi_id, item.id));
+        return { ...item, _count: { pegawai_seksi: Number(count) } };
+      })
+    );
+
+    const seksiList = seksiWithCounts;
 
     // Sort by defined hierarchy
     seksiList.sort((a, b) => {

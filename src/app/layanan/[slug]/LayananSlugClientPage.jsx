@@ -39,8 +39,8 @@ export default function LayananSlugClientPage({ slug, initialData }) {
     // Map relation names to match the UI component props
     const mappedData = {
       ...initialData,
-      pegawai: initialData.pegawai_seksi || [],
-      link_aplikasi: initialData.link_aplikasi_seksi || [],
+      pegawai: initialData.pegawai_seksis || [],
+      link_aplikasi: initialData.link_aplikasi_seksis || [],
     };
 
     return <SeksiDetailUI data={mappedData} breadcrumb={breadcrumb} menuTitle={menuTitle} />;

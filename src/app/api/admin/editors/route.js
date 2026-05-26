@@ -1,6 +1,8 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { editor_requests, profiles, user_permissions } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -27,33 +29,35 @@ export async function GET(request) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
     const skip = (page - 1) * limit;
 
-    const [requests, total] = await Promise.all([
-      prisma.editor_requests.findMany({
-        include: {
-          profiles_editor_requests_user_idToprofiles: {
-            select: {
+    const [requests, [{ count: total }]] = await Promise.all([
+      db.query.editor_requests.findMany({
+        with: {
+          profile_user_id: {
+            columns: {
               id: true,
               role: true,
               is_active: true,
+            },
+            with: {
               user_permissions: {
-                select: {
+                columns: {
                   permission: true
                 }
               }
             }
           }
         },
-        orderBy: { requested_at: 'desc' },
-        skip,
-        take: limit,
+        orderBy: [desc(editor_requests.requested_at)],
+        offset: skip,
+        limit: limit,
       }),
-      prisma.editor_requests.count()
+      db.select({ count: sql`count(*)` }).from(editor_requests)
     ]);
 
     const invalidMfaUserIds = {};
 
     const editors = requests.map((item) => {
-      const profile = item.profiles_editor_requests_user_idToprofiles;
+      const profile = item.profile_user_id;
       const status = String(item.status || "").toLowerCase();
       const rawSystemRole = String(profile?.role || "").toLowerCase();
       const normalizedRole =

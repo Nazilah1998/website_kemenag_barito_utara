@@ -1,8 +1,8 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import prisma from "@/lib/prisma";
-
 import { PERMISSIONS } from "@/lib/permissions";
+import { db } from "@/lib/drizzle";
+import { seksi } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +11,17 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   try {
-    const data = await prisma.seksi.findMany({
-      include: {
-        _count: {
-          select: {
-            pegawai_seksi: true
-          }
-        }
-      }
+    const rawData = await db.query.seksi.findMany({
+      with: {
+        pegawai_seksis: {
+          columns: { id: true },
+        },
+      },
+    });
+
+    const dataWithCounts = (rawData || []).map((item) => {
+      const { pegawai_seksis, ...rest } = item;
+      return { ...rest, _count: { pegawai_seksi: pegawai_seksis.length } };
     });
 
     // Urutan slug sesuai dengan struktur hirarki organisasi Kemenag
@@ -34,15 +37,13 @@ export async function GET() {
       "kua-kantor-urusan-agama"
     ];
 
-    if (data) {
-      data.sort((a, b) => {
-        let indexA = slugOrder.indexOf(a.slug);
-        let indexB = slugOrder.indexOf(b.slug);
-        if (indexA === -1) indexA = 999;
-        if (indexB === -1) indexB = 999;
-        return indexA - indexB;
-      });
-    }
+    const data = dataWithCounts.sort((a, b) => {
+      let indexA = slugOrder.indexOf(a.slug);
+      let indexB = slugOrder.indexOf(b.slug);
+      if (indexA === -1) indexA = 999;
+      if (indexB === -1) indexB = 999;
+      return indexA - indexB;
+    });
 
     return apiResponse({
       items: data || [],

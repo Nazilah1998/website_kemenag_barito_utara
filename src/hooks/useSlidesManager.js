@@ -38,6 +38,7 @@ export function useSlidesManager() {
 
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [deletingId, setDeletingId] = useState("");
 
   const [message, setMessage] = useState("");
@@ -142,9 +143,12 @@ export function useSlidesManager() {
     }));
   }, []);
 
-  const handleImageFileChange = useCallback(async (event) => {
-    const file = event.target.files?.[0];
+  async function processImageFile(file) {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("File harus berupa gambar.");
+      return;
+    }
 
     try {
       setUploadingImage(true);
@@ -169,8 +173,29 @@ export function useSlidesManager() {
       setError(err?.message || "Gagal memproses gambar.");
     } finally {
       setUploadingImage(false);
-      event.target.value = "";
     }
+  }
+
+  const handleImageFileChange = useCallback(async (event) => {
+    const file = event.target.files?.[0];
+    if (file) await processImageFile(file);
+    event.target.value = "";
+  }, []);
+
+  const handleImageDragOver = useCallback((e) => {
+    e.preventDefault();
+    setIsDraggingImage(true);
+  }, []);
+
+  const handleImageDragLeave = useCallback(() => {
+    setIsDraggingImage(false);
+  }, []);
+
+  const handleImageDrop = useCallback((e) => {
+    e.preventDefault();
+    setIsDraggingImage(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processImageFile(file);
   }, []);
 
   const validateForm = useCallback(() => {
@@ -295,6 +320,10 @@ export function useSlidesManager() {
     handleCloseForm,
     handleChange,
     handleImageFileChange,
+    isDraggingImage,
+    handleImageDragOver,
+    handleImageDragLeave,
+    handleImageDrop,
     handleSave,
     handleDelete: handleDeleteRequest,
     showDeleteConfirm,

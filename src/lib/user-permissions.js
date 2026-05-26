@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { ROLES, getRolePermissions } from "@/lib/permissions";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { profiles, editor_requests, user_permissions } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 function forbiddenUrl(
   message = "Anda tidak memiliki izin untuk mengakses halaman ini.",
@@ -46,25 +48,37 @@ export async function getUserPermissionContext({
     };
   }
 
-  const [profile, request, permissions] = await Promise.all([
-    prisma.profiles.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true, role: true, is_active: true }
-    }),
-    prisma.editor_requests.findUnique({
-      where: { user_id: userId },
-      select: { status: true }
-    }),
-    prisma.user_permissions.findMany({
-      where: { user_id: userId },
-      select: { permission: true }
-    })
+  const [profilesRes, requestsRes, permissionsList] = await Promise.all([
+    db
+      .select({
+        id: profiles.id,
+        email: profiles.email,
+        role: profiles.role,
+        is_active: profiles.is_active,
+      })
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1),
+    db
+      .select({ status: editor_requests.status })
+      .from(editor_requests)
+      .where(eq(editor_requests.user_id, userId))
+      .limit(1),
+    db
+      .select({ permission: user_permissions.permission })
+      .from(user_permissions)
+      .where(eq(user_permissions.user_id, userId)),
   ]);
+
+  const profile = profilesRes[0] || null;
+  const request = requestsRes[0] || null;
 
   const requestStatus = request?.status || null;
   const approved = requestStatus === "approved";
   const isActive = Boolean(profile?.is_active);
-  const customPermissions = (permissions || []).map((item) => item.permission).filter(Boolean);
+  const customPermissions = (permissionsList || [])
+    .map((item) => item.permission)
+    .filter(Boolean);
 
   return {
     role: normalizedRole || null,

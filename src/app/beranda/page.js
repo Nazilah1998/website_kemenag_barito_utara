@@ -6,7 +6,9 @@ import { getPublicHomepageSlides } from "../../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
 import ApaKataMerekaSection from "@/components/features/home/ApaKataMerekaSection";
 import { siteInfo } from "@/data/site";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { testimonials } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 
 const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNewsSection"));
 const HomeGallerySection = dynamic(() => import("@/components/features/home/HomeGallerySection"));
@@ -46,10 +48,11 @@ function SectionDivider() {
 const getCachedTestimonials = unstable_cache(
   async () => {
     try {
-      return await prisma.testimonials.findMany({
-        where: { is_active: true },
-        orderBy: { sort_order: 'asc' }
-      });
+      return await db
+        .select()
+        .from(testimonials)
+        .where(eq(testimonials.is_active, true))
+        .orderBy(asc(testimonials.sort_order));
     } catch (err) {
       console.error("Error fetching testimonials:", err);
       return [];

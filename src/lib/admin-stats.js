@@ -1,6 +1,6 @@
-// Agregasi statistik untuk dashboard admin menggunakan Prisma ORM.
-
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { berita, homepage_slides, galeri, kontak_pesan, report_documents, admin_audit_log } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 
 function safeDate(value) {
   if (!value) return null;
@@ -31,46 +31,46 @@ export async function getDashboardStats({
     // Ambil data statistik paralel untuk efisiensi
     const [
       beritaList,
-      totalSlides,
-      totalGallery,
-      totalKontak,
-      kontakBaru,
-      totalReportDocs,
+      [{ count: totalSlides }],
+      [{ count: totalGallery }],
+      [{ count: totalKontak }],
+      [{ count: kontakBaru }],
+      [{ count: totalReportDocs }],
       recentActivity,
     ] = await Promise.all([
       // Data Berita
-      prisma.berita.findMany({
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          is_published: true,
-          published_at: true,
-          views: true,
-          created_at: true,
-        },
-        orderBy: { created_at: "desc" },
-      }),
+      db.select({
+        id: berita.id,
+        title: berita.title,
+        slug: berita.slug,
+        is_published: berita.is_published,
+        published_at: berita.published_at,
+        views: berita.views,
+        created_at: berita.created_at,
+      })
+      .from(berita)
+      .orderBy(desc(berita.created_at)),
+      
       // Counter lainnya
-      prisma.homepage_slides.count(),
-      prisma.galeri.count(),
-      prisma.kontak_pesan.count(),
-      prisma.kontak_pesan.count({ where: { status: "baru" } }),
-      prisma.report_documents.count({ where: { is_published: true } }),
+      db.select({ count: sql`count(*)` }).from(homepage_slides),
+      db.select({ count: sql`count(*)` }).from(galeri),
+      db.select({ count: sql`count(*)` }).from(kontak_pesan),
+      db.select({ count: sql`count(*)` }).from(kontak_pesan).where(eq(kontak_pesan.status, "baru")),
+      db.select({ count: sql`count(*)` }).from(report_documents).where(eq(report_documents.is_published, true)),
+      
       // Aktivitas Audit Log (hanya untuk super admin)
       isSuperAdmin
-        ? prisma.admin_audit_log.findMany({
-            take: 8,
-            orderBy: { created_at: "desc" },
-            select: {
-              id: true,
-              action: true,
-              entity: true,
-              summary: true,
-              actor_email: true,
-              created_at: true,
-            },
+        ? db.select({
+            id: admin_audit_log.id,
+            action: admin_audit_log.action,
+            entity: admin_audit_log.entity,
+            summary: admin_audit_log.summary,
+            actor_email: admin_audit_log.actor_email,
+            created_at: admin_audit_log.created_at,
           })
+          .from(admin_audit_log)
+          .orderBy(desc(admin_audit_log.created_at))
+          .limit(8)
         : Promise.resolve([]),
     ]);
 

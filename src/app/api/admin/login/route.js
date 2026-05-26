@@ -1,7 +1,9 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { profiles } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -72,10 +74,12 @@ export async function POST(request) {
 
     const supabase = await createClient();
 
-    // 1. Cek profil untuk status lockout (Menggunakan Prisma)
-    const profile = await prisma.profiles.findUnique({
-      where: { email },
-    });
+    // 1. Cek profil untuk status lockout
+    const [profile] = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.email, email))
+      .limit(1);
 
     if (
       profile &&
@@ -106,13 +110,13 @@ export async function POST(request) {
         const lockoutUntil =
           newAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // Kunci 15 menit jika >= 5 kali
 
-        await prisma.profiles.update({
-          where: { id: profile.id },
-          data: {
+        await db
+          .update(profiles)
+          .set({
             failed_login_attempts: newAttempts,
             lockout_until: lockoutUntil,
-          },
-        });
+          })
+          .where(eq(profiles.id, profile.id));
       }
 
       return apiResponse(
@@ -126,13 +130,13 @@ export async function POST(request) {
 
     // 3. Reset kegagalan login jika berhasil
     if (profile && profile.failed_login_attempts > 0) {
-      await prisma.profiles.update({
-        where: { id: profile.id },
-        data: {
+      await db
+        .update(profiles)
+        .set({
           failed_login_attempts: 0,
           lockout_until: null,
-        },
-      });
+        })
+        .where(eq(profiles.id, profile.id));
     }
 
     const session = await getCurrentSessionContext();

@@ -1,4 +1,4 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import {
   buildSafePdfFilename,
@@ -6,7 +6,9 @@ import {
   validatePdfFile,
 } from "@/lib/laporan-upload-validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { report_categories, report_documents } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { uploadToR2 } from "@/lib/r2";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { revalidatePath } from "next/cache";
@@ -46,15 +48,19 @@ export async function POST(request) {
     let category = null;
 
     if (categoryId) {
-      category = await prisma.report_categories.findFirst({
-        where: { id: categoryId, is_active: true }
-      });
+      [category] = await db
+        .select()
+        .from(report_categories)
+        .where(and(eq(report_categories.id, categoryId), eq(report_categories.is_active, true)))
+        .limit(1);
     }
 
     if (!category && categorySlug) {
-      category = await prisma.report_categories.findFirst({
-        where: { slug: categorySlug, is_active: true }
-      });
+      [category] = await db
+        .select()
+        .from(report_categories)
+        .where(and(eq(report_categories.slug, categorySlug), eq(report_categories.is_active, true)))
+        .limit(1);
     }
 
     if (!category) {
@@ -69,8 +75,9 @@ export async function POST(request) {
     // Upload to Cloudflare R2
     const fileUrl = await uploadToR2(buffer, storagePath, "application/pdf");
 
-    const document = await prisma.report_documents.create({
-      data: {
+    const [document] = await db
+      .insert(report_documents)
+      .values({
         category_id: category.id,
         title: payloadValidation.data.title,
         description: payloadValidation.data.description || null,
@@ -80,12 +87,12 @@ export async function POST(request) {
         file_path: storagePath,
         file_url: fileUrl,
         mime_type: "application/pdf",
-        file_size: BigInt(file.size || 0),
+        file_size: file.size || 0,
         sort_order: 0,
-        view_count: BigInt(0),
+        view_count: 0,
         created_by: auth.session.user.id,
-      }
-    });
+      })
+      .returning();
 
     await recordAudit({
       session: auth.session,

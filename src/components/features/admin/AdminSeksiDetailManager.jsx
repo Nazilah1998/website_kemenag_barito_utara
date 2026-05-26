@@ -91,7 +91,7 @@ export default function AdminSeksiDetailManager({ id }) {
         foto_kepala_y: data.foto_kepala_y ?? 50,
       });
       setFotoKepalaPreview(data.foto_kepala || "");
-      setPegawaiList(data.pegawai_seksi || []);
+      setPegawaiList(data.pegawai_seksis || []);
     } catch (err) {
       console.error(err);
       setError(err?.message || "Terjadi kesalahan saat memuat data.");
@@ -134,6 +134,10 @@ export default function AdminSeksiDetailManager({ id }) {
       }
 
       setSeksiData(data.item);
+      setSeksiForm((prev) => ({
+        ...prev,
+        foto_kepala_y: data.item.foto_kepala_y ?? 50,
+      }));
       setFotoKepalaBase64("");
       setFotoKepalaPreview(data.item.foto_kepala || "");
       setMessage("Profil seksi berhasil diperbarui.");

@@ -1,5 +1,7 @@
 import { unstable_cache } from "next/cache";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { homepage_slides } from "@/db/schema";
+import { eq, asc, desc } from "drizzle-orm";
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -49,13 +51,11 @@ function sortSlides(items = []) {
 const getCachedPublicSlides = unstable_cache(
   async () => {
     try {
-      const data = await prisma.homepage_slides.findMany({
-        where: { is_published: true },
-        orderBy: [
-          { sort_order: 'asc' },
-          { updated_at: 'desc' }
-        ]
-      });
+      const data = await db
+        .select()
+        .from(homepage_slides)
+        .where(eq(homepage_slides.is_published, true))
+        .orderBy(asc(homepage_slides.sort_order), desc(homepage_slides.updated_at));
 
       return sortSlides((data || []).map(normalizeHomepageSlide));
     } catch (error) {
@@ -76,12 +76,10 @@ export async function getPublicHomepageSlides() {
 
 export async function getAdminHomepageSlides() {
   try {
-    const data = await prisma.homepage_slides.findMany({
-      orderBy: [
-        { sort_order: 'asc' },
-        { updated_at: 'desc' }
-      ]
-    });
+    const data = await db
+      .select()
+      .from(homepage_slides)
+      .orderBy(asc(homepage_slides.sort_order), desc(homepage_slides.updated_at));
 
     return sortSlides((data || []).map(normalizeHomepageSlide));
   } catch (error) {

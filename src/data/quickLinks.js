@@ -2,7 +2,7 @@ export const quickLinks = [
   {
     title: "Profil Instansi",
     description: "Informasi singkat mengenai identitas, tugas, dan fungsi instansi.",
-    href: "/profil",
+    href: "/profil/sejarah",
     badge: "Profil",
   },
   {

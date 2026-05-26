@@ -1,34 +1,50 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageBanner from "@/components/common/PageBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
-const goals = [
+const FALLBACK_GOALS = [
   {
     title: "Meningkatkan Kualitas Layanan",
-    desc: "Menghadirkan pelayanan keagamaan yang mudah, cepat, transparan, dan responsif terhadap kebutuhan masyarakat.",
+    description: "Menghadirkan pelayanan keagamaan yang mudah, cepat, transparan, dan responsif terhadap kebutuhan masyarakat.",
   },
   {
     title: "Memperkuat Kerukunan Umat",
-    desc: "Membangun kehidupan beragama yang damai, toleran, moderat, dan saling menghormati.",
+    description: "Membangun kehidupan beragama yang damai, toleran, moderat, dan saling menghormati.",
   },
   {
     title: "Meningkatkan Mutu Pendidikan",
-    desc: "Mendorong kualitas pendidikan agama dan pendidikan keagamaan yang unggul, inklusif, dan berkarakter.",
+    description: "Mendorong kualitas pendidikan agama dan pendidikan keagamaan yang unggul, inklusif, dan berkarakter.",
   },
   {
     title: "Mewujudkan Tata Kelola Bersih",
-    desc: "Memperkuat birokrasi yang akuntabel, profesional, transparan, dan berorientasi pada pelayanan publik.",
+    description: "Memperkuat birokrasi yang akuntabel, profesional, transparan, dan berorientasi pada pelayanan publik.",
   },
   {
     title: "Mengoptimalkan Transformasi Digital",
-    desc: "Memanfaatkan teknologi informasi untuk mempercepat layanan dan meningkatkan keterbukaan informasi publik.",
+    description: "Memanfaatkan teknologi informasi untuk mempercepat layanan dan meningkatkan keterbukaan informasi publik.",
   },
 ];
 
 export default function TujuanPage() {
   const { t } = useLanguage();
+  const [goals, setGoals] = useState(FALLBACK_GOALS);
+
+  useEffect(() => {
+    fetch("/api/static-pages?slug=tujuan")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.content) {
+          try {
+            const parsed = JSON.parse(data.content);
+            if (Array.isArray(parsed.goals) && parsed.goals.length > 0)
+              setGoals(parsed.goals);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
@@ -58,7 +74,7 @@ export default function TujuanPage() {
                   {goal.title}
                 </h2>
                 <p className="mt-3 text-sm leading-8 text-slate-600 dark:text-slate-400">
-                  {goal.desc}
+                  {goal.description || goal.desc}
                 </p>
               </div>
             </div>

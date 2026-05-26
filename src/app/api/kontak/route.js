@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { cleanString } from "@/lib/validation";
+import { db } from "@/lib/drizzle";
+import { kontak_pesan } from "@/db/schema";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -12,12 +14,6 @@ const MIN_PESAN = 10;
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 5;
-
-function cleanString(value, max = 1000) {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim().replace(/\s+/g, " ");
-  return trimmed.slice(0, max);
-}
 
 function isValidWhatsapp(wa) {
   if (!wa) return false;
@@ -35,12 +31,10 @@ function jsonResponse(data, status = 200) {
 
 async function saveToDatabase(payload) {
   try {
-    await prisma.kontak_pesan.create({
-      data: payload
-    });
+    await db.insert(kontak_pesan).values(payload);
     return { ok: true };
   } catch (error) {
-    console.error("Gagal menyimpan pesan kontak ke Prisma:", error);
+    console.error("Gagal menyimpan pesan kontak ke Drizzle:", error);
     return { ok: false, error: error?.message };
   }
 }

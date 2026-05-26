@@ -69,10 +69,14 @@ export default function AdminBeritaManager() {
         dirty={m.dirty} saving={m.saving} uploadingCover={m.uploadingCover}
         wordCount={m.wordCount} readingTime={m.readingTime} previewSlug={m.previewSlug}
         coverPreviewSrc={m.coverPreviewSrc} editorRef={m.editorRef}
+        isDraggingCover={m.isDraggingCover}
         onClose={m.handleCloseForm} onChange={m.handleChange}
         onPublishedToggle={m.handlePublishedToggle} onEditorInput={m.onEditorInput}
         onEditorPaste={m.onEditorPaste} onRunCommand={m.onRunCommand}
         onInsertLink={m.onInsertLink} onCoverChange={m.onCoverChange}
+        onCoverDragOver={m.handleCoverDragOver}
+        onCoverDragLeave={m.handleCoverDragLeave}
+        onCoverDrop={m.handleCoverDrop}
         onClearCover={m.onClearCover} onSave={m.onSave}
       />
     </>

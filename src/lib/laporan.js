@@ -1,7 +1,9 @@
 // src/lib/laporan.js
 
 import { laporanCategories } from "@/data/laporan";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { db } from "@/lib/drizzle";
+import { report_categories } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -105,18 +107,16 @@ function normalizeFallbackCategory(item) {
   return normalizeLaporanCategory(item, item?.documents || []);
 }
 
-import prisma from "@/lib/prisma";
-
 export async function getAllLaporanCategories() {
   try {
-    const data = await prisma.report_categories.findMany({
-      where: { is_active: true },
-      include: {
+    const data = await db.query.report_categories.findMany({
+      where: eq(report_categories.is_active, true),
+      with: {
         report_documents: true
       },
       orderBy: [
-        { sort_order: 'asc' },
-        { title: 'asc' }
+        asc(report_categories.sort_order),
+        asc(report_categories.title)
       ]
     });
 
@@ -135,16 +135,16 @@ export async function getAllLaporanCategories() {
       return normalizeLaporanCategory(item, publicDocs);
     });
   } catch (error) {
-    console.error("Prisma getAllLaporanCategories Error:", error);
+    console.error("Drizzle getAllLaporanCategories Error:", error);
     return laporanCategories.map(normalizeFallbackCategory);
   }
 }
 
 export async function getLaporanDetailBySlug(slug) {
   try {
-    const data = await prisma.report_categories.findUnique({
-      where: { slug: slug },
-      include: {
+    const data = await db.query.report_categories.findFirst({
+      where: eq(report_categories.slug, slug),
+      with: {
         report_documents: true
       }
     });
@@ -161,7 +161,7 @@ export async function getLaporanDetailBySlug(slug) {
 
     return normalizeLaporanCategory(data, documents);
   } catch (error) {
-    console.error("Prisma getLaporanDetailBySlug Error:", error);
+    console.error("Drizzle getLaporanDetailBySlug Error:", error);
     const fallback = laporanCategories.find((item) => item.slug === slug);
     if (!fallback) return null;
     return normalizeFallbackCategory(fallback);
@@ -172,14 +172,14 @@ export const getLaporanCategoryBySlug = getLaporanDetailBySlug;
 
 export async function getAdminLaporanCategories(slug = "") {
   try {
-    const data = await prisma.report_categories.findMany({
-      where: slug ? { slug: slug } : {},
-      include: {
+    const data = await db.query.report_categories.findMany({
+      where: slug ? eq(report_categories.slug, slug) : undefined,
+      with: {
         report_documents: true
       },
       orderBy: [
-        { sort_order: 'asc' },
-        { title: 'asc' }
+        asc(report_categories.sort_order),
+        asc(report_categories.title)
       ]
     });
 
@@ -192,7 +192,7 @@ export async function getAdminLaporanCategories(slug = "") {
       return normalizeLaporanCategory(item, docs);
     });
   } catch (error) {
-    console.error("Prisma getAdminLaporanCategories Error:", error);
+    console.error("Drizzle getAdminLaporanCategories Error:", error);
     if (slug) {
       const fallback = laporanCategories.find((item) => item.slug === slug);
       return fallback ? [normalizeFallbackCategory(fallback)] : [];

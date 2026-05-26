@@ -1,6 +1,8 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { report_categories, report_documents } from "@/db/schema";
+import { eq, desc, asc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -29,19 +31,17 @@ export async function GET(request) {
     const searchParams = request.nextUrl.searchParams;
     const slug = sanitizeSlug(searchParams.get("slug") || "");
 
-    const categories = await prisma.report_categories.findMany({
-      where: {
-        ...(slug && { slug })
-      },
-      include: {
+    const categories = await db.query.report_categories.findMany({
+      where: slug ? eq(report_categories.slug, slug) : undefined,
+      with: {
         report_documents: {
-          orderBy: { created_at: 'desc' }
+          orderBy: [desc(report_documents.created_at)]
         }
       },
-      orderBy: { sort_order: 'asc' }
+      orderBy: [asc(report_categories.sort_order)]
     });
 
-    const normalizedCategories = categories.map((category) => {
+    const normalizedCategories = (categories || []).map((category) => {
       return {
         ...category,
         documents: normalizeDocuments(category.report_documents || [])

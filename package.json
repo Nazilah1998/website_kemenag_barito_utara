@@ -4,25 +4,26 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "db:push": "prisma db push"
+    "db:push": "npx drizzle-kit push"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
     "@aws-sdk/s3-request-presigner": "^3.1053.0",
-    "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
     "@vercel/analytics": "^1.1.4",
     "@vercel/speed-insights": "^1.0.4",
+    "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.39.0",
     "lucide-react": "^1.14.0",
     "next": "16.2.3",
@@ -35,7 +36,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@prisma/config": "^7.8.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -44,10 +44,11 @@
     "@types/node": "25.5.0",
     "@types/react": "19.2.14",
     "@vitest/coverage-v8": "^4.1.4",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "happy-dom": "^20.9.0",
-    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "vitest": "^4.1.4"
   }

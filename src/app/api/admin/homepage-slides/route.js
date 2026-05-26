@@ -1,10 +1,11 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadBase64Image } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { homepage_slides } from "@/db/schema";
+import { asc, desc } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
 
@@ -36,12 +37,10 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   try {
-    const data = await prisma.homepage_slides.findMany({
-      orderBy: [
-        { sort_order: 'asc' },
-        { updated_at: 'desc' }
-      ]
-    });
+    const data = await db
+      .select()
+      .from(homepage_slides)
+      .orderBy(asc(homepage_slides.sort_order), desc(homepage_slides.updated_at));
 
     return apiResponse({
       items: (data || []).map(normalizeHomepageSlide),
@@ -61,7 +60,6 @@ export async function POST(request) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const supabase = createAdminClient();
 
     const title = toText(body?.title, "");
     const caption = toText(body?.caption, "");
@@ -83,7 +81,6 @@ export async function POST(request) {
 
     if (imageUploadBase64) {
       const uploaded = await uploadBase64Image({
-        supabase,
         dataUrl: imageUploadBase64,
         folder: "homepage-slides",
         fileNameStem: imageUploadName || title,
@@ -98,16 +95,17 @@ export async function POST(request) {
       );
     }
 
-    const data = await prisma.homepage_slides.create({
-      data: {
+    const [data] = await db
+      .insert(homepage_slides)
+      .values({
         title,
         caption,
         image_url: finalImageUrl,
         category,
         is_published: isPublished,
         sort_order: sortOrder,
-      }
-    });
+      })
+      .returning();
 
     await recordAudit({
       session: auth.session,

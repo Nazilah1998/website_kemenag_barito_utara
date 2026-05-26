@@ -1,4 +1,3 @@
-import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import {
@@ -7,10 +6,12 @@ import {
   uploadBase64Image,
 } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
-import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { homepage_slides } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -44,11 +45,12 @@ export async function PATCH(request, context) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const supabase = createAdminClient();
 
-    const existing = await prisma.homepage_slides.findUnique({
-      where: { id: id }
-    });
+    const [existing] = await db
+      .select()
+      .from(homepage_slides)
+      .where(eq(homepage_slides.id, id))
+      .limit(1);
 
     if (!existing) {
       return apiResponse({ message: "Slide tidak ditemukan." }, 404);
@@ -71,7 +73,6 @@ export async function PATCH(request, context) {
 
     if (imageUploadBase64) {
       const uploaded = await uploadBase64Image({
-        supabase,
         dataUrl: imageUploadBase64,
         folder: "homepage-slides",
         fileNameStem: imageUploadName || title,
@@ -93,9 +94,9 @@ export async function PATCH(request, context) {
       return apiResponse({ message: "Gambar slide wajib diupload." }, 400);
     }
 
-    const data = await prisma.homepage_slides.update({
-      where: { id: id },
-      data: {
+    const [data] = await db
+      .update(homepage_slides)
+      .set({
         title,
         caption,
         image_url: finalImageUrl,
@@ -103,8 +104,9 @@ export async function PATCH(request, context) {
         is_published: isPublished,
         sort_order: sortOrder,
         updated_at: new Date(),
-      }
-    });
+      })
+      .where(eq(homepage_slides.id, id))
+      .returning();
 
     await recordAudit({
       session: auth.session,
@@ -141,11 +143,12 @@ export async function DELETE(request, context) {
 
   try {
     const id = await getSafeIdFromContext(context);
-    const supabase = createAdminClient();
 
-    const existing = await prisma.homepage_slides.findUnique({
-      where: { id: id }
-    });
+    const [existing] = await db
+      .select()
+      .from(homepage_slides)
+      .where(eq(homepage_slides.id, id))
+      .limit(1);
 
     if (!existing) {
       return apiResponse(
@@ -154,9 +157,7 @@ export async function DELETE(request, context) {
       );
     }
 
-    await prisma.homepage_slides.delete({
-      where: { id: id }
-    });
+    await db.delete(homepage_slides).where(eq(homepage_slides.id, id));
 
     if (existing.image_url && isCmsStoragePublicUrl(existing.image_url)) {
       await removeStorageFileByPublicUrl(existing.image_url).catch(

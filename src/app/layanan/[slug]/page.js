@@ -1,5 +1,7 @@
 import React from "react";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { seksi, pegawai_seksi, layanan_ptsp, link_aplikasi_seksi } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 import LayananSlugClientPage from "./LayananSlugClientPage";
 
 export const revalidate = 600;
@@ -7,11 +9,13 @@ export const revalidate = 600;
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   try {
-    const seksi = await prisma.seksi.findUnique({
-      where: { slug }
-    });
+    const [seksiData2] = await db
+      .select()
+      .from(seksi)
+      .where(eq(seksi.slug, slug))
+      .limit(1);
 
-    if (!seksi) {
+    if (!seksiData2) {
       return {
         title: "Layanan Publik | Kemenag Barito Utara",
         description: "Layanan Publik Kantor Kementerian Agama Kabupaten Barito Utara.",
@@ -19,8 +23,8 @@ export async function generateMetadata({ params }) {
     }
 
     return {
-      title: `${seksi.judul} | Kemenag Barito Utara`,
-      description: seksi.deskripsi,
+      title: `${seksiData2.judul} | Kemenag Barito Utara`,
+      description: seksiData2.deskripsi,
     };
   } catch (error) {
     console.error("generateMetadata error:", error);
@@ -35,37 +39,33 @@ export default async function LayananSubPage({ params }) {
 
   let seksiData = null;
   try {
-    seksiData = await prisma.seksi.findUnique({
-      where: { slug },
-      include: {
-        pegawai_seksi: {
-          orderBy: { sort_order: 'asc' }
+    seksiData = await db.query.seksi.findFirst({
+      where: eq(seksi.slug, slug),
+      with: {
+        pegawai_seksis: {
+          orderBy: [asc(pegawai_seksi.sort_order)]
         },
-        layanan_ptsp: {
-          orderBy: { sort_order: 'asc' }
+        layanan_ptsps: {
+          orderBy: [asc(layanan_ptsp.sort_order)]
         },
-        link_aplikasi_seksi: {
-          orderBy: { sort_order: 'asc' }
+        link_aplikasi_seksis: {
+          orderBy: [asc(link_aplikasi_seksi.sort_order)]
         }
       }
     });
   } catch (error) {
-    if (error?.code === 'P2021') {
-      // Tabel (e.g. layanan_ptsp) belum ada di database — query tanpa include
-      try {
-        seksiData = await prisma.seksi.findUnique({
-          where: { slug },
-          include: {
-            pegawai_seksi: {
-              orderBy: { sort_order: 'asc' }
-            }
+    console.error("Error fetching seksi data from database:", error);
+    try {
+      seksiData = await db.query.seksi.findFirst({
+        where: eq(seksi.slug, slug),
+        with: {
+          pegawai_seksis: {
+            orderBy: [asc(pegawai_seksi.sort_order)]
           }
-        });
-      } catch (fallbackError) {
-        console.error("Fallback query also failed:", fallbackError);
-      }
-    } else {
-      console.error("Error fetching seksi data from database:", error);
+        }
+      });
+    } catch (fallbackError) {
+      console.error("Fallback query also failed:", fallbackError);
     }
   }
 

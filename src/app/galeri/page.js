@@ -1,6 +1,7 @@
-import PageBanner from "@/components/common/PageBanner";
 import GaleriPageClient from "@/components/features/galeri/GaleriPageClient";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { galeri } from "@/db/schema";
+import { eq, desc, ne } from "drizzle-orm";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
 
 export const revalidate = 300;
@@ -29,28 +30,22 @@ function mapGaleriItems(rows = []) {
 async function getPublishedGaleri() {
   try {
     // 1. Try to get published items first
-    let data = await prisma.galeri.findMany({
-      where: { is_published: true },
-      orderBy: [
-        { published_at: 'desc' },
-        { created_at: 'desc' }
-      ]
-    });
+    let data = await db
+      .select()
+      .from(galeri)
+      .where(eq(galeri.is_published, true))
+      .orderBy(desc(galeri.published_at), desc(galeri.created_at));
 
     if (data && data.length > 0) {
       return mapGaleriItems(data);
     }
 
     // 2. Fallback: Get all items that are not explicitly unpublished
-    data = await prisma.galeri.findMany({
-      where: {
-        NOT: { is_published: false }
-      },
-      orderBy: [
-        { published_at: 'desc' },
-        { created_at: 'desc' }
-      ]
-    });
+    data = await db
+      .select()
+      .from(galeri)
+      .where(ne(galeri.is_published, false))
+      .orderBy(desc(galeri.published_at), desc(galeri.created_at));
 
     return mapGaleriItems(data);
   } catch (error) {

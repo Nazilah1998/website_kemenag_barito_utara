@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { profiles, admin_users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
 const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
@@ -58,16 +60,20 @@ async function getUserProfile(userId) {
 
   try {
     // Try profiles first
-    const profile = await prisma.profiles.findUnique({
-      where: { id: userId },
-    });
+    const [profile] = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
 
     if (profile) return profile;
 
     // Fallback to admin_users if needed (though profiles should have it)
-    const adminUser = await prisma.admin_users.findUnique({
-      where: { user_id: userId },
-    });
+    const [adminUser] = await db
+      .select()
+      .from(admin_users)
+      .where(eq(admin_users.user_id, userId))
+      .limit(1);
 
     if (adminUser) {
       return {
@@ -119,14 +125,17 @@ export async function getCurrentSessionContext() {
   let profileRole = normalizeRole(profile?.role);
 
   if (SUPER_ADMIN_EMAIL && currentEmail === SUPER_ADMIN_EMAIL) {
-    console.warn(`[AUTH] SUPER_ADMIN_EMAIL override activated for ${currentEmail}`);
+    console.warn(
+      `[AUTH] SUPER_ADMIN_EMAIL override activated for ${currentEmail}`,
+    );
     profileRole = "super_admin";
   } else if (!profileRole) {
     try {
-      const adminRow = await prisma.admin_users.findUnique({
-        where: { user_id: user.id },
-        select: { role: true },
-      });
+      const [adminRow] = await db
+        .select({ role: admin_users.role })
+        .from(admin_users)
+        .where(eq(admin_users.user_id, user.id))
+        .limit(1);
 
       if (adminRow) {
         profileRole = normalizeRole(adminRow.role);

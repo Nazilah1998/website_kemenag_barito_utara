@@ -77,9 +77,13 @@ export default function AdminHomepageSlidesManager() {
         imagePreview={s.imagePreview}
         saving={s.saving}
         uploadingImage={s.uploadingImage}
+        isDraggingImage={s.isDraggingImage}
         onClose={s.handleCloseForm}
         onChange={s.handleChange}
         onFileChange={s.handleImageFileChange}
+        onImageDragOver={s.handleImageDragOver}
+        onImageDragLeave={s.handleImageDragLeave}
+        onImageDrop={s.handleImageDrop}
         onSave={s.handleSave}
       />
 

@@ -1,29 +1,45 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageBanner from "@/components/common/PageBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
-const timeline = [
+const FALLBACK_TIMELINE = [
   {
     year: "Awal Perjalanan",
     title: "Penguatan Layanan Keagamaan",
-    desc: "Kemenag Barito Utara hadir untuk memperkuat pelayanan urusan agama, pendidikan keagamaan, dan pembinaan masyarakat.",
+    description: "Kemenag Barito Utara hadir untuk memperkuat pelayanan urusan agama, pendidikan keagamaan, dan pembinaan masyarakat.",
   },
   {
     year: "Transformasi",
     title: "Pelayanan Publik Lebih Terarah",
-    desc: "Pelayanan terus dikembangkan melalui tata kelola yang lebih tertib, responsif, dan berorientasi pada kebutuhan masyarakat.",
+    description: "Pelayanan terus dikembangkan melalui tata kelola yang lebih tertib, responsif, dan berorientasi pada kebutuhan masyarakat.",
   },
   {
     year: "Masa Kini",
     title: "Digital, Terbuka, dan Profesional",
-    desc: "Kemenag Barito Utara terus bergerak menuju pelayanan modern berbasis integritas, profesionalitas, dan keterbukaan informasi.",
+    description: "Kemenag Barito Utara terus bergerak menuju pelayanan modern berbasis integritas, profesionalitas, dan keterbukaan informasi.",
   },
 ];
 
 export default function SejarahPage() {
   const { t } = useLanguage();
+  const [timeline, setTimeline] = useState(FALLBACK_TIMELINE);
+
+  useEffect(() => {
+    fetch("/api/static-pages?slug=sejarah")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.content) {
+          try {
+            const parsed = JSON.parse(data.content);
+            if (Array.isArray(parsed.timeline) && parsed.timeline.length > 0)
+              setTimeline(parsed.timeline);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
@@ -82,7 +98,7 @@ export default function SejarahPage() {
                       {item.title}
                     </h3>
                     <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400">
-                      {item.desc}
+                      {item.description || item.desc}
                     </p>
                   </div>
                 </div>

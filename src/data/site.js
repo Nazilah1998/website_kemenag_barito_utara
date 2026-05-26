@@ -18,8 +18,8 @@ export const siteInfo = {
   email: "kepegawaiankemenagbarut@gmail.com",
   phone: "(0519) 21269",
   phoneRaw: "051921269",
-  whatsapp: "+62 812-0000-0000",
-  whatsappRaw: "6281200000000",
+  whatsapp: "+62 519-21269",
+  whatsappRaw: "6251921269",
   officeHours: [
     "Senin - Kamis, 07.30 - 16.00 WIB",
     "Jum'at, 07.30 - 16.30 WIB",
@@ -41,7 +41,7 @@ export const siteLinks = {
   mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`,
   mapDirectionUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`,
   instagram: "https://www.instagram.com/kemenag.barut/",
-  youtube: "http://www.youtube.com/@KemenagBaritoUtara",
+  youtube: "https://www.youtube.com/@KemenagBaritoUtara",
   tiktok: "#",
   facebook: "#",
   x: "#",
@@ -49,7 +49,7 @@ export const siteLinks = {
 
 export const footerMenuLinks = [
   { label: "Beranda", href: "/" },
-  { label: "Profil", href: "/profil" },
+  { label: "Profil", href: "/profil/sejarah" },
   { label: "Berita", href: "/berita" },
   { label: "Layanan", href: "/layanan/sekjen" },
   { label: "Kontak", href: "/kontak" },

@@ -60,7 +60,7 @@ function buildCsp() {
     "script-src": [
       "'self'",
       "'unsafe-inline'",
-      "'unsafe-eval'",
+      ...(isProd ? [] : ["'unsafe-eval'"]),
       "https://va.vercel-scripts.com",
       "https://vercel.live",
       "https://www.google.com",
@@ -149,9 +149,7 @@ const nextConfig = {
     "@aws-sdk/client-s3",
     "@aws-sdk/s3-request-presigner",
     "pg",
-    "@prisma/client",
-    "@prisma/adapter-pg",
-    "pdfjs-dist",
+"pdfjs-dist",
   ],
   experimental: {
     optimizePackageImports: [

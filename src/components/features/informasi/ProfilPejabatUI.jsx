@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
-
-const DEFAULT_AVATAR = "/assets/images/pejabat.png";
+import Avatar from "@/components/ui/Avatar";
 
 function BadgeIcon() {
   return (
@@ -72,17 +70,14 @@ function KepalaKantorCard({ pejabat }) {
         {/* Photo */}
         <div className="relative shrink-0">
           <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-amber-400/40 via-emerald-400/20 to-transparent blur-xl" />
-          <div className="relative h-52 w-52 lg:h-64 lg:w-64 overflow-hidden rounded-full ring-4 ring-white/20 shadow-2xl">
-            <Image
-              src={pejabat.foto_kepala || DEFAULT_AVATAR}
-              alt={pejabat.nama_kepala}
-              fill
-              priority
-              sizes="(max-width: 1024px) 13rem, 16rem"
-              className="object-cover"
-              style={{ objectPosition: `50% ${pejabat.foto_kepala_y ?? 50}%` }}
-            />
-          </div>
+          <Avatar
+            src={pejabat.foto_kepala}
+            alt={pejabat.nama_kepala}
+            className="relative h-52 w-52 lg:h-64 lg:w-64 overflow-hidden rounded-full ring-4 ring-white/20 shadow-2xl"
+            priority
+            sizes="(max-width: 1024px) 13rem, 16rem"
+            foto_kepala_y={pejabat.foto_kepala_y ?? 50}
+          />
           {/* Gold crown badge */}
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-4 py-1.5 shadow-lg shadow-amber-900/40">
             <svg className="h-3.5 w-3.5 fill-white" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -146,16 +141,13 @@ function PejabatCard({ pejabat, index }) {
         {/* Photo */}
         <div className="relative">
           <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-emerald-400/20 to-transparent opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-300" />
-          <div className="relative h-32 w-32 overflow-hidden rounded-full ring-4 ring-slate-100 shadow-lg group-hover:ring-emerald-200 transition-all duration-300 dark:ring-slate-800 dark:group-hover:ring-emerald-800">
-            <Image
-              src={pejabat.foto_kepala || DEFAULT_AVATAR}
-              alt={pejabat.nama_kepala}
-              fill
-              sizes="8rem"
-              className="object-cover"
-              style={{ objectPosition: `50% ${pejabat.foto_kepala_y ?? 50}%` }}
-            />
-          </div>
+          <Avatar
+            src={pejabat.foto_kepala}
+            alt={pejabat.nama_kepala}
+            className="relative h-32 w-32 overflow-hidden rounded-full ring-4 ring-slate-100 shadow-lg group-hover:ring-emerald-200 transition-all duration-300 dark:ring-slate-800 dark:group-hover:ring-emerald-800"
+            sizes="8rem"
+            foto_kepala_y={pejabat.foto_kepala_y ?? 50}
+          />
         </div>
 
         {/* Name & position */}

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { static_pages } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -9,17 +11,23 @@ export async function GET(request) {
     const slug = searchParams.get("slug");
 
     if (slug) {
-      const page = await prisma.static_pages.findFirst({
-        where: { slug, is_published: true },
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          description: true,
-          content: true,
-          updated_at: true,
-        },
-      });
+      const [page] = await db
+        .select({
+          id: static_pages.id,
+          slug: static_pages.slug,
+          title: static_pages.title,
+          description: static_pages.description,
+          content: static_pages.content,
+          updated_at: static_pages.updated_at,
+        })
+        .from(static_pages)
+        .where(
+          and(
+            eq(static_pages.slug, slug),
+            eq(static_pages.is_published, true)
+          )
+        )
+        .limit(1);
 
       if (!page) {
         return NextResponse.json(
@@ -31,17 +39,17 @@ export async function GET(request) {
       return NextResponse.json(page);
     }
 
-    const pages = await prisma.static_pages.findMany({
-      where: { is_published: true },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        updated_at: true,
-      },
-      orderBy: { updated_at: "desc" },
-    });
+    const pages = await db
+      .select({
+        id: static_pages.id,
+        slug: static_pages.slug,
+        title: static_pages.title,
+        description: static_pages.description,
+        updated_at: static_pages.updated_at,
+      })
+      .from(static_pages)
+      .where(eq(static_pages.is_published, true))
+      .orderBy(desc(static_pages.updated_at));
 
     return NextResponse.json(pages);
   } catch (error) {

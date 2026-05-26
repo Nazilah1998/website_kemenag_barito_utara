@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const profileLinks = [
-  { label: "Profil Instansi", href: "/profil" },
   { label: "Sejarah", href: "/profil/sejarah" },
   { label: "Visi & Misi", href: "/profil/visi-misi" },
   { label: "Tugas dan Fungsi", href: "/profil/tugas-fungsi" },

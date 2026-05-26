@@ -1,10 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageBanner from "@/components/common/PageBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
-const missions = [
+const FALLBACK_VISION =
+  "Terwujudnya masyarakat Kabupaten Barito Utara yang taat beragama, rukun, cerdas, mandiri, dan sejahtera lahir batin.";
+
+const FALLBACK_MISSIONS = [
   "Meningkatkan kualitas pemahaman dan pengamalan ajaran agama dalam kehidupan masyarakat.",
   "Memperkuat kerukunan umat beragama melalui moderasi, toleransi, dan harmoni sosial.",
   "Meningkatkan kualitas pendidikan agama dan pendidikan keagamaan yang unggul dan berdaya saing.",
@@ -14,6 +17,24 @@ const missions = [
 
 export default function VisiMisiPage() {
   const { t } = useLanguage();
+  const [vision, setVision] = useState(FALLBACK_VISION);
+  const [missions, setMissions] = useState(FALLBACK_MISSIONS);
+
+  useEffect(() => {
+    fetch("/api/static-pages?slug=visi-misi")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.content) {
+          try {
+            const parsed = JSON.parse(data.content);
+            if (parsed.vision) setVision(parsed.vision);
+            if (Array.isArray(parsed.missions) && parsed.missions.length > 0)
+              setMissions(parsed.missions);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 transition-colors dark:bg-slate-950">
@@ -34,8 +55,7 @@ export default function VisiMisiPage() {
           </p>
 
           <h2 className="mt-4 text-3xl font-black leading-tight text-slate-950 dark:text-slate-100 md:text-4xl">
-            Terwujudnya masyarakat Kabupaten Barito Utara yang taat beragama,
-            rukun, cerdas, mandiri, dan sejahtera lahir batin.
+            {vision}
           </h2>
         </div>
 

@@ -76,9 +76,13 @@ export default function AdminGaleriManager() {
         imagePreview={g.imagePreview}
         saving={g.saving}
         uploadingImage={g.uploadingImage}
+        isDraggingImage={g.isDraggingImage}
         onClose={g.handleCloseForm}
         onChange={g.handleChange}
         onFileChange={g.handleImageFileChange}
+        onImageDragOver={g.handleImageDragOver}
+        onImageDragLeave={g.handleImageDragLeave}
+        onImageDrop={g.handleImageDrop}
         onSave={g.handleSave}
       />
 

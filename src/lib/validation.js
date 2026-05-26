@@ -13,7 +13,7 @@ export class ValidationError extends Error {
 
 export function cleanString(value, max = 5000) {
   if (typeof value !== "string") return "";
-  const trimmed = value.trim().replace(/\u0000/g, "");
+  const trimmed = value.trim().replace(/\u0000/g, "").replace(/\s+/g, " ");
   return trimmed.length > max ? trimmed.slice(0, max) : trimmed;
 }
 

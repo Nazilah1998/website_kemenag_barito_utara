@@ -1,9 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { env } from "@/lib/env";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { profiles, admin_users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(request) {
   try {
@@ -51,31 +53,41 @@ export async function POST(request) {
     }
 
     // 3) Update profiles & admin_users tables
-    await prisma.$transaction(async (tx) => {
+    await db.transaction(async (tx) => {
       // Update profiles
-      const profileExists = await tx.profiles.findUnique({ where: { id: user.id } });
+      const [profileExists] = await tx
+        .select({ id: profiles.id })
+        .from(profiles)
+        .where(eq(profiles.id, user.id))
+        .limit(1);
+
       if (profileExists) {
-        await tx.profiles.update({
-          where: { id: user.id },
-          data: {
+        await tx
+          .update(profiles)
+          .set({
             ...(fullName ? { full_name: fullName } : {}),
             ...(email ? { email: email } : {}),
             ...(avatarUrl !== undefined ? { avatar_url: avatarUrl } : {}),
             updated_at: new Date()
-          }
-        });
+          })
+          .where(eq(profiles.id, user.id));
       }
 
       // Update admin_users if exists
-      const adminExists = await tx.admin_users.findUnique({ where: { user_id: user.id } });
+      const [adminExists] = await tx
+        .select({ user_id: admin_users.user_id })
+        .from(admin_users)
+        .where(eq(admin_users.user_id, user.id))
+        .limit(1);
+
       if (adminExists) {
-        await tx.admin_users.update({
-          where: { user_id: user.id },
-          data: {
+        await tx
+          .update(admin_users)
+          .set({
             ...(fullName ? { full_name: fullName } : {}),
             updated_at: new Date()
-          }
-        });
+          })
+          .where(eq(admin_users.user_id, user.id));
       }
     });
 

@@ -1,15 +1,17 @@
 import { revalidatePath, revalidateTag } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { cleanString, ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
+import { ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
+import { cleanString, cleanHtml } from "@/lib/validation";
 import {
   removeStorageFileByPublicUrl,
   uploadBase64Image,
 } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
-import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
-import prisma from "@/lib/prisma";
+import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { db } from "@/lib/drizzle";
+import { berita, galeri } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -105,7 +107,7 @@ function resolvePublishedAt({
   publishedAtInput,
   currentPublishedAt = null,
 }) {
-  if (!isPublished) return null;
+  if (!isPublished) return currentPublishedAt || null;
 
   const sourceValue = publishedAtInput || currentPublishedAt || new Date();
   const parsedDate = new Date(sourceValue);
@@ -118,7 +120,6 @@ function resolvePublishedAt({
 }
 
 async function resolveCoverImage({
-  supabase,
   body,
   currentUrl = null,
   currentSizeKB = 0,
@@ -140,7 +141,6 @@ async function resolveCoverImage({
   const base64Meta = getBase64PayloadMeta(uploadBase64);
 
   const uploaded = await uploadBase64Image({
-    supabase,
     dataUrl: uploadBase64,
     folder: "berita",
     fileNameStem: slugSeed || uploadName,
@@ -162,7 +162,6 @@ async function resolveCoverImage({
 }
 
 async function buildPayload(
-  supabase,
   body,
   {
     currentCoverUrl = null,
@@ -172,7 +171,7 @@ async function buildPayload(
   } = {},
 ) {
   const title = cleanString(body?.title);
-  const content = cleanString(body?.content);
+  const content = cleanHtml(body?.content, 60000);
   const excerpt =
     cleanString(body?.excerpt) || buildExcerptFromHtml(content, 180);
   const category = cleanString(body?.category) || "Umum";
@@ -188,7 +187,6 @@ async function buildPayload(
   }
 
   const coverImage = await resolveCoverImage({
-    supabase,
     body,
     currentUrl: currentCoverUrl,
     currentSizeKB,
@@ -218,14 +216,16 @@ async function buildPayload(
 }
 
 async function syncRelatedGaleriMetadata(beritaItem) {
-  const galeriItem = await prisma.galeri.findUnique({
-    where: {
-      source_type_source_id: {
-        source_type: "berita",
-        source_id: beritaItem.id
-      }
-    }
-  });
+  const [galeriItem] = await db
+    .select()
+    .from(galeri)
+    .where(
+      and(
+        eq(galeri.source_type, "berita"),
+        eq(galeri.source_id, beritaItem.id)
+      )
+    )
+    .limit(1);
 
   if (!galeriItem) {
     return;
@@ -242,13 +242,43 @@ async function syncRelatedGaleriMetadata(beritaItem) {
   if (!galeriItem.image_url) {
     patch.image_url = beritaItem.cover_image;
     patch.image_size_kb = beritaItem.cover_size_kb || 0;
-    patch.image_size_bytes = BigInt(beritaItem.cover_size_bytes || 0);
+    patch.image_size_bytes = beritaItem.cover_size_bytes || 0;
   }
 
-  await prisma.galeri.update({
-    where: { id: galeriItem.id },
-    data: patch
+  await db
+    .update(galeri)
+    .set(patch)
+    .where(eq(galeri.id, galeriItem.id));
+}
+
+export async function GET(request, context) {
+  const auth = await validateAdmin({
+    allowEditor: true,
+    permission: PERMISSIONS.BERITA_UPDATE,
   });
+  if (!auth.ok) return auth.response;
+
+  try {
+    const safeId = await getSafeIdFromContext(context);
+
+    const [data] = await db
+      .select()
+      .from(berita)
+      .where(eq(berita.id, safeId))
+      .limit(1);
+
+    if (!data) {
+      return apiResponse({ message: "Berita tidak ditemukan." }, 404);
+    }
+
+    return apiResponse(data);
+  } catch (error) {
+    console.error("GET Berita Error:", error);
+    return apiResponse(
+      { message: error.message || "Gagal memuat berita." },
+      error.status || 500,
+    );
+  }
 }
 
 export async function PUT(request, context) {
@@ -261,15 +291,16 @@ export async function PUT(request, context) {
   try {
     const safeId = await getSafeIdFromContext(context);
     const body = await request.json();
-    const supabase = createAdminClient(); // Tetap butuh untuk Storage
 
-    const existingItem = await prisma.berita.findUnique({
-      where: { id: safeId }
-    });
+    const [existingItem] = await db
+      .select()
+      .from(berita)
+      .where(eq(berita.id, safeId))
+      .limit(1);
 
     if (!existingItem) throw createHttpError("Berita tidak ditemukan.", 404);
 
-    const payload = await buildPayload(supabase, body, {
+    const payload = await buildPayload(body, {
       currentCoverUrl: existingItem.cover_image || null,
       currentSizeKB: existingItem.cover_size_kb || 0,
       currentSizeBytes: Number(existingItem.cover_size_bytes || 0),
@@ -283,13 +314,14 @@ export async function PUT(request, context) {
       safeId,
     );
 
-    const data = await prisma.berita.update({
-      where: { id: safeId },
-      data: {
+    const [data] = await db
+      .update(berita)
+      .set({
         ...payload,
         slug
-      }
-    });
+      })
+      .where(eq(berita.id, safeId))
+      .returning();
 
     await syncRelatedGaleriMetadata(data);
 
@@ -352,35 +384,35 @@ export async function DELETE(request, context) {
 
   try {
     const safeId = await getSafeIdFromContext(context);
-    const supabase = createAdminClient();
 
-    const existingItem = await prisma.berita.findUnique({
-      where: { id: safeId },
-      select: { id: true, slug: true, cover_image: true }
-    });
+    const [existingItem] = await db
+      .select({ id: berita.id, slug: berita.slug, cover_image: berita.cover_image })
+      .from(berita)
+      .where(eq(berita.id, safeId))
+      .limit(1);
 
     if (!existingItem) throw createHttpError("Berita tidak ditemukan.", 404);
 
-    const relatedGalleryRows = await prisma.galeri.findMany({
-      where: {
-        source_type: "berita",
-        source_id: safeId
-      },
-      select: { id: true, image_url: true }
-    });
+    const relatedGalleryRows = await db
+      .select({ id: galeri.id, image_url: galeri.image_url })
+      .from(galeri)
+      .where(
+        and(
+          eq(galeri.source_type, "berita"),
+          eq(galeri.source_id, safeId)
+        )
+      );
 
-    // Gunakan transaksi Prisma untuk menghapus berita dan galeri terkait secara atomik
-    await prisma.$transaction([
-      prisma.galeri.deleteMany({
-        where: {
-          source_type: "berita",
-          source_id: safeId
-        }
-      }),
-      prisma.berita.delete({
-        where: { id: safeId }
-      })
-    ]);
+    // Hapus berita dan galeri terkait dalam 1 transaksi
+    await db.transaction(async (tx) => {
+      await tx.delete(galeri).where(
+        and(
+          eq(galeri.source_type, "berita"),
+          eq(galeri.source_id, safeId)
+        )
+      );
+      await tx.delete(berita).where(eq(berita.id, safeId));
+    });
 
     try {
       const filesToDelete = new Set();

@@ -1,7 +1,9 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { profiles, admin_users, editor_requests, user_permissions } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "";
@@ -35,15 +37,15 @@ export async function PATCH(request, context) {
     const now = new Date();
 
     if (action === "approve") {
-      await prisma.editor_requests.update({
-        where: { user_id: userId },
-        data: {
+      await db
+        .update(editor_requests)
+        .set({
           status: "approved",
           reviewed_at: now,
           reviewed_by: reviewerId,
           updated_at: now,
-        }
-      });
+        })
+        .where(eq(editor_requests.user_id, userId));
 
       await recordAudit({
         session: auth.session,
@@ -76,10 +78,11 @@ export async function PATCH(request, context) {
         );
       }
 
-      const targetProfile = await prisma.profiles.findUnique({
-        where: { id: userId },
-        select: { id: true, email: true }
-      });
+      const [targetProfile] = await db
+        .select({ id: profiles.id, email: profiles.email })
+        .from(profiles)
+        .where(eq(profiles.id, userId))
+        .limit(1);
 
       if (!targetProfile) return apiResponse({ message: "Profil tidak ditemukan." }, 404);
 
@@ -94,17 +97,17 @@ export async function PATCH(request, context) {
         );
       }
 
-      // Update in transaction to ensure consistency
-      await prisma.$transaction([
-        prisma.profiles.update({
-          where: { id: userId },
-          data: { role: nextRole, updated_at: now }
-        }),
-        prisma.admin_users.update({
-          where: { user_id: userId },
-          data: { role: nextRole, updated_at: now }
-        })
-      ]);
+      // Update both tables to ensure consistency
+      await db.transaction(async (tx) => {
+        await tx
+          .update(profiles)
+          .set({ role: nextRole, updated_at: now })
+          .where(eq(profiles.id, userId));
+        await tx
+          .update(admin_users)
+          .set({ role: nextRole, updated_at: now })
+          .where(eq(admin_users.user_id, userId));
+      });
 
       await recordAudit({
         session: auth.session,
@@ -129,10 +132,11 @@ export async function PATCH(request, context) {
       }
 
       // Check if it's the super admin by email before deleting
-      const targetProfile = await prisma.profiles.findUnique({
-        where: { id: userId },
-        select: { id: true, email: true }
-      });
+      const [targetProfile] = await db
+        .select({ id: profiles.id, email: profiles.email })
+        .from(profiles)
+        .where(eq(profiles.id, userId))
+        .limit(1);
 
       if (targetProfile && targetProfile.email === SUPER_ADMIN_EMAIL) {
         return apiResponse({ message: "Akun super admin tidak dapat dihapus." }, 403);
@@ -148,14 +152,13 @@ export async function PATCH(request, context) {
         console.warn("Supabase Auth Delete Warning:", authErr.message);
       }
 
-      // Delete from all Prisma tables
-      // Even if profile is missing, we try to clean up other tables
-      await prisma.$transaction([
-        prisma.user_permissions.deleteMany({ where: { user_id: userId } }),
-        prisma.editor_requests.deleteMany({ where: { user_id: userId } }),
-        prisma.admin_users.deleteMany({ where: { user_id: userId } }),
-        prisma.profiles.deleteMany({ where: { id: userId } }) // Use deleteMany to avoid 404 if already gone
-      ]);
+      // Delete from all tables dalam 1 transaksi
+      await db.transaction(async (tx) => {
+        await tx.delete(user_permissions).where(eq(user_permissions.user_id, userId));
+        await tx.delete(editor_requests).where(eq(editor_requests.user_id, userId));
+        await tx.delete(admin_users).where(eq(admin_users.user_id, userId));
+        await tx.delete(profiles).where(eq(profiles.id, userId));
+      });
 
       await recordAudit({
         session: auth.session,
@@ -170,15 +173,15 @@ export async function PATCH(request, context) {
     }
 
     if (action === "reject") {
-      await prisma.editor_requests.update({
-        where: { user_id: userId },
-        data: {
+      await db
+        .update(editor_requests)
+        .set({
           status: "rejected",
           reviewed_at: now,
           reviewed_by: reviewerId,
           updated_at: now,
-        }
-      });
+        })
+        .where(eq(editor_requests.user_id, userId));
 
       await recordAudit({
         session: auth.session,
@@ -193,16 +196,16 @@ export async function PATCH(request, context) {
     }
 
     if (action === "activate") {
-      await prisma.$transaction([
-        prisma.profiles.update({
-          where: { id: userId },
-          data: { is_active: true, updated_at: now }
-        }),
-        prisma.admin_users.update({
-          where: { user_id: userId },
-          data: { is_active: true, updated_at: now }
-        })
-      ]);
+      await db.transaction(async (tx) => {
+        await tx
+          .update(profiles)
+          .set({ is_active: true, updated_at: now })
+          .where(eq(profiles.id, userId));
+        await tx
+          .update(admin_users)
+          .set({ is_active: true, updated_at: now })
+          .where(eq(admin_users.user_id, userId));
+      });
 
       await recordAudit({
         session: auth.session,
@@ -217,16 +220,16 @@ export async function PATCH(request, context) {
     }
 
     if (action === "deactivate") {
-      await prisma.$transaction([
-        prisma.profiles.update({
-          where: { id: userId },
-          data: { is_active: false, updated_at: now }
-        }),
-        prisma.admin_users.update({
-          where: { user_id: userId },
-          data: { is_active: false, updated_at: now }
-        })
-      ]);
+      await db.transaction(async (tx) => {
+        await tx
+          .update(profiles)
+          .set({ is_active: false, updated_at: now })
+          .where(eq(profiles.id, userId));
+        await tx
+          .update(admin_users)
+          .set({ is_active: false, updated_at: now })
+          .where(eq(admin_users.user_id, userId));
+      });
 
       await recordAudit({
         session: auth.session,
@@ -241,14 +244,14 @@ export async function PATCH(request, context) {
     }
 
     if (action === "unlock") {
-      await prisma.profiles.update({
-        where: { id: userId },
-        data: {
+      await db
+        .update(profiles)
+        .set({
           failed_login_attempts: 0,
           lockout_until: null,
           updated_at: now,
-        },
-      });
+        })
+        .where(eq(profiles.id, userId));
 
       await recordAudit({
         session: auth.session,

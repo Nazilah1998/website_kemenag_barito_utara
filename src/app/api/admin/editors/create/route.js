@@ -1,8 +1,10 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateAdmin } from "@/lib/cms-utils";
 import { ROLES } from "@/lib/permissions";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { profiles, admin_users, editor_requests } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -38,10 +40,11 @@ export async function POST(request) {
     }
 
     // 3. Check for Existing Profile
-    const existingProfile = await prisma.profiles.findUnique({
-      where: { email: email },
-      select: { id: true }
-    });
+    const [existingProfile] = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.email, email))
+      .limit(1);
 
     if (existingProfile) {
       return apiResponse(
@@ -83,67 +86,106 @@ export async function POST(request) {
     const now = new Date();
 
     // 5. Create Database Entries (Directly Active & Approved)
-    await prisma.$transaction([
-      prisma.profiles.upsert({
-        where: { id: userId },
-        update: {
-          full_name: fullName,
-          email,
-          role: ROLES.EDITOR,
-          unit_name: unitName || null,
-          is_active: true, // AUTO ACTIVE
-          updated_at: now,
-        },
-        create: {
-          id: userId,
-          full_name: fullName,
-          email,
-          role: ROLES.EDITOR,
-          unit_name: unitName || null,
-          is_active: true, // AUTO ACTIVE
-          updated_at: now,
-        }
-      }),
-      prisma.admin_users.upsert({
-        where: { user_id: userId },
-        update: {
-          full_name: fullName,
-          role: ROLES.EDITOR,
-          is_active: true, // AUTO ACTIVE
-          updated_at: now,
-        },
-        create: {
-          user_id: userId,
-          full_name: fullName,
-          role: ROLES.EDITOR,
-          is_active: true, // AUTO ACTIVE
-          updated_at: now,
-        }
-      }),
-      prisma.editor_requests.upsert({
-        where: { user_id: userId },
-        update: {
-          full_name: fullName,
-          email,
-          unit_name: unitName || null,
-          status: "approved", // AUTO APPROVED
-          reviewed_at: now,
-          reviewed_by: auth.session?.profile?.id || auth.session?.user?.id || null,
-          updated_at: now,
-        },
-        create: {
-          user_id: userId,
-          full_name: fullName,
-          email,
-          unit_name: unitName || null,
-          status: "approved", // AUTO APPROVED
-          requested_at: now,
-          reviewed_at: now,
-          reviewed_by: auth.session?.profile?.id || auth.session?.user?.id || null,
-          updated_at: now,
-        }
-      })
-    ]);
+    const upsertProfiles = async () => {
+      const [existing] = await db
+        .select({ id: profiles.id })
+        .from(profiles)
+        .where(eq(profiles.id, userId))
+        .limit(1);
+      if (existing) {
+        await db
+          .update(profiles)
+          .set({
+            full_name: fullName,
+            email,
+            role: ROLES.EDITOR,
+            unit_name: unitName || null,
+            is_active: true,
+            updated_at: now,
+          })
+          .where(eq(profiles.id, userId));
+      } else {
+        await db
+          .insert(profiles)
+          .values({
+            id: userId,
+            full_name: fullName,
+            email,
+            role: ROLES.EDITOR,
+            unit_name: unitName || null,
+            is_active: true,
+            updated_at: now,
+          });
+      }
+    };
+
+    const upsertAdminUsers = async () => {
+      const [existing] = await db
+        .select({ user_id: admin_users.user_id })
+        .from(admin_users)
+        .where(eq(admin_users.user_id, userId))
+        .limit(1);
+      if (existing) {
+        await db
+          .update(admin_users)
+          .set({
+            full_name: fullName,
+            role: ROLES.EDITOR,
+            is_active: true,
+            updated_at: now,
+          })
+          .where(eq(admin_users.user_id, userId));
+      } else {
+        await db
+          .insert(admin_users)
+          .values({
+            user_id: userId,
+            full_name: fullName,
+            role: ROLES.EDITOR,
+            is_active: true,
+            updated_at: now,
+          });
+      }
+    };
+
+    const upsertEditorRequests = async () => {
+      const reviewerId = auth.session?.profile?.id || auth.session?.user?.id || null;
+      const [existing] = await db
+        .select({ user_id: editor_requests.user_id })
+        .from(editor_requests)
+        .where(eq(editor_requests.user_id, userId))
+        .limit(1);
+      if (existing) {
+        await db
+          .update(editor_requests)
+          .set({
+            full_name: fullName,
+            email,
+            unit_name: unitName || null,
+            status: "approved",
+            reviewed_at: now,
+            reviewed_by: reviewerId,
+            updated_at: now,
+          })
+          .where(eq(editor_requests.user_id, userId));
+      } else {
+        await db
+          .insert(editor_requests)
+          .values({
+            user_id: userId,
+            full_name: fullName,
+            email,
+            unit_name: unitName || null,
+            status: "approved",
+            requested_at: now,
+            reviewed_at: now,
+            reviewed_by: reviewerId,
+            updated_at: now,
+          });
+      }
+    };
+
+    await Promise.all([upsertProfiles(), upsertAdminUsers(), upsertEditorRequests()]);
 
     return apiResponse({
       success: true,

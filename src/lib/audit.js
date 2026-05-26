@@ -1,5 +1,7 @@
-import prisma from "@/lib/prisma";
-import { serializePrisma } from "@/lib/prisma-helpers";
+import { db } from "@/lib/drizzle";
+import { admin_audit_log } from "@/db/schema";
+import { serializeData } from "@/lib/api-helpers";
+import { eq, and, desc } from "drizzle-orm";
 
 const auditBuffer = [];
 const AUDIT_BATCH_SIZE = 10;
@@ -66,9 +68,7 @@ async function flushAuditBuffer() {
 
     if (batch.length === 0) return;
 
-    await prisma.admin_audit_log.createMany({
-      data: batch,
-    });
+    await db.insert(admin_audit_log).values(batch);
   } catch (error) {
     console.warn("[audit] batch flush error:", error?.message);
 
@@ -76,7 +76,7 @@ async function flushAuditBuffer() {
 
     for (const record of batch) {
       try {
-        await prisma.admin_audit_log.create({ data: record });
+        await db.insert(admin_audit_log).values(record);
       } catch (e) {
         console.warn("[audit] single insert error:", e?.message);
       }
@@ -117,9 +117,9 @@ export async function recordAudit({
       entity,
       entity_id: entityId ? String(entityId) : null,
       summary: summary ? String(summary).slice(0, 500) : null,
-      before: serializePrisma(redact(before)),
-      after: serializePrisma(redact(after)),
-      metadata: serializePrisma(metadata) || null,
+      before: serializeData(redact(before)),
+      after: serializeData(redact(after)),
+      metadata: serializeData(metadata) || null,
       ip_address: extractIp(request),
       user_agent: request?.headers?.get?.("user-agent") || null,
     };
@@ -141,24 +141,25 @@ export async function listAudit({
   action = null,
 } = {}) {
   try {
-    const items = await prisma.admin_audit_log.findMany({
-      where: {
-        ...(entity && { entity }),
-        ...(action && { action }),
-      },
-      select: {
-        id: true,
-        actor_email: true,
-        actor_role: true,
-        action: true,
-        entity: true,
-        entity_id: true,
-        summary: true,
-        created_at: true,
-      },
-      orderBy: { created_at: "desc" },
-      take: Math.min(Math.max(limit, 1), 200),
-    });
+    const conditions = [];
+    if (entity) conditions.push(eq(admin_audit_log.entity, entity));
+    if (action) conditions.push(eq(admin_audit_log.action, action));
+
+    const items = await db
+      .select({
+        id: admin_audit_log.id,
+        actor_email: admin_audit_log.actor_email,
+        actor_role: admin_audit_log.actor_role,
+        action: admin_audit_log.action,
+        entity: admin_audit_log.entity,
+        entity_id: admin_audit_log.entity_id,
+        summary: admin_audit_log.summary,
+        created_at: admin_audit_log.created_at,
+      })
+      .from(admin_audit_log)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(admin_audit_log.created_at))
+      .limit(Math.min(Math.max(limit, 1), 200));
 
     return { ok: true, items: items || [] };
   } catch (error) {
@@ -170,9 +171,7 @@ export async function deleteAudit(id) {
   try {
     if (!id) throw new Error("ID log wajib diisi.");
 
-    await prisma.admin_audit_log.delete({
-      where: { id: String(id) },
-    });
+    await db.delete(admin_audit_log).where(eq(admin_audit_log.id, String(id)));
 
     return { ok: true, message: "Log berhasil dihapus secara permanen." };
   } catch (error) {
@@ -182,7 +181,7 @@ export async function deleteAudit(id) {
 
 export async function clearAllAudit() {
   try {
-    await prisma.admin_audit_log.deleteMany();
+    await db.delete(admin_audit_log);
     return { ok: true, message: "Seluruh riwayat log berhasil dibersihkan." };
   } catch (error) {
     return { ok: false, error: error?.message || "Gagal membersihkan log." };

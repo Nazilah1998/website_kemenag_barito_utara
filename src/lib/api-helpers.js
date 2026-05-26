@@ -1,13 +1,13 @@
 /**
- * Safely serializes a Prisma result by converting BigInt values to Numbers.
+ * Safely serializes a DB result by converting BigInt values to Numbers.
  * This is necessary because JSON.stringify (used in NextResponse.json) doesn't support BigInt.
  */
-export function serializePrisma(data) {
+export function serializeData(data) {
   if (data === null || data === undefined) return data;
 
   // Handle arrays
   if (Array.isArray(data)) {
-    return data.map(serializePrisma);
+    return data.map(serializeData);
   }
 
   // Handle objects
@@ -21,7 +21,7 @@ export function serializePrisma(data) {
         return [key, Number(value)];
       }
       if (typeof value === "object" && value !== null) {
-        return [key, serializePrisma(value)];
+        return [key, serializeData(value)];
       }
       return [key, value];
     });
@@ -36,7 +36,7 @@ export function serializePrisma(data) {
  * Common response creator for consistent API responses
  */
 export function apiResponse(data, status = 200) {
-  return Response.json(serializePrisma(data), {
+  return Response.json(serializeData(data), {
     status,
     headers: {
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

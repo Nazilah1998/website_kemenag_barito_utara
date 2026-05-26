@@ -1,5 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { berita } from "@/db/schema";
+import { eq, and, ne, desc, asc, gt, lt } from "drizzle-orm";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
 
 export function formatDateIndonesia(value) {
@@ -128,14 +130,20 @@ export async function getAllBerita(options = {}) {
   if (includeDrafts) noStore();
 
   try {
-    const data = await prisma.berita.findMany({
-      where: includeDrafts ? {} : { is_published: true },
-      orderBy: [
-        { published_at: 'desc' },
-        { created_at: 'desc' }
-      ],
-      take: limit ? Number(limit) : undefined
-    });
+    let query = db
+      .select()
+      .from(berita)
+      .orderBy(desc(berita.published_at), desc(berita.created_at));
+
+    if (!includeDrafts) {
+      query = query.where(eq(berita.is_published, true));
+    }
+
+    if (limit) {
+      query = query.limit(Number(limit));
+    }
+
+    const data = await query;
 
     return (data || []).map(normalizeBerita);
   } catch (error) {
@@ -156,12 +164,16 @@ export async function getBeritaBySlug(slug, options = {}) {
   if (includeDrafts) noStore();
 
   try {
-    const data = await prisma.berita.findFirst({
-      where: {
-        slug: safeSlug,
-        ...(includeDrafts ? {} : { is_published: true })
-      }
-    });
+    const conditions = [eq(berita.slug, safeSlug)];
+    if (!includeDrafts) {
+      conditions.push(eq(berita.is_published, true));
+    }
+
+    const [data] = await db
+      .select()
+      .from(berita)
+      .where(and(...conditions))
+      .limit(1);
 
     return data ? normalizeBerita(data) : null;
   } catch (error) {
@@ -183,28 +195,34 @@ export function estimateReadingTime(value = "", wordsPerMinute = 200) {
 
 export async function getRelatedBerita(currentSlug, category, limit = 3) {
   try {
-    const results = await prisma.berita.findMany({
-      where: {
-        is_published: true,
-        category: category,
-        slug: { not: currentSlug }
-      },
-      orderBy: { published_at: 'desc' },
-      take: limit
-    });
+    const results = await db
+      .select()
+      .from(berita)
+      .where(
+        and(
+          eq(berita.is_published, true),
+          eq(berita.category, category),
+          ne(berita.slug, currentSlug),
+        ),
+      )
+      .orderBy(desc(berita.published_at))
+      .limit(limit);
 
     const normalized = results.map(normalizeBerita);
 
     if (normalized.length < limit) {
-      const fallback = await prisma.berita.findMany({
-        where: {
-          is_published: true,
-          slug: { not: currentSlug },
-          category: { not: category }
-        },
-        orderBy: { published_at: 'desc' },
-        take: limit - normalized.length
-      });
+      const fallback = await db
+        .select()
+        .from(berita)
+        .where(
+          and(
+            eq(berita.is_published, true),
+            ne(berita.slug, currentSlug),
+            ne(berita.category, category),
+          ),
+        )
+        .orderBy(desc(berita.published_at))
+        .limit(limit - normalized.length);
       normalized.push(...fallback.map(normalizeBerita));
     }
 
@@ -221,23 +239,19 @@ export async function getAdjacentBerita(currentBerita) {
   const date = currentBerita.isoDate;
 
   try {
-    const newerData = await prisma.berita.findFirst({
-      where: {
-        is_published: true,
-        published_at: { gt: date }
-      },
-      select: { slug: true, title: true },
-      orderBy: { published_at: 'asc' }
-    });
+    const [newerData] = await db
+      .select({ slug: berita.slug, title: berita.title })
+      .from(berita)
+      .where(and(eq(berita.is_published, true), gt(berita.published_at, date)))
+      .orderBy(asc(berita.published_at))
+      .limit(1);
 
-    const olderData = await prisma.berita.findFirst({
-      where: {
-        is_published: true,
-        published_at: { lt: date }
-      },
-      select: { slug: true, title: true },
-      orderBy: { published_at: 'desc' }
-    });
+    const [olderData] = await db
+      .select({ slug: berita.slug, title: berita.title })
+      .from(berita)
+      .where(and(eq(berita.is_published, true), lt(berita.published_at, date)))
+      .orderBy(desc(berita.published_at))
+      .limit(1);
 
     return {
       newer: newerData || null,

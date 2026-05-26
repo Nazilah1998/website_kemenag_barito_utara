@@ -1,8 +1,10 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLES } from "@/lib/permissions";
-import prisma from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { db } from "@/lib/drizzle";
+import { profiles, admin_users, editor_requests } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "";
@@ -51,10 +53,11 @@ export async function POST(request) {
       return apiResponse({ message: "Password minimal 8 karakter." }, 400);
     }
 
-    const existingProfile = await prisma.profiles.findUnique({
-      where: { email: email },
-      select: { id: true, email: true }
-    });
+    const [existingProfile] = await db
+      .select({ id: profiles.id, email: profiles.email })
+      .from(profiles)
+      .where(eq(profiles.email, email))
+      .limit(1);
 
     if (existingProfile) {
       return apiResponse(
@@ -140,62 +143,100 @@ export async function POST(request) {
 
     const now = new Date();
 
-    // Use transaction to ensure all three tables are updated
-    await prisma.$transaction([
-      prisma.profiles.upsert({
-        where: { id: userId },
-        update: {
-          full_name: fullName,
-          email,
-          role: ROLES.EDITOR,
-          unit_name: unitName || null,
-          updated_at: now,
-        },
-        create: {
-          id: userId,
-          full_name: fullName,
-          email,
-          role: ROLES.EDITOR,
-          unit_name: unitName || null,
-          is_active: false,
-          updated_at: now,
-        }
-      }),
-      prisma.admin_users.upsert({
-        where: { user_id: userId },
-        update: {
-          full_name: fullName,
-          role: ROLES.EDITOR,
-          updated_at: now,
-        },
-        create: {
-          user_id: userId,
-          full_name: fullName,
-          role: ROLES.EDITOR,
-          is_active: false,
-          updated_at: now,
-        }
-      }),
-      prisma.editor_requests.upsert({
-        where: { user_id: userId },
-        update: {
-          full_name: fullName,
-          email,
-          unit_name: unitName || null,
-          status: "pending",
-          updated_at: now,
-        },
-        create: {
-          user_id: userId,
-          full_name: fullName,
-          email,
-          unit_name: unitName || null,
-          status: "pending",
-          requested_at: now,
-          updated_at: now,
-        }
-      })
-    ]);
+    // Upsert all three tables
+    const upsertProfiles = async () => {
+      const [existing] = await db
+        .select({ id: profiles.id })
+        .from(profiles)
+        .where(eq(profiles.id, userId))
+        .limit(1);
+      if (existing) {
+        await db
+          .update(profiles)
+          .set({
+            full_name: fullName,
+            email,
+            role: ROLES.EDITOR,
+            unit_name: unitName || null,
+            updated_at: now,
+          })
+          .where(eq(profiles.id, userId));
+      } else {
+        await db
+          .insert(profiles)
+          .values({
+            id: userId,
+            full_name: fullName,
+            email,
+            role: ROLES.EDITOR,
+            unit_name: unitName || null,
+            is_active: false,
+            updated_at: now,
+          });
+      }
+    };
+
+    const upsertAdminUsers = async () => {
+      const [existing] = await db
+        .select({ user_id: admin_users.user_id })
+        .from(admin_users)
+        .where(eq(admin_users.user_id, userId))
+        .limit(1);
+      if (existing) {
+        await db
+          .update(admin_users)
+          .set({
+            full_name: fullName,
+            role: ROLES.EDITOR,
+            updated_at: now,
+          })
+          .where(eq(admin_users.user_id, userId));
+      } else {
+        await db
+          .insert(admin_users)
+          .values({
+            user_id: userId,
+            full_name: fullName,
+            role: ROLES.EDITOR,
+            is_active: false,
+            updated_at: now,
+          });
+      }
+    };
+
+    const upsertEditorRequests = async () => {
+      const [existing] = await db
+        .select({ user_id: editor_requests.user_id })
+        .from(editor_requests)
+        .where(eq(editor_requests.user_id, userId))
+        .limit(1);
+      if (existing) {
+        await db
+          .update(editor_requests)
+          .set({
+            full_name: fullName,
+            email,
+            unit_name: unitName || null,
+            status: "pending",
+            updated_at: now,
+          })
+          .where(eq(editor_requests.user_id, userId));
+      } else {
+        await db
+          .insert(editor_requests)
+          .values({
+            user_id: userId,
+            full_name: fullName,
+            email,
+            unit_name: unitName || null,
+            status: "pending",
+            requested_at: now,
+            updated_at: now,
+          });
+      }
+    };
+
+    await Promise.all([upsertProfiles(), upsertAdminUsers(), upsertEditorRequests()]);
 
     return apiResponse({
       success: true,

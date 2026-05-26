@@ -1,5 +1,5 @@
 import { revalidatePath, revalidateTag } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { cleanString } from "@/lib/validation";
 import { ensureUniqueSlug, validateAdmin } from "@/lib/cms-utils";
 import {
   removeStorageFileByPublicUrl,
@@ -14,8 +14,10 @@ import {
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { hasUserPermission } from "@/lib/user-permissions";
-import { apiResponse } from "@/lib/prisma-helpers";
-import prisma from "@/lib/prisma";
+import { apiResponse } from "@/lib/api-helpers";
+import { db } from "@/lib/drizzle";
+import { berita } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { broadcastRefresh } from "@/lib/realtime-service";
 
 const LIMITS = {
@@ -37,10 +39,6 @@ function createHttpError(message, status = 500) {
 const table = "berita";
 const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
-
-function cleanString(value = "") {
-  return String(value || "").trim();
-}
 
 function stripHtml(html = "") {
   return String(html || "")
@@ -133,7 +131,6 @@ function resolvePublishedAt({
 }
 
 async function resolveCoverImage({
-  supabase,
   body,
   currentUrl = null,
   currentSizeKB = 0,
@@ -155,7 +152,6 @@ async function resolveCoverImage({
   const base64Meta = getBase64PayloadMeta(uploadBase64);
 
   const uploaded = await uploadBase64Image({
-    supabase,
     dataUrl: uploadBase64,
     folder: "berita",
     fileNameStem: slugSeed || uploadName,
@@ -177,7 +173,6 @@ async function resolveCoverImage({
 }
 
 async function buildPayload(
-  supabase,
   body,
   {
     currentCoverUrl = null,
@@ -214,7 +209,6 @@ async function buildPayload(
   ]);
 
   const coverImage = await resolveCoverImage({
-    supabase,
     body,
     currentUrl: currentCoverUrl,
     currentSizeKB,
@@ -273,34 +267,30 @@ export async function GET(request) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
-      prisma.berita.findMany({
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          excerpt: true,
-          category: true,
-          content: true,
-          cover_image: true,
-          cover_size_kb: true,
-          cover_size_bytes: true,
-          is_published: true,
-          published_at: true,
-          views: true,
-          author_id: true,
-          created_at: true,
-          updated_at: true
-        },
-        orderBy: [
-          { is_published: 'desc' },
-          { published_at: 'desc' },
-          { created_at: 'desc' }
-        ],
-        skip,
-        take: limit,
-      }),
-      prisma.berita.count()
+    const [data, [{ count: total }]] = await Promise.all([
+      db
+        .select({
+          id: berita.id,
+          slug: berita.slug,
+          title: berita.title,
+          excerpt: berita.excerpt,
+          category: berita.category,
+          content: berita.content,
+          cover_image: berita.cover_image,
+          cover_size_kb: berita.cover_size_kb,
+          cover_size_bytes: berita.cover_size_bytes,
+          is_published: berita.is_published,
+          published_at: berita.published_at,
+          views: berita.views,
+          author_id: berita.author_id,
+          created_at: berita.created_at,
+          updated_at: berita.updated_at,
+        })
+        .from(berita)
+        .orderBy(desc(berita.is_published), desc(berita.published_at), desc(berita.created_at))
+        .offset(skip)
+        .limit(limit),
+      db.select({ count: sql`count(*)` }).from(berita)
     ]);
 
     return apiResponse({
@@ -332,9 +322,8 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const supabase = createAdminClient(); // Tetap butuh supabase untuk Storage (upload)
 
-    const payload = await buildPayload(supabase, body);
+    const payload = await buildPayload(body);
 
     // Editor tidak boleh langsung publish tanpa izin.
     if (
@@ -351,13 +340,14 @@ export async function POST(request) {
       payload.title,
     );
 
-    const data = await prisma.berita.create({
-      data: {
+    const [data] = await db
+      .insert(berita)
+      .values({
         ...payload,
         slug,
         author_id: auth.session?.profile?.id ?? null,
-      }
-    });
+      })
+      .returning();
 
     revalidateBeritaPaths(data?.slug);
 

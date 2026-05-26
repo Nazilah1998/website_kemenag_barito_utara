@@ -8,6 +8,6 @@ export const ctaData = {
   },
   secondaryButton: {
     label: "Lihat Profil",
-    href: "/profil",
+    href: "/profil/sejarah",
   },
 };

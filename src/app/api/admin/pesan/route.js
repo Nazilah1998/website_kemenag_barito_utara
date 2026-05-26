@@ -1,8 +1,10 @@
-import { apiResponse } from "@/lib/prisma-helpers";
+import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { PERMISSIONS } from "@/lib/permissions";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/drizzle";
+import { kontak_pesan } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -19,13 +21,14 @@ export async function GET(request) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
-      prisma.kontak_pesan.findMany({
-        orderBy: { created_at: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.kontak_pesan.count()
+    const [data, [{ count: total }]] = await Promise.all([
+      db
+        .select()
+        .from(kontak_pesan)
+        .orderBy(desc(kontak_pesan.created_at))
+        .limit(limit)
+        .offset(skip),
+      db.select({ count: sql`count(*)` }).from(kontak_pesan)
     ]);
 
     return apiResponse({
@@ -64,18 +67,21 @@ export async function PATCH(request) {
       );
     }
 
-    const existing = await prisma.kontak_pesan.findUnique({
-      where: { id: id }
-    });
+    const [existing] = await db
+      .select()
+      .from(kontak_pesan)
+      .where(eq(kontak_pesan.id, id))
+      .limit(1);
 
     if (!existing) {
       return apiResponse({ message: "Pesan tidak ditemukan." }, 404);
     }
 
-    const data = await prisma.kontak_pesan.update({
-      where: { id: id },
-      data: { status }
-    });
+    const [data] = await db
+      .update(kontak_pesan)
+      .set({ status })
+      .where(eq(kontak_pesan.id, id))
+      .returning();
 
     await recordAudit({
       session: auth.session,
@@ -116,17 +122,17 @@ export async function DELETE(request) {
       return apiResponse({ message: "ID pesan wajib diisi." }, 400);
     }
 
-    const existing = await prisma.kontak_pesan.findUnique({
-      where: { id: id }
-    });
+    const [existing] = await db
+      .select()
+      .from(kontak_pesan)
+      .where(eq(kontak_pesan.id, id))
+      .limit(1);
 
     if (!existing) {
       return apiResponse({ message: "Pesan tidak ditemukan." }, 404);
     }
 
-    await prisma.kontak_pesan.delete({
-      where: { id: id }
-    });
+    await db.delete(kontak_pesan).where(eq(kontak_pesan.id, id));
 
     await recordAudit({
       session: auth.session,

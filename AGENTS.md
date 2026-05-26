@@ -2,7 +2,7 @@
 
 ## Stack
 - **Next.js 16** (App Router, Turbopack), React 19, Tailwind CSS 4
-- **Prisma ORM** (PostgreSQL via Supabase) — two schemas: `auth` + `public`
+- **Drizzle ORM** (PostgreSQL via Supabase) — two schemas: `auth` + `public`
 - **Supabase** for Auth & Storage only (not DB queries)
 - **Cloudflare R2** for file/media storage
 - **Vitest** (unit), **Playwright** (E2E)
@@ -19,7 +19,7 @@ Do **NOT** create `middleware.js` — it breaks admin auth.
 | Action | Command |
 |--------|---------|
 | Dev server | `npm run dev` |
-| Build | `npm run build` (auto-runs `prisma generate`) |
+| Build | `npm run build` |
 | Start (prod) | `npm run start` |
 | Lint | `npm run lint` |
 | Unit tests | `npm test` (Vitest; `tests/**/*.test.{js,jsx}`) |
@@ -36,9 +36,9 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - **Root layout**: `src/app/layout.js` — includes ChatWidget, RealtimeSync, Providers, JsonLd structured data
 - **Entrypoints**: `src/app/page.js` (home), `src/app/admin/` (14 sub-routes)
 - **API routes**: `src/app/api/` (12 public dirs); admin APIs under `src/app/api/admin/` (18 entries incl. audit, berita, dashboard, editors, galeri, galeri-berita, halaman, homepage-slides, laporan, login, logout, my-permissions, pesan, register-editor, reset-password, seksi, session, update-password)
-- **Prisma client**: `src/lib/prisma.js` (singleton, `prisma/adapter-pg` pool via `pg.Pool`, `'server-only'`)
+- **Drizzle client**: `src/lib/drizzle.js` (singleton, `pg.Pool` via `drizzle-orm/node-postgres`, `'server-only'`)
 - **Env validation**: `src/lib/env.js` — checks `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
-- **API responses** MUST use `apiResponse()` from `src/lib/prisma-helpers.js` (BigInt serialization)
+- **API responses** MUST use `apiResponse()` from `src/lib/api-helpers.js` (BigInt serialization)
 - **Audit log**: `recordAudit()` / `listAudit()` / `deleteAudit()` from `src/lib/audit.js` — auto-log admin CRUD
 - **Admin auth guard**: `validateAdmin()` from `src/lib/cms-utils.js` (role/permission check in API routes)
 - **Rate limit**: `rateLimit()` from `src/lib/rate-limit.js` — Upstash Redis or in-memory Map fallback
@@ -55,12 +55,12 @@ No `typecheck` or `lint:fix` script exists despite README claims.
   - `<StatCard />`, `<StatusPill />`, `<ActionIconButton />`, `<ToggleSwitch />`, `<SlidePagination />`
 
 ## Database
-- Prisma ORM only — never raw SQL
-- Source of truth: `prisma/schema.prisma` (~1000 lines, 104 models incl. auth schema)
+- Drizzle ORM only — never raw SQL
+- Source of truth: `src/db/schema.ts` (~104 models incl. auth schema)
 - App models: `admin_audit_log`, `admin_users`, `agenda`, `berita`, `categories`, `documents`, `dokumen`, `editor_requests`, `galeri`, `homepage_slides`, `kontak_pesan`, `news`, `profiles`, `report_categories`, `report_documents`, `static_pages`, `user_permissions`, `seksi`, `pegawai_seksi`, `layanan_ptsp`, `link_aplikasi_seksi`, `layanan_publik`, `testimonials`
 - Auth schema models (`@schema("auth")`) exist but are managed by Supabase — do not modify
 - Rate limit: Upstash Redis or in-memory failover (`src/lib/rate-limit.js`)
-- Prisma engine type: `"binary"` (set in schema.prisma; overridable via `PRISMA_CLIENT_ENGINE_TYPE` env)
+- Drizzle Kit introspection: `npx drizzle-kit pull` generates `src/db/schema.ts` + `src/db/relations.ts`
 
 ## Testing
 - Vitest: happy-dom, `@testing-library/jest-dom/vitest`, `next/navigation` mocked (see `vitest.setup.js`)
@@ -91,8 +91,7 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - ESLint: flat config (`eslint.config.mjs`), `eslint-config-next/core-web-vitals`
 - Security headers (CSP, HSTS, X-Frame-Options, Referrer-Policy) configured in `next.config.mjs`
 - CSP includes `worker-src 'self'` for PWA Service Worker support
-- Prisma separate config: `prisma.config.js` (uses `DIRECT_URL` || `DATABASE_URL`)
-- `prisma generate` runs automatically as part of `npm run build`
+- `drizzle-kit generate` / `drizzle-kit push` for schema changes
 - Root canonical removed from layout.js — set canonical per-page only (homepage: `src/app/page.js`)
 - Google Search Console: verified, indexing requested
 - Dev by Muhammad Nazilah, S.E.

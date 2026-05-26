@@ -1,5 +1,7 @@
-import { apiResponse } from "@/lib/prisma-helpers";
-import prisma from "@/lib/prisma";
+import { apiResponse } from "@/lib/api-helpers";
+import { db } from "@/lib/drizzle";
+import { report_documents } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -12,15 +14,11 @@ export async function POST(request) {
       return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
-    const document = await prisma.report_documents.update({
-      where: { id: id },
-      data: {
-        view_count: {
-          increment: 1
-        }
-      },
-      select: { view_count: true }
-    });
+    const [document] = await db
+      .update(report_documents)
+      .set({ view_count: sql`${report_documents.view_count} + 1` })
+      .where(eq(report_documents.id, id))
+      .returning({ view_count: report_documents.view_count });
 
     return apiResponse({ views: document.view_count });
   } catch (error) {

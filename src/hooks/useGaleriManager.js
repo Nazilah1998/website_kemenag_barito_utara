@@ -21,6 +21,7 @@ export function useGaleriManager() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -81,9 +82,12 @@ export function useGaleriManager() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function handleImageFileChange(e) {
-    const file = e.target.files?.[0];
+  async function processImageFile(file) {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("File harus berupa gambar.");
+      return;
+    }
 
     try {
       setUploadingImage(true);
@@ -104,6 +108,27 @@ export function useGaleriManager() {
       setUploadingImage(false);
     }
   }
+
+  async function handleImageFileChange(e) {
+    const file = e.target.files?.[0];
+    if (file) await processImageFile(file);
+  }
+
+  const handleImageDragOver = (e) => {
+    e.preventDefault();
+    setIsDraggingImage(true);
+  };
+
+  const handleImageDragLeave = () => {
+    setIsDraggingImage(false);
+  };
+
+  const handleImageDrop = (e) => {
+    e.preventDefault();
+    setIsDraggingImage(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processImageFile(file);
+  };
 
   async function handleSave() {
     try {
@@ -174,6 +199,10 @@ export function useGaleriManager() {
     form,
     handleChange,
     handleImageFileChange,
+    isDraggingImage,
+    handleImageDragOver,
+    handleImageDragLeave,
+    handleImageDrop,
     handleSave,
     saving,
     uploadingImage,

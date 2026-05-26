@@ -1,10 +1,12 @@
-import { apiResponse, getSafeIdFromContext } from "@/lib/prisma-helpers";
+import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { uploadBase64ImageToSupabase } from "@/lib/storage-media";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
-import prisma from "@/lib/prisma";
 import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
+import { db } from "@/lib/drizzle";
+import { seksi, pegawai_seksi } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +28,13 @@ export async function POST(request, context) {
     const seksiId = await getSafeIdFromContext(context);
     const body = await request.json().catch(() => ({}));
 
-    const seksi = await prisma.seksi.findUnique({
-      where: { id: seksiId }
-    });
+    const [seksiData] = await db
+      .select()
+      .from(seksi)
+      .where(eq(seksi.id, seksiId))
+      .limit(1);
 
-    if (!seksi) {
+    if (!seksiData) {
       return apiResponse({ message: "Seksi tidak ditemukan." }, 404);
     }
 
@@ -61,8 +65,9 @@ export async function POST(request, context) {
       finalFoto = uploaded?.publicUrl || "";
     }
 
-    const data = await prisma.pegawai_seksi.create({
-      data: {
+    const [data] = await db
+      .insert(pegawai_seksi)
+      .values({
         seksi_id: seksiId,
         nama,
         nip: nip || null,
@@ -70,15 +75,15 @@ export async function POST(request, context) {
         foto: finalFoto || null,
         foto_y: Number.isInteger(foto_y) ? foto_y : 50,
         sort_order,
-      }
-    });
+      })
+      .returning();
 
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.CREATE,
       entity: AUDIT_ENTITIES.SETTINGS,
       entityId: data.id,
-      summary: `Menambahkan staf pegawai seksi (${seksi.judul}): ${nama}`,
+      summary: `Menambahkan staf pegawai seksi (${seksiData.judul}): ${nama}`,
       after: data,
       request,
     });
@@ -86,7 +91,7 @@ export async function POST(request, context) {
     // Revalidate public routes
     revalidatePath("/");
     revalidatePath("/informasi/struktur-organisasi");
-    revalidatePath(`/layanan/${seksi.slug}`);
+    revalidatePath(`/layanan/${seksiData.slug}`);
 
     return apiResponse({
       message: "Staf pegawai berhasil ditambahkan.",
