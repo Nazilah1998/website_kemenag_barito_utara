@@ -1,6 +1,12 @@
 import prisma from "@/lib/prisma";
 import { serializePrisma } from "@/lib/prisma-helpers";
 
+const auditBuffer = [];
+const AUDIT_BATCH_SIZE = 10;
+const AUDIT_FLUSH_INTERVAL = 5_000;
+let auditFlushTimer = null;
+let auditFlushLock = false;
+
 export const AUDIT_ACTIONS = {
   CREATE: "create",
   UPDATE: "update",
@@ -20,6 +26,8 @@ export const AUDIT_ENTITIES = {
   KONTAK: "kontak",
   USER: "user",
   SETTINGS: "settings",
+  HOMEPAGE_SLIDES: "homepage_slides",
+  SEKSI: "seksi",
 };
 
 function redact(value) {
@@ -44,6 +52,45 @@ function extractIp(request) {
   const forwarded = request.headers.get?.("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
   return request.headers.get?.("x-real-ip") || null;
+}
+
+async function flushAuditBuffer() {
+  auditFlushTimer = null;
+
+  if (auditBuffer.length === 0 || auditFlushLock) return;
+
+  auditFlushLock = true;
+
+  try {
+    const batch = auditBuffer.splice(0, auditBuffer.length);
+
+    if (batch.length === 0) return;
+
+    await prisma.admin_audit_log.createMany({
+      data: batch,
+    });
+  } catch (error) {
+    console.warn("[audit] batch flush error:", error?.message);
+
+    const batch = auditBuffer.splice(0, auditBuffer.length);
+
+    for (const record of batch) {
+      try {
+        await prisma.admin_audit_log.create({ data: record });
+      } catch (e) {
+        console.warn("[audit] single insert error:", e?.message);
+      }
+    }
+  } finally {
+    auditFlushLock = false;
+
+    if (auditBuffer.length > 0) scheduleAuditFlush();
+  }
+}
+
+function scheduleAuditFlush() {
+  if (auditFlushTimer) return;
+  auditFlushTimer = setTimeout(flushAuditBuffer, AUDIT_FLUSH_INTERVAL);
 }
 
 export async function recordAudit({
@@ -77,9 +124,12 @@ export async function recordAudit({
       user_agent: request?.headers?.get?.("user-agent") || null,
     };
 
-    await prisma.admin_audit_log.create({
-      data: record,
-    });
+    auditBuffer.push(record);
+    scheduleAuditFlush();
+
+    if (auditBuffer.length >= AUDIT_BATCH_SIZE) {
+      await flushAuditBuffer();
+    }
   } catch (error) {
     console.warn("[audit] exception:", error?.message);
   }

@@ -112,7 +112,7 @@ export async function POST(request) {
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.CREATE,
-      entity: AUDIT_ENTITIES.SETTINGS, // Ganti ke entity yang sesuai jika ada
+      entity: AUDIT_ENTITIES.HOMEPAGE_SLIDES,
       entityId: data?.id,
       summary: `Menambah slide beranda: ${title}`,
       after: data,

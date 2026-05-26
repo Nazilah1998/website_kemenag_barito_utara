@@ -9,12 +9,29 @@
  */
 
 const memoryBuckets = new Map();
+const MEMORY_CLEANUP_INTERVAL = 60_000;
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 function shouldUseUpstash() {
   return Boolean(UPSTASH_URL && UPSTASH_TOKEN);
+}
+
+let cleanupTimer = null;
+
+function scheduleMemoryCleanup() {
+  if (cleanupTimer) return;
+  cleanupTimer = setTimeout(() => {
+    cleanupTimer = null;
+    const now = Date.now();
+    for (const [key, bucket] of memoryBuckets) {
+      if (now - bucket.startedAt > Math.max(bucket.windowMs || 60_000, 60_000)) {
+        memoryBuckets.delete(key);
+      }
+    }
+    if (memoryBuckets.size > 0) scheduleMemoryCleanup();
+  }, MEMORY_CLEANUP_INTERVAL);
 }
 
 async function upstashCommand(args) {
@@ -75,7 +92,10 @@ function memoryRateLimit({ key, limit, windowMs }) {
     memoryBuckets.set(key, {
       startedAt: now,
       count: 1,
+      windowMs,
     });
+
+    scheduleMemoryCleanup();
 
     return {
       ok: true,
@@ -126,4 +146,9 @@ export function getClientIp(request) {
   }
 
   return request.headers?.get?.("x-real-ip") || "unknown";
+}
+
+export async function rateLimitForAdmin({ key, limit = 30, windowMs = 60_000, session = null }) {
+  const userId = session?.profile?.id || session?.user?.id || "anon";
+  return rateLimit({ key: `admin:${userId}:${key}`, limit, windowMs });
 }

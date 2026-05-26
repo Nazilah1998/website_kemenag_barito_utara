@@ -128,7 +128,7 @@ export async function POST(request) {
           unit_name: unitName || null,
           status: "approved", // AUTO APPROVED
           reviewed_at: now,
-          reviewed_by: auth.session?.profile?.id || "system",
+          reviewed_by: auth.session?.profile?.id || auth.session?.user?.id || null,
           updated_at: now,
         },
         create: {
@@ -139,7 +139,7 @@ export async function POST(request) {
           status: "approved", // AUTO APPROVED
           requested_at: now,
           reviewed_at: now,
-          reviewed_by: auth.session?.profile?.id || "system",
+          reviewed_by: auth.session?.profile?.id || auth.session?.user?.id || null,
           updated_at: now,
         }
       })

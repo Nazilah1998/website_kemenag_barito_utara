@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const MAX_RESPONSE_BYTES = 10_000_000;
 
 function getAllowedHosts() {
   const hosts = new Set([
@@ -29,6 +32,20 @@ function getAllowedHosts() {
 }
 
 export async function GET(request) {
+  const ip = getClientIp(request);
+  const limitCheck = await rateLimit({
+    key: `image-proxy:${ip}`,
+    limit: 30,
+    windowMs: 60_000,
+  });
+
+  if (!limitCheck.ok) {
+    return NextResponse.json(
+      { message: "Terlalu banyak permintaan." },
+      { status: 429 },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const targetUrl = searchParams.get("url");
 
@@ -89,7 +106,22 @@ export async function GET(request) {
     );
   }
 
+  const contentLength = upstream.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_RESPONSE_BYTES) {
+    return NextResponse.json(
+      { message: "Ukuran gambar melebihi batas maksimal (" + (MAX_RESPONSE_BYTES / 1_000_000) + " MB)." },
+      { status: 413 },
+    );
+  }
+
   const arrayBuffer = await upstream.arrayBuffer();
+
+  if (arrayBuffer.byteLength > MAX_RESPONSE_BYTES) {
+    return NextResponse.json(
+      { message: "Ukuran gambar melebihi batas maksimal (" + (MAX_RESPONSE_BYTES / 1_000_000) + " MB)." },
+      { status: 413 },
+    );
+  }
 
   return new Response(arrayBuffer, {
     status: 200,

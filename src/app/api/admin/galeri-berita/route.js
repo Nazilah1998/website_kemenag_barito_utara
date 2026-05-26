@@ -139,7 +139,7 @@ async function resolveGaleriImage({
 
   if (currentUrl && currentUrl !== uploaded.publicUrl) {
     try {
-      await removeStorageFileByPublicUrl(supabase, currentUrl);
+      await removeStorageFileByPublicUrl(currentUrl);
     } catch (error) {
       console.error("Gagal menghapus cover galeri lama:", error);
     }
@@ -344,7 +344,7 @@ export async function DELETE(request) {
 
     if (item.image_url) {
       try {
-        await removeStorageFileByPublicUrl(supabase, item.image_url);
+        await removeStorageFileByPublicUrl(item.image_url);
       } catch (error) {
         console.error("Gagal menghapus file galeri dari storage:", error);
       }

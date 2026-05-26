@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server";
 import SYSTEM_PROMPT from "@/lib/chat/system-prompt";
 import ENGINES from "@/lib/chat/engines";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req) {
   try {
+    const ip = getClientIp(req);
+    const limitCheck = await rateLimit({
+      key: `chat:${ip}`,
+      limit: 20,
+      windowMs: 60_000,
+    });
+
+    if (!limitCheck.ok) {
+      return NextResponse.json(
+        { error: "Terlalu banyak permintaan. Silakan coba lagi nanti." },
+        { status: 429 },
+      );
+    }
+
     const { messages, system_injection } = await req.json();
 
     const finalSystemPrompt = system_injection

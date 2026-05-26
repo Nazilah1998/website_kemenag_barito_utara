@@ -2,7 +2,12 @@ import React from "react";
 import { Badge, FilterButton } from "./EditorUI";
 import { SearchIcon } from "./EditorIcons";
 
-export function EditorHeader({ pendingCount, filteredCount, totalCount, onAddEditor }) {
+export function EditorHeader({
+  pendingCount,
+  filteredCount,
+  totalCount,
+  onAddEditor,
+}) {
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between border-b-2 border-slate-100 dark:border-slate-800 pb-10">
       <div>
@@ -16,7 +21,8 @@ export function EditorHeader({ pendingCount, filteredCount, totalCount, onAddEdi
           Manajemen Editor
         </h1>
         <p className="mt-4 max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-          Kelola hak akses personil, verifikasi pengajuan akun baru, dan pantau status aktifasi secara tersentralisasi.
+          Kelola hak akses personil, verifikasi pengajuan akun baru, dan pantau
+          status aktifasi secara tersentralisasi.
         </p>
       </div>
 
@@ -25,10 +31,20 @@ export function EditorHeader({ pendingCount, filteredCount, totalCount, onAddEdi
           onClick={onAddEditor}
           className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 text-xs font-black uppercase tracking-widest text-white transition hover:bg-emerald-700 shadow-xl shadow-emerald-500/20"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="3"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4v16m8-8H4"
+            />
           </svg>
-          Tambah Editor Baru
+          Tambah Akun Baru
         </button>
 
         <div className="flex flex-wrap justify-end gap-3">
@@ -45,7 +61,7 @@ export function EditorFilters({
   search,
   setSearch,
   filterRole,
-  setFilterRole
+  setFilterRole,
 }) {
   return (
     <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

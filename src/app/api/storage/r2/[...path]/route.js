@@ -1,10 +1,21 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getR2Client } from "@/lib/r2";
 import { env } from "@/lib/env";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request, { params }) {
+  const ip = getClientIp(request);
+  const limitCheck = await rateLimit({
+    key: `r2-proxy:${ip}`,
+    limit: 60,
+    windowMs: 60_000,
+  });
+
+  if (!limitCheck.ok) {
+    return new Response("Terlalu banyak permintaan.", { status: 429 });
+  }
   let currentPath = "unknown";
   try {
     const resolvedParams = await params;

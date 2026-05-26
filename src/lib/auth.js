@@ -119,6 +119,7 @@ export async function getCurrentSessionContext() {
   let profileRole = normalizeRole(profile?.role);
 
   if (SUPER_ADMIN_EMAIL && currentEmail === SUPER_ADMIN_EMAIL) {
+    console.warn(`[AUTH] SUPER_ADMIN_EMAIL override activated for ${currentEmail}`);
     profileRole = "super_admin";
   } else if (!profileRole) {
     try {

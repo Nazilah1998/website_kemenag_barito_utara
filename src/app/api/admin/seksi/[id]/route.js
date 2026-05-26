@@ -130,7 +130,7 @@ export async function PUT(request, context) {
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.UPDATE,
-      entity: AUDIT_ENTITIES.SETTINGS,
+      entity: AUDIT_ENTITIES.SEKSI,
       entityId: id,
       summary: `Memperbarui profil seksi kepegawaian: ${judul}`,
       before: existing,
@@ -215,7 +215,7 @@ export async function DELETE(request, context) {
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.DELETE,
-      entity: AUDIT_ENTITIES.SETTINGS,
+      entity: AUDIT_ENTITIES.SEKSI,
       entityId: id,
       summary: `Menghapus profil seksi kepegawaian: ${existing.judul}`,
       before: existing,

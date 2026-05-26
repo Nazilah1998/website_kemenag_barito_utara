@@ -3,9 +3,24 @@ import { getCurrentSessionContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request) {
   try {
+    const ip = getClientIp(request);
+    const limitCheck = await rateLimit({
+      key: `admin:login:${ip}`,
+      limit: 5,
+      windowMs: 60_000,
+    });
+
+    if (!limitCheck.ok) {
+      return apiResponse(
+        { message: "Terlalu banyak percobaan login. Silakan coba lagi nanti.", code: "RATE_LIMITED" },
+        429,
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const email = body?.email?.trim()?.toLowerCase();
     const password = body?.password;
@@ -32,6 +47,7 @@ export async function POST(request) {
             secret: process.env.TURNSTILE_SECRET_KEY,
             response: turnstileToken,
           }),
+          signal: AbortSignal.timeout(5_000),
         },
       );
       const verifyJson = await verifyRes.json();

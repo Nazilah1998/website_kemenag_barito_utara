@@ -6,16 +6,13 @@ import {
   User, 
   Calendar, 
   Activity, 
-  Search, 
-  Filter,
   ArrowLeft,
   ArrowRight,
   ShieldCheck,
-  Eye,
-  Info,
   Trash2,
   Trash
 } from "lucide-react";
+import { DeleteConfirmModal, FloatingFeedback } from "@/components/features/admin/slides/SlidesUI";
 
 export default function AuditLogPage() {
   const [logs, setLogs] = useState([]);
@@ -25,6 +22,12 @@ export default function AuditLogPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [deletingId, setDeletingId] = useState(null);
   const [clearing, setClearing] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, id: null });
+  const [toast, setToast] = useState(null);
+
+  const pushToast = (message, error = null) => {
+    setToast({ message, error });
+  };
 
   const fetchLogs = React.useCallback(async () => {
     try {
@@ -47,9 +50,7 @@ export default function AuditLogPage() {
     fetchLogs();
   }, [fetchLogs]);
 
-  const handleDelete = async (id) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus log ini secara permanen?")) return;
-
+  const executeDelete = async (id) => {
     try {
       setDeletingId(id);
       const res = await fetch(`/api/admin/audit?id=${id}`, { method: "DELETE" });
@@ -57,17 +58,17 @@ export default function AuditLogPage() {
 
       if (!res.ok) throw new Error(data.error || "Gagal menghapus log.");
 
+      pushToast("Log berhasil dihapus.");
       fetchLogs();
+      setConfirmDialog({ open: false, type: null, id: null });
     } catch (err) {
-      alert(err.message);
+      pushToast(null, err.message);
     } finally {
       setDeletingId(null);
     }
   };
 
-  const handleClearAll = async () => {
-    if (!confirm("PERHATIAN: Apakah Anda yakin ingin MENGHAPUS SEMUA riwayat log? Tindakan ini tidak dapat dibatalkan.")) return;
-
+  const executeClearAll = async () => {
     try {
       setClearing(true);
       const res = await fetch("/api/admin/audit", { method: "DELETE" });
@@ -75,13 +76,23 @@ export default function AuditLogPage() {
 
       if (!res.ok) throw new Error(data.error || "Gagal membersihkan log.");
 
+      pushToast("Semua riwayat log berhasil dibersihkan.");
       setPage(1);
       fetchLogs();
+      setConfirmDialog({ open: false, type: null, id: null });
     } catch (err) {
-      alert(err.message);
+      pushToast(null, err.message);
     } finally {
       setClearing(false);
     }
+  };
+
+  const handleDeleteClick = (id) => {
+    setConfirmDialog({ open: true, type: 'single', id });
+  };
+
+  const handleClearAllClick = () => {
+    setConfirmDialog({ open: true, type: 'all', id: null });
   };
 
   const getActionColor = (action) => {
@@ -122,7 +133,7 @@ export default function AuditLogPage() {
         
         {logs.length > 0 && (
           <button
-            onClick={handleClearAll}
+            onClick={handleClearAllClick}
             disabled={clearing}
             className="flex items-center gap-2 rounded-xl bg-rose-50 px-5 py-2.5 text-[11px] font-black uppercase tracking-widest text-rose-600 transition-all hover:bg-rose-600 hover:text-white disabled:opacity-30"
           >
@@ -212,7 +223,7 @@ export default function AuditLogPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button
-                        onClick={() => handleDelete(log.id)}
+                        onClick={() => handleDeleteClick(log.id)}
                         disabled={deletingId === log.id}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30"
                         title="Hapus Log"
@@ -254,6 +265,31 @@ export default function AuditLogPage() {
           </div>
         </div>
       </div>
+
+      <DeleteConfirmModal
+        open={confirmDialog.open}
+        onCancel={() => setConfirmDialog({ open: false, type: null, id: null })}
+        onConfirm={() => {
+          if (confirmDialog.type === 'single') {
+            executeDelete(confirmDialog.id);
+          } else if (confirmDialog.type === 'all') {
+            executeClearAll();
+          }
+        }}
+        title={confirmDialog.type === 'single' ? "Hapus Log" : "Bersihkan Semua Log"}
+        description={
+          confirmDialog.type === 'single'
+            ? "Apakah Anda yakin ingin menghapus log ini secara permanen?"
+            : "PERHATIAN: Apakah Anda yakin ingin MENGHAPUS SEMUA riwayat log? Tindakan ini tidak dapat dibatalkan."
+        }
+        loading={confirmDialog.type === 'single' ? deletingId === confirmDialog.id : clearing}
+      />
+
+      <FloatingFeedback 
+        message={toast?.message} 
+        error={toast?.error} 
+        onClose={() => setToast(null)} 
+      />
     </div>
   );
 }

@@ -148,7 +148,7 @@ async function resolveCoverImage({
 
   if (currentUrl && currentUrl !== uploaded.publicUrl) {
     try {
-      await removeStorageFileByPublicUrl(supabase, currentUrl);
+      await removeStorageFileByPublicUrl(currentUrl);
     } catch (error) {
       console.error("Gagal menghapus cover lama berita:", error);
     }
@@ -396,7 +396,7 @@ export async function DELETE(request, context) {
       }
 
       for (const fileUrl of filesToDelete) {
-        await removeStorageFileByPublicUrl(supabase, fileUrl);
+        await removeStorageFileByPublicUrl(fileUrl);
       }
     } catch (cleanupError) {
       console.error("Storage cleanup warning:", cleanupError);

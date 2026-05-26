@@ -10,16 +10,16 @@ async function flushViews() {
 
   const { default: prisma } = await import("@/lib/prisma");
 
-  for (const [slug, count] of batch) {
-    try {
-      await prisma.berita.update({
+  await Promise.all(
+    Array.from(batch.entries()).map(([slug, count]) =>
+      prisma.berita.update({
         where: { slug },
         data: { views: { increment: count } },
-      });
-    } catch (err) {
-      console.error(`view-counter flush error for ${slug}:`, err.message);
-    }
-  }
+      }).catch((err) => {
+        console.error(`view-counter flush error for ${slug}:`, err.message);
+      })
+    )
+  );
 }
 
 function scheduleFlush() {

@@ -10,7 +10,7 @@ function isValidUuid(value) {
   );
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
     const auth = await validateAdmin();
     if (!auth.ok) return auth.response;
@@ -22,23 +22,33 @@ export async function GET() {
       );
     }
 
-    const requests = await prisma.editor_requests.findMany({
-      include: {
-        profiles_editor_requests_user_idToprofiles: {
-          select: {
-            id: true,
-            role: true,
-            is_active: true,
-            user_permissions: {
-              select: {
-                permission: true
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
+    const skip = (page - 1) * limit;
+
+    const [requests, total] = await Promise.all([
+      prisma.editor_requests.findMany({
+        include: {
+          profiles_editor_requests_user_idToprofiles: {
+            select: {
+              id: true,
+              role: true,
+              is_active: true,
+              user_permissions: {
+                select: {
+                  permission: true
+                }
               }
             }
           }
-        }
-      },
-      orderBy: { requested_at: 'desc' }
-    });
+        },
+        orderBy: { requested_at: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.editor_requests.count()
+    ]);
 
     const invalidMfaUserIds = {};
 
@@ -85,7 +95,16 @@ export async function GET() {
       };
     });
 
-    return apiResponse({ editors, invalidMfaUserIds });
+    return apiResponse({
+      editors,
+      invalidMfaUserIds,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error("GET Editors Error:", error);
     return apiResponse(

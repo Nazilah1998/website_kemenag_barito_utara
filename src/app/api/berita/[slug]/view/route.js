@@ -1,7 +1,18 @@
 import { apiResponse } from "@/lib/prisma-helpers";
 import { incrementView } from "@/lib/view-counter";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
-export async function POST(_request, context) {
+export async function POST(request, context) {
+  const ip = getClientIp(request);
+  const limitCheck = await rateLimit({
+    key: `berita-view:${ip}`,
+    limit: 30,
+    windowMs: 60_000,
+  });
+
+  if (!limitCheck.ok) {
+    return apiResponse({ message: "Terlalu banyak permintaan." }, 429);
+  }
   try {
     const { slug } = await context.params;
     incrementView(slug);

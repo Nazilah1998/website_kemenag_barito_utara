@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import { apiResponse } from "@/lib/prisma-helpers";
 import prisma from "@/lib/prisma";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request, { params }) {
+  const ip = getClientIp(request);
+  const limitCheck = await rateLimit({
+    key: `laporan-download:${ip}`,
+    limit: 20,
+    windowMs: 60_000,
+  });
+
+  if (!limitCheck.ok) {
+    return apiResponse({ message: "Terlalu banyak permintaan." }, 429);
+  }
   try {
     const resolvedParams = await params;
     const id = resolvedParams?.id;

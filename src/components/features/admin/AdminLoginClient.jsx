@@ -7,6 +7,7 @@ import Turnstile from "@/components/ui/Turnstile";
 import { siteInfo } from "@/data/site";
 import { useAdminLogin } from "@/hooks/useAdminLogin";
 import { EyeIcon, inputClassName, LoginLoading } from "./login/LoginUI";
+import { LogIn, ArrowLeft } from "lucide-react";
 
 export default function AdminLoginClient({ initialUnauthorized = false }) {
   const l = useAdminLogin(initialUnauthorized);
@@ -74,7 +75,8 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4 text-center">
-            <Link href="/beranda" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+            <Link href="/beranda" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+              <ArrowLeft className="h-3.5 w-3.5" strokeWidth={3} />
               Kembali ke Beranda
             </Link>
           </div>
@@ -124,7 +126,14 @@ function SubmitButton({ submitting, disabled }) {
       disabled={submitting || disabled}
       className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
     >
-      <span className="relative z-10">{submitting ? "Memverifikasi..." : "Masuk ke Dashboard"}</span>
+      <span className="relative z-10 flex items-center gap-2">
+        {submitting ? "Memverifikasi..." : (
+          <>
+            Masuk ke Dashboard
+            <LogIn className="h-4 w-4" strokeWidth={2.5} />
+          </>
+        )}
+      </span>
       <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
     </button>
   );

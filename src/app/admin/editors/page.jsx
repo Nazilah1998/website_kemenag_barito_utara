@@ -15,6 +15,9 @@ async function getEditors() {
                     is_active: true,
                     failed_login_attempts: true,
                     lockout_until: true,
+                    full_name: true,
+                    email: true,
+                    avatar_url: true,
                 }
             }
         },
@@ -44,8 +47,9 @@ async function getEditors() {
         const profile = item.profiles_editor_requests_user_idToprofiles;
         return {
             user_id: item.user_id,
-            full_name: item.full_name,
-            email: item.email,
+            full_name: profile?.full_name || item.full_name,
+            email: profile?.email || item.email,
+            avatar_url: profile?.avatar_url || null,
             unit_name: item.unit_name || "-",
             status: item.status,
             requested_at: item.requested_at,

@@ -85,6 +85,7 @@ export function GaleriFormModal({
                     src={imagePreview}
                     alt="Preview"
                     fill
+                    sizes="(max-width: 768px) 100vw, 40vw"
                     className="object-cover transition-opacity group-hover:opacity-75"
                   />
                 ) : (

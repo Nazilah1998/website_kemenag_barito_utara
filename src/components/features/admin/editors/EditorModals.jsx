@@ -343,7 +343,7 @@ export function CreateEditorModal({
   return (
     <ModalWrapper open={open} onClose={onClose} maxWidth="max-w-xl">
       <ModalHeader
-        title="Registrasi Editor"
+        title="Registrasi Akun"
         subtitle="Daftarkan personil baru secara manual ke dalam sistem admin."
         onClose={onClose}
       />
@@ -439,7 +439,7 @@ export function CreateEditorModal({
 
         <div className="mt-10 flex flex-col gap-3 pt-8 border-t border-slate-100 dark:border-white/5">
           <Button type="submit" tone="primary" size="lg" loading={saving}>
-            Buat Akun Editor
+            Buat Akun Baru
           </Button>
           <Button type="button" tone="ghost" size="lg" onClick={onClose} disabled={saving}>
             Batal

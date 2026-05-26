@@ -96,8 +96,7 @@ export async function removeSupabaseFileByPublicUrl(publicUrl = "") {
   return true;
 }
 
-export async function removeStorageFileByPublicUrl(arg1, arg2) {
-  const publicUrl = arg2 !== undefined ? arg2 : arg1;
+export async function removeStorageFileByPublicUrl(publicUrl) {
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {

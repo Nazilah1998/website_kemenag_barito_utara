@@ -163,7 +163,7 @@ async function resolveCoverImage({
 
   if (currentUrl && currentUrl !== uploaded.publicUrl) {
     try {
-      await removeStorageFileByPublicUrl(supabase, currentUrl);
+      await removeStorageFileByPublicUrl(currentUrl);
     } catch (error) {
       console.error("Gagal menghapus cover lama berita:", error);
     }
@@ -260,7 +260,7 @@ function revalidateBeritaPaths(slug) {
 }
 
 
-export async function GET() {
+export async function GET(request) {
   const auth = await validateAdmin({
     allowEditor: true,
     permission: PERMISSIONS.BERITA_VIEW,
@@ -268,33 +268,49 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   try {
-    const data = await prisma.berita.findMany({
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        excerpt: true,
-        category: true,
-        content: true,
-        cover_image: true,
-        cover_size_kb: true,
-        cover_size_bytes: true,
-        is_published: true,
-        published_at: true,
-        views: true,
-        author_id: true,
-        created_at: true,
-        updated_at: true
-      },
-      orderBy: [
-        { is_published: 'desc' },
-        { published_at: 'desc' },
-        { created_at: 'desc' }
-      ]
-    });
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      prisma.berita.findMany({
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          excerpt: true,
+          category: true,
+          content: true,
+          cover_image: true,
+          cover_size_kb: true,
+          cover_size_bytes: true,
+          is_published: true,
+          published_at: true,
+          views: true,
+          author_id: true,
+          created_at: true,
+          updated_at: true
+        },
+        orderBy: [
+          { is_published: 'desc' },
+          { published_at: 'desc' },
+          { created_at: 'desc' }
+        ],
+        skip,
+        take: limit,
+      }),
+      prisma.berita.count()
+    ]);
 
     return apiResponse({
       items: data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     console.error("GET Berita Error:", error);

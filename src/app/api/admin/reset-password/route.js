@@ -27,6 +27,7 @@ export async function POST(request) {
               secret: process.env.TURNSTILE_SECRET_KEY,
               response: turnstileToken,
             }),
+            signal: AbortSignal.timeout(5_000),
           },
         );
 

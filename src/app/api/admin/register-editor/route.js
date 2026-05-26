@@ -2,11 +2,25 @@ import { apiResponse } from "@/lib/prisma-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLES } from "@/lib/permissions";
 import prisma from "@/lib/prisma";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "";
 
 export async function POST(request) {
+  const ip = getClientIp(request);
+  const limitCheck = await rateLimit({
+    key: `register-editor:${ip}`,
+    limit: 3,
+    windowMs: 3600_000,
+  });
+
+  if (!limitCheck.ok) {
+    return apiResponse(
+      { message: "Terlalu banyak permintaan pendaftaran. Silakan coba lagi nanti." },
+      429,
+    );
+  }
   try {
     const body = await request.json().catch(() => ({}));
     const fullName = String(body?.fullName || "").trim();

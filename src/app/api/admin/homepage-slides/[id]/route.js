@@ -83,7 +83,7 @@ export async function PATCH(request, context) {
         existing.image_url !== finalImageUrl &&
         isCmsStoragePublicUrl(existing.image_url)
       ) {
-        await removeStorageFileByPublicUrl(supabase, existing.image_url).catch(
+        await removeStorageFileByPublicUrl(existing.image_url).catch(
           () => null,
         );
       }
@@ -109,7 +109,7 @@ export async function PATCH(request, context) {
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.UPDATE,
-      entity: AUDIT_ENTITIES.SETTINGS,
+      entity: AUDIT_ENTITIES.HOMEPAGE_SLIDES,
       entityId: id,
       summary: `Memperbarui slide beranda: ${title}`,
       before: existing,
@@ -159,7 +159,7 @@ export async function DELETE(request, context) {
     });
 
     if (existing.image_url && isCmsStoragePublicUrl(existing.image_url)) {
-      await removeStorageFileByPublicUrl(supabase, existing.image_url).catch(
+      await removeStorageFileByPublicUrl(existing.image_url).catch(
         () => null,
       );
     }
@@ -167,7 +167,7 @@ export async function DELETE(request, context) {
     await recordAudit({
       session: auth.session,
       action: AUDIT_ACTIONS.DELETE,
-      entity: AUDIT_ENTITIES.SETTINGS,
+      entity: AUDIT_ENTITIES.HOMEPAGE_SLIDES,
       entityId: id,
       summary: `Menghapus slide beranda: ${existing.title}`,
       before: existing,

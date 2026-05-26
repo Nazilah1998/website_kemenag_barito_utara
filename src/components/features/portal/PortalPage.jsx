@@ -164,13 +164,14 @@ export default function PortalPage() {
     <div className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-900 selection:bg-emerald-500/30">
       {/* Background */}
       <div className="absolute inset-0 z-0">
-        <Image
-          src="/assets/images/kantor-kemenag.jpg"
-          alt="Kantor Kemenag Barito Utara"
-          fill
-          className="object-cover scale-105 blur-[2px] opacity-40 grayscale-[20%] transition-transform duration-1000"
-          priority
-        />
+          <Image
+            src="/assets/images/kantor-kemenag.jpg"
+            alt="Kantor Kemenag Barito Utara"
+            fill
+            sizes="100vw"
+            className="object-cover scale-105 blur-[2px] opacity-40 grayscale-[20%] transition-transform duration-1000"
+            priority
+          />
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/85 to-emerald-950/75" />
       </div>
 

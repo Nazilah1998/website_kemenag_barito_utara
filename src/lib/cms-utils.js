@@ -37,11 +37,9 @@ export async function ensureUniqueSlug(
 
   let candidate = baseSlug;
   let counter = 1;
+  const MAX_ITERATIONS = 100;
 
-  while (true) {
-    // Check if slug exists using Prisma
-    // We assume the table name in Prisma matches the database table name
-    // or is mapped correctly in schema.prisma
+  while (counter <= MAX_ITERATIONS) {
     const existing = await prisma[table].findFirst({
       where: {
         slug: candidate,
@@ -57,6 +55,8 @@ export async function ensureUniqueSlug(
     candidate = `${baseSlug}-${counter}`;
     counter += 1;
   }
+
+  return `${baseSlug}-${Date.now()}`;
 }
 
 export async function validateAdmin(options = {}) {

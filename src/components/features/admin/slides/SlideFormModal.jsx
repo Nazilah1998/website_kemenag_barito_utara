@@ -138,6 +138,7 @@ export function SlideFormModal({
                       src={imagePreview}
                       alt="Preview"
                       fill
+                      sizes="(max-width: 768px) 100vw, 40vw"
                       className="object-contain"
                       unoptimized
                     />
