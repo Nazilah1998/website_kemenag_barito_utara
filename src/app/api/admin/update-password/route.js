@@ -3,6 +3,7 @@ import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { env } from "@/lib/env";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -54,7 +55,7 @@ export async function POST(request) {
 
     return apiResponse({ message: "Password berhasil diperbarui" });
   } catch (error) {
-    console.error("Update Password API Error:", error);
+    logError("update_password_api_error", { error: error?.message });
     return apiResponse({ message: "Terjadi kesalahan server internal" }, 500);
   }
 }

@@ -9,47 +9,36 @@ export function useAdminShell() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
     async function loadSession() {
       try {
         const [sessionRes, permRes] = await Promise.all([
-          fetch("/api/admin/session", { cache: "no-store" }),
-          fetch("/api/admin/my-permissions", { cache: "no-store" }),
+          fetch("/api/admin/session", { cache: "no-store", signal: controller.signal }),
+          fetch("/api/admin/my-permissions", { cache: "no-store", signal: controller.signal }),
         ]);
 
         const session = await sessionRes.json().catch(() => null);
         const perm = await permRes.json().catch(() => null);
 
-        if (!active) return;
-
         const hasAdminPanelAccess =
           session?.permissions?.isAdmin || session?.permissions?.isEditor;
 
         if (!sessionRes.ok || !hasAdminPanelAccess) {
-          if (active) {
-            setSessionData(null);
-            setPermissionContext(null);
-          }
+          setSessionData(null);
+          setPermissionContext(null);
           return;
         }
 
-        if (active) {
-          setSessionData(session);
-          setPermissionContext(perm?.permissionContext || null);
-        }
-      } catch {
-        if (active) {
-          setSessionData(null);
-          setPermissionContext(null);
-        }
+        setSessionData(session);
+        setPermissionContext(perm?.permissionContext || null);
+      } catch (err) {
+        if (err?.name === "AbortError") return;
       } finally {
-        if (active) setLoading(false);
+        setLoading(false);
       }
     }
     loadSession();
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, [router]);
 
   useEffect(() => {

@@ -44,34 +44,32 @@ export function useHeader() {
   }
 
   useEffect(() => {
-    let mounted = true;
+    const controller = new AbortController();
 
     async function checkAdminSession() {
       try {
         const res = await fetch("/api/admin/session", {
           method: "GET",
           cache: "no-store",
+          signal: controller.signal,
         });
 
         if (!res.ok) throw new Error("Gagal membaca session admin");
 
         const data = await res.json();
 
-        if (!mounted) return;
         setAdminState({
           loaded: true,
           isAdmin: Boolean(data?.permissions?.isAdmin),
         });
-      } catch {
-        if (!mounted) return;
+      } catch (err) {
+        if (err.name === "AbortError") return;
         setAdminState({ loaded: true, isAdmin: false });
       }
     }
 
     checkAdminSession();
-    return () => {
-      mounted = false;
-    };
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {

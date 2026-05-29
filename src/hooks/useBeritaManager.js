@@ -66,7 +66,9 @@ export function useBeritaManager() {
   const [isDraggingCover, setIsDraggingCover] = useState(false);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
 
-  async function loadItems() {
+  const loadItemsAbortRef = useRef(null);
+
+  async function loadItems(signal) {
     try {
       setLoading(true);
       setError("");
@@ -74,6 +76,7 @@ export function useBeritaManager() {
       const response = await fetch("/api/admin/berita", {
         method: "GET",
         cache: "no-store",
+        signal,
       });
 
       const data = await readJsonSafely(response);
@@ -84,6 +87,7 @@ export function useBeritaManager() {
 
       setItems(Array.isArray(data?.items) ? data.items : []);
     } catch (err) {
+      if (err.name === "AbortError") return;
       setError(err.message || "Gagal memuat daftar berita.");
       setItems([]);
     } finally {
@@ -92,7 +96,10 @@ export function useBeritaManager() {
   }
 
   useEffect(() => {
-    loadItems();
+    const controller = new AbortController();
+    loadItemsAbortRef.current = controller;
+    loadItems(controller.signal);
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -247,20 +254,6 @@ export function useBeritaManager() {
     }
   }
 
-  function resetForm() {
-    setForm({
-      ...emptyForm,
-      published_at: getDefaultPublishedAt(),
-    });
-    setEditingId(null);
-    setSlugManuallyEdited(false);
-    setDirty(false);
-
-    if (editorRef.current) {
-      editorRef.current.innerHTML = "";
-    }
-  }
-
   function handleOpenCreate() {
     setMessage("");
     setError("");
@@ -274,12 +267,16 @@ export function useBeritaManager() {
     setEditingId(item.id);
     setSlugManuallyEdited(true);
 
+    const existingCover = item.cover_image && typeof item.cover_image === "string" && item.cover_image.startsWith("/")
+      ? item.cover_image
+      : item.cover_image || "";
+
     setForm({
       title: item.title || "",
       slug: item.slug || "",
       category: item.category || "Umum",
       content: item.content || "",
-      cover_image: item.cover_image || "",
+      cover_image: existingCover,
       cover_upload_base64: "",
       cover_upload_name: "",
       cover_upload_size_kb: 0,
@@ -473,41 +470,6 @@ export function useBeritaManager() {
     if (file) processCoverFile(file);
   };
 
-  async function handleGalleryFileChange(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploadingGalleryImage(true);
-      setError("");
-      setMessage("");
-
-      const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 400,
-        hardMaxSizeKB: 500,
-        throwIfOverHardLimit: false,
-        maxWidth: 1200,
-        maxHeight: 1600,
-      });
-
-      setGalleryForm((prev) => ({
-        ...prev,
-        gallery_upload_base64: compressed.base64,
-        gallery_upload_name: compressed.fileName,
-        gallery_upload_size_kb: compressed.sizeKB,
-      }));
-
-      setMessage(
-        `Gambar galeri berhasil dikompresi dari ${compressed.originalSizeKB} KB menjadi ${compressed.sizeKB} KB.`,
-      );
-    } catch (err) {
-      setError(err.message || "Gagal memproses gambar galeri.");
-    } finally {
-      setUploadingGalleryImage(false);
-      event.target.value = "";
-    }
-  }
-
   function clearCoverImage() {
     setForm((prev) => ({
       ...prev,
@@ -517,24 +479,6 @@ export function useBeritaManager() {
       cover_upload_size_kb: 0,
     }));
     setDirty(true);
-  }
-
-  function handleGalleryChange(event) {
-    const { name, value } = event.target;
-    setGalleryForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  function clearGalleryImage() {
-    setGalleryForm((prev) => ({
-      ...prev,
-      image_url: "",
-      gallery_upload_base64: "",
-      gallery_upload_name: "",
-      gallery_upload_size_kb: 0,
-    }));
   }
 
   function buildPayload(nextPublishedState = form.is_published) {
@@ -564,6 +508,9 @@ export function useBeritaManager() {
       return null;
     }
 
+    // Pastikan cover_image tidak undefined/null, selalu string
+    const coverImageValue = typeof form.cover_image === "string" ? form.cover_image : "";
+
     let publishedAtIso = "";
 
     if (form.published_at) {
@@ -583,7 +530,7 @@ export function useBeritaManager() {
       category: form.category || "Umum",
       excerpt: autoExcerpt,
       content: currentContent,
-      cover_image: form.cover_image || "",
+      cover_image: coverImageValue,
       cover_upload_base64: form.cover_upload_base64 || "",
       cover_upload_name: form.cover_upload_name || "",
       is_published: Boolean(nextPublishedState),

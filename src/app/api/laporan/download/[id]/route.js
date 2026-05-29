@@ -4,6 +4,7 @@ import { db } from "@/lib/drizzle";
 import { report_documents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,7 @@ export async function GET(request, { params }) {
     response.headers.set("Access-Control-Allow-Headers", "*");
     return response;
   } catch (error) {
-    console.error("GET Laporan Download Redirect Error:", error);
+    logError("laporan_download_redirect_error", { error: error?.message });
     return apiResponse(
       {
         message: error?.message || "Terjadi kesalahan saat mengunduh dokumen.",

@@ -6,6 +6,7 @@ import { profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -65,7 +66,7 @@ export async function POST(request) {
         );
       }
     } catch (err) {
-      console.error("Turnstile Verification Error:", err);
+      logError("login_turnstile_verification_error", { error: err?.message });
       return apiResponse(
         { ok: false, message: "Gagal memverifikasi keamanan. Coba lagi." },
         429,
@@ -195,7 +196,7 @@ export async function POST(request) {
       },
     });
   } catch (error) {
-    console.error("POST Login Error:", error);
+    logError("login_post_error", { error: error?.message });
     return apiResponse(
       {
         ok: false,

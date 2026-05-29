@@ -1,11 +1,24 @@
 import { siteInfo, siteLinks } from "@/data/site";
 
-const BASE = siteInfo.siteUrl.replace(/\/$/, "");
+const BASE: string = siteInfo.siteUrl.replace(/\/$/, "");
 
-/**
- * Bangun schema Organization untuk Kemenag Barito Utara.
- * Ditanam di layout root agar muncul di setiap halaman.
- */
+interface Crumb {
+  name: string;
+  url?: string;
+}
+
+interface BeritaItem {
+  slug?: string;
+  coverImage?: string | null;
+  publishedAt?: string | null;
+  isoDate?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  title?: string;
+  excerpt?: string | null;
+  category?: string | null;
+}
+
 export function organizationSchema() {
   return {
     "@context": "https://schema.org",
@@ -69,9 +82,6 @@ export function organizationSchema() {
   };
 }
 
-/**
- * Bangun schema WebSite dengan sitelinks search box.
- */
 export function websiteSchema() {
   return {
     "@context": "https://schema.org",
@@ -94,10 +104,7 @@ export function websiteSchema() {
   };
 }
 
-/**
- * Bangun schema NewsArticle untuk detail berita.
- */
-export function newsArticleSchema(berita, { canonicalUrl } = {}) {
+export function newsArticleSchema(berita: BeritaItem | null, { canonicalUrl }: { canonicalUrl?: string } = {}) {
   if (!berita) return null;
   const url = canonicalUrl || `${BASE}/berita/${berita.slug}`;
   const image = berita.coverImage
@@ -136,10 +143,7 @@ export function newsArticleSchema(berita, { canonicalUrl } = {}) {
   };
 }
 
-/**
- * Bangun schema BreadcrumbList dari daftar crumb {name, url}.
- */
-export function breadcrumbSchema(crumbs = []) {
+export function breadcrumbSchema(crumbs: Crumb[] = []) {
   if (!Array.isArray(crumbs) || crumbs.length === 0) return null;
 
   return {
@@ -154,9 +158,6 @@ export function breadcrumbSchema(crumbs = []) {
   };
 }
 
-/**
- * Bangun schema ContactPage.
- */
 export function contactPageSchema() {
   return {
     "@context": "https://schema.org",
@@ -170,9 +171,6 @@ export function contactPageSchema() {
   };
 }
 
-/**
- * Bangun schema SiteNavigationElement untuk membantu Sitelinks.
- */
 export function navigationSchema() {
   const items = [
     { name: "Berita Terbaru", url: "/berita" },
@@ -193,7 +191,7 @@ export function navigationSchema() {
   };
 }
 
-function safeIso(value) {
+function safeIso(value: string | null | undefined): string | undefined {
   if (!value) return undefined;
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return undefined;

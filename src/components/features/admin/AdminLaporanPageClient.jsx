@@ -10,7 +10,7 @@ export default function AdminLaporanPageClient() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        let isMounted = true;
+        const controller = new AbortController();
 
         async function loadData() {
             try {
@@ -21,6 +21,7 @@ export default function AdminLaporanPageClient() {
                     method: "GET",
                     cache: "no-store",
                     credentials: "include",
+                    signal: controller.signal,
                 });
 
                 const json = await res.json();
@@ -29,24 +30,19 @@ export default function AdminLaporanPageClient() {
                     throw new Error(json?.message || "Gagal memuat data laporan admin.");
                 }
 
-                if (!isMounted) return;
-
                 setCategories(Array.isArray(json?.categories) ? json.categories : []);
             } catch (err) {
-                if (!isMounted) return;
+                if (err?.name === "AbortError") return;
                 setError(err?.message || "Gagal memuat data laporan admin.");
                 setCategories([]);
             } finally {
-                if (!isMounted) return;
-                setLoading(false);
+                if (!controller.signal.aborted) setLoading(false);
             }
         }
 
         loadData();
 
-        return () => {
-            isMounted = false;
-        };
+        return () => controller.abort();
     }, []);
 
     const initialCategory = categories[0] || null;

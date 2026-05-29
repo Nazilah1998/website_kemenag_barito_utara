@@ -7,6 +7,7 @@ import { db } from "@/lib/drizzle";
 import { static_pages } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,7 @@ export async function GET(request) {
       pagination: { page, limit, total, totalPages: Math.ceil(Number(total) / limit) },
     });
   } catch (error) {
-    console.error("GET Halaman Error:", error);
+    logError("halaman_get_error", { error: error?.message });
     return apiResponse({ message: error.message || "Gagal mengambil daftar halaman." }, error.status || 500);
   }
 }
@@ -102,7 +103,7 @@ export async function POST(request) {
 
     return apiResponse({ message: "Halaman berhasil ditambahkan.", item: data }, 201);
   } catch (error) {
-    console.error("POST Halaman Error:", error);
+    logError("halaman_post_error", { error: error?.message });
     return apiResponse({ message: error.message || "Gagal menambahkan halaman." }, error.status || 500);
   }
 }

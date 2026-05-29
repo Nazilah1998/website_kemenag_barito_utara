@@ -2,29 +2,51 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
+import { logWarn, logError } from "@/lib/logger";
 import { db } from "@/lib/drizzle";
 import { profiles, admin_users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
 const EDITOR_ROLES = new Set(["editor", "admin", "super_admin"]);
-// PENGAMANAN DARURAT (EMERGENCY FALLBACK)
-// Jika Anda kehilangan akses ke database atau terjadi masalah peretasan (hack),
-// Anda dapat menetapkan email penyelamat secara paksa.
-// Caranya: Tambahkan baris berikut di file .env.local Anda:
-// SUPER_ADMIN_EMAIL=email_rahasia_baru@domain.com
-// Akun dengan email tersebut akan otomatis mendapatkan akses super_admin.
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || null;
 
-export function normalizeRole(role) {
+interface SupabaseUser {
+  id?: string;
+  email?: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+}
+
+interface ProfileRecord {
+  id?: string;
+  email?: string;
+  role?: string;
+  [key: string]: unknown;
+}
+
+export interface SessionContext {
+  supabase?: unknown;
+  user: SupabaseUser | null;
+  profile: ProfileRecord | null;
+  claims: Record<string, unknown>;
+  role: string | null;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  isEditor: boolean;
+  hasAdminAccess: boolean;
+}
+
+export function normalizeRole(role: unknown): string | null {
   if (!role || typeof role !== "string") return null;
   const normalized = role.trim().toLowerCase();
   return normalized || null;
 }
 
-function isMissingSessionError(error) {
-  const message = String(error?.message || "").toLowerCase();
-  const code = String(error?.code || "").toLowerCase();
+function isMissingSessionError(error: unknown): boolean {
+  const err = error as { message?: string; code?: string };
+  const message = String(err?.message || "").toLowerCase();
+  const code = String(err?.code || "").toLowerCase();
   return (
     message.includes("auth session missing") ||
     message.includes("session missing") ||
@@ -33,42 +55,42 @@ function isMissingSessionError(error) {
   );
 }
 
-function buildForbiddenUrl(message, fallback = "/error") {
+function buildForbiddenUrl(message: string, fallback = "/error"): string {
   return `${fallback}?message=${encodeURIComponent(message)}`;
 }
 
-export async function createServerSupabaseClient() {
+export async function createServerSupabaseClient(): Promise<unknown> {
   const cookieStore = await cookies();
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: Array<{ name: string; value: string; options: Record<string, unknown> }>) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
           });
-        } catch {}
+        } catch {
+          // ignore
+        }
       },
     },
   });
 }
 
-async function getUserProfile(userId) {
+async function getUserProfile(userId: string | null): Promise<ProfileRecord | null> {
   if (!userId) return null;
 
   try {
-    // Try profiles first
     const [profile] = await db
       .select()
       .from(profiles)
       .where(eq(profiles.id, userId))
       .limit(1);
 
-    if (profile) return profile;
+    if (profile) return profile as unknown as ProfileRecord;
 
-    // Fallback to admin_users if needed (though profiles should have it)
     const [adminUser] = await db
       .select()
       .from(admin_users)
@@ -78,25 +100,26 @@ async function getUserProfile(userId) {
     if (adminUser) {
       return {
         ...adminUser,
-        id: adminUser.user_id,
-        role: adminUser.role,
-      };
+        id: (adminUser as unknown as Record<string, unknown>).user_id as string,
+        role: (adminUser as unknown as Record<string, unknown>).role as string,
+      } as unknown as ProfileRecord;
     }
 
     return null;
   } catch (error) {
-    console.error("getUserProfile error:", error);
+    logError("getUserProfile_error", { error: error as Error });
     return null;
   }
 }
 
-export async function getCurrentSessionContext() {
+export async function getCurrentSessionContext(): Promise<SessionContext> {
   const supabase = await createServerSupabaseClient();
 
   const {
     data: { user },
     error: userError,
-  } = await supabase.auth.getUser();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = await (supabase as any).auth.getUser();
 
   if (userError && !isMissingSessionError(userError)) {
     throw userError;
@@ -125,13 +148,12 @@ export async function getCurrentSessionContext() {
   let profileRole = normalizeRole(profile?.role);
 
   if (SUPER_ADMIN_EMAIL && currentEmail === SUPER_ADMIN_EMAIL) {
-    console.warn(
-      `[AUTH] SUPER_ADMIN_EMAIL override activated for ${currentEmail}`,
-    );
+    logWarn("SUPER_ADMIN_EMAIL_override", { email: currentEmail });
     profileRole = "super_admin";
   } else if (!profileRole) {
     try {
-      const [adminRow] = await db
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const [adminRow] = await (db as any)
         .select({ role: admin_users.role })
         .from(admin_users)
         .where(eq(admin_users.user_id, user.id))
@@ -140,24 +162,26 @@ export async function getCurrentSessionContext() {
       if (adminRow) {
         profileRole = normalizeRole(adminRow.role);
       }
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
 
   const role = normalizeRole(
     profileRole ||
-      user?.app_metadata?.role ||
-      user?.user_metadata?.role ||
+      (user?.app_metadata?.role as string) ||
+      (user?.user_metadata?.role as string) ||
       null,
   );
 
-  const isAdmin = ADMIN_ROLES.has(role);
-  const isEditor = EDITOR_ROLES.has(role);
+  const isAdmin = ADMIN_ROLES.has(role as string);
+  const isEditor = EDITOR_ROLES.has(role as string);
 
   return {
     supabase,
     user,
     profile,
-    claims: user?.app_metadata || {},
+    claims: (user?.app_metadata || {}) as Record<string, unknown>,
     role,
     isAuthenticated: true,
     isAdmin,
@@ -166,7 +190,7 @@ export async function getCurrentSessionContext() {
   };
 }
 
-export async function requireAuth({ loginRedirect = "/login" } = {}) {
+export async function requireAuth({ loginRedirect = "/login" } = {}): Promise<SessionContext> {
   const session = await getCurrentSessionContext();
 
   if (!session.isAuthenticated) {
@@ -181,7 +205,7 @@ export async function requireEditor({
   forbiddenRedirect = buildForbiddenUrl(
     "Akun ini tidak memiliki hak akses editor.",
   ),
-} = {}) {
+} = {}): Promise<SessionContext> {
   const session = await requireAuth({ loginRedirect });
 
   if (!session.isEditor) {
@@ -191,14 +215,12 @@ export async function requireEditor({
   return session;
 }
 
-// requireAdmin tetap KETAT: hanya admin dan super_admin.
-// Dipakai untuk halaman super admin saja (misal: manajemen editor, settings global).
 export async function requireAdmin({
   loginRedirect = "/admin/login",
   forbiddenRedirect = buildForbiddenUrl(
     "Akun ini tidak memiliki hak akses admin.",
   ),
-} = {}) {
+} = {}): Promise<SessionContext> {
   const session = await requireAuth({ loginRedirect });
 
   if (!session.isAdmin) {
@@ -208,14 +230,12 @@ export async function requireAdmin({
   return session;
 }
 
-// BARU: requireAdminAccess = boleh masuk panel admin, termasuk editor.
-// Dipakai untuk layout admin dan halaman umum panel (bukan halaman super admin).
 export async function requireAdminAccess({
   loginRedirect = "/admin/login",
   forbiddenRedirect = buildForbiddenUrl(
     "Akun ini tidak memiliki hak akses untuk masuk panel admin.",
   ),
-} = {}) {
+} = {}): Promise<SessionContext> {
   const session = await requireAuth({ loginRedirect });
 
   if (!session.hasAdminAccess) {

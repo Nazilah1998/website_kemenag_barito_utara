@@ -33,14 +33,15 @@ export default function useHalamanManager() {
     }, 5000);
   }, []);
 
-  const loadItems = useCallback(async () => {
+  const loadItems = useCallback(async (signal) => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/halaman");
+      const res = await fetch("/api/admin/halaman", { signal });
       if (!res.ok) throw new Error("Gagal memuat daftar halaman.");
       const data = await res.json();
       setItems(data.items || []);
     } catch (err) {
+      if (err.name === "AbortError") return;
       showFeedback(err.message, "error");
     } finally {
       setLoading(false);
@@ -48,7 +49,9 @@ export default function useHalamanManager() {
   }, [showFeedback]);
 
   useEffect(() => {
-    loadItems();
+    const controller = new AbortController();
+    loadItems(controller.signal);
+    return () => controller.abort();
   }, [loadItems]);
 
   const openCreateForm = useCallback(() => {

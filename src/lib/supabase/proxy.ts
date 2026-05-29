@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
+import { logWarn } from "@/lib/logger";
 
-export async function updateSession(request) {
+export async function updateSession(request: NextRequest): Promise<NextResponse> {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -13,7 +14,7 @@ export async function updateSession(request) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet, headers) {
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>, headers?: Record<string, string>) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
@@ -21,7 +22,7 @@ export async function updateSession(request) {
           supabaseResponse = NextResponse.next({ request });
 
           cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
+            supabaseResponse.cookies.set(name, value, options || {});
           });
 
           if (headers) {
@@ -35,12 +36,10 @@ export async function updateSession(request) {
   );
 
   try {
-    await supabase.auth.getClaims();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).auth.getClaims();
   } catch (error) {
-    console.warn(
-      "Supabase session invalid, clearing stale cookies...",
-      error?.message,
-    );
+    logWarn("supabase_session_invalid", { error: error as Error });
 
     for (const cookie of request.cookies.getAll()) {
       if (cookie.name.startsWith("sb-")) {

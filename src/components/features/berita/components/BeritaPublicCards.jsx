@@ -1,19 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+const FALLBACK_IMAGE = "/assets/branding/kemenag.svg";
+
+function getCoverImage(item) {
+  return item.coverImage || FALLBACK_IMAGE;
+}
+
 export function BeritaFeaturedCard({ item }) {
+  const [imgSrc, setImgSrc] = useState(null);
   if (!item) return null;
+
+  const currentSrc = imgSrc || getCoverImage(item);
+
   return (
     <article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="grid gap-0 lg:grid-cols-[1fr_1fr]">
         <div className="relative min-h-[260px] bg-slate-200 dark:bg-slate-800">
           <Image
-            src={item.coverImage}
+            src={currentSrc}
             alt={item.title}
             fill
+            priority
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 50vw"
+            onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
         </div>
         <div className="p-6 md:p-8">
@@ -37,15 +49,19 @@ export function BeritaFeaturedCard({ item }) {
 }
 
 export function BeritaCard({ item }) {
+  const [imgSrc, setImgSrc] = useState(null);
+  const currentSrc = imgSrc || getCoverImage(item);
+
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-500/40">
       <div className="relative h-52 bg-slate-200 dark:bg-slate-800">
         <Image
-          src={item.coverImage}
+          src={currentSrc}
           alt={item.title}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          onError={() => setImgSrc(FALLBACK_IMAGE)}
         />
       </div>
       <div className="p-6">

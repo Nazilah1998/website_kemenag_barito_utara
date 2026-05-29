@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { galeri } from "@/db/schema";
 import { eq, desc, ne } from "drizzle-orm";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 300;
 
@@ -49,7 +50,7 @@ async function getPublishedGaleri() {
 
     return mapGaleriItems(data);
   } catch (error) {
-    console.error("getPublishedGaleri error:", error);
+    logError("galeri_public_error", { error: error?.message });
     return [];
   }
 }

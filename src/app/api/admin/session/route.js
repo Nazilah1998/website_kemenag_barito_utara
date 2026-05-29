@@ -1,5 +1,6 @@
 import { apiResponse } from "@/lib/api-helpers";
 import { getCurrentSessionContext } from "@/lib/auth";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("GET Session Error:", error);
+    logError("session_get_error", { error: error?.message });
     return apiResponse({
       authenticated: false,
       user: null,

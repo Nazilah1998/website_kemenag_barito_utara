@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import PageBanner from "@/components/common/PageBanner";
+import CoverImageWithFallback from "@/components/features/berita/components/CoverImageWithFallback";
 import {
   BeritaDetailBackLink,
   BeritaDetailDateText,
@@ -17,7 +17,7 @@ import JsonLd from "@/components/features/seo/JsonLd";
 import { breadcrumbSchema, newsArticleSchema } from "@/lib/structured-data";
 import { siteInfo } from "@/data/site";
 
-const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+const FALLBACK_IMAGE = "/assets/branding/kemenag.svg";
 
 function truncateText(value = "", maxLength = 180) {
   if (!value) return "";
@@ -154,7 +154,7 @@ export default async function DetailBeritaPage({ params }) {
                       className="group block w-full aspect-[16/9] cursor-pointer overflow-hidden bg-slate-50 dark:bg-slate-900"
                       title="Buka atau unduh gambar"
                     >
-                      <Image
+                      <CoverImageWithFallback
                         src={coverImage}
                         alt={berita.title}
                         width={800}

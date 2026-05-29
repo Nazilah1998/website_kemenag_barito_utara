@@ -27,7 +27,8 @@ export default function SejarahPage() {
   const [timeline, setTimeline] = useState(FALLBACK_TIMELINE);
 
   useEffect(() => {
-    fetch("/api/static-pages?slug=sejarah")
+    const controller = new AbortController();
+    fetch("/api/static-pages?slug=sejarah", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.content) {
@@ -38,7 +39,8 @@ export default function SejarahPage() {
           } catch {}
         }
       })
-      .catch(() => {});
+      .catch((e) => { if (e?.name !== "AbortError") {} });
+    return () => controller.abort();
   }, []);
 
   return (

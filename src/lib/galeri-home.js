@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { galeri } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
+import { logWarn, logError } from "@/lib/logger";
 
 const getCachedLatestGaleriHome = unstable_cache(
   async () => {
@@ -25,7 +26,7 @@ const getCachedLatestGaleriHome = unstable_cache(
       }
 
       if (!data || data.length === 0) {
-        console.warn("getCachedLatestGaleriHome: No gallery data found in database.");
+        logWarn("getCachedLatestGaleriHome_no_data");
         return [];
       }
 
@@ -42,7 +43,7 @@ const getCachedLatestGaleriHome = unstable_cache(
         };
       });
     } catch (error) {
-      console.error("getCachedLatestGaleriHome error:", error);
+      logError("getCachedLatestGaleriHome_error", { error: error?.message });
       return [];
     }
   },

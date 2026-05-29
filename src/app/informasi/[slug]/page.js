@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { static_pages } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import InformasiSlugClientPage from "./InformasiSlugClientPage";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 600;
 
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }) {
       description: page.description || "",
     };
   } catch (error) {
-    console.error("generateMetadata error:", error);
+    logError("informasi_slug_metadata_error", { error: error?.message });
     return { title: "Informasi Publik | Kemenag Barito Utara" };
   }
 }
@@ -44,7 +45,7 @@ export default async function InformasiSubPage({ params }) {
       .limit(1);
     pageData = pageDataResult;
   } catch (error) {
-    console.error("Error fetching static page from database:", error);
+    logError("informasi_slug_page_error", { error: error?.message });
   }
 
   return <InformasiSlugClientPage slug={slug} pageData={pageData} />;

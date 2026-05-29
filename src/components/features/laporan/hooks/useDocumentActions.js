@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logError } from "@/lib/logger";
 
 export function useDocumentActions() {
   const [isDownloading, setIsDownloading] = useState(null);
@@ -17,7 +18,7 @@ export function useDocumentActions() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error("Download failed:", error);
+      logError("document_download_error", { error: error?.message });
       const link = document.createElement("a");
       link.href = url;
       link.target = "_blank";

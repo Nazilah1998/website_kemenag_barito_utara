@@ -2,6 +2,7 @@ import React from "react";
 import StrukturOrganisasiUI from "@/components/features/informasi/StrukturOrganisasiUI";
 import { db } from "@/lib/drizzle";
 import { seksi } from "@/db/schema";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 600;
 
@@ -74,7 +75,7 @@ export default async function StrukturOrganisasiPage() {
 
     leadershipData = [kepalaKantor, ...dynamicLeaders];
   } catch (error) {
-    console.error("Error fetching seksi data for Struktur Organisasi:", error);
+    logError("struktur_organisasi_error", { error: error?.message });
     // Fallback to static if error
     const { leadershipProfiles } = await import("@/data/profile");
     leadershipData = leadershipProfiles;

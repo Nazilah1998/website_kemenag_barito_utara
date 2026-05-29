@@ -9,7 +9,7 @@ import { db } from "@/lib/drizzle";
 import * as schema from "@/db/schema";
 import { eq, ne, and } from "drizzle-orm";
 
-export function slugify(value) {
+export function slugify(value: string): string {
   return cleanString(value)
     .toLowerCase()
     .normalize("NFD")
@@ -20,28 +20,59 @@ export function slugify(value) {
     .replace(/^-|-$/g, "");
 }
 
+interface SessionContext {
+  isAuthenticated?: boolean;
+  role?: string;
+  isEditor?: boolean;
+  isAdmin?: boolean;
+  profile?: { id?: string; email?: string };
+  user?: { id?: string; email?: string };
+}
+
+interface PermissionContext {
+  isSuperAdmin?: boolean;
+  isAdmin?: boolean;
+  isEditor?: boolean;
+  approved?: boolean;
+  isActive?: boolean;
+}
+
+type ValidateAdminResult =
+  | {
+      ok: true;
+      session: SessionContext;
+      permissionContext: PermissionContext;
+    }
+  | {
+      ok: false;
+      response: Response;
+    };
+
 export async function ensureUniqueSlug(
-  table,
-  rawSlug,
-  fallbackTitle,
-  currentId = null,
-) {
-  const baseSlug =
+  table: string,
+  rawSlug: string,
+  fallbackTitle: string,
+  currentId: string | null = null,
+): Promise<string> {
+  const baseSlug: string =
     slugify(rawSlug) || slugify(fallbackTitle) || `${table}-${Date.now()}`;
 
   let candidate = baseSlug;
   let counter = 1;
   const MAX_ITERATIONS = 100;
 
-  const camelTable = table.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-  const schemaTable = schema[camelTable] || schema[table];
+  const camelTable = table.replace(/_([a-z])/g, (_g: string, c: string) =>
+    c.toUpperCase(),
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const schemaTable: any = (schema as any)[camelTable] || (schema as any)[table];
 
   if (!schemaTable) {
     throw new Error(`Tabel ${table} tidak ditemukan di schema`);
   }
 
   while (counter <= MAX_ITERATIONS) {
-    let conditions = [eq(schemaTable.slug, candidate)];
+    const conditions = [eq(schemaTable.slug, candidate)];
     if (currentId) {
       conditions.push(ne(schemaTable.id, currentId));
     }
@@ -63,10 +94,12 @@ export async function ensureUniqueSlug(
   return `${baseSlug}-${Date.now()}`;
 }
 
-export async function validateAdmin(options = {}) {
+export async function validateAdmin(
+  options: { permission?: string | null; allowEditor?: boolean } = {},
+): Promise<ValidateAdminResult> {
   const { permission = null, allowEditor = true } = options;
 
-  const session = await getCurrentSessionContext();
+  const session: SessionContext = await getCurrentSessionContext();
 
   if (!session?.isAuthenticated) {
     return {
@@ -104,11 +137,12 @@ export async function validateAdmin(options = {}) {
     const userId = session?.profile?.id || session?.user?.id || null;
     const email = session?.profile?.email || session?.user?.email || null;
 
-    const permissionContext = await getUserPermissionContext({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const permissionContext: PermissionContext = await getUserPermissionContext({
       userId,
       role,
       email,
-    });
+    } as any);
 
     if (!permissionContext.approved || !permissionContext.isActive) {
       return {
@@ -123,7 +157,8 @@ export async function validateAdmin(options = {}) {
       };
     }
 
-    if (permission && !hasUserPermission(permissionContext, permission)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (permission && !hasUserPermission(permissionContext as any, permission)) {
       return {
         ok: false,
         response: NextResponse.json(

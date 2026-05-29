@@ -6,6 +6,7 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { usePdfViewer } from "@/hooks/usePdfViewer";
 import { PdfViewerToolbar } from "./PdfViewerToolbar";
+import { logError } from "@/lib/logger";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/assets/workers/pdf.worker.min.mjs";
 
@@ -27,25 +28,22 @@ export default function PdfViewerClient({ fileUrl, fileName = "dokumen.pdf", onE
   const [fetchError, setFetchError] = React.useState(null);
 
   React.useEffect(() => {
-    let isMounted = true;
+    const controller = new AbortController();
     async function loadPdf() {
       try {
-        const res = await fetch(fileUrl);
+        const res = await fetch(fileUrl, { signal: controller.signal });
         if (!res.ok) throw new Error(`Gagal mengunduh dokumen (Status: ${res.status})`);
         const blob = await res.blob();
-        if (isMounted) {
-          setPdfData(blob);
-        }
+        setPdfData(blob);
       } catch (err) {
-        if (isMounted) {
-          console.error("PDF Fetch Error:", err);
-          setFetchError(err);
-          if (onError) onError(err);
-        }
+        if (err?.name === "AbortError") return;
+        logError("pdf_viewer_fetch_error", { error: err?.message });
+        setFetchError(err);
+        if (onError) onError(err);
       }
     }
     loadPdf();
-    return () => { isMounted = false; };
+    return () => controller.abort();
   }, [fileUrl, onError]);
 
   const {

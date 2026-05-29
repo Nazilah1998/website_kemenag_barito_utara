@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { GalleryLightbox } from "@/components/features/galeri/components/GalleryLightbox";
 import { motion } from "framer-motion";
+import { logError } from "@/lib/logger";
 
 const containerVariants = {
   hidden: {},
@@ -214,7 +215,7 @@ function GalleryCard({ item, locale, t, onPreview, isMobile = false, isActive = 
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Download failed:", error);
+      logError("home_gallery_download_error", { error: error?.message });
       window.open(item.imageUrl, "_blank");
     }
   };

@@ -2,6 +2,7 @@ import { apiResponse } from "@/lib/api-helpers";
 import { db } from "@/lib/drizzle";
 import { report_documents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export async function POST(request) {
 
     return apiResponse({ views: document.view_count });
   } catch (error) {
-    console.error("POST Laporan View Error:", error);
+    logError("laporan_admin_view_post_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal mencatat pembaca." },
       500,

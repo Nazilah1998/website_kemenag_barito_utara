@@ -1,6 +1,7 @@
 import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { getUserPermissionContext } from "@/lib/user-permissions";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export async function GET() {
 
     return apiResponse({ permissionContext });
   } catch (error) {
-    console.error("GET My Permissions Error:", error);
+    logError("my_permissions_error", { error: error?.message });
     return apiResponse({ permissionContext: null }, 500);
   }
 }

@@ -4,6 +4,7 @@ import { admin_audit_log } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { validateAdmin } from "@/lib/cms-utils";
 import { PERMISSIONS } from "@/lib/permissions";
+import { logError } from "@/lib/logger";
 
 export async function GET(request) {
   try {
@@ -37,7 +38,7 @@ export async function GET(request) {
       }
     });
   } catch (error) {
-    console.error("Audit log API error:", error);
+    logError("audit_log_get_error", { error: error?.message });
     return apiResponse({ error: "Internal Server Error" }, 500);
   }
 }
@@ -65,7 +66,7 @@ export async function DELETE(request) {
       return apiResponse({ message: "Seluruh riwayat log berhasil dibersihkan." });
     }
   } catch (error) {
-    console.error("Audit log DELETE error:", error);
+    logError("audit_log_delete_error", { error: error?.message });
     return apiResponse({ error: "Gagal menghapus log." }, 500);
   }
 }

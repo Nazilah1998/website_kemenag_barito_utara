@@ -1,6 +1,7 @@
 import { db } from "@/lib/drizzle";
 import { berita, homepage_slides, galeri, kontak_pesan, report_documents, admin_audit_log } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 function safeDate(value) {
   if (!value) return null;
@@ -141,7 +142,7 @@ export async function getDashboardStats({
       recentActivity,
     };
   } catch (error) {
-    console.error("Dashboard Stats Error:", error);
+    logError("dashboard_stats_error", { error: error?.message });
     return {
       ok: false,
       error: error.message,

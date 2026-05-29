@@ -3,6 +3,7 @@ import { cleanString } from "@/lib/validation";
 import { db } from "@/lib/drizzle";
 import { kontak_pesan } from "@/db/schema";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { logInfo, logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ async function saveToDatabase(payload) {
     await db.insert(kontak_pesan).values(payload);
     return { ok: true };
   } catch (error) {
-    console.error("Gagal menyimpan pesan kontak ke Drizzle:", error);
+    logError("kontak_save_error", { error: error?.message });
     return { ok: false, error: error?.message };
   }
 }
@@ -123,7 +124,7 @@ export async function POST(request) {
   const saved = await saveToDatabase(record);
 
   if (!saved.ok) {
-    console.info("[kontak] pesan diterima (fallback log):", record);
+    logInfo("kontak_fallback_log", { record });
   }
 
   return jsonResponse({

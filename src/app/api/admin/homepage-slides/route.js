@@ -2,12 +2,14 @@ import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { uploadBase64Image } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
+import { cleanString } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { homepage_slides } from "@/db/schema";
 import { asc, desc } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +48,7 @@ export async function GET() {
       items: (data || []).map(normalizeHomepageSlide),
     });
   } catch (error) {
-    console.error("GET Homepage Slides Error:", error);
+    logError("homepage_slides_get_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memuat data slider beranda." },
       500,
@@ -64,7 +66,7 @@ export async function POST(request) {
     const title = toText(body?.title, "");
     const caption = toText(body?.caption, "");
     const imageUrlRaw = toText(body?.image_url, "");
-    const imageUploadBase64 = toText(body?.image_upload_base64, "");
+    const imageUploadBase64 = cleanString(body?.image_upload_base64, 10_000_000);
     const imageUploadName = toText(body?.image_upload_name, "homepage-slide");
     const isPublished = toBool(body?.is_published, true);
     const sortOrder = toNumber(body?.sort_order, 0);
@@ -127,7 +129,7 @@ export async function POST(request) {
       item: normalizeHomepageSlide(data || {}),
     });
   } catch (error) {
-    console.error("POST Homepage Slides Error:", error);
+    logError("homepage_slides_post_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal menambahkan slide beranda." },
       500,

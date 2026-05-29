@@ -1,9 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+
+const FALLBACK_IMAGE = "/assets/branding/kemenag.svg";
 
 function formatDate(isoDate, locale) {
   if (!isoDate) return "-";
@@ -71,13 +73,14 @@ function AdjacentLink({ label, item, align = "left", locale }) {
 }
 
 function RelatedCard({ item, t, locale }) {
+  const [imgSrc, setImgSrc] = useState(null);
   const displayDate = formatDate(item.isoDate, locale);
   const displayCategory = t(`berita.categories.${item.category}`) || item.category;
 
   return (
     <article className="relative group flex flex-row md:flex-col overflow-hidden rounded-2xl md:rounded-[28px] border border-slate-200 bg-white shadow-sm transition md:hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       <div className="relative block w-[100px] sm:w-[120px] md:w-full shrink-0 aspect-square md:aspect-16/10 bg-slate-100 dark:bg-slate-800">
-        <Image src={item.coverImage || "/assets/branding/kemenag.svg"} alt={item.title} fill className="object-cover transition duration-500 md:group-hover:scale-[1.03]" sizes="(max-width: 768px) 120px, (max-width: 1024px) 50vw, 25vw" />
+        <Image src={imgSrc || item.coverImage || FALLBACK_IMAGE} alt={item.title} fill className="object-cover transition duration-500 md:group-hover:scale-[1.03]" sizes="(max-width: 768px) 120px, (max-width: 1024px) 50vw, 25vw" onError={() => setImgSrc(FALLBACK_IMAGE)} />
       </div>
       <div className="flex flex-col justify-center flex-1 p-3 sm:p-4 md:p-5 min-w-0">
         <div className="flex flex-wrap items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-medium text-slate-500 dark:text-slate-400">

@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logInfo, logError } from "@/lib/logger";
 
 /**
  * Broadcasts a refresh signal to all connected clients.
@@ -18,8 +19,8 @@ export async function broadcastRefresh(entity = "content") {
       },
     });
     
-    console.log(`[RealtimeService] Refresh signal broadcasted for: ${entity}`);
+    logInfo("realtime_refresh_broadcast", { entity });
   } catch (error) {
-    console.error("[RealtimeService] Failed to broadcast refresh signal:", error);
+    logError("realtime_broadcast_failed", { error: error?.message });
   }
 }

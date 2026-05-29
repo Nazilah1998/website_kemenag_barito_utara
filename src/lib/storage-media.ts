@@ -1,7 +1,8 @@
 import { uploadToR2, deleteFromR2, getR2PublicUrl } from "./r2";
 import { createAdminClient } from "./supabase/admin";
+import { logError } from "@/lib/logger";
 
-export const CMS_MEDIA_BUCKET =
+export const CMS_MEDIA_BUCKET: string =
   process.env.NEXT_PUBLIC_SUPABASE_CMS_BUCKET || "cms-media";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -10,8 +11,11 @@ export async function uploadBase64Image({
   dataUrl,
   folder = "berita",
   fileNameStem = "image",
+}: {
+  dataUrl: string;
+  folder?: string;
+  fileNameStem?: string;
 }) {
-
   const parsed = parseDataUrl(dataUrl);
 
   if (!ALLOWED_MIME_TYPES.includes(parsed.mimeType)) {
@@ -35,6 +39,10 @@ export async function uploadBase64ImageToSupabase({
   dataUrl,
   folder = "seksi",
   fileNameStem = "image",
+}: {
+  dataUrl: string;
+  folder?: string;
+  fileNameStem?: string;
 }) {
   const parsed = parseDataUrl(dataUrl);
 
@@ -73,7 +81,7 @@ export async function uploadBase64ImageToSupabase({
   };
 }
 
-export async function removeSupabaseFileByPublicUrl(publicUrl = "") {
+export async function removeSupabaseFileByPublicUrl(publicUrl = ""): Promise<boolean> {
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {
@@ -89,14 +97,14 @@ export async function removeSupabaseFileByPublicUrl(publicUrl = "") {
     .remove([path]);
 
   if (error) {
-    console.error("Gagal menghapus file dari Supabase Storage:", error.message);
+    logError("supabase_storage_delete_failed", { error: error as Error });
     return false;
   }
 
   return true;
 }
 
-export async function removeStorageFileByPublicUrl(publicUrl) {
+export async function removeStorageFileByPublicUrl(publicUrl: string): Promise<boolean> {
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {
@@ -108,11 +116,11 @@ export async function removeStorageFileByPublicUrl(publicUrl) {
   return true;
 }
 
-export function isCmsStoragePublicUrl(value = "") {
+export function isCmsStoragePublicUrl(value = ""): boolean {
   return extractStoragePathFromPublicUrl(value) !== null;
 }
 
-function parseDataUrl(dataUrl = "") {
+function parseDataUrl(dataUrl = ""): { mimeType: string; buffer: Buffer } {
   const match = String(dataUrl || "").match(/^data:(.+?);base64,(.+)$/);
 
   if (!match) {
@@ -126,14 +134,14 @@ function parseDataUrl(dataUrl = "") {
   return { mimeType, buffer };
 }
 
-function mimeTypeToExt(mimeType = "") {
+function mimeTypeToExt(mimeType = ""): string {
   if (mimeType === "image/jpeg") return "jpg";
   if (mimeType === "image/png") return "png";
   if (mimeType === "image/webp") return "webp";
   throw new Error("Mime type gambar tidak didukung.");
 }
 
-function sanitizeSegment(value = "") {
+function sanitizeSegment(value = ""): string {
   return String(value || "")
     .toLowerCase()
     .trim()
@@ -142,7 +150,7 @@ function sanitizeSegment(value = "") {
     .replace(/^-|-$/g, "");
 }
 
-function buildStoragePath(folder, fileNameStem, ext) {
+function buildStoragePath(folder: string, fileNameStem: string, ext: string): string {
   const now = new Date();
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -154,11 +162,10 @@ function buildStoragePath(folder, fileNameStem, ext) {
   return `${safeFolder}/${year}/${month}/${safeStem}-${unique}.${ext}`;
 }
 
-function extractStoragePathFromPublicUrl(publicUrl = "") {
+function extractStoragePathFromPublicUrl(publicUrl = ""): string | null {
   if (!publicUrl) return null;
 
   try {
-    // Check if it's our R2 proxy URL
     const marker = "/api/storage/r2/";
     const index = publicUrl.indexOf(marker);
 
@@ -166,14 +173,12 @@ function extractStoragePathFromPublicUrl(publicUrl = "") {
       return publicUrl.slice(index + marker.length);
     }
 
-    // Fallback check for Supabase if some old URLs still exist
     const supabaseMarker = "/storage/v1/object/public/";
     const sIndex = publicUrl.indexOf(supabaseMarker);
 
     if (sIndex !== -1) {
       const rest = publicUrl.slice(sIndex + supabaseMarker.length);
       const parts = rest.split("/");
-      // The first part is the bucket name, the rest is the path
       if (parts.length > 1) {
         return parts.slice(1).join("/");
       }

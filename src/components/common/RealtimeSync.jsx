@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { logInfo } from "@/lib/logger";
 
 /**
  * RealtimeSync Component (Broadcast Version)
@@ -19,13 +20,13 @@ export default function RealtimeSync() {
 
     channel
       .on("broadcast", { event: "refresh-content" }, (payload) => {
-        console.log("[RealtimeSync] Broadcast signal received:", payload);
+        logInfo("realtimesync_broadcast_received", { payload });
         // Trigger a soft refresh to pull latest data from Server Components
         router.refresh();
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
-          console.log("[RealtimeSync] Listening for site updates...");
+          logInfo("realtimesync_listening");
         }
       });
 

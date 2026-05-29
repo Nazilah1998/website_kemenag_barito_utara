@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
+import { logError } from "@/lib/logger";
 
 function formatDate(value, locale = "id") {
   if (!value) return "-";
@@ -71,7 +72,7 @@ export function GalleryCard({ item, onOpen, isActive, onToggle }) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Gagal mendownload gambar:", error);
+      logError("galeri_ui_download_error", { error: error?.message });
       window.open(item.imageUrl, '_blank');
     }
   };

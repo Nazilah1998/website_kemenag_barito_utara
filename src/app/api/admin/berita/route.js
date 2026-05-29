@@ -19,6 +19,7 @@ import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { logInfo, logError } from "@/lib/logger";
 
 const LIMITS = {
   title: { min: 3, max: 200 },
@@ -73,7 +74,7 @@ function toSafeSizeNumber(value) {
 }
 
 function getBase64PayloadMeta(dataUrl) {
-  const input = cleanString(dataUrl);
+  const input = cleanString(dataUrl, 10_000_000);
 
   if (!input) return null;
 
@@ -137,7 +138,7 @@ async function resolveCoverImage({
   currentSizeBytes = 0,
   slugSeed = "",
 }) {
-  const uploadBase64 = cleanString(body?.cover_upload_base64);
+  const uploadBase64 = cleanString(body?.cover_upload_base64, 10_000_000);
   const uploadName = cleanString(body?.cover_upload_name) || "cover.webp";
   const currentCover = cleanString(body?.cover_image) || currentUrl || null;
 
@@ -149,6 +150,7 @@ async function resolveCoverImage({
     };
   }
 
+  // Pastikan base64 upload valid sebelum lanjut
   const base64Meta = getBase64PayloadMeta(uploadBase64);
 
   const uploaded = await uploadBase64Image({
@@ -157,11 +159,14 @@ async function resolveCoverImage({
     fileNameStem: slugSeed || uploadName,
   });
 
+  // Hapus file lama HANYA jika benar-benar ada URL lama dan berbeda dengan yang baru
+  // Untuk berita baru (currentUrl = null), skip penghapusan
   if (currentUrl && currentUrl !== uploaded.publicUrl) {
     try {
       await removeStorageFileByPublicUrl(currentUrl);
+      logInfo("berita_cover_old_deleted", { currentUrl });
     } catch (error) {
-      console.error("Gagal menghapus cover lama berita:", error);
+      logError("berita_cover_delete_error", { error: error?.message });
     }
   }
 
@@ -237,20 +242,19 @@ async function buildPayload(
   };
 }
 
-function revalidateBeritaPaths(slug) {
-  revalidatePath("/");
-  revalidatePath("/beranda");
-  revalidatePath("/berita");
-  revalidatePath("/admin");
-  revalidatePath("/admin/berita");
-  revalidateTag("home-latest-berita");
-  revalidateTag("home-popular-berita");
+async function revalidateBeritaPaths(slug) {
+  await Promise.all([
+    revalidatePath("/"),
+    revalidatePath("/beranda"),
+    revalidatePath("/berita"),
+    revalidatePath("/admin"),
+    revalidatePath("/admin/berita"),
+    revalidateTag("home-latest-berita"),
+    revalidateTag("home-popular-berita"),
+    slug ? revalidatePath(`/berita/${slug}`) : Promise.resolve(),
+  ]);
 
-  if (slug) {
-    revalidatePath(`/berita/${slug}`);
-  }
-  
-  broadcastRefresh("berita");
+  await broadcastRefresh("berita");
 }
 
 
@@ -303,7 +307,7 @@ export async function GET(request) {
       }
     });
   } catch (error) {
-    console.error("GET Berita Error:", error);
+    logError("berita_get_error", { error: error?.message });
     return apiResponse(
       {
         message: error.message || "Gagal mengambil daftar berita.",
@@ -349,7 +353,7 @@ export async function POST(request) {
       })
       .returning();
 
-    revalidateBeritaPaths(data?.slug);
+    await revalidateBeritaPaths(data?.slug);
 
     await recordAudit({
       session: auth.session,
@@ -369,7 +373,7 @@ export async function POST(request) {
       201,
     );
   } catch (error) {
-    console.error("POST Berita Error:", error);
+    logError("berita_post_error", { error: error?.message });
     if (error instanceof ValidationError) {
       const resp = validationErrorResponse(error);
       return apiResponse(resp.body, resp.status);

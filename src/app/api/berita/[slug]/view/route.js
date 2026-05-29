@@ -1,6 +1,7 @@
 import { apiResponse } from "@/lib/api-helpers";
 import { incrementView } from "@/lib/view-counter";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export async function POST(request, context) {
   const ip = getClientIp(request);
@@ -19,7 +20,7 @@ export async function POST(request, context) {
 
     return apiResponse({ ok: true });
   } catch (error) {
-    console.error("POST Berita View Error:", error);
+    logError("berita_view_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal menambah jumlah pembaca." },
       500

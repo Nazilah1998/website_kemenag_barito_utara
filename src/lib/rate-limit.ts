@@ -1,26 +1,39 @@
-/**
- * Rate limiter hybrid:
- * - Jika UPSTASH_REDIS_REST_URL dan UPSTASH_REDIS_REST_TOKEN tersedia, pakai Upstash via REST.
- * - Kalau tidak, fallback ke in-memory bucket (per proses).
- *
- * API:
- *   await rateLimit({ key, limit, windowMs })
- *     -> { ok: boolean, remaining: number, retryAfter?: number }
- */
+interface RateLimitResult {
+  ok: boolean;
+  remaining: number;
+  retryAfter?: number;
+}
 
-const memoryBuckets = new Map();
+interface MemoryBucket {
+  startedAt: number;
+  count: number;
+  windowMs: number;
+}
+
+interface SessionLike {
+  profile?: { id?: string };
+  user?: { id?: string };
+}
+
+interface RequestLike {
+  headers?: {
+    get?: (name: string) => string | null;
+  };
+}
+
+const memoryBuckets = new Map<string, MemoryBucket>();
 const MEMORY_CLEANUP_INTERVAL = 60_000;
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-function shouldUseUpstash() {
+function shouldUseUpstash(): boolean {
   return Boolean(UPSTASH_URL && UPSTASH_TOKEN);
 }
 
-let cleanupTimer = null;
+let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
-function scheduleMemoryCleanup() {
+function scheduleMemoryCleanup(): void {
   if (cleanupTimer) return;
   cleanupTimer = setTimeout(() => {
     cleanupTimer = null;
@@ -34,9 +47,9 @@ function scheduleMemoryCleanup() {
   }, MEMORY_CLEANUP_INTERVAL);
 }
 
-async function upstashCommand(args) {
+async function upstashCommand(args: unknown[]): Promise<unknown | null> {
   try {
-    const response = await fetch(UPSTASH_URL, {
+    const response = await fetch(UPSTASH_URL as string, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${UPSTASH_TOKEN}`,
@@ -55,7 +68,7 @@ async function upstashCommand(args) {
   }
 }
 
-async function upstashRateLimit({ key, limit, windowMs }) {
+async function upstashRateLimit({ key, limit, windowMs }: { key: string; limit: number; windowMs: number }): Promise<RateLimitResult> {
   const windowSec = Math.max(1, Math.ceil(windowMs / 1000));
   const count = await upstashCommand(["INCR", key]);
 
@@ -84,7 +97,7 @@ async function upstashRateLimit({ key, limit, windowMs }) {
   };
 }
 
-function memoryRateLimit({ key, limit, windowMs }) {
+function memoryRateLimit({ key, limit, windowMs }: { key: string; limit: number; windowMs: number }): RateLimitResult {
   const now = Date.now();
   const current = memoryBuckets.get(key);
 
@@ -121,7 +134,7 @@ function memoryRateLimit({ key, limit, windowMs }) {
   };
 }
 
-export async function rateLimit({ key, limit = 10, windowMs = 60_000 }) {
+export async function rateLimit({ key, limit = 10, windowMs = 60_000 }: { key: string; limit?: number; windowMs?: number }): Promise<RateLimitResult> {
   const safeKey = `rl:${String(key || "anon")}`;
 
   if (shouldUseUpstash()) {
@@ -139,7 +152,7 @@ export async function rateLimit({ key, limit = 10, windowMs = 60_000 }) {
   });
 }
 
-export function getClientIp(request) {
+export function getClientIp(request: RequestLike): string {
   const forwarded = request.headers?.get?.("x-forwarded-for");
   if (forwarded) {
     return forwarded.split(",")[0].trim();
@@ -148,7 +161,7 @@ export function getClientIp(request) {
   return request.headers?.get?.("x-real-ip") || "unknown";
 }
 
-export async function rateLimitForAdmin({ key, limit = 30, windowMs = 60_000, session = null }) {
+export async function rateLimitForAdmin({ key, limit = 30, windowMs = 60_000, session = null }: { key: string; limit?: number; windowMs?: number; session?: SessionLike | null }): Promise<RateLimitResult> {
   const userId = session?.profile?.id || session?.user?.id || "anon";
   return rateLimit({ key: `admin:${userId}:${key}`, limit, windowMs });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { User } from "lucide-react";
 import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
@@ -67,16 +67,21 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
   }, [leadershipData]);
 
   // Fungsi untuk mengambil data terbaru dari API publik
+  const abortRef = useRef(null);
+
   const fetchLatestData = async () => {
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const res = await fetch("/api/seksi", { cache: "no-store" });
+      const res = await fetch("/api/seksi", { cache: "no-store", signal: controller.signal });
       if (!res.ok) return;
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         setLeadershipList(data);
       }
     } catch (e) {
-      // Silent fail – jangan ganggu UX pengguna
+      if (e?.name === "AbortError") return;
     }
   };
 
@@ -104,6 +109,7 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
 
     return () => {
       clearInterval(interval);
+      if (abortRef.current) abortRef.current.abort();
       if (channel) supabase?.removeChannel(channel);
     };
   }, []);

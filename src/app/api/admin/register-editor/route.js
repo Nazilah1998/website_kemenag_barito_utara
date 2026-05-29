@@ -5,6 +5,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { db } from "@/lib/drizzle";
 import { profiles, admin_users, editor_requests } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "";
@@ -143,100 +144,103 @@ export async function POST(request) {
 
     const now = new Date();
 
-    // Upsert all three tables
-    const upsertProfiles = async () => {
-      const [existing] = await db
-        .select({ id: profiles.id })
-        .from(profiles)
-        .where(eq(profiles.id, userId))
-        .limit(1);
-      if (existing) {
-        await db
-          .update(profiles)
-          .set({
-            full_name: fullName,
-            email,
-            role: ROLES.EDITOR,
-            unit_name: unitName || null,
-            updated_at: now,
-          })
-          .where(eq(profiles.id, userId));
-      } else {
-        await db
-          .insert(profiles)
-          .values({
-            id: userId,
-            full_name: fullName,
-            email,
-            role: ROLES.EDITOR,
-            unit_name: unitName || null,
-            is_active: false,
-            updated_at: now,
-          });
+    // Upsert all three tables in a single transaction
+    await db.transaction(async (tx) => {
+      // upsertProfiles
+      {
+        const [existing] = await tx
+          .select({ id: profiles.id })
+          .from(profiles)
+          .where(eq(profiles.id, userId))
+          .limit(1);
+        if (existing) {
+          await tx
+            .update(profiles)
+            .set({
+              full_name: fullName,
+              email,
+              role: ROLES.EDITOR,
+              unit_name: unitName || null,
+              updated_at: now,
+            })
+            .where(eq(profiles.id, userId));
+        } else {
+          await tx
+            .insert(profiles)
+            .values({
+              id: userId,
+              full_name: fullName,
+              email,
+              role: ROLES.EDITOR,
+              unit_name: unitName || null,
+              is_active: false,
+              updated_at: now,
+            });
+        }
       }
-    };
 
-    const upsertAdminUsers = async () => {
-      const [existing] = await db
-        .select({ user_id: admin_users.user_id })
-        .from(admin_users)
-        .where(eq(admin_users.user_id, userId))
-        .limit(1);
-      if (existing) {
-        await db
-          .update(admin_users)
-          .set({
-            full_name: fullName,
-            role: ROLES.EDITOR,
-            updated_at: now,
-          })
-          .where(eq(admin_users.user_id, userId));
-      } else {
-        await db
-          .insert(admin_users)
-          .values({
-            user_id: userId,
-            full_name: fullName,
-            role: ROLES.EDITOR,
-            is_active: false,
-            updated_at: now,
-          });
+      // upsertAdminUsers
+      {
+        const [existing] = await tx
+          .select({ user_id: admin_users.user_id })
+          .from(admin_users)
+          .where(eq(admin_users.user_id, userId))
+          .limit(1);
+        if (existing) {
+          await tx
+            .update(admin_users)
+            .set({
+              full_name: fullName,
+              role: ROLES.EDITOR,
+              updated_at: now,
+            })
+            .where(eq(admin_users.user_id, userId));
+        } else {
+          await tx
+            .insert(admin_users)
+            .values({
+              user_id: userId,
+              full_name: fullName,
+              role: ROLES.EDITOR,
+              is_active: false,
+              updated_at: now,
+            });
+        }
       }
-    };
 
-    const upsertEditorRequests = async () => {
-      const [existing] = await db
-        .select({ user_id: editor_requests.user_id })
-        .from(editor_requests)
-        .where(eq(editor_requests.user_id, userId))
-        .limit(1);
-      if (existing) {
-        await db
-          .update(editor_requests)
-          .set({
-            full_name: fullName,
-            email,
-            unit_name: unitName || null,
-            status: "pending",
-            updated_at: now,
-          })
-          .where(eq(editor_requests.user_id, userId));
-      } else {
-        await db
-          .insert(editor_requests)
-          .values({
-            user_id: userId,
-            full_name: fullName,
-            email,
-            unit_name: unitName || null,
-            status: "pending",
-            requested_at: now,
-            updated_at: now,
-          });
+      // upsertEditorRequests
+      {
+        const [existing] = await tx
+          .select({ user_id: editor_requests.user_id })
+          .from(editor_requests)
+          .where(eq(editor_requests.user_id, userId))
+          .limit(1);
+        if (existing) {
+          await tx
+            .update(editor_requests)
+            .set({
+              full_name: fullName,
+              email,
+              unit_name: unitName || null,
+              status: "pending",
+              updated_at: now,
+            })
+            .where(eq(editor_requests.user_id, userId));
+        } else {
+          await tx
+            .insert(editor_requests)
+            .values({
+              user_id: userId,
+              full_name: fullName,
+              email,
+              unit_name: unitName || null,
+              status: "pending",
+              requested_at: now,
+              updated_at: now,
+            });
+        }
       }
-    };
-
-    await Promise.all([upsertProfiles(), upsertAdminUsers(), upsertEditorRequests()]);
+    });
 
     return apiResponse({
       success: true,
@@ -244,7 +248,7 @@ export async function POST(request) {
         "Pendaftaran editor berhasil. Akun dapat langsung login tanpa verifikasi email Supabase, namun akses fitur menunggu verifikasi super admin.",
     });
   } catch (error) {
-    console.error("POST Register Editor Error:", error);
+    logError("register_editor_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat mendaftar akun editor." },
       500,

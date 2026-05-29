@@ -1,12 +1,14 @@
 import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { uploadBase64ImageToSupabase } from "@/lib/storage-media";
+import { cleanString } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/drizzle";
 import { seksi, pegawai_seksi } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +44,7 @@ export async function POST(request, context) {
     const nip = toText(body?.nip, "");
     const jabatan = toText(body?.jabatan, "");
     const sort_order = toNumber(body?.sort_order, 0);
-    const fotoBase64 = toText(body?.foto_base64, "");
+    const fotoBase64 = cleanString(body?.foto_base64, 10_000_000);
     const fotoName = toText(body?.foto_name, "pegawai");
     const foto_y = body?.foto_y !== undefined ? parseInt(body.foto_y, 10) : 50;
 
@@ -98,7 +100,7 @@ export async function POST(request, context) {
       item: data
     });
   } catch (error) {
-    console.error("POST Admin Pegawai Seksi Error:", error);
+    logError("pegawai_seksi_post_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal menambahkan staf pegawai." },
       500,

@@ -1,12 +1,14 @@
 import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
 import { uploadBase64ImageToSupabase, removeSupabaseFileByPublicUrl, isCmsStoragePublicUrl } from "@/lib/storage-media";
+import { cleanString } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/drizzle";
 import { seksi, pegawai_seksi } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logWarn, logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +61,7 @@ export async function PUT(request, context) {
     const jabatan = toText(body?.jabatan, "");
     const sort_order = toNumber(body?.sort_order, existing.sort_order);
     const fotoRaw = toText(body?.foto, "");
-    const fotoBase64 = toText(body?.foto_base64, "");
+    const fotoBase64 = cleanString(body?.foto_base64, 10_000_000);
     const fotoName = toText(body?.foto_name, "pegawai");
     const foto_y = body?.foto_y !== undefined ? parseInt(body.foto_y, 10) : existing.foto_y;
 
@@ -86,7 +88,7 @@ export async function PUT(request, context) {
         try {
           await removeSupabaseFileByPublicUrl(existing.foto);
         } catch (e) {
-          console.warn("Failed to delete old Pegawai photo from Supabase storage:", e);
+          logWarn("pegawai_id_delete_old_photo_warn", { error: e?.message });
         }
       }
     }
@@ -125,7 +127,7 @@ export async function PUT(request, context) {
       item: updated
     });
   } catch (error) {
-    console.error("PUT Admin Pegawai Seksi Error:", error);
+    logError("pegawai_seksi_id_put_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memperbarui staf pegawai." },
       500,
@@ -171,7 +173,7 @@ export async function DELETE(request, context) {
       try {
         await removeSupabaseFileByPublicUrl(existing.foto);
       } catch (e) {
-        console.warn("Failed to delete Pegawai photo from Supabase storage upon deletion:", e);
+        logWarn("pegawai_id_delete_photo_warn", { error: e?.message });
       }
     }
 
@@ -197,7 +199,7 @@ export async function DELETE(request, context) {
       message: "Data staf pegawai berhasil dihapus secara permanen.",
     });
   } catch (error) {
-    console.error("DELETE Admin Pegawai Seksi Error:", error);
+    logError("pegawai_seksi_id_delete_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal menghapus staf pegawai." },
       500,

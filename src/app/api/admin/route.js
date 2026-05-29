@@ -1,5 +1,6 @@
 import { apiResponse } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("GET Admin Base Error:", error);
+    logError("admin_base_error", { error: error?.message });
     return apiResponse(
       {
         ok: false,

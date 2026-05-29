@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { FloatingFeedback, DeleteConfirmModal } from "./slides/SlidesUI";
 import { compressImageToBase64 } from "@/lib/image-compress";
+import { logError } from "@/lib/logger";
 
 export default function AdminSeksiDetailManager({ id }) {
   const router = useRouter();
@@ -72,11 +73,11 @@ export default function AdminSeksiDetailManager({ id }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const fetchSeksiDetail = useCallback(async () => {
+  const fetchSeksiDetail = useCallback(async (signal) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/seksi/${id}`);
+      const res = await fetch(`/api/admin/seksi/${id}`, { signal });
       if (!res.ok) {
         throw new Error("Gagal memuat detail seksi.");
       }
@@ -93,7 +94,8 @@ export default function AdminSeksiDetailManager({ id }) {
       setFotoKepalaPreview(data.foto_kepala || "");
       setPegawaiList(data.pegawai_seksis || []);
     } catch (err) {
-      console.error(err);
+      if (err?.name === "AbortError") return;
+      logError("seksi_detail_fetch_error", { error: err?.message });
       setError(err?.message || "Terjadi kesalahan saat memuat data.");
     } finally {
       setLoading(false);
@@ -101,9 +103,10 @@ export default function AdminSeksiDetailManager({ id }) {
   }, [id]);
 
   useEffect(() => {
-    if (id) {
-      fetchSeksiDetail();
-    }
+    if (!id) return;
+    const controller = new AbortController();
+    fetchSeksiDetail(controller.signal);
+    return () => controller.abort();
   }, [id, fetchSeksiDetail]);
 
   // Handle Seksi profile save
@@ -143,7 +146,7 @@ export default function AdminSeksiDetailManager({ id }) {
       setMessage("Profil seksi berhasil diperbarui.");
       router.refresh();
     } catch (err) {
-      console.error(err);
+      logError("seksi_detail_save_error", { error: err?.message });
       setError(err?.message || "Terjadi kesalahan saat menyimpan data.");
     } finally {
       setSavingSeksi(false);
@@ -196,7 +199,7 @@ export default function AdminSeksiDetailManager({ id }) {
         `Foto kepala seksi berhasil diproses (${compressed.originalSizeKB} KB -> ${compressed.sizeKB} KB).`,
       );
     } catch (err) {
-      console.error(err);
+      logError("seksi_detail_kasi_compress_error", { error: err?.message });
       setError(err?.message || "Gagal memproses dan mengompresi gambar.");
     }
   };
@@ -285,7 +288,7 @@ export default function AdminSeksiDetailManager({ id }) {
         `Foto pegawai berhasil diproses (${compressed.originalSizeKB} KB -> ${compressed.sizeKB} KB).`,
       );
     } catch (err) {
-      console.error(err);
+      logError("seksi_detail_pegawai_compress_error", { error: err?.message });
       setError(err?.message || "Gagal memproses dan mengompresi gambar.");
     }
   };
@@ -356,7 +359,7 @@ export default function AdminSeksiDetailManager({ id }) {
       setOpenPegawaiModal(false);
       router.refresh();
     } catch (err) {
-      console.error(err);
+      logError("seksi_detail_pegawai_save_error", { error: err?.message });
       setError(
         err?.message || "Terjadi kesalahan saat menyimpan data pegawai.",
       );
@@ -398,7 +401,7 @@ export default function AdminSeksiDetailManager({ id }) {
       setMessage(`Staf pegawai "${deletingPegawaiName}" berhasil dihapus.`);
       router.refresh();
     } catch (err) {
-      console.error(err);
+      logError("seksi_detail_pegawai_delete_error", { error: err?.message });
       setError(
         err?.message || "Terjadi kesalahan saat menghapus staf pegawai.",
       );

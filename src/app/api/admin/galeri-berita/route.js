@@ -10,6 +10,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { galeri, berita } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -34,25 +35,21 @@ function toSafeSizeNumber(value) {
 }
 
 function getBase64PayloadMeta(dataUrl) {
-  const input = cleanString(dataUrl);
+  const input = cleanString(dataUrl, 10_000_000);
 
   if (!input) return null;
 
+  if (!input.startsWith("data:")) return null;
+
   const match = input.match(/^data:(.+?);base64,(.+)$/);
 
-  if (!match) {
-    throw new Error("Format file galeri tidak valid.");
-  }
+  if (!match) return null;
 
   const base64Payload = match[2];
   const sizeBytes = Buffer.from(base64Payload, "base64").length;
   const sizeKB = Math.ceil(sizeBytes / 1024);
 
-  if (sizeBytes > MAX_IMAGE_SIZE_BYTES) {
-    throw new Error(
-      `Ukuran cover galeri setelah kompresi masih ${sizeKB} KB. Maksimal ${MAX_IMAGE_SIZE_KB} KB.`,
-    );
-  }
+  if (sizeBytes > MAX_IMAGE_SIZE_BYTES) return null;
 
   return {
     sizeBytes,
@@ -72,7 +69,7 @@ function resolvePublishedAt(value) {
   const parsedDate = sourceValue ? new Date(sourceValue) : new Date();
 
   if (Number.isNaN(parsedDate.getTime())) {
-    throw new Error("Tanggal publish galeri tidak valid.");
+    return null;
   }
 
   return parsedDate;
@@ -103,7 +100,7 @@ async function resolveGaleriImage({
   beritaFallbackSizeBytes = 0,
   slugSeed = "",
 }) {
-  const uploadBase64 = cleanString(body?.gallery_upload_base64);
+  const uploadBase64 = cleanString(body?.gallery_upload_base64, 10_000_000);
   const uploadName = cleanString(body?.gallery_upload_name) || "galeri.webp";
   const requestedUrl = cleanString(body?.image_url);
 
@@ -126,6 +123,9 @@ async function resolveGaleriImage({
   }
 
   const base64Meta = getBase64PayloadMeta(uploadBase64);
+  if (!base64Meta) {
+    throw new Error("Format file tidak valid atau ukuran terlalu besar.");
+  }
 
   const uploaded = await uploadBase64Image({
     dataUrl: uploadBase64,
@@ -137,7 +137,7 @@ async function resolveGaleriImage({
     try {
       await removeStorageFileByPublicUrl(currentUrl);
     } catch (error) {
-      console.error("Gagal menghapus cover galeri lama:", error);
+      logError("galeri_berita_cover_delete_error", { error: error?.message });
     }
   }
 
@@ -175,7 +175,7 @@ export async function GET(request) {
       item: data,
     });
   } catch (error) {
-    console.error("GET Galeri-Berita Error:", error);
+    logError("galeri_berita_get_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal mengambil data galeri." },
       500,
@@ -312,7 +312,7 @@ export async function POST(request) {
       gallery_id: insertedItem?.id ?? null,
     });
   } catch (error) {
-    console.error("API /api/admin/galeri/from-berita error:", error);
+    logError("galeri_berita_post_error", { error: error?.message });
 
     return apiResponse(
       { message: error.message || "Gagal mengirim berita ke galeri." },
@@ -347,7 +347,7 @@ export async function DELETE(request) {
       try {
         await removeStorageFileByPublicUrl(item.image_url);
       } catch (error) {
-        console.error("Gagal menghapus file galeri dari storage:", error);
+        logError("galeri_berita_delete_storage_error", { error: error?.message });
       }
     }
 
@@ -369,7 +369,7 @@ export async function DELETE(request) {
       message: "Item galeri berhasil dihapus.",
     });
   } catch (error) {
-    console.error("DELETE Galeri-Berita Error:", error);
+    logError("galeri_berita_delete_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal menghapus item galeri." },
       500,

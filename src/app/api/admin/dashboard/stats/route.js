@@ -3,6 +3,7 @@ import { validateAdmin } from "@/lib/cms-utils";
 import { db } from "@/lib/drizzle";
 import { berita, galeri, report_documents, kontak_pesan } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -41,7 +42,7 @@ export async function GET() {
 
     return apiResponse(stats);
   } catch (error) {
-    console.error("Dashboard stats error:", error);
+    logError("dashboard_stats_error", { error: error?.message });
     return apiResponse({ error: "Internal Server Error" }, 500);
   }
 }

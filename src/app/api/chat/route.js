@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import SYSTEM_PROMPT from "@/lib/chat/system-prompt";
 import ENGINES from "@/lib/chat/engines";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { logInfo, logWarn, logError } from "@/lib/logger";
 
 export async function POST(req) {
   try {
@@ -54,9 +55,7 @@ export async function POST(req) {
       // Safety check: Jika sudah berjalan lebih dari 8 detik, hentikan loop
       // untuk menghindari Vercel timeout (biasanya 10 detik)
       if (Date.now() - startTime > 8000) {
-        console.warn(
-          "⚠️ Waktu hampir habis, menghentikan pencarian engine cadangan.",
-        );
+        logWarn("chat_engine_timeout");
         break;
       }
 
@@ -64,7 +63,7 @@ export async function POST(req) {
       if (!key) continue;
 
       try {
-        console.log(`🛡️ Mencoba Lapis ${engine.id}: ${engine.name}...`);
+        logInfo("chat_engine_try", { engineId: engine.id, engineName: engine.name });
 
         let response;
         let aiText = "";
@@ -147,11 +146,11 @@ export async function POST(req) {
         }
 
         if (aiText) {
-          console.log(`✅ Lapis ${engine.id} BERHASIL (${engine.name})`);
+          logInfo("chat_engine_success", { engineId: engine.id, engineName: engine.name });
           return NextResponse.json({ content: aiText });
         }
       } catch (err) {
-        console.warn(`⚠️ Lapis ${engine.id} GAGAL: ${err.message}`);
+        logWarn("chat_engine_fail", { engineId: engine.id, error: err.message });
         lastErrorMessage = err.message;
         // Lanjut ke lapis berikutnya...
       }
@@ -166,7 +165,7 @@ export async function POST(req) {
       { status: 429 },
     );
   } catch (error) {
-    console.error("Chat API Error:", error);
+    logError("chat_api_error", { error: error?.message });
     return NextResponse.json(
       { error: "Terjadi kesalahan pada server." },
       { status: 500 },

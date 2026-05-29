@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
 import { eq, and, ne, desc, asc, gt, lt } from "drizzle-orm";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
+import { logWarn, logError } from "@/lib/logger";
 
 export function formatDateIndonesia(value) {
   if (!value) return "-";
@@ -25,6 +26,16 @@ export function normalizeBerita(item = {}) {
   const updatedAt = item.updated_at || null;
   const isoDate = publishedAt || createdAt;
   const rawCoverImage = item.cover_image || "";
+
+  // Debug: log jika cover_image kosong pada berita yg sudah dipublikasi
+  if (!rawCoverImage && item.is_published && item.slug) {
+    logWarn("normalizeBerita_cover_image_empty", {
+      slug: item.slug,
+      title: item.title?.slice(0, 50),
+      id: item.id,
+    });
+  }
+
   const isPublished = Boolean(item.is_published);
 
   return {
@@ -147,7 +158,7 @@ export async function getAllBerita(options = {}) {
 
     return (data || []).map(normalizeBerita);
   } catch (error) {
-    console.error("getAllBerita error:", error);
+    logError("getAllBerita_error", { error: error?.message });
     return [];
   }
 }
@@ -177,7 +188,7 @@ export async function getBeritaBySlug(slug, options = {}) {
 
     return data ? normalizeBerita(data) : null;
   } catch (error) {
-    console.error("getBeritaBySlug error:", error);
+    logError("getBeritaBySlug_error", { error: error?.message });
     return null;
   }
 }
@@ -228,7 +239,7 @@ export async function getRelatedBerita(currentSlug, category, limit = 3) {
 
     return normalized;
   } catch (error) {
-    console.error("getRelatedBerita error:", error);
+    logError("getRelatedBerita_error", { error: error?.message });
     return [];
   }
 }
@@ -258,7 +269,7 @@ export async function getAdjacentBerita(currentBerita) {
       older: olderData || null,
     };
   } catch (error) {
-    console.error("getAdjacentBerita error:", error);
+    logError("getAdjacentBerita_error", { error: error?.message });
     return { newer: null, older: null };
   }
 }

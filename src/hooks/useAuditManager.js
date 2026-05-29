@@ -25,7 +25,7 @@ export function useAuditManager() {
   const [idToDelete, setIdToDelete] = useState(null);
   const [bulkAction, setBulkAction] = useState(false);
 
-  const loadItems = useCallback(async () => {
+  const loadItems = useCallback(async (signal) => {
     try {
       setLoading(true);
       setError("");
@@ -33,6 +33,7 @@ export function useAuditManager() {
       const response = await fetch("/api/admin/audit?limit=200", {
         method: "GET",
         cache: "no-store",
+        signal,
       });
 
       const data = await readJsonSafely(response);
@@ -43,6 +44,7 @@ export function useAuditManager() {
       setItems(Array.isArray(data?.items) ? data.items : []);
       setCurrentPage(1);
     } catch (err) {
+      if (err.name === "AbortError") return;
       setError(err?.message || "Gagal memuat riwayat aktivitas.");
       setItems([]);
     } finally {
@@ -51,7 +53,9 @@ export function useAuditManager() {
   }, []);
 
   useEffect(() => {
-    loadItems();
+    const controller = new AbortController();
+    loadItems(controller.signal);
+    return () => controller.abort();
   }, [loadItems]);
 
   useEffect(() => {

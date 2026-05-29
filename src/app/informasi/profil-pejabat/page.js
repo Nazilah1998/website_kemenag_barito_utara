@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { seksi, pegawai_seksi } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import ProfilPejabatUI from "@/components/features/informasi/ProfilPejabatUI";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 600;
 
@@ -65,7 +66,7 @@ export default async function ProfilPejabatPage() {
     // Semua seksi lain (kecuali kepala kantor dan KUA) sebagai pejabat struktural
     pejabatList = seksiList.filter((s) => s.slug !== "kepala-kantor" && s.slug !== "kua-kantor-urusan-agama");
   } catch (error) {
-    console.error("Error fetching profil pejabat:", error);
+    logError("profil_pejabat_error", { error: error?.message });
   }
 
   return (

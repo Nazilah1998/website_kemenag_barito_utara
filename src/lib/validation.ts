@@ -1,7 +1,15 @@
 export class ValidationError extends Error {
+  status: number;
+  errors: Array<{ field: string; message: string }>;
+  code: string;
+
   constructor(
-    message,
-    { status = 400, errors = [], code = "VALIDATION_ERROR" } = {},
+    message: string,
+    { status = 400, errors = [], code = "VALIDATION_ERROR" }: {
+      status?: number;
+      errors?: Array<{ field: string; message: string }>;
+      code?: string;
+    } = {},
   ) {
     super(message);
     this.name = "ValidationError";
@@ -11,13 +19,13 @@ export class ValidationError extends Error {
   }
 }
 
-export function cleanString(value, max = 5000) {
+export function cleanString(value: unknown, max = 5000): string {
   if (typeof value !== "string") return "";
   const trimmed = value.trim().replace(/\u0000/g, "").replace(/\s+/g, " ");
   return trimmed.length > max ? trimmed.slice(0, max) : trimmed;
 }
 
-export function cleanHtml(value, max = 50_000) {
+export function cleanHtml(value: unknown, max = 50_000): string {
   if (typeof value !== "string") return "";
 
   let html = value.trim().replace(/\u0000/g, "");
@@ -32,7 +40,7 @@ export function cleanHtml(value, max = 50_000) {
   return html.length > max ? html.slice(0, max) : html;
 }
 
-export function toBool(value) {
+export function toBool(value: unknown): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
 
@@ -45,15 +53,21 @@ export function toBool(value) {
 }
 
 export function toSafeNumber(
-  value,
+  value: unknown,
   {
     field = "nilai",
     required = false,
     min = null,
     max = null,
     integer = false,
+  }: {
+    field?: string;
+    required?: boolean;
+    min?: number | null;
+    max?: number | null;
+    integer?: boolean;
   } = {},
-) {
+): number | null {
   if (value === undefined || value === null || value === "") {
     if (required) {
       throw new ValidationError("Validasi gagal.", {
@@ -93,9 +107,9 @@ export function toSafeNumber(
 }
 
 export function toDocumentYear(
-  value,
-  { required = false, field = "tahun" } = {},
-) {
+  value: unknown,
+  { required = false, field = "tahun" }: { required?: boolean; field?: string } = {},
+): number | null {
   return toSafeNumber(value, {
     field,
     required,
@@ -105,7 +119,10 @@ export function toDocumentYear(
   });
 }
 
-export function toDateISO(value, { required = false, field = "tanggal" } = {}) {
+export function toDateISO(
+  value: unknown,
+  { required = false, field = "tanggal" }: { required?: boolean; field?: string } = {},
+): string | null {
   const raw = typeof value === "string" ? value.trim() : value;
 
   if (!raw) {
@@ -117,7 +134,7 @@ export function toDateISO(value, { required = false, field = "tanggal" } = {}) {
     return null;
   }
 
-  const parsed = new Date(raw);
+  const parsed = new Date(raw as string);
 
   if (Number.isNaN(parsed.getTime())) {
     throw new ValidationError("Validasi gagal.", {
@@ -128,8 +145,17 @@ export function toDateISO(value, { required = false, field = "tanggal" } = {}) {
   return parsed.toISOString();
 }
 
-export function requireFields(_obj, fields) {
-  const errors = [];
+interface FieldDef {
+  field: string;
+  value: unknown;
+  label?: string;
+  min?: number;
+  max?: number;
+  type?: "string";
+}
+
+export function requireFields(_obj: unknown, fields: FieldDef[]): void {
+  const errors: Array<{ field: string; message: string }> = [];
 
   for (const item of fields) {
     const { field, value, label, min, max, type = "string" } = item;
@@ -166,7 +192,11 @@ export function requireFields(_obj, fields) {
   }
 }
 
-export function oneOf(value, allowed, { field = "nilai", label } = {}) {
+export function oneOf(
+  value: unknown,
+  allowed: string[],
+  { field = "nilai", label }: { field?: string; label?: string } = {},
+): string | null {
   if (value === undefined || value === null || value === "") return null;
 
   const normalized = String(value).trim();
@@ -185,7 +215,10 @@ export function oneOf(value, allowed, { field = "nilai", label } = {}) {
   return normalized;
 }
 
-export function isHttpsUrl(value, { allowedHosts = [] } = {}) {
+export function isHttpsUrl(
+  value: unknown,
+  { allowedHosts = [] }: { allowedHosts?: string[] } = {},
+): boolean {
   try {
     const url = new URL(String(value || "").trim());
 
@@ -201,16 +234,25 @@ export function isHttpsUrl(value, { allowedHosts = [] } = {}) {
   }
 }
 
-export function isPdfFile(file) {
+interface FileLike {
+  type?: string;
+  name?: string;
+}
+
+export function isPdfFile(file: unknown): boolean {
   if (!file) return false;
 
-  const type = String(file?.type || "").toLowerCase();
-  const name = String(file?.name || "").toLowerCase();
+  const f = file as FileLike;
+  const type = String(f?.type || "").toLowerCase();
+  const name = String(f?.name || "").toLowerCase();
 
   return type === "application/pdf" || name.endsWith(".pdf");
 }
 
-export function validationErrorResponse(error) {
+export function validationErrorResponse(error: ValidationError): {
+  body: { message: string; code: string; errors: Array<{ field: string; message: string }> };
+  status: number;
+} {
   return {
     body: {
       message: error?.message || "Validasi gagal.",

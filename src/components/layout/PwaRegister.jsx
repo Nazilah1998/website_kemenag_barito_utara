@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { logWarn } from "@/lib/logger";
 
 export default function PwaRegister() {
   useEffect(() => {
@@ -12,7 +13,7 @@ export default function PwaRegister() {
       navigator.serviceWorker
         .register("/sw.js", { scope: "/" })
         .catch((err) => {
-          console.warn("SW register failed:", err?.message);
+          logWarn("pwa_register_failed", { error: err?.message });
         });
     };
 

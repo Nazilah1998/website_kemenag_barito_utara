@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/drizzle";
 import { report_documents } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -140,7 +141,7 @@ export async function PUT(request, context) {
       document: updatedDoc,
     });
   } catch (error) {
-    console.error("PUT Laporan [id] Error:", error);
+    logError("laporan_id_put_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat memperbarui dokumen." },
       500,
@@ -191,7 +192,7 @@ export async function DELETE(request, context) {
       message: "Dokumen berhasil dihapus.",
     });
   } catch (error) {
-    console.error("DELETE Laporan [id] Error:", error);
+    logError("laporan_id_delete_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat menghapus dokumen." },
       500,

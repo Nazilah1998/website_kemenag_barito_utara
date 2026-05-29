@@ -1,22 +1,14 @@
-/**
- * Safely serializes a DB result by converting BigInt values to Numbers.
- * This is necessary because JSON.stringify (used in NextResponse.json) doesn't support BigInt.
- */
-export function serializeData(data) {
+export function serializeData(data: unknown): unknown {
   if (data === null || data === undefined) return data;
 
-  // Handle arrays
   if (Array.isArray(data)) {
     return data.map(serializeData);
   }
 
-  // Handle objects
   if (typeof data === "object") {
-    // Handle Date objects
     if (data instanceof Date) return data;
 
-    const entries = Object.entries(data).map(([key, value]) => {
-      // Recursively handle nested objects/arrays
+    const entries = Object.entries(data as Record<string, unknown>).map(([key, value]) => {
       if (typeof value === "bigint") {
         return [key, Number(value)];
       }
@@ -32,10 +24,7 @@ export function serializeData(data) {
   return data;
 }
 
-/**
- * Common response creator for consistent API responses
- */
-export function apiResponse(data, status = 200) {
+export function apiResponse(data: unknown, status = 200): Response {
   return Response.json(serializeData(data), {
     status,
     headers: {
@@ -46,11 +35,11 @@ export function apiResponse(data, status = 200) {
   });
 }
 
-/**
- * Extracts and validates ID from Next.js context
- */
-export async function getSafeIdFromContext(context) {
-  // context.params can be a Promise in Next.js 15
+interface RouteContext {
+  params: Promise<{ id: string }> | { id: string };
+}
+
+export async function getSafeIdFromContext(context: RouteContext): Promise<string> {
   const params = await context.params;
   const id = params?.id;
   if (!id) throw new Error("ID parameter is missing");

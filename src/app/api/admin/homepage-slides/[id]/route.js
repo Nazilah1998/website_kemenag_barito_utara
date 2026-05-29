@@ -7,11 +7,13 @@ import {
 } from "@/lib/storage-media";
 import { normalizeHomepageSlide } from "@/lib/homepage-slides";
 import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
+import { cleanString } from "@/lib/validation";
 import { validateAdmin } from "@/lib/cms-utils";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { homepage_slides } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +61,7 @@ export async function PATCH(request, context) {
     const title = toText(body?.title, existing.title || "");
     const caption = toText(body?.caption, existing.caption || "");
     const imageUrlRaw = toText(body?.image_url, existing.image_url || "");
-    const imageUploadBase64 = toText(body?.image_upload_base64, "");
+    const imageUploadBase64 = cleanString(body?.image_upload_base64, 10_000_000);
     const imageUploadName = toText(body?.image_upload_name, title || "slide");
     const isPublished = toBool(body?.is_published, existing.is_published);
     const sortOrder = toNumber(body?.sort_order, existing.sort_order);
@@ -129,7 +131,7 @@ export async function PATCH(request, context) {
       item: normalizeHomepageSlide(data || {}),
     });
   } catch (error) {
-    console.error("PATCH Homepage Slides Error:", error);
+    logError("homepage_slides_id_patch_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memperbarui slide beranda." },
       500,
@@ -184,7 +186,7 @@ export async function DELETE(request, context) {
       message: "Slide beranda berhasil dihapus.",
     });
   } catch (error) {
-    console.error("DELETE Homepage Slides Error:", error);
+    logError("homepage_slides_id_delete_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal menghapus slide beranda." },
       500,

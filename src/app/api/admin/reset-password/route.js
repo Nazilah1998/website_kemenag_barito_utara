@@ -1,5 +1,6 @@
 import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -34,7 +35,7 @@ export async function POST(request) {
         const verifyData = await verifyRes.json();
 
         if (!verifyData.success) {
-          console.error("Turnstile verification failed:", verifyData);
+          logError("reset_password_turnstile_failed", { verifyData });
           return apiResponse(
             {
               ok: false,
@@ -44,7 +45,7 @@ export async function POST(request) {
           );
         }
       } catch (err) {
-        console.error("Turnstile Verification Error:", err);
+        logError("reset_password_turnstile_error", { error: err?.message });
         return apiResponse(
           { ok: false, message: "Terjadi kesalahan saat verifikasi keamanan." },
           500,
@@ -63,7 +64,7 @@ export async function POST(request) {
       );
 
       if (resetError) {
-        console.error("Supabase Auth Error:", resetError);
+        logError("reset_password_supabase_error", { error: resetError?.message });
         // Kita bisa melempar error jika ini adalah masalah rate limit dari supabase
         if (resetError.status === 429) {
           return apiResponse(
@@ -90,7 +91,7 @@ export async function POST(request) {
     // tanpa reset token/expiry yang tervalidasi.
     return apiResponse({ ok: false, message: "Aksi tidak valid." }, 400);
   } catch (error) {
-    console.error("DEBUG - Reset Password Error:", error);
+    logError("reset_password_error", { error: error?.message });
     return apiResponse(
       {
         ok: false,

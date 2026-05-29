@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/drizzle";
 import { static_pages } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export async function GET(request) {
 
     return NextResponse.json(pages);
   } catch (error) {
-    console.error("GET Static Pages Error:", error);
+    logError("static_pages_error", { error: error?.message });
     return NextResponse.json(
       { error: "Gagal mengambil data halaman." },
       { status: 500 },

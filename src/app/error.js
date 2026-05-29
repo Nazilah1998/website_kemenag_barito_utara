@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { logError } from "@/lib/logger";
 
 export default function Error({ error, reset }) {
   useEffect(() => {
-    console.error("App error:", error);
+    logError("app_error", { error: error?.message });
   }, [error]);
 
   return (

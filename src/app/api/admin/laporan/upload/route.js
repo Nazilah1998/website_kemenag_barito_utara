@@ -12,6 +12,7 @@ import { eq, and } from "drizzle-orm";
 import { uploadToR2 } from "@/lib/r2";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { revalidatePath } from "next/cache";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -112,7 +113,7 @@ export async function POST(request) {
       document,
     });
   } catch (error) {
-    console.error("admin_laporan_upload_unhandled_error", error);
+    logError("laporan_upload_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat mengupload dokumen." },
       500,

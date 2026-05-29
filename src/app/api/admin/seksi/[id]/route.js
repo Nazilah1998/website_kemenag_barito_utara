@@ -1,5 +1,6 @@
 import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin, ensureUniqueSlug } from "@/lib/cms-utils";
+import { cleanString } from "@/lib/validation";
 import {
   uploadBase64ImageToSupabase,
   removeSupabaseFileByPublicUrl,
@@ -12,6 +13,7 @@ import { broadcastRefresh } from "@/lib/realtime-service";
 import { db } from "@/lib/drizzle";
 import { seksi, pegawai_seksi } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { logWarn, logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +44,7 @@ export async function GET(request, context) {
 
     return apiResponse(data);
   } catch (error) {
-    console.error("GET Admin Seksi Detail Error:", error);
+    logError("seksi_id_get_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memuat detail seksi." },
       500,
@@ -73,7 +75,7 @@ export async function PUT(request, context) {
     const nama_kepala = toText(body?.nama_kepala, "");
     const nip_kepala = toText(body?.nip_kepala, "");
     const fotoKepalaRaw = toText(body?.foto_kepala, "");
-    const fotoKepalaBase64 = toText(body?.foto_kepala_base64, "");
+    const fotoKepalaBase64 = cleanString(body?.foto_kepala_base64, 10_000_000);
     const fotoKepalaName = toText(body?.foto_kepala_name, "kepala-seksi");
     const foto_kepala_y =
       body?.foto_kepala_y !== undefined ? parseInt(body.foto_kepala_y, 10) : 50;
@@ -107,10 +109,7 @@ export async function PUT(request, context) {
         try {
           await removeSupabaseFileByPublicUrl(existing.foto_kepala);
         } catch (e) {
-          console.warn(
-            "Failed to delete old Kepala Seksi photo from Supabase storage:",
-            e,
-          );
+          logWarn("seksi_id_delete_old_photo_warn", { error: e?.message });
         }
       }
     }
@@ -156,7 +155,7 @@ export async function PUT(request, context) {
       item: updated,
     });
   } catch (error) {
-    console.error("PUT Admin Seksi Error:", error);
+    logError("seksi_id_put_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memperbarui profil seksi." },
       500,
@@ -202,10 +201,7 @@ export async function DELETE(request, context) {
       try {
         await removeSupabaseFileByPublicUrl(existing.foto_kepala);
       } catch (e) {
-        console.warn(
-          "Failed to delete Kepala Seksi photo from Supabase storage:",
-          e,
-        );
+          logWarn("seksi_id_delete_photo_warn", { error: e?.message });
       }
     }
 
@@ -229,7 +225,7 @@ export async function DELETE(request, context) {
 
     return apiResponse({ message: "Seksi berhasil dihapus." });
   } catch (error) {
-    console.error("DELETE Admin Seksi Error:", error);
+    logError("seksi_id_delete_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal menghapus seksi." },
       500,

@@ -26,14 +26,15 @@ export function useGaleriManager() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  async function loadItems() {
+  async function loadItems(signal) {
     try {
       setLoading(true);
-      const response = await fetch("/api/admin/galeri", { cache: "no-store" });
+      const response = await fetch("/api/admin/galeri", { cache: "no-store", signal });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Gagal memuat galeri.");
       setItems(data.items || []);
     } catch (err) {
+      if (err.name === "AbortError") return;
       setError(err.message);
     } finally {
       setLoading(false);
@@ -41,7 +42,9 @@ export function useGaleriManager() {
   }
 
   useEffect(() => {
-    loadItems();
+    const controller = new AbortController();
+    loadItems(controller.signal);
+    return () => controller.abort();
   }, []);
 
   const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));

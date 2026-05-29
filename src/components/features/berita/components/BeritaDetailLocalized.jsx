@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import BeritaDetailActions from "./BeritaDetailActions";
+import BeritaViewCounter from "./BeritaViewCounter";
 
 function formatDate(isoDate, locale) {
   if (!isoDate) return "-";
@@ -41,7 +42,10 @@ export function BeritaDetailSidebar({ category, isoDate, views, title, slug }) {
         <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
           <InfoRow label={t("berita.categoryLabel")} value={displayCategory} />
           <InfoRow label={t("berita.dateLabel")} value={displayDate} />
-          <InfoRow label={t("berita.viewsLabel")} value={`${Number(views ?? 0).toLocaleString(locale === "en" ? "en-US" : "id-ID")} ${t("berita.readCount")}`} isRight />
+          <div className="flex items-start justify-between gap-4">
+            <span>{t("berita.viewsLabel")}</span>
+            <BeritaViewCounter slug={slug} initialViews={views} />
+          </div>
         </div>
       </div>
       <BeritaDetailActions title={title} path={`/berita/${slug}`} />

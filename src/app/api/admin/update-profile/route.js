@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 import { db } from "@/lib/drizzle";
 import { profiles, admin_users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -93,7 +94,7 @@ export async function POST(request) {
 
     return apiResponse({ message: "Profil berhasil diperbarui" });
   } catch (error) {
-    console.error("Update Profile API Error:", error);
+    logError("update_profile_api_error", { error: error?.message });
     return apiResponse({ message: "Terjadi kesalahan server internal" }, 500);
   }
 }

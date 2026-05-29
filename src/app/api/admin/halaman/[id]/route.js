@@ -7,6 +7,7 @@ import { broadcastRefresh } from "@/lib/realtime-service";
 import { db } from "@/lib/drizzle";
 import { static_pages } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export async function GET(request, context) {
     if (!data) return apiResponse({ message: "Halaman tidak ditemukan." }, 404);
     return apiResponse(data);
   } catch (error) {
-    console.error("GET Halaman Error:", error);
+    logError("halaman_id_get_error", { error: error?.message });
     return apiResponse({ message: error.message || "Gagal memuat halaman." }, error.status || 500);
   }
 }
@@ -79,7 +80,7 @@ export async function PUT(request, context) {
 
     return apiResponse({ message: "Halaman berhasil diperbarui.", item: data });
   } catch (error) {
-    console.error("PUT Halaman Error:", error);
+    logError("halaman_id_put_error", { error: error?.message });
     return apiResponse({ message: error.message || "Gagal memperbarui halaman." }, error.status || 500);
   }
 }
@@ -118,7 +119,7 @@ export async function DELETE(request, context) {
 
     return apiResponse({ message: "Halaman berhasil dihapus." });
   } catch (error) {
-    console.error("DELETE Halaman Error:", error);
+    logError("halaman_id_delete_error", { error: error?.message });
     return apiResponse({ message: error.message || "Gagal menghapus halaman." }, error.status || 500);
   }
 }

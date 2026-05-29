@@ -9,6 +9,7 @@ import { siteInfo } from "@/data/site";
 import { db } from "@/lib/drizzle";
 import { testimonials } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNewsSection"));
 const HomeGallerySection = dynamic(() => import("@/components/features/home/HomeGallerySection"));
@@ -54,7 +55,7 @@ const getCachedTestimonials = unstable_cache(
         .where(eq(testimonials.is_active, true))
         .orderBy(asc(testimonials.sort_order));
     } catch (err) {
-      console.error("Error fetching testimonials:", err);
+      logError("beranda_testimonials_error", { error: err?.message });
       return [];
     }
   },

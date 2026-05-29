@@ -29,17 +29,18 @@ export function useAdminLogin(initialUnauthorized) {
   const [turnstileToken, setTurnstileToken] = useState(null);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
     async function checkSession() {
       try {
         const { data, error: sessionError } = await supabase.auth.getSession();
-        if (!active) return;
+        if (controller.signal.aborted) return;
         if (!sessionError && data?.session) {
           const res = await fetch("/api/admin/session", {
             method: "GET",
             cache: "no-store",
+            signal: controller.signal,
           });
-          if (!active) return;
+          if (controller.signal.aborted) return;
           if (res.ok) {
             const payload = await res.json();
             if (
@@ -51,16 +52,14 @@ export function useAdminLogin(initialUnauthorized) {
             }
           }
         }
-      } catch {
-        /* ignore */
+      } catch (err) {
+        if (err?.name === "AbortError") return;
       } finally {
-        if (active) setLoadingSession(false);
+        if (!controller.signal.aborted) setLoadingSession(false);
       }
     }
     checkSession();
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, [router, supabase]);
 
   const handlePasswordKeyState = (event) =>

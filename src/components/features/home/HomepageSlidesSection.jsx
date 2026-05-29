@@ -177,6 +177,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                                     src={resolveImage(current.image_url)}
                                                     alt={current.title || "Slide beranda"}
                                                     fill
+                                                    priority
                                                     sizes="(max-width: 1024px) 100vw, 40vw"
                                                     className="object-cover lg:object-contain"
                                                 />

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/drizzle";
 import { report_documents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ export async function GET(request, context) {
 
     return NextResponse.redirect(doc.file_url, 302);
   } catch (error) {
-    console.error("GET Laporan View Redirect Error:", error);
+    logError("laporan_admin_view_redirect_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat mencatat view dokumen." },
       500,

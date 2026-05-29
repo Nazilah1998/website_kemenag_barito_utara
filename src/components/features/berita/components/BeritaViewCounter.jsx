@@ -13,28 +13,30 @@ export default function BeritaViewCounter({ slug, initialViews = 0 }) {
     const storageKey = `berita-viewed:${slug}`;
     const alreadyViewed = sessionStorage.getItem(storageKey);
 
-    if (alreadyViewed) {
-      return;
-    }
+    if (alreadyViewed) return;
+
+    const controller = new AbortController();
 
     async function incrementViews() {
       try {
         const response = await fetch(`/api/berita/${slug}/view`, {
           method: "POST",
+          signal: controller.signal,
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          setViews(Number(data?.views || 0));
+          setViews((prev) => prev + 1);
           sessionStorage.setItem(storageKey, "1");
         }
-      } catch {
-        // diamkan saja, jangan ganggu halaman
+      } catch (err) {
+        if (err?.name === "AbortError") return;
       }
     }
 
     incrementViews();
+    return () => controller.abort();
   }, [slug]);
 
   return (

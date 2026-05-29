@@ -12,6 +12,7 @@ import { galeri } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { randomUUID } from "crypto";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,9 @@ function toSafeSizeNumber(value) {
 }
 
 function getBase64PayloadMeta(dataUrl) {
-  const input = cleanString(dataUrl);
+  const input = cleanString(dataUrl, 10_000_000);
   if (!input) return null;
+  if (!input.startsWith("data:")) return null;
   const match = input.match(/^data:(.+?);base64,(.+)$/);
   if (!match) return null;
 
@@ -80,7 +82,7 @@ export async function GET(request) {
       }
     });
   } catch (error) {
-    console.error("GET Galeri Error:", error);
+    logError("galeri_get_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal mengambil data galeri." },
       500,
@@ -95,7 +97,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    const uploadBase64 = cleanString(body?.gallery_upload_base64);
+    const uploadBase64 = cleanString(body?.gallery_upload_base64, 10_000_000);
     const publishedAt = body?.published_at
       ? new Date(body.published_at)
       : new Date();
@@ -159,7 +161,7 @@ export async function POST(request) {
       item: insertedItem,
     });
   } catch (error) {
-    console.error("POST /api/admin/galeri error:", error);
+    logError("galeri_post_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal menyimpan galeri." },
       500,
@@ -187,7 +189,7 @@ export async function PUT(request) {
     if (!existingItem)
       return apiResponse({ message: "Item tidak ditemukan." }, 404);
 
-    const uploadBase64 = cleanString(body?.gallery_upload_base64);
+    const uploadBase64 = cleanString(body?.gallery_upload_base64, 10_000_000);
     const publishedAt = body?.published_at
       ? new Date(body.published_at)
       : existingItem.published_at;
@@ -198,9 +200,15 @@ export async function PUT(request) {
 
     if (uploadBase64) {
       const base64Meta = getBase64PayloadMeta(uploadBase64);
-      if (!base64Meta) throw new Error("Format file tidak valid.");
-      if (base64Meta.sizeBytes > MAX_IMAGE_SIZE_BYTES)
-        throw new Error(`Maksimal ${MAX_IMAGE_SIZE_KB} KB.`);
+      if (!base64Meta) {
+        return apiResponse({ message: "Format file tidak valid." }, 400);
+      }
+      if (base64Meta.sizeBytes > MAX_IMAGE_SIZE_BYTES) {
+        return apiResponse(
+          { message: `Ukuran file terlalu besar. Maksimal ${MAX_IMAGE_SIZE_KB} KB.` },
+          400,
+        );
+      }
 
       const uploaded = await uploadBase64Image({
         dataUrl: uploadBase64,
@@ -209,7 +217,7 @@ export async function PUT(request) {
       });
 
       if (existingItem.image_url) {
-        await removeStorageFileByPublicUrl(existingItem.image_url).catch(console.error);
+        await removeStorageFileByPublicUrl(existingItem.image_url).catch((e) => logError("galeri_put_storage_delete_error", { error: e?.message }));
       }
 
       finalImageUrl = uploaded.publicUrl;
@@ -245,7 +253,7 @@ export async function PUT(request) {
       item: data,
     });
   } catch (error) {
-    console.error("PUT Galeri Error:", error);
+    logError("galeri_put_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal update galeri." },
       500,
@@ -272,7 +280,7 @@ export async function DELETE(request) {
 
     if (item.image_url) {
       await removeStorageFileByPublicUrl(item.image_url).catch(
-        console.error,
+        (e) => logError("galeri_delete_storage_error", { error: e?.message }),
       );
     }
 
@@ -292,7 +300,7 @@ export async function DELETE(request) {
 
     return apiResponse({ message: "Item galeri berhasil dihapus." });
   } catch (error) {
-    console.error("DELETE Galeri Error:", error);
+    logError("galeri_delete_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal menghapus galeri." },
       500,

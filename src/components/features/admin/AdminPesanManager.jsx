@@ -15,13 +15,19 @@ export default function AdminPesanManager() {
         toast,
         confirmData,
         setConfirmData,
+        page,
+        totalPages,
+        total,
+        setPage,
+        searchQuery,
+        setSearchQuery,
         filterSubjek,
         setFilterSubjek,
         filterStatus,
         setFilterStatus,
         updateStatus,
         deleteMessage,
-        filteredMessages
+        messages
     } = useMessages();
 
     // Prevent body scroll when modal is open
@@ -60,6 +66,8 @@ export default function AdminPesanManager() {
 
                 {/* Filters - Adaptive */}
                 <MessageFilters
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
                     filterSubjek={filterSubjek}
                     setFilterSubjek={setFilterSubjek}
                     filterStatus={filterStatus}
@@ -68,7 +76,7 @@ export default function AdminPesanManager() {
             </div>
 
             {/* Main Content Area */}
-            {filteredMessages.length === 0 ? (
+            {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-[3rem] border-2 border-dashed border-slate-100 bg-white/50 py-32 dark:border-white/5">
                     <div className="mb-6 rounded-3xl bg-slate-50 p-6 dark:bg-white/5">
                         <svg className="h-10 w-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,14 +89,14 @@ export default function AdminPesanManager() {
                 <>
                     {/* Desktop Table View */}
                     <MessageTable
-                        messages={filteredMessages}
+                        messages={messages}
                         onOpen={setSelectedMsg}
                         onDelete={deleteMessage}
                     />
 
                     {/* Mobile Card View */}
                     <div className="grid gap-4 lg:hidden">
-                        {filteredMessages.map((msg, idx) => (
+                        {messages.map((msg, idx) => (
                             <MessageCard
                                 key={msg.id}
                                 msg={msg}
@@ -98,6 +106,49 @@ export default function AdminPesanManager() {
                             />
                         ))}
                     </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="mt-8 flex flex-col gap-6 border-t-2 border-slate-100 pt-8 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+                                Halaman <span className="text-slate-900 dark:text-white">{page}</span> dari <span className="text-slate-900 dark:text-white">{totalPages}</span> &middot; <span className="text-slate-900 dark:text-white">{total}</span> pesan
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setPage(Math.max(1, page - 1))}
+                                    disabled={page === 1}
+                                    className="flex h-10 items-center justify-center rounded-xl border-2 border-slate-100 bg-white px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all hover:border-slate-900 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
+                                >
+                                    Prev
+                                </button>
+
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                    <button
+                                        key={p}
+                                        type="button"
+                                        onClick={() => setPage(p)}
+                                        className={`h-10 min-w-[40px] rounded-xl text-[10px] font-black transition-all border-2 ${page === p
+                                            ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black shadow-lg shadow-slate-900/20"
+                                            : "border-slate-100 bg-white text-slate-400 hover:border-slate-900 hover:text-slate-900 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
+                                            }`}
+                                    >
+                                        {p}
+                                    </button>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                                    disabled={page === totalPages}
+                                    className="flex h-10 items-center justify-center rounded-xl border-2 border-slate-100 bg-white px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all hover:border-slate-900 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
 

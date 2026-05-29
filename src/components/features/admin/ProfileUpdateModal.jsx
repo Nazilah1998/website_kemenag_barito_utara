@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { createPortal } from "react-dom";
 import Cropper from "react-easy-crop";
+import { logError } from "@/lib/logger";
 
 export default function ProfileUpdateModal({ open, onClose, profile, onUpdateSuccess }) {
   const [fullName, setFullName] = useState("");
@@ -106,7 +107,7 @@ export default function ProfileUpdateModal({ open, onClose, profile, onUpdateSuc
         }, "image/jpeg", 0.95);
       });
     } catch (e) {
-      console.error(e);
+      logError("profile_update_crop_error", { error: e?.message });
       return null;
     }
   };

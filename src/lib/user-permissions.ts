@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentSessionContext } from "@/lib/auth";
+import type { SessionContext } from "@/lib/auth";
 import { ROLES, getRolePermissions } from "@/lib/permissions";
 import { db } from "@/lib/drizzle";
 import { profiles, editor_requests, user_permissions } from "@/db/schema";
@@ -7,15 +8,31 @@ import { eq } from "drizzle-orm";
 
 function forbiddenUrl(
   message = "Anda tidak memiliki izin untuk mengakses halaman ini.",
-) {
+): string {
   return `/error?message=${encodeURIComponent(message)}`;
+}
+
+export interface PermissionContext {
+  role: string | null;
+  email: string | null;
+  isSuperAdmin: boolean;
+  isAdmin: boolean;
+  isEditor: boolean;
+  isActive: boolean;
+  approved: boolean;
+  requestStatus: string | null;
+  permissions: string[];
 }
 
 export async function getUserPermissionContext({
   userId,
   role,
   email = null,
-} = {}) {
+}: {
+  userId: string | null;
+  role: string | null;
+  email?: string | null;
+}): Promise<PermissionContext> {
   const normalizedRole = String(role || "")
     .trim()
     .toLowerCase();
@@ -33,6 +50,7 @@ export async function getUserPermissionContext({
       permissions: [],
     };
   }
+
   if (normalizedRole === ROLES.SUPER_ADMIN) {
     const basePermissions = new Set(getRolePermissions(normalizedRole));
     return {
@@ -48,7 +66,8 @@ export async function getUserPermissionContext({
     };
   }
 
-  const [profilesRes, requestsRes, permissionsList] = await Promise.all([
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [profilesRes, requestsRes, permissionsList]: [any[], any[], any[]] = await Promise.all([
     db
       .select({
         id: profiles.id,
@@ -57,17 +76,17 @@ export async function getUserPermissionContext({
         is_active: profiles.is_active,
       })
       .from(profiles)
-      .where(eq(profiles.id, userId))
+      .where(eq(profiles.id, userId as string))
       .limit(1),
     db
       .select({ status: editor_requests.status })
       .from(editor_requests)
-      .where(eq(editor_requests.user_id, userId))
+      .where(eq(editor_requests.user_id, userId as string))
       .limit(1),
     db
       .select({ permission: user_permissions.permission })
       .from(user_permissions)
-      .where(eq(user_permissions.user_id, userId)),
+      .where(eq(user_permissions.user_id, userId as string)),
   ]);
 
   const profile = profilesRes[0] || null;
@@ -77,7 +96,7 @@ export async function getUserPermissionContext({
   const approved = requestStatus === "approved";
   const isActive = Boolean(profile?.is_active);
   const customPermissions = (permissionsList || [])
-    .map((item) => item.permission)
+    .map((item: { permission?: string }) => item.permission)
     .filter(Boolean);
 
   return {
@@ -89,11 +108,11 @@ export async function getUserPermissionContext({
     isActive,
     approved,
     requestStatus,
-    permissions: approved && isActive ? customPermissions : [],
+    permissions: approved && isActive ? (customPermissions as string[]) : [],
   };
 }
 
-export function hasUserPermission(permissionContext, permission) {
+export function hasUserPermission(permissionContext: PermissionContext | null, permission: string | null): boolean {
   if (!permissionContext || !permission) return false;
   if (permissionContext.isSuperAdmin) return true;
   return Array.isArray(permissionContext.permissions)
@@ -101,14 +120,17 @@ export function hasUserPermission(permissionContext, permission) {
     : false;
 }
 
-export function hasAnyUserPermission(permissionContext, permissions = []) {
+export function hasAnyUserPermission(permissionContext: PermissionContext | null, permissions: string[] = []): boolean {
   if (!permissions.length) return false;
   return permissions.some((permission) =>
     hasUserPermission(permissionContext, permission),
   );
 }
 
-export async function getCurrentUserPermissionContext() {
+export async function getCurrentUserPermissionContext(): Promise<{
+  session: SessionContext;
+  permissionContext: PermissionContext;
+}> {
   const session = await getCurrentSessionContext();
 
   const userId = session?.profile?.id || session?.user?.id || null;
@@ -128,7 +150,7 @@ export async function getCurrentUserPermissionContext() {
 }
 
 export async function requirePermission(
-  permission,
+  permission: string,
   {
     loginRedirect = "/admin/login",
     forbiddenRedirect = forbiddenUrl(),
@@ -136,7 +158,7 @@ export async function requirePermission(
       "Akun editor belum aktif atau belum disetujui.",
     ),
   } = {},
-) {
+): Promise<{ session: SessionContext; permissionContext: PermissionContext }> {
   const { session, permissionContext } =
     await getCurrentUserPermissionContext();
 

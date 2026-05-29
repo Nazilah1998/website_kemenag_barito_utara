@@ -57,7 +57,7 @@ export function useSlidesManager() {
     setCurrentPage(page);
   }, []);
 
-  const loadItems = useCallback(async () => {
+  const loadItems = useCallback(async (signal) => {
     try {
       setLoading(true);
       setError("");
@@ -65,6 +65,7 @@ export function useSlidesManager() {
       const response = await fetch("/api/admin/homepage-slides", {
         method: "GET",
         cache: "no-store",
+        signal,
       });
 
       const data = await readJsonSafely(response);
@@ -75,6 +76,7 @@ export function useSlidesManager() {
       setItems(Array.isArray(data?.items) ? data.items : []);
       setCurrentPage(1);
     } catch (err) {
+      if (err.name === "AbortError") return;
       setError(err?.message || "Gagal memuat data slider.");
       setItems([]);
     } finally {
@@ -83,7 +85,9 @@ export function useSlidesManager() {
   }, []);
 
   useEffect(() => {
-    loadItems();
+    const controller = new AbortController();
+    loadItems(controller.signal);
+    return () => controller.abort();
   }, [loadItems]);
 
   useEffect(() => {

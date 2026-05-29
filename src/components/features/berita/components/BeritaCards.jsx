@@ -7,10 +7,25 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import BeritaViewsBadge from "./BeritaViewsBadge";
 
-const FALLBACK_IMAGE = "/images/placeholder-news.jpg";
+const FALLBACK_IMAGE = "/assets/branding/kemenag.svg";
 
 function getCoverImage(item) {
   return item.coverImage || FALLBACK_IMAGE;
+}
+
+function NewsCardImage({ item, className, sizes, ...rest }) {
+  const [imgSrc, setImgSrc] = React.useState(null);
+  return (
+    <Image
+      src={imgSrc || getCoverImage(item)}
+      alt={item.title}
+      fill
+      className={className}
+      sizes={sizes}
+      onError={() => setImgSrc(FALLBACK_IMAGE)}
+      {...rest}
+    />
+  );
 }
 
 function formatDate(isoDate, locale) {
@@ -44,13 +59,11 @@ export function FeaturedNewsCard({ item }) {
           href={`/berita/${item.slug}`}
           className="relative block min-h-[280px] lg:min-h-[400px] overflow-hidden bg-slate-100 dark:bg-slate-800"
         >
-          <Image
-            src={getCoverImage(item)}
-            alt={item.title}
-            fill
+          <NewsCardImage
+            item={item}
+            priority
             className="object-cover transition duration-700 group-hover:scale-105"
             sizes="(max-width: 1024px) 100vw, 60vw"
-            priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
           <div className="absolute left-4 top-4 lg:left-8 lg:top-8 z-10">
@@ -111,10 +124,8 @@ export function NewsCard({ item }) {
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
         <div className="relative h-48 w-full overflow-hidden">
-          <Image
-            src={getCoverImage(item)}
-            alt={item.title}
-            fill
+          <NewsCardImage
+            item={item}
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 16vw"
           />

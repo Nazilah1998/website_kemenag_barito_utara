@@ -72,7 +72,7 @@ export function useEditorsManagement(initialEditors = []) {
 
   const [toast, setToast] = useState(null);
 
-  async function loadEditors() {
+  async function loadEditors(signal) {
     setLoading(true);
     setError("");
 
@@ -80,6 +80,7 @@ export function useEditorsManagement(initialEditors = []) {
       const res = await fetch("/api/admin/editors", {
         method: "GET",
         cache: "no-store",
+        signal,
       });
 
       const data = await parseSafeJsonResponse(res);
@@ -90,6 +91,7 @@ export function useEditorsManagement(initialEditors = []) {
 
       setEditors(Array.isArray(data?.editors) ? data.editors : []);
     } catch (err) {
+      if (err.name === "AbortError") return;
       setError(err?.message || "Terjadi kesalahan saat memuat editor.");
     } finally {
       setLoading(false);
@@ -97,9 +99,11 @@ export function useEditorsManagement(initialEditors = []) {
   }
 
   useEffect(() => {
+    const controller = new AbortController();
     if (!initialEditors?.length) {
-      loadEditors();
+      loadEditors(controller.signal);
     }
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

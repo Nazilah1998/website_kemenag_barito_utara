@@ -4,7 +4,8 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { kontak_pesan } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, or, like } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -20,15 +21,38 @@ export async function GET(request) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50")));
     const skip = (page - 1) * limit;
+    const q = searchParams.get("q")?.trim() || "";
+    const statusFilter = searchParams.get("status")?.trim() || "";
+    const subjekFilter = searchParams.get("subjek")?.trim() || "";
+
+    const filters = [];
+    if (q) {
+      filters.push(
+        or(
+          like(kontak_pesan.nama, `%${q}%`),
+          like(kontak_pesan.whatsapp, `%${q}%`),
+          like(kontak_pesan.pesan, `%${q}%`),
+          like(kontak_pesan.subjek, `%${q}%`),
+        ),
+      );
+    }
+    if (statusFilter) {
+      filters.push(eq(kontak_pesan.status, statusFilter));
+    }
+    if (subjekFilter) {
+      filters.push(eq(kontak_pesan.subjek, subjekFilter));
+    }
+    const whereClause = filters.length > 0 ? sql.join(filters, sql` AND `) : undefined;
 
     const [data, [{ count: total }]] = await Promise.all([
       db
         .select()
         .from(kontak_pesan)
+        .where(whereClause)
         .orderBy(desc(kontak_pesan.created_at))
         .limit(limit)
         .offset(skip),
-      db.select({ count: sql`count(*)` }).from(kontak_pesan)
+      db.select({ count: sql`count(*)` }).from(kontak_pesan).where(whereClause)
     ]);
 
     return apiResponse({
@@ -41,7 +65,7 @@ export async function GET(request) {
       }
     });
   } catch (error) {
-    console.error("GET Pesan Error:", error);
+    logError("pesan_get_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal mengambil daftar pesan." },
       500,
@@ -99,7 +123,7 @@ export async function PATCH(request) {
       item: data,
     });
   } catch (error) {
-    console.error("PATCH Pesan Error:", error);
+    logError("pesan_patch_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal memperbarui status pesan." },
       500,
@@ -146,7 +170,7 @@ export async function DELETE(request) {
 
     return apiResponse({ message: "Pesan berhasil dihapus." });
   } catch (error) {
-    console.error("DELETE Pesan Error:", error);
+    logError("pesan_delete_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal menghapus pesan." },
       500,

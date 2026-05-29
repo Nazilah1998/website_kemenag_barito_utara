@@ -3,6 +3,7 @@ import { validateAdmin } from "@/lib/cms-utils";
 import { db } from "@/lib/drizzle";
 import { report_categories, report_documents } from "@/db/schema";
 import { eq, desc, asc } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export async function GET(request) {
       categories: normalizedCategories,
     });
   } catch (error) {
-    console.error("admin_laporan_list_unhandled_error", error);
+    logError("admin_laporan_list_error", { error: error?.message });
 
     return apiResponse(
       { message: error?.message || "Terjadi kesalahan saat memuat laporan." },

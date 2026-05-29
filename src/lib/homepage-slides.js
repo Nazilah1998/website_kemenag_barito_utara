@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { db } from "@/lib/drizzle";
 import { homepage_slides } from "@/db/schema";
 import { eq, asc, desc } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -59,7 +60,7 @@ const getCachedPublicSlides = unstable_cache(
 
       return sortSlides((data || []).map(normalizeHomepageSlide));
     } catch (error) {
-      console.error("getPublicHomepageSlides error:", error);
+      logError("getPublicHomepageSlides_error", { error: error?.message });
       return [];
     }
   },
@@ -83,7 +84,7 @@ export async function getAdminHomepageSlides() {
 
     return sortSlides((data || []).map(normalizeHomepageSlide));
   } catch (error) {
-    console.error("getAdminHomepageSlides error:", error);
+    logError("getAdminHomepageSlides_error", { error: error?.message });
     return [];
   }
 }

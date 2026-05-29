@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { static_pages } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import InformasiIndexClient from "./InformasiIndexClient";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 600;
 
@@ -26,7 +27,7 @@ export default async function InformasiPage() {
       .where(eq(static_pages.is_published, true))
       .orderBy(desc(static_pages.updated_at));
   } catch (error) {
-    console.error("Error fetching static pages:", error);
+    logError("informasi_static_pages_error", { error: error?.message });
   }
 
   return <InformasiIndexClient staticPages={staticPages} />;

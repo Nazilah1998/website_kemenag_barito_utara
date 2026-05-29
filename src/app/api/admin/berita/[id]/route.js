@@ -12,6 +12,7 @@ import { broadcastRefresh } from "@/lib/realtime-service";
 import { db } from "@/lib/drizzle";
 import { berita, galeri } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { logInfo, logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -25,20 +26,19 @@ const table = "berita";
 const MAX_IMAGE_SIZE_KB = 500;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024;
 
-function revalidateBeritaPaths(slug) {
-  revalidatePath("/");
-  revalidatePath("/beranda");
-  revalidatePath("/berita");
-  revalidatePath("/admin");
-  revalidatePath("/admin/berita");
-  revalidateTag("home-latest-berita");
-  revalidateTag("home-popular-berita");
+async function revalidateBeritaPaths(slug) {
+  await Promise.all([
+    revalidatePath("/"),
+    revalidatePath("/beranda"),
+    revalidatePath("/berita"),
+    revalidatePath("/admin"),
+    revalidatePath("/admin/berita"),
+    revalidateTag("home-latest-berita"),
+    revalidateTag("home-popular-berita"),
+    slug ? revalidatePath(`/berita/${slug}`) : Promise.resolve(),
+  ]);
 
-  if (slug) {
-    revalidatePath(`/berita/${slug}`);
-  }
-  
-  broadcastRefresh("berita");
+  await broadcastRefresh("berita");
 }
 
 function stripHtml(html = "") {
@@ -74,7 +74,7 @@ function toSafeSizeNumber(value) {
 }
 
 function getBase64PayloadMeta(dataUrl) {
-  const input = cleanString(dataUrl);
+  const input = cleanString(dataUrl, 10_000_000);
 
   if (!input) return null;
 
@@ -126,7 +126,7 @@ async function resolveCoverImage({
   currentSizeBytes = 0,
   slugSeed = "",
 }) {
-  const uploadBase64 = cleanString(body?.cover_upload_base64);
+  const uploadBase64 = cleanString(body?.cover_upload_base64, 10_000_000);
   const uploadName = cleanString(body?.cover_upload_name) || "cover.webp";
   const currentCover = cleanString(body?.cover_image) || currentUrl || null;
 
@@ -138,6 +138,7 @@ async function resolveCoverImage({
     };
   }
 
+  // Pastikan base64 upload valid sebelum lanjut
   const base64Meta = getBase64PayloadMeta(uploadBase64);
 
   const uploaded = await uploadBase64Image({
@@ -146,11 +147,13 @@ async function resolveCoverImage({
     fileNameStem: slugSeed || uploadName,
   });
 
+  // Hapus file lama HANYA jika benar-benar ada URL lama dan berbeda dengan yang baru
   if (currentUrl && currentUrl !== uploaded.publicUrl) {
     try {
       await removeStorageFileByPublicUrl(currentUrl);
+      logInfo("berita_id_cover_old_deleted", { currentUrl });
     } catch (error) {
-      console.error("Gagal menghapus cover lama berita:", error);
+      logError("berita_id_cover_delete_error", { error: error?.message });
     }
   }
 
@@ -273,7 +276,7 @@ export async function GET(request, context) {
 
     return apiResponse(data);
   } catch (error) {
-    console.error("GET Berita Error:", error);
+    logError("berita_id_get_error", { error: error?.message });
     return apiResponse(
       { message: error.message || "Gagal memuat berita." },
       error.status || 500,
@@ -325,10 +328,10 @@ export async function PUT(request, context) {
 
     await syncRelatedGaleriMetadata(data);
 
-    revalidateBeritaPaths(data?.slug);
+    await revalidateBeritaPaths(data?.slug);
 
     if (existingItem.slug && existingItem.slug !== data.slug) {
-      revalidatePath(`/berita/${existingItem.slug}`);
+      await revalidatePath(`/berita/${existingItem.slug}`);
     }
 
     await recordAudit({
@@ -365,7 +368,7 @@ export async function PUT(request, context) {
       item: data,
     });
   } catch (error) {
-    console.error("PUT Berita Error:", error);
+    logError("berita_id_put_error", { error: error?.message });
     return apiResponse(
       {
         message: error.message || "Gagal memperbarui berita.",
@@ -431,10 +434,10 @@ export async function DELETE(request, context) {
         await removeStorageFileByPublicUrl(fileUrl);
       }
     } catch (cleanupError) {
-      console.error("Storage cleanup warning:", cleanupError);
+      logError("berita_id_storage_cleanup_warning", { error: cleanupError?.message });
     }
 
-    revalidateBeritaPaths(existingItem?.slug);
+    await revalidateBeritaPaths(existingItem?.slug);
 
     await recordAudit({
       session: auth.session,
@@ -460,7 +463,7 @@ export async function DELETE(request, context) {
       message: "Berita berhasil dihapus.",
     });
   } catch (error) {
-    console.error("DELETE Berita Error:", error);
+    logError("berita_id_delete_error", { error: error?.message });
     return apiResponse(
       {
         message: error.message || "Gagal menghapus berita.",

@@ -4,6 +4,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { profiles, admin_users, editor_requests, user_permissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logWarn, logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "";
@@ -149,7 +150,7 @@ export async function PATCH(request, context) {
       try {
         await supabaseAdmin.auth.admin.deleteUser(userId);
       } catch (authErr) {
-        console.warn("Supabase Auth Delete Warning:", authErr.message);
+        logWarn("editors_delete_auth_warning", { error: authErr.message });
       }
 
       // Delete from all tables dalam 1 transaksi
@@ -267,7 +268,7 @@ export async function PATCH(request, context) {
 
     return apiResponse({ message: "Aksi tidak dikenali." }, 400);
   } catch (error) {
-    console.error("PATCH Editors [userId] Error:", error);
+    logError("editors_patch_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memproses data editor." },
       500,

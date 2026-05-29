@@ -1,15 +1,17 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "./env";
+import { logWarn } from "@/lib/logger";
 
 const { accessKeyId, secretAccessKey, endpoint, bucketName } = env.r2;
 
-let s3Client = null;
+let s3Client: S3Client | null = null;
 
-export function getR2Client() {
+export function getR2Client(): S3Client | null {
   if (s3Client) return s3Client;
 
   if (!accessKeyId || !secretAccessKey || !endpoint) {
-    console.warn("Cloudflare R2 credentials are not fully configured.");
+    logWarn("r2_credentials_missing");
     return null;
   }
 
@@ -25,14 +27,7 @@ export function getR2Client() {
   return s3Client;
 }
 
-/**
- * Upload a file to Cloudflare R2
- * @param {Buffer | Uint8Array} buffer File content
- * @param {string} path Destination path in bucket
- * @param {string} contentType MIME type
- * @returns {Promise<string>} Public proxy URL
- */
-export async function uploadToR2(buffer, path, contentType) {
+export async function uploadToR2(buffer: Buffer | Uint8Array, path: string, contentType: string): Promise<string> {
   const client = getR2Client();
   if (!client) throw new Error("R2 Client not initialized");
 
@@ -48,11 +43,7 @@ export async function uploadToR2(buffer, path, contentType) {
   return `/api/storage/r2/${path}`;
 }
 
-/**
- * Delete a file from Cloudflare R2
- * @param {string} path Path in bucket
- */
-export async function deleteFromR2(path) {
+export async function deleteFromR2(path: string): Promise<void> {
   const client = getR2Client();
   if (!client) return;
 
@@ -64,15 +55,7 @@ export async function deleteFromR2(path) {
   await client.send(command);
 }
 
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-/**
- * Get a presigned download URL directly from Cloudflare R2
- * @param {string} path Path in bucket
- * @param {number} expiresIn Time in seconds until URL expires
- * @returns {Promise<string>}
- */
-export async function getPresignedR2Url(path, expiresIn = 3600) {
+export async function getPresignedR2Url(path: string, expiresIn = 3600): Promise<string> {
   const client = getR2Client();
   if (!client) throw new Error("R2 Client not initialized");
 
@@ -85,12 +68,7 @@ export async function getPresignedR2Url(path, expiresIn = 3600) {
   return url;
 }
 
-/**
- * Get public proxy URL for R2 file
- * @param {string} path Path in bucket
- * @returns {string}
- */
-export function getR2PublicUrl(path) {
+export function getR2PublicUrl(path: string): string {
   if (!path) return "";
   if (path.startsWith("http")) return path;
   return `/api/storage/r2/${path}`;

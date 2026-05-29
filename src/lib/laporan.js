@@ -4,6 +4,7 @@ import { laporanCategories } from "@/data/laporan";
 import { db } from "@/lib/drizzle";
 import { report_categories } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 function toNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -135,7 +136,7 @@ export async function getAllLaporanCategories() {
       return normalizeLaporanCategory(item, publicDocs);
     });
   } catch (error) {
-    console.error("Drizzle getAllLaporanCategories Error:", error);
+    logError("getAllLaporanCategories_error", { error: error?.message });
     return laporanCategories.map(normalizeFallbackCategory);
   }
 }
@@ -161,7 +162,7 @@ export async function getLaporanDetailBySlug(slug) {
 
     return normalizeLaporanCategory(data, documents);
   } catch (error) {
-    console.error("Drizzle getLaporanDetailBySlug Error:", error);
+    logError("getLaporanDetailBySlug_error", { error: error?.message });
     const fallback = laporanCategories.find((item) => item.slug === slug);
     if (!fallback) return null;
     return normalizeFallbackCategory(fallback);
@@ -192,7 +193,7 @@ export async function getAdminLaporanCategories(slug = "") {
       return normalizeLaporanCategory(item, docs);
     });
   } catch (error) {
-    console.error("Drizzle getAdminLaporanCategories Error:", error);
+    logError("getAdminLaporanCategories_error", { error: error?.message });
     if (slug) {
       const fallback = laporanCategories.find((item) => item.slug === slug);
       return fallback ? [normalizeFallbackCategory(fallback)] : [];

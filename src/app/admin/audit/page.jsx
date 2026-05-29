@@ -29,10 +29,10 @@ export default function AuditLogPage() {
     setToast({ message, error });
   };
 
-  const fetchLogs = React.useCallback(async () => {
+  const fetchLogs = React.useCallback(async (signal) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/admin/audit?page=${page}&limit=15`);
+      const res = await fetch(`/api/admin/audit?page=${page}&limit=15`, { signal });
       const data = await res.json();
       
       if (data.error) throw new Error(data.error);
@@ -40,6 +40,7 @@ export default function AuditLogPage() {
       setLogs(data.logs);
       setTotalPages(data.pagination.totalPages);
     } catch (err) {
+      if (err?.name === "AbortError") return;
       setError(err.message);
     } finally {
       setLoading(false);
@@ -47,7 +48,9 @@ export default function AuditLogPage() {
   }, [page]);
 
   useEffect(() => {
-    fetchLogs();
+    const controller = new AbortController();
+    fetchLogs(controller.signal);
+    return () => controller.abort();
   }, [fetchLogs]);
 
   const executeDelete = async (id) => {

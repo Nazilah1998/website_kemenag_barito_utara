@@ -5,6 +5,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { user_permissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -45,22 +46,23 @@ export async function PUT(request, context) {
       );
     }
 
-    const now = new Date();
+    await db.transaction(async (tx) => {
+      // Delete old permissions
+      await tx.delete(user_permissions).where(eq(user_permissions.user_id, userId));
 
-    // Delete old permissions
-    await db.delete(user_permissions).where(eq(user_permissions.user_id, userId));
-
-    // Insert new permissions
-    if (permissions.length) {
-      await db.insert(user_permissions).values(
-        permissions.map((permission) => ({
-          user_id: userId,
-          permission,
-          created_at: now,
-          updated_at: now,
-        }))
-      );
-    }
+      // Insert new permissions
+      if (permissions.length) {
+        const now = new Date();
+        await tx.insert(user_permissions).values(
+          permissions.map((permission) => ({
+            user_id: userId,
+            permission,
+            created_at: now,
+            updated_at: now,
+          }))
+        );
+      }
+    });
 
     await recordAudit({
       session: auth.session,
@@ -73,7 +75,7 @@ export async function PUT(request, context) {
 
     return apiResponse({ message: "Permission editor berhasil disimpan." });
   } catch (error) {
-    console.error("PUT Editor Permissions Error:", error);
+    logError("editors_permissions_put_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal menyimpan permission editor." },
       500,

@@ -3,6 +3,7 @@ import { validateAdmin } from "@/lib/cms-utils";
 import { db } from "@/lib/drizzle";
 import { editor_requests, profiles, user_permissions } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -110,7 +111,7 @@ export async function GET(request) {
       }
     });
   } catch (error) {
-    console.error("GET Editors Error:", error);
+    logError("editors_get_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memuat daftar editor." },
       500,

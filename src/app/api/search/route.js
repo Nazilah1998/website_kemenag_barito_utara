@@ -3,6 +3,7 @@ import { berita, report_documents, static_pages, agenda, dokumen, seksi } from "
 import { eq, and, or, ilike, desc } from "drizzle-orm";
 import { apiResponse } from "@/lib/api-helpers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { logError } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -210,7 +211,7 @@ export async function GET(request) {
 
     return apiResponse({ items, q });
   } catch (error) {
-    console.error("Search API Error:", error);
+    logError("search_api_error", { error: error?.message });
     return apiResponse({ items: [], error: "Gagal memuat hasil pencarian" }, 200);
   }
 }

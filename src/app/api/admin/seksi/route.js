@@ -3,6 +3,7 @@ import { validateAdmin } from "@/lib/cms-utils";
 import { PERMISSIONS } from "@/lib/permissions";
 import { db } from "@/lib/drizzle";
 import { seksi } from "@/db/schema";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export async function GET() {
       items: data || [],
     });
   } catch (error) {
-    console.error("GET Admin Seksi List Error:", error);
+    logError("seksi_list_get_error", { error: error?.message });
     return apiResponse(
       { message: error?.message || "Gagal memuat data seksi kepegawaian." },
       500,

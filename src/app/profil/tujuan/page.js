@@ -32,7 +32,8 @@ export default function TujuanPage() {
   const [goals, setGoals] = useState(FALLBACK_GOALS);
 
   useEffect(() => {
-    fetch("/api/static-pages?slug=tujuan")
+    const controller = new AbortController();
+    fetch("/api/static-pages?slug=tujuan", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.content) {
@@ -43,7 +44,8 @@ export default function TujuanPage() {
           } catch {}
         }
       })
-      .catch(() => {});
+      .catch((e) => { if (e?.name !== "AbortError") {} });
+    return () => controller.abort();
   }, []);
 
   return (

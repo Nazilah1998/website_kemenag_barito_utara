@@ -1,4 +1,6 @@
-function readEnv(key, fallback = undefined) {
+import { logWarn } from "@/lib/logger";
+
+function readEnv(key: string, fallback?: string): string | undefined {
   const value = process.env[key] ?? fallback;
   return value;
 }
@@ -26,21 +28,36 @@ const r2Endpoint = process.env.CLOUDFLARE_R2_ENDPOINT ?? "";
 const turnstileSecret = process.env.TURNSTILE_SECRET_KEY ?? "";
 
 if (!r2KeyId || !r2SecretKey || !r2Endpoint) {
-  console.warn("[env] Cloudflare R2 credentials belum lengkap. Upload file tidak akan berfungsi.");
+  logWarn("env_r2_credentials_incomplete");
 }
 
 if (!turnstileSecret) {
-  console.warn("[env] TURNSTILE_SECRET_KEY belum diatur. Verifikasi keamanan login tidak akan berfungsi.");
+  logWarn("env_turnstile_secret_missing");
 }
 
 if (!process.env.GEMINI_API_KEY && !process.env.GROQ_API_KEY && !process.env.MISTRAL_API_KEY && !process.env.OPENROUTER_API_KEY) {
-  console.warn("[env] Tidak ada AI API key yang dikonfigurasi. Chat AI tidak akan berfungsi.");
+  logWarn("env_ai_api_keys_missing");
 }
 
-export const env = {
-  siteUrl: readEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000"),
-  supabaseUrl,
-  supabasePublishableKey,
+interface Env {
+  siteUrl: string;
+  supabaseUrl: string;
+  supabasePublishableKey: string;
+  supabaseServiceRoleKey: string;
+  turnstileSiteKey: string;
+  turnstileSecretKey: string;
+  r2: {
+    accessKeyId: string;
+    secretAccessKey: string;
+    endpoint: string;
+    bucketName: string;
+  };
+}
+
+export const env: Env = {
+  siteUrl: readEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000") as string,
+  supabaseUrl: supabaseUrl as string,
+  supabasePublishableKey: supabasePublishableKey as string,
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   turnstileSiteKey: readEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", ""),
   turnstileSecretKey: turnstileSecret,
@@ -52,7 +69,7 @@ export const env = {
   },
 };
 
-export function assertServiceRoleKey() {
+export function assertServiceRoleKey(): string {
   if (!env.supabaseServiceRoleKey) {
     throw new Error(
       "SUPABASE_SERVICE_ROLE_KEY belum diatur. File ini dibutuhkan untuk operasi server/admin.",

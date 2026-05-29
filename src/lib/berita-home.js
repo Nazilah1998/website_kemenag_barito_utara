@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { normalizeBerita } from "./berita";
+import { logError } from "@/lib/logger";
 
 const getCachedLatestBeritaHome = unstable_cache(
   async () => {
@@ -16,7 +17,7 @@ const getCachedLatestBeritaHome = unstable_cache(
 
       return (data || []).map(normalizeBerita);
     } catch (error) {
-      console.error("getCachedLatestBeritaHome error:", error);
+      logError("getCachedLatestBeritaHome_error", { error: error?.message });
       return [];
     }
   },
@@ -39,7 +40,7 @@ const getCachedPopularBeritaHome = unstable_cache(
 
       return (data || []).map(normalizeBerita);
     } catch (error) {
-      console.error("getCachedPopularBeritaHome error:", error);
+      logError("getCachedPopularBeritaHome_error", { error: error?.message });
       return [];
     }
   },

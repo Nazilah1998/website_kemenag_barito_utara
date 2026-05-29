@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/drizzle";
 import { seksi } from "@/db/schema";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +60,7 @@ export async function GET() {
 
     return NextResponse.json([kepalaKantor, ...dynamicLeaders]);
   } catch (error) {
-    console.error("GET Public Seksi Error:", error);
+    logError("seksi_public_error", { error: error?.message });
     return NextResponse.json({ error: "Failed to fetch seksi data." }, { status: 500 });
   }
 }

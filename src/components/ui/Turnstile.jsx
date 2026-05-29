@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { logWarn, logError } from "@/lib/logger";
 
 /**
  * Custom Cloudflare Turnstile Component
@@ -12,7 +13,7 @@ export default function Turnstile({ siteKey, onVerify, theme = "light" }) {
 
   useEffect(() => {
     if (!siteKey) {
-      console.warn("Turnstile Site Key is missing.");
+      logWarn("turnstile_missing_site_key");
       return;
     }
 
@@ -46,7 +47,7 @@ export default function Turnstile({ siteKey, onVerify, theme = "light" }) {
             },
           });
         } catch (error) {
-          console.error("Failed to render Turnstile widget:", error);
+          logError("turnstile_render_error", { error: error?.message });
         }
       }
     };

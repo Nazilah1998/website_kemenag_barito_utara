@@ -3,6 +3,7 @@ import { db } from "@/lib/drizzle";
 import { seksi, pegawai_seksi, layanan_ptsp, link_aplikasi_seksi } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import LayananSlugClientPage from "./LayananSlugClientPage";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 600;
 
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }) {
       description: seksiData2.deskripsi,
     };
   } catch (error) {
-    console.error("generateMetadata error:", error);
+    logError("layanan_slug_metadata_error", { error: error?.message });
     return {
       title: "Layanan Publik | Kemenag Barito Utara",
     };
@@ -54,7 +55,7 @@ export default async function LayananSubPage({ params }) {
       }
     });
   } catch (error) {
-    console.error("Error fetching seksi data from database:", error);
+    logError("layanan_slug_fetch_error", { error: error?.message });
     try {
       seksiData = await db.query.seksi.findFirst({
         where: eq(seksi.slug, slug),
@@ -65,7 +66,7 @@ export default async function LayananSubPage({ params }) {
         }
       });
     } catch (fallbackError) {
-      console.error("Fallback query also failed:", fallbackError);
+      logError("layanan_slug_fallback_error", { error: fallbackError?.message });
     }
   }
 

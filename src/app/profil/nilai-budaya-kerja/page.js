@@ -32,7 +32,8 @@ export default function NilaiBudayaKerjaPage() {
   const [values, setValues] = useState(FALLBACK_VALUES);
 
   useEffect(() => {
-    fetch("/api/static-pages?slug=nilai-budaya-kerja")
+    const controller = new AbortController();
+    fetch("/api/static-pages?slug=nilai-budaya-kerja", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.content) {
@@ -43,7 +44,8 @@ export default function NilaiBudayaKerjaPage() {
           } catch {}
         }
       })
-      .catch(() => {});
+      .catch((e) => { if (e?.name !== "AbortError") {} });
+    return () => controller.abort();
   }, []);
 
   return (

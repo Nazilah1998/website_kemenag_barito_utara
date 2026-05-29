@@ -45,7 +45,8 @@ export default function TugasFungsiPage() {
   const [fungsiList, setFungsiList] = useState(FALLBACK_FUNGSI);
 
   useEffect(() => {
-    fetch("/api/static-pages?slug=tugas-fungsi")
+    const controller = new AbortController();
+    fetch("/api/static-pages?slug=tugas-fungsi", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.content) {
@@ -58,7 +59,8 @@ export default function TugasFungsiPage() {
           } catch {}
         }
       })
-      .catch(() => {});
+      .catch((e) => { if (e?.name !== "AbortError") {} });
+    return () => controller.abort();
   }, []);
 
   return (

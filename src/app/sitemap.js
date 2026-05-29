@@ -3,6 +3,7 @@ import { laporanCategories } from "@/data/laporan";
 import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 export const revalidate = 300;
 
@@ -81,7 +82,7 @@ export default async function sitemap() {
       priority: 0.8,
     }));
   } catch (err) {
-    console.error("[sitemap] berita fetch error:", err?.message || err);
+    logError("sitemap_berita_fetch_error", { error: err?.message || err });
   }
 
   return [...staticRoutes, ...laporanRoutes, ...zonaRoutes, ...beritaRoutes];

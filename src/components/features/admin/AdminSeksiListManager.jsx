@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { FloatingFeedback, DeleteConfirmModal } from "./slides/SlidesUI";
+import { logWarn, logError } from "@/lib/logger";
 
 export default function AdminSeksiListManager() {
   const [items, setItems] = useState([]);
@@ -22,19 +23,22 @@ export default function AdminSeksiListManager() {
   const [confirmModal, setConfirmModal] = useState({ open: false, id: null, judul: "" });
 
   useEffect(() => {
+    const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch("/api/admin/session");
+        const res = await fetch("/api/admin/session", { signal: controller.signal });
         if (res.ok) {
           const data = await res.json();
           setIsSuperAdmin(data?.permissions?.role === "super_admin");
         }
       } catch (e) {
-        console.warn("Failed to load admin session:", e);
+        if (e?.name === "AbortError") return;
+        logWarn("seksi_list_session_warn", { error: e?.message });
       } finally {
-        fetchSeksi();
+        if (!controller.signal.aborted) fetchSeksi();
       }
     })();
+    return () => controller.abort();
   }, []);
 
   const fetchSeksi = async () => {
@@ -51,7 +55,7 @@ export default function AdminSeksiListManager() {
       const data = await res.json();
       setItems(data?.items || []);
     } catch (err) {
-      console.error(err);
+      logError("seksi_list_fetch_error", { error: err?.message });
       setError(err?.message || "Terjadi kesalahan koneksi saat memuat data.");
     } finally {
       setLoading(false);
@@ -85,7 +89,7 @@ export default function AdminSeksiListManager() {
       setMessage(data?.message || "Seksi berhasil dihapus.");
       await fetchSeksi();
     } catch (err) {
-      console.error(err);
+      logError("seksi_list_delete_error", { error: err?.message });
       setError(err?.message || "Gagal menghapus seksi.");
     } finally {
       setDeletingId(null);

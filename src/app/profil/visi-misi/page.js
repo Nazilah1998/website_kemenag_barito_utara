@@ -21,7 +21,8 @@ export default function VisiMisiPage() {
   const [missions, setMissions] = useState(FALLBACK_MISSIONS);
 
   useEffect(() => {
-    fetch("/api/static-pages?slug=visi-misi")
+    const controller = new AbortController();
+    fetch("/api/static-pages?slug=visi-misi", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.content) {
@@ -33,7 +34,8 @@ export default function VisiMisiPage() {
           } catch {}
         }
       })
-      .catch(() => {});
+      .catch((e) => { if (e?.name !== "AbortError") {} });
+    return () => controller.abort();
   }, []);
 
   return (

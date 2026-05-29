@@ -85,7 +85,9 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`
 - R2: `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_ENDPOINT`, `CLOUDFLARE_R2_BUCKET_NAME`
 - Optional: `NEXT_PUBLIC_SITE_URL` (defaults to `https://baritoutara.kemenag.go.id`), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (fallback to `ANON_KEY`)
-- Optional rate limit: `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (in-memory used if absent)
+- Optional Upstash Redis: `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (in-memory Map fallback if absent). Used by:
+  - Rate limiter (`src/lib/rate-limit.js`) — 13 API endpoints (login, chat, kontak, search, view counter, image proxy, R2 proxy, laporan, admin endpoints)
+  - View counter (`src/lib/view-counter.js`) — `INCR` + batch flush every 30s to DB; `GETSET` atomically reads/resets during flush
 
 ## Notes
 - ESLint: flat config (`eslint.config.mjs`), `eslint-config-next/core-web-vitals`

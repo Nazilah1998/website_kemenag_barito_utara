@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import FillImageWithFallback from "@/components/features/berita/components/FillImageWithFallback";
 import { motion } from "framer-motion";
 
 const containerVariants = {
@@ -109,7 +109,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                     key={item.slug}
                     className={`w-full flex-none px-1 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isActive ? "scale-100 opacity-100" : "scale-90 opacity-40 blur-[1px]"}`}
                   >
-                    <NewsCard item={item} index={index} t={t} isSlider />
+                    <NewsCard item={item} index={index} t={t} isSlider priority={index === activeIndex} />
                   </div>
                 );
               })}
@@ -168,10 +168,10 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                 >
                   {/* Cover Image */}
                   <div className="relative w-20 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-800">
-                    <Image
-                      src={item.coverImage || "/assets/branding/kemenag.svg"}
+                    <FillImageWithFallback
+                      src={item.coverImage}
+                      fallbackSrc="/assets/branding/kemenag.svg"
                       alt={item.title}
-                      fill
                       sizes="80px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -226,6 +226,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                 item={item}
                 index={index}
                 t={t}
+                priority={index === 0}
               />
             ))}
           </motion.div>
@@ -266,10 +267,10 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                       >
                         {/* Cover Image */}
                         <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-800">
-                          <Image
-                            src={item.coverImage || "/assets/branding/kemenag.svg"}
+                          <FillImageWithFallback
+                            src={item.coverImage}
+                            fallbackSrc="/assets/branding/kemenag.svg"
                             alt={item.title}
-                            fill
                             sizes="96px"
                             className="object-cover transition-transform duration-500 group-hover:scale-105"
                           />
@@ -307,7 +308,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
   );
 }
 
-function NewsCard({ item, index, t, className = "", isSlider = false }) {
+function NewsCard({ item, index, t, className = "", isSlider = false, priority = false }) {
   return (
     <motion.article
       variants={cardVariants}
@@ -318,12 +319,13 @@ function NewsCard({ item, index, t, className = "", isSlider = false }) {
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
         <div className="relative h-48 w-full overflow-hidden">
-          <Image
-            src={item.coverImage || "/assets/branding/kemenag.svg"}
+          <FillImageWithFallback
+            src={item.coverImage}
+            fallbackSrc="/assets/branding/kemenag.svg"
             alt={item.title}
-            fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-700 group-hover:scale-110"
+            priority={priority}
           />
 
           {/* Elegant Overlays */}
