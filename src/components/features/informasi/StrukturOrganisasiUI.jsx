@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { User } from "lucide-react";
-import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -15,12 +14,8 @@ const ProfileNode = ({ data, variant = "secondary", className = "", delay = 0 })
   const isPrimary = variant === 'primary';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay, ease: "easeOut" }}
-      className={`w-[160px] sm:w-[180px] lg:w-[200px] flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 relative z-10 ${className}
+    <div
+      className={`w-[160px] sm:w-[180px] lg:w-[200px] flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 relative z-10 animate-fade-in-up ${className}
       ${isPrimary
           ? 'bg-gradient-to-br from-[#052033] via-[#0b3b46] to-[#0e5f55] border-transparent shadow-2xl shadow-emerald-900/30 ring-4 ring-emerald-500/20'
           : 'bg-white border-slate-100 shadow-lg shadow-slate-100/80 hover:shadow-xl hover:border-emerald-200 dark:bg-slate-900/80 dark:border-slate-800 dark:hover:border-emerald-800'}
@@ -49,11 +44,11 @@ const ProfileNode = ({ data, variant = "secondary", className = "", delay = 0 })
 
       {/* Job Title Container */}
       <div className={`w-full pt-2.5 border-t flex flex-col items-center ${isPrimary ? 'border-white/10' : 'border-slate-100 dark:border-slate-800/50'}`}>
-        <p className={`text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] leading-relaxed ${isPrimary ? 'text-emerald-300' : 'text-emerald-600 dark:text-emerald-400'}`}>
+        <p className={`text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] leading-relaxed ${isPrimary ? 'text-emerald-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
           {data.position}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -157,7 +152,7 @@ export default function StrukturOrganisasiUI({ breadcrumb, leadershipData = [] }
         {/* Auto-updating Label (Top Right) */}
         <div className="w-full flex justify-end mb-6">
           <div className="inline-flex items-center px-4 py-2 bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            * Bagan Struktur Organisasi Instansi ini diperbarui per bulan <span className="font-semibold text-emerald-600 dark:text-emerald-400 ml-1">{currentMonth} {currentYear}</span>.
+            * Bagan Struktur Organisasi Instansi ini diperbarui per bulan <span className="font-semibold text-emerald-700 dark:text-emerald-400 ml-1">{currentMonth} {currentYear}</span>.
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
@@ -168,12 +168,7 @@ export function HeaderControls({ locale, setLocale, theme, setLightTheme, setDar
 
 function AdminLoginButton({ adminState }) {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timer);
-  }, []);
+  const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
   if (adminState?.user) {
     return (
@@ -191,7 +186,7 @@ function AdminLoginButton({ adminState }) {
     <>
       {/* Trigger Button */}
       <button
-        onClick={() => setShowConfirm(true)}
+        onClick={() => { setHasBeenOpened(true); setShowConfirm(true); }}
         className="group relative flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white transition-all hover:shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] active:scale-95"
       >
         <span className="relative z-10">Login Admin</span>
@@ -199,7 +194,7 @@ function AdminLoginButton({ adminState }) {
       </button>
 
       {/* Confirmation Modal via Portal */}
-      {mounted && typeof document !== "undefined" && createPortal(
+      {hasBeenOpened && typeof document !== "undefined" && createPortal(
         <AnimatePresence>
           {showConfirm && (
             <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">

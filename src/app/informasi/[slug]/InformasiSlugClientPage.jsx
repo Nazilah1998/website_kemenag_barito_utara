@@ -37,7 +37,7 @@ export default function InformasiSlugClientPage({ slug, pageData }) {
         />
         <div className="w-full px-6 sm:px-10 lg:px-16 xl:px-20 mt-10">
           <div
-            className="text-slate-700 dark:text-slate-300 leading-relaxed [&_h1]:text-3xl [&_h1]:font-bold [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-semibold [&_h1]:mt-8 [&_h2]:mt-6 [&_h3]:mt-4 [&_p]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-emerald-600 [&_a]:underline [&_a]:hover:text-emerald-700 [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-500"
+            className="text-slate-700 dark:text-slate-300 leading-relaxed [&_h1]:text-3xl [&_h1]:font-bold [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-semibold [&_h1]:mt-8 [&_h2]:mt-6 [&_h3]:mt-4 [&_p]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-emerald-700 [&_a]:underline [&_a]:hover:text-emerald-800 [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-500"
             dangerouslySetInnerHTML={{ __html: pageData.content }}
           />
         </div>

@@ -44,6 +44,15 @@ export function useHeader() {
   }
 
   useEffect(() => {
+    const cached = sessionStorage.getItem("admin_session");
+    const cachedTime = sessionStorage.getItem("admin_session_time");
+    if (cached && cachedTime && Date.now() - Number(cachedTime) < 300000) {
+      try {
+        setAdminState({ loaded: true, ...JSON.parse(cached) });
+        return;
+      } catch {}
+    }
+
     const controller = new AbortController();
 
     async function checkAdminSession() {
@@ -58,10 +67,13 @@ export function useHeader() {
 
         const data = await res.json();
 
-        setAdminState({
-          loaded: true,
-          isAdmin: Boolean(data?.permissions?.isAdmin),
-        });
+        const state = { loaded: true, isAdmin: Boolean(data?.permissions?.isAdmin) };
+        setAdminState(state);
+
+        try {
+          sessionStorage.setItem("admin_session", JSON.stringify(state));
+          sessionStorage.setItem("admin_session_time", String(Date.now()));
+        } catch {}
       } catch (err) {
         if (err.name === "AbortError") return;
         setAdminState({ loaded: true, isAdmin: false });

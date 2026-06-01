@@ -107,7 +107,7 @@ export default function AdminUserMenu({
                 toggleTheme();
                 setIsOpen(false);
               }}
-              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
             >
               <div className="flex items-center gap-2.5">
                 <Palette size={16} />
@@ -125,7 +125,7 @@ export default function AdminUserMenu({
                 setIsProfileModalOpen(true);
                 setIsOpen(false);
               }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
             >
               <UserCircle size={16} />
               <span>Ubah Profil</span>
@@ -136,7 +136,7 @@ export default function AdminUserMenu({
                 setIsPasswordModalOpen(true);
                 setIsOpen(false);
               }}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-600 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
             >
               <Lock size={16} />
               <span>Ubah Password</span>

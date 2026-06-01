@@ -74,11 +74,11 @@ function RegisterHeader() {
         </Link>
         <div className="h-10 w-px bg-slate-100 dark:bg-white/5" />
         <div className="text-left">
-          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 mb-1">
+          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-700 dark:text-emerald-400 mb-1">
             Gatekeeper Access
           </p>
           <h1 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
-            Buat Akun <span className="text-emerald-600 dark:text-emerald-400">Editor</span>
+            Buat Akun <span className="text-emerald-700 dark:text-emerald-400">Editor</span>
           </h1>
         </div>
       </div>

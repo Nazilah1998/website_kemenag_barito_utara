@@ -111,7 +111,7 @@ function ListEditor({ value = [], onChange, placeholder }) {
       <button
         type="button"
         onClick={() => onChange([...items, ""])}
-        className="text-xs font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+        className="text-xs font-bold uppercase tracking-wider text-emerald-700 hover:text-emerald-700 dark:text-emerald-400"
       >
         + Tambah Item
       </button>
@@ -180,7 +180,7 @@ function GroupEditor({ value = [], onChange, subFields }) {
           subFields.forEach((sf) => { blank[sf.key] = ""; });
           onChange([...items, blank]);
         }}
-        className="text-xs font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+        className="text-xs font-bold uppercase tracking-wider text-emerald-700 hover:text-emerald-700 dark:text-emerald-400"
       >
         + Tambah {subFields[0]?.label || "Item"}
       </button>
@@ -224,7 +224,7 @@ export default function HalamanFormModal({
             </h2>
             {form.slug && (
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Slug: <span className="font-mono font-bold text-emerald-600">{form.slug}</span>
+                Slug: <span className="font-mono font-bold text-emerald-700">{form.slug}</span>
               </p>
             )}
           </div>
@@ -299,7 +299,7 @@ export default function HalamanFormModal({
 
               <div className="space-y-6 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-5 dark:border-emerald-900/30 dark:bg-emerald-950/10">
                 <div className="flex items-center gap-2">
-                  <svg className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="h-5 w-5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
                     <line x1="12" y1="18" x2="12" y2="12" />

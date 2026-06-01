@@ -42,7 +42,7 @@ export default function MessageTable({ messages, onOpen, onDelete }) {
                                 <td className="px-8 py-6 text-center">
                                     <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 border-2 ${msg.status.toLowerCase() === "baru"
                                         ? "bg-amber-500/10 border-amber-500/20 text-amber-600"
-                                        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+                                        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-700"
                                         }`}>
                                         <div className={`h-1.5 w-1.5 rounded-full ${msg.status.toLowerCase() === "baru" ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
                                         <span className="text-[10px] font-black uppercase tracking-widest">{msg.status}</span>

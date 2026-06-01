@@ -108,7 +108,7 @@ export default function AdminHalamanPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => m.openEditForm(item.id)}
-                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600 dark:border-slate-700 dark:hover:border-emerald-700 dark:hover:bg-emerald-500/10"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:hover:border-emerald-700 dark:hover:bg-emerald-500/10"
                             title="Edit"
                           >
                             <EditIcon />

@@ -4,30 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import FillImageWithFallback from "@/components/features/berita/components/FillImageWithFallback";
-import { motion } from "framer-motion";
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08
-    }
-  }
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 35 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 90,
-      damping: 18
-    }
-  }
-};
-
 export default function HomeNewsSection({ latestBerita = [], popularBerita = [] }) {
   const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -79,10 +55,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
           </p>
         </div>
 
-        <motion.div
-          whileHover={{ y: -3, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
+        <div>
           <Link
             href="/berita"
             className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
@@ -90,7 +63,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
             {t("actions.viewAll") || "Lihat Semua Berita"}
             <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-        </motion.div>
+        </div>
       </div>
 
       {/* 1. MOBILE & TABLET LAYOUT (lg:hidden) */}
@@ -122,7 +95,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
               onClick={prevSlide}
               disabled={activeIndex === 0}
               aria-label="Berita sebelumnya"
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-700 transition hover:bg-emerald-700 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
@@ -140,7 +113,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
               onClick={nextSlide}
               disabled={activeIndex === displayLatest.length - 1}
               aria-label="Berita berikutnya"
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === displayLatest.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-700 transition hover:bg-emerald-700 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === displayLatest.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
             >
               <ChevronRightIcon className="h-5 w-5" />
             </button>
@@ -151,7 +124,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
         {displayPopular.length > 0 && (
           <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-md">
             <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
                 {popularBadgeText}
               </span>
               <h3 className="text-xl font-black mt-1 text-slate-900 dark:text-white">
@@ -179,10 +152,10 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
                   {/* Info Content */}
                   <div className="flex-1 min-w-0">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                       {item.category}
                     </span>
-                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
                       {item.title}
                     </h4>
                     <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
@@ -208,16 +181,12 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
         {/* Left Column: Latest News (Col span 8) */}
         <div className="lg:col-span-8 flex flex-col">
           <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 flex-shrink-0">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
               {latestBadgeText}
             </span>
           </div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+          <div
             className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 flex-grow"
           >
             {displayLatest.map((item, index) => (
@@ -229,7 +198,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                 priority={index === 0}
               />
             ))}
-          </motion.div>
+          </div>
         </div>
 
         {/* Right Column: Popular News (Col span 4) */}
@@ -243,7 +212,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
             <div className="flex-grow flex flex-col">
               <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-md flex flex-col h-full">
                 <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4 flex-shrink-0">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
                     {popularBadgeText}
                   </span>
                   <h3 className="text-xl font-black mt-1 text-slate-900 dark:text-white">
@@ -253,12 +222,8 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
                 <div className="flex-1 flex flex-col justify-between gap-2">
                   {displayPopular.map((item, index) => (
-                    <motion.div
+                    <div
                       key={item.slug}
-                      initial={{ opacity: 0, x: 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.05, duration: 0.4 }}
                       className="flex-grow flex flex-col justify-center"
                     >
                       <Link
@@ -278,10 +243,10 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
                         {/* Info Content */}
                         <div className="flex-1 min-w-0">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                          <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                             {item.category}
                           </span>
-                          <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
                             {item.title}
                           </h4>
                           <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
@@ -296,7 +261,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                           </div>
                         </div>
                       </Link>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -310,11 +275,8 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
 function NewsCard({ item, index, t, className = "", isSlider = false, priority = false }) {
   return (
-    <motion.article
-      variants={cardVariants}
-      whileHover={{ y: -8, scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 120, damping: 16 }}
-      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}
+    <article
+      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-2 hover:scale-[1.01] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}
     >
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
@@ -357,7 +319,7 @@ function NewsCard({ item, index, t, className = "", isSlider = false, priority =
           </p>
 
           <div className="mt-auto pt-6 flex items-center justify-between border-t border-slate-50 dark:border-white/5">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 transition-colors group-hover:text-emerald-600 dark:text-slate-400 dark:group-hover:text-emerald-400">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 transition-colors group-hover:text-emerald-700 dark:text-slate-400 dark:group-hover:text-emerald-400">
               {t("actions.readMore")}
             </span>
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white dark:bg-slate-800">
@@ -366,7 +328,7 @@ function NewsCard({ item, index, t, className = "", isSlider = false, priority =
           </div>
         </div>
       </Link>
-    </motion.article>
+    </article>
   );
 }
 

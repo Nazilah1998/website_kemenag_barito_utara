@@ -73,7 +73,7 @@ export default function LaporanDocumentsClient({ documents = [], categorySlug })
                                             {bidang}
                                         </h3>
                                         <div className="mt-1 flex items-center gap-1.5">
-                                            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                            <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
                                                 UNIT
                                             </span>
                                             <span className="text-[9px] font-semibold text-slate-400">
@@ -82,7 +82,7 @@ export default function LaporanDocumentsClient({ documents = [], categorySlug })
                                         </div>
                                     </div>
                                 </div>
-                                <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-transform duration-300 dark:bg-slate-800/50 ${isExpanded ? "rotate-180 text-emerald-600 dark:text-emerald-400" : ""}`}>
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-transform duration-300 dark:bg-slate-800/50 ${isExpanded ? "rotate-180 text-emerald-700 dark:text-emerald-400" : ""}`}>
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                     </svg>

@@ -28,7 +28,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 
           <div className="flex items-center gap-3 mb-4">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-400">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">
               Administrative Portal
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4 text-center">
-            <Link href="/beranda" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+            <Link href="/beranda" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
               <ArrowLeft className="h-3.5 w-3.5" strokeWidth={3} />
               Kembali ke Beranda
             </Link>
@@ -106,7 +106,7 @@ function PasswordField({ value, onChange, show, onToggleShow, onKeyState, capsLo
     <div className="group">
       <div className="flex items-center justify-between mb-2">
         <label htmlFor="admin-password" className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Security Password</label>
-        <Link href="/admin/forgot-password" className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Lupa?</Link>
+        <Link href="/admin/forgot-password" className="text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Lupa?</Link>
       </div>
       <div className="relative">
         <input id="admin-password" type={show ? "text" : "password"} value={value} onChange={(e) => onChange(e.target.value)} onKeyUp={onKeyState} onKeyDown={onKeyState} className={inputClassName(true)} placeholder="••••••••" autoComplete="current-password" aria-invalid={Boolean(error)} required />

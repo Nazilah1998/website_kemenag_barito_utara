@@ -4,8 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { getApaKataMereka } from "@/data/apaKataMereka";
 import { useLanguage } from "@/context/LanguageContext";
-import { motion, AnimatePresence } from "framer-motion";
-
 function ChevronLeftIcon() {
     return (
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
@@ -21,28 +19,6 @@ function ChevronRightIcon() {
         </svg>
     );
 }
-
-const containerVariants = {
-    hidden: {},
-    visible: {
-        transition: {
-            staggerChildren: 0.15
-        }
-    }
-};
-
-const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            type: "spring",
-            stiffness: 90,
-            damping: 18
-        }
-    }
-};
 
 export default function ApaKataMerekaSection({ testimonials }) {
     const { t, locale } = useLanguage();
@@ -99,14 +75,8 @@ export default function ApaKataMerekaSection({ testimonials }) {
                 {/* MOBILE SLIDER */}
                 <div className="mt-8 block md:hidden">
                     <div className="relative">
-                        <AnimatePresence mode="wait">
-                            <motion.article
-                                key={activeIndex}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.3, ease: "easeInOut" }}
-                                className="theme-news-card relative flex flex-col overflow-hidden rounded-[2.5rem] border bg-white p-6 dark:bg-slate-900"
+                        <article
+                                className="theme-news-card relative flex flex-col overflow-hidden rounded-[2.5rem] border bg-white p-6 dark:bg-slate-900 transition-all duration-300"
                             >
                                 <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/10 blur-3xl" />
 
@@ -133,13 +103,12 @@ export default function ApaKataMerekaSection({ testimonials }) {
                                         <h3 className="mt-3 text-sm font-black text-slate-900 dark:text-white tracking-tight">
                                             {data[activeIndex].name}
                                         </h3>
-                                        <p className="mt-1 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                                        <p className="mt-1 text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
                                             {data[activeIndex].position}
                                         </p>
                                     </div>
                                 </div>
-                            </motion.article>
-                        </AnimatePresence>
+                            </article>
 
                         {/* Navigation Buttons Mobile */}
                         <div className="mt-6 flex items-center justify-center gap-4">
@@ -180,22 +149,15 @@ export default function ApaKataMerekaSection({ testimonials }) {
                 </div>
 
                 {/* DESKTOP PREMIUM GRID */}
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
+                <div
                     className="mt-12 hidden md:grid md:grid-cols-3 gap-6"
                 >
                     {data.map((person, index) => {
                         const isCenter = index === 1;
                         return (
-                            <motion.article
+                            <article
                                 key={`${person.name}-${index}`}
-                                variants={cardVariants}
-                                whileHover={{ y: isCenter ? -10 : -6, scale: 1.01 }}
-                                transition={{ type: "spring", stiffness: 150, damping: 18 }}
-                                className={`group relative flex flex-col overflow-hidden rounded-3xl border p-6 lg:p-8 ${isCenter
+                                className={`group relative flex flex-col overflow-hidden rounded-3xl border p-6 lg:p-8 transition-all duration-300 hover:-translate-y-2 hover:scale-[1.01] ${isCenter
                                         ? "bg-white border-emerald-200 shadow-[0_25px_50px_rgba(16,185,129,0.1)] dark:bg-slate-900 dark:border-emerald-500/30 z-10"
                                         : "bg-white/60 border-slate-100 shadow-lg dark:bg-slate-900/40 dark:border-slate-800"
                                     }`}
@@ -242,17 +204,17 @@ export default function ApaKataMerekaSection({ testimonials }) {
                                             {person.name}
                                         </h3>
                                         <div className="mt-1 flex flex-col items-center gap-0.5">
-                                            <p className="text-center text-[8px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+                                            <p className="text-center text-[8px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
                                                 {person.position}
                                             </p>
                                             <div className="h-0.5 w-6 bg-emerald-500/10 rounded-full group-hover:w-10 transition-all duration-500" />
                                         </div>
                                     </div>
                                 </div>
-                            </motion.article>
+                            </article>
                         );
                     })}
-                </motion.div>
+                </div>
             </div>
         </section>
     );

@@ -60,7 +60,7 @@ export function PasswordInput({ label, value, onChange, show, onToggle, placehol
             <span className={`text-[10px] font-black uppercase tracking-widest ${
               strength.level === 1 ? 'text-rose-600' :
               strength.level === 2 ? 'text-amber-600' :
-              strength.level === 3 ? 'text-emerald-600' :
+              strength.level === 3 ? 'text-emerald-700' :
               'text-emerald-700'
             }`}>{strength.label}</span>
           </div>

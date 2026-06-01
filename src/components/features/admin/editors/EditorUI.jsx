@@ -66,7 +66,7 @@ export function IconButton({
   loading = false,
 }) {
   const tones = {
-    emerald: "bg-emerald-50 text-emerald-600 border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 dark:hover:bg-emerald-600 dark:hover:text-white",
+    emerald: "bg-emerald-50 text-emerald-700 border-2 border-emerald-100 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 dark:hover:bg-emerald-600 dark:hover:text-white",
     rose: "bg-rose-50 text-rose-600 border-2 border-rose-100 hover:bg-rose-600 hover:text-white dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/50 dark:hover:bg-rose-600 dark:hover:text-white",
     slate: "bg-white text-slate-900 border-2 border-slate-100 hover:border-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:border-white dark:hover:text-white",
     blue: "bg-blue-50 text-blue-600 border-2 border-blue-100 hover:bg-blue-600 hover:text-white dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50 dark:hover:bg-blue-600 dark:hover:text-white",

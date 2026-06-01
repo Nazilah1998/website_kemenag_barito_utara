@@ -17,7 +17,7 @@ export function LoginCaptcha({
         <button
           type="button"
           onClick={onRefresh}
-          className="text-[11px] font-bold text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400"
+          className="text-[11px] font-bold text-emerald-700 transition-colors hover:text-emerald-700 dark:text-emerald-400"
         >
           Ganti Kode
         </button>

@@ -9,7 +9,7 @@ export default function MessageCard({ msg, idx, onOpen, onDelete }) {
                     <h3 className="text-lg font-black uppercase text-slate-900 dark:text-white leading-tight">{msg.nama}</h3>
                     <p className="mt-1 text-xs font-bold text-slate-400">{msg.whatsapp}</p>
                 </div>
-                <div className={`rounded-xl px-4 py-2 border-2 ${msg.status.toLowerCase() === "baru" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"}`}>
+                <div className={`rounded-xl px-4 py-2 border-2 ${msg.status.toLowerCase() === "baru" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-700"}`}>
                     <span className="text-[9px] font-black uppercase tracking-widest">{msg.status}</span>
                 </div>
             </div>

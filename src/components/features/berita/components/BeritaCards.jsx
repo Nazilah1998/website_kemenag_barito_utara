@@ -74,7 +74,7 @@ export function FeaturedNewsCard({ item }) {
         </Link>
 
         <div className="flex flex-col justify-center p-6 md:p-12 xl:p-16">
-          <div className="flex items-center gap-3 text-[9px] lg:text-[11px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+          <div className="flex items-center gap-3 text-[9px] lg:text-[11px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
             <span className="h-1 w-8 lg:w-10 rounded-full bg-emerald-500/20" />
             {displayDate}
           </div>
@@ -162,7 +162,7 @@ export function NewsCard({ item }) {
 
           <div className="mt-auto pt-3 lg:pt-5 flex items-center justify-between border-t border-slate-50 dark:border-white/5">
             <div className="flex flex-col gap-1 lg:gap-2">
-              <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition-colors group-hover:text-emerald-600 dark:text-slate-500 dark:group-hover:text-emerald-400">
+              <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition-colors group-hover:text-emerald-700 dark:text-slate-500 dark:group-hover:text-emerald-400">
                 {t("actions.readMore")}
               </span>
               <BeritaViewsBadge views={item.views} isSmall />

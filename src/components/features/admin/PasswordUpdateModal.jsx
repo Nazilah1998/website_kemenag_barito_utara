@@ -71,7 +71,7 @@ export default function PasswordUpdateModal({ open, onClose }) {
 
       <div className="relative w-full max-w-md animate-in zoom-in slide-in-from-bottom-8 duration-300 overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col items-center text-center">
-          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] border-4 border-white bg-emerald-50 text-emerald-600 shadow-xl shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-800 dark:text-emerald-500 dark:shadow-none">
+          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] border-4 border-white bg-emerald-50 text-emerald-700 shadow-xl shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-800 dark:text-emerald-500 dark:shadow-none">
             <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>

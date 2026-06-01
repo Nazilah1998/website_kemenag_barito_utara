@@ -58,7 +58,7 @@ export function EditorCard({
               <Badge tone="violet">{role.toUpperCase()}</Badge>
             </div>
 
-            <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight uppercase group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-tight uppercase group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
               {editor.full_name}
             </h3>
             <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-400 break-all">

@@ -35,7 +35,7 @@ export default function DocumentItem({
                 <div>
                     {/* Top row: Icon & Status badges */}
                     <div className="flex items-center justify-between gap-3 mb-3.5">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform duration-500 group-hover:scale-105 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 transition-transform duration-500 group-hover:scale-105 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <FileIcon />
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -58,7 +58,7 @@ export default function DocumentItem({
                             <span className="text-emerald-500/80">Akses Publik</span>
                         </div>
                         
-                        <h3 className="mt-1.5 font-bold leading-snug text-slate-900 dark:text-white transition-all text-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 line-clamp-2" title={doc.title}>
+                        <h3 className="mt-1.5 font-bold leading-snug text-slate-900 dark:text-white transition-all text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 line-clamp-2" title={doc.title}>
                             {doc.title}
                         </h3>
                     </div>

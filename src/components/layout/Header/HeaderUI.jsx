@@ -30,9 +30,9 @@ export function MobileMenuToggle({ isOpen, onToggle }) {
     >
       <span>Menu</span>
       {isOpen ? (
-        <CloseIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <CloseIcon className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
       ) : (
-        <HamburgerIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <HamburgerIcon className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
       )}
     </button>
   );

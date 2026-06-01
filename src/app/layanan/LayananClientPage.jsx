@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { 
   Building2, 
   BookOpen, 
@@ -24,7 +23,7 @@ import { serviceFlow, serviceRequirements, serviceFaqs } from "@/data/services";
 const getCategoryIcon = (title = "") => {
   const t = title.toLowerCase();
   if (t.includes("kua") || t.includes("keagamaan") || t.includes("nikah")) {
-    return <Building2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />;
+    return <Building2 className="h-6 w-6 text-emerald-700 dark:text-emerald-400" />;
   }
   if (t.includes("haji") || t.includes("umrah")) {
     return <BookOpen className="h-6 w-6 text-teal-600 dark:text-teal-400" />;
@@ -117,10 +116,8 @@ export default function LayananClientPage({ initialServices }) {
                   }`}
                 >
                   {isActive && (
-                    <motion.div
-                      layoutId="activeTabGlow"
+                    <div
                       className="absolute inset-0 bg-emerald-600 rounded-xl -z-10"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
                   {tab.icon}
@@ -133,15 +130,10 @@ export default function LayananClientPage({ initialServices }) {
 
         {/* Dynamic Tab Contents */}
         <div className="min-h-[500px]">
-          <AnimatePresence mode="wait">
-            {activeTab === "catalog" && (
-              <motion.div
+          {activeTab === "catalog" && (
+              <div
                 key="catalog"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
+                className="space-y-6 animate-fade-in-up"
               >
                 <div className="max-w-3xl">
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Daftar Layanan Publik</h3>
@@ -173,7 +165,7 @@ export default function LayananClientPage({ initialServices }) {
                           </div>
 
                           <div>
-                            <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-200">
+                            <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors duration-200">
                               {item.title}
                             </h4>
                             <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-3">
@@ -195,7 +187,7 @@ export default function LayananClientPage({ initialServices }) {
                           )}
                         </div>
 
-                        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/40 relative z-10 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400 group-hover:underline">
+                        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/40 relative z-10 flex items-center justify-between text-xs font-semibold text-emerald-700 dark:text-emerald-400 group-hover:underline">
                           <span>Seksi & Persyaratan</span>
                           <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </div>
@@ -203,17 +195,13 @@ export default function LayananClientPage({ initialServices }) {
                     );
                   })}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {activeTab === "flow" && (
-              <motion.div
+              <div
                 key="flow"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
+                className="space-y-8 animate-fade-in-up"
               >
                 <div className="max-w-3xl">
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Alur Pelayanan Publik</h3>
@@ -234,7 +222,7 @@ export default function LayananClientPage({ initialServices }) {
                           <span className="text-4xl font-extrabold text-slate-200 dark:text-slate-800 tracking-tighter">
                             {flow.step}
                           </span>
-                          <div className="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                          <div className="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-emerald-400">
                             Tahap
                           </div>
                         </div>
@@ -255,17 +243,13 @@ export default function LayananClientPage({ initialServices }) {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {activeTab === "requirements" && (
-              <motion.div
+              <div
                 key="requirements"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-8"
+                className="space-y-8 animate-fade-in-up"
               >
                 <div className="max-w-3xl">
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Persyaratan Umum</h3>
@@ -281,7 +265,7 @@ export default function LayananClientPage({ initialServices }) {
                       className="p-6 bg-white border border-slate-200 rounded-3xl shadow-sm dark:bg-[#0B1120] dark:border-slate-800/80 space-y-4"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/60 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/60 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">
                           <ShieldCheck className="h-5 w-5" />
                         </div>
                         <h4 className="font-bold text-base text-slate-900 dark:text-white tracking-tight">{req.title}</h4>
@@ -298,17 +282,13 @@ export default function LayananClientPage({ initialServices }) {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {activeTab === "faq" && (
-              <motion.div
+              <div
                 key="faq"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
+                className="space-y-6 animate-fade-in-up"
               >
                 <div className="max-w-3xl">
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Tanya Jawab Pelayanan</h3>
@@ -333,28 +313,21 @@ export default function LayananClientPage({ initialServices }) {
                           <ChevronDown className={`h-5 w-5 text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                         </button>
 
-                        <AnimatePresence initial={false}>
-                          {isOpen && (
-                            <motion.div
-                              initial={{ height: 0 }}
-                              animate={{ height: "auto" }}
-                              exit={{ height: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="p-5 pt-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-50 dark:border-slate-900">
-                                {faq.answer}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        {isOpen && (
+                          <div
+                            className="overflow-hidden transition-all duration-300"
+                          >
+                            <div className="p-5 pt-0 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-50 dark:border-slate-900">
+                              {faq.answer}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
       </div>
     </div>

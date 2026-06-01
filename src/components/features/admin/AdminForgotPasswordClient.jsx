@@ -25,7 +25,7 @@ export default function AdminForgotPasswordClient() {
 
           <div className="flex items-center gap-3 mb-4">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-400">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">
               Security Recovery
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function AdminForgotPasswordClient() {
           {f.step === 2 && (
             <form onSubmit={f.handleResetPassword} className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               <div className="space-y-4">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 text-center">Tahap 2: Perbaharui Password</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 text-center">Tahap 2: Perbaharui Password</p>
 
                 <div className="group">
                   <label className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Password Baru</label>
@@ -175,7 +175,7 @@ export default function AdminForgotPasswordClient() {
           {(f.step !== 3 && f.step !== 4) && (
             <div className="mt-8 flex flex-col items-center gap-4 text-center">
               <div className="h-px w-10 bg-slate-100 dark:bg-white/5" />
-              <Link href="/admin/login" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+              <Link href="/admin/login" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
                 Batal & Kembali
               </Link>
             </div>

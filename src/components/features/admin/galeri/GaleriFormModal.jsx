@@ -61,7 +61,7 @@ export function GaleriFormModal({
 
               <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-950/20">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 rounded-full bg-emerald-100 p-1 text-emerald-600 dark:bg-emerald-900/40">
+                  <div className="mt-0.5 rounded-full bg-emerald-100 p-1 text-emerald-700 dark:bg-emerald-900/40">
                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3.5">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>

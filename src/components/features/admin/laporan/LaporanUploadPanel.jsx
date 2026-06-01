@@ -115,7 +115,7 @@ export default function LaporanUploadPanel({
                                                         setDocForm((prev) => ({ ...prev, description: bidang }));
                                                         setIsDropdownOpen(false);
                                                     }}
-                                                    className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50 ${docForm.description === bidang || (!docForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20" : "text-slate-700 dark:text-slate-300"}`}
+                                                    className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50 ${docForm.description === bidang || (!docForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20" : "text-slate-700 dark:text-slate-300"}`}
                                                 >
                                                     {bidang}
                                                 </button>
@@ -170,7 +170,7 @@ export default function LaporanUploadPanel({
                             <div className={`flex flex-col items-center justify-center min-h-[120px] w-full rounded-2xl border-2 border-dashed px-5 py-6 transition-all ${isDragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20" : "border-slate-200 bg-slate-50/50 group-hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/30 dark:group-hover:border-white"}`}>
                                 {selectedFile || docForm.file_name ? (
                                     <>
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mb-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 mb-3">
                                             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
                                                 <path d="M5 13l4 4L19 7" />
                                             </svg>
@@ -182,12 +182,12 @@ export default function LaporanUploadPanel({
                                     </>
                                 ) : (
                                     <>
-                                        <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors mb-3 ${isDragging ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black"}`}>
+                                        <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors mb-3 ${isDragging ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black"}`}>
                                             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                 <path d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
                                             </svg>
                                         </div>
-                                        <span className={`text-[11px] font-black uppercase tracking-widest text-center ${isDragging ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"}`}>
+                                        <span className={`text-[11px] font-black uppercase tracking-widest text-center ${isDragging ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"}`}>
                                             {isDragging ? "Lepaskan File PDF di sini" : "Pilih / Drag File PDF"}
                                         </span>
                                     </>

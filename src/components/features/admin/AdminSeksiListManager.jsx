@@ -240,7 +240,7 @@ export default function AdminSeksiListManager() {
                             {item.judul}
                           </p>
                           <p className="text-[10px] font-bold text-slate-400 mt-0.5">
-                            Slug: <span className="font-mono text-emerald-600 dark:text-emerald-400">{item.slug}</span>
+                            Slug: <span className="font-mono text-emerald-700 dark:text-emerald-400">{item.slug}</span>
                           </p>
                         </div>
                       </div>

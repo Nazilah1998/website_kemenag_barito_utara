@@ -4,8 +4,6 @@ import { MobileNavHeader } from "./mobile/MobileNavHeader";
 import { MobileNavSearch } from "./mobile/MobileNavSearch";
 import { MobileNavLinks } from "./mobile/MobileNavLinks";
 import { MobileNavUtilities } from "./mobile/MobileNavUtilities";
-import { motion, AnimatePresence } from "framer-motion";
-
 export function MobileNav({
   isMobileMenuOpen,
   closeMobileMenu,
@@ -30,38 +28,32 @@ export function MobileNav({
   toggleMobileDropdown,
   adminState,
 }) {
-  const [mounted, setMounted] = useState(false);
+  const [portalMounted, setPortalMounted] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isMobileMenuOpen) {
+      const id = setTimeout(() => setPortalMounted(true), 0);
+      return () => clearTimeout(id);
+    }
+  }, [isMobileMenuOpen]);
 
-  if (!mounted) return null;
+  if (!portalMounted) return null;
 
   return createPortal(
-    <AnimatePresence>
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[9999] lg:hidden">
-          {/* Backdrop: Animasi Fade-in/out */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            onClick={closeMobileMenu}
-          />
+    <div
+      className={`fixed inset-0 z-[9999] lg:hidden transition-all duration-300 ${isMobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+    >
+      {/* Backdrop: Animasi Fade-in/out */}
+      <div
+        className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+        onClick={closeMobileMenu}
+      />
 
-          {/* Drawer Container: Animasi Slide-in/out */}
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="absolute top-0 right-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col bg-white dark:bg-slate-950 shadow-2xl"
-            style={{ isolation: "isolate" }}
-          >
+      {/* Drawer Container: Animasi Slide-in/out */}
+      <div
+        className={`absolute top-0 right-0 bottom-0 w-[300px] max-w-[85vw] flex flex-col bg-white dark:bg-slate-950 shadow-2xl transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ isolation: "isolate" }}
+      >
             <MobileNavHeader onClose={closeMobileMenu} />
 
             <div className="flex-1 overflow-y-auto no-scrollbar py-2">
@@ -97,10 +89,8 @@ export function MobileNav({
                 adminState={adminState}
               />
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
+          </div>
+        </div>,
     document.body
   );
 }

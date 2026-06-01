@@ -7,7 +7,6 @@ import { useHomepageSlides } from "./hooks/useHomepageSlides";
 import SectionHeader from "./components/SectionHeader";
 import CategorySlider from "./components/CategorySlider";
 import EmptySliderState from "./components/EmptySliderState";
-import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -70,11 +69,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                         }`}
                                 >
                                     {isActive && (
-                                        <motion.div
-                                            layoutId="activeTabIndicator"
-                                            className="absolute inset-0 -z-10 rounded-full bg-emerald-600 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)]"
-                                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                                        />
+                                        <div className="absolute inset-0 -z-10 rounded-full bg-emerald-600 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)]" />
                                     )}
 
                                     <div className={`transition-transform duration-300 ${isActive ? "scale-105" : "scale-90"}`}>
@@ -122,13 +117,11 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                 title={t("home.katolikSection.title")}
                                 color="text-purple-800 dark:text-purple-200"
                             />
-                            <motion.div
-                                whileHover={{ y: -6 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(168,85,247,0.15)] transition-shadow group-hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.3)]"
+                            <div
+                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(168,85,247,0.15)] transition-all duration-300 hover:-translate-y-1.5 group-hover:shadow-[0_20px_50px_-10px_rgba(168,85,247,0.3)]"
                             >
                                 <CategorySlider slides={katolikSlides} fallbackTitle="Doa & Renungan" />
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
 
@@ -141,13 +134,11 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                 title={t("home.christianSection.title")}
                                 color="text-blue-800 dark:text-blue-200"
                             />
-                            <motion.div
-                                whileHover={{ y: -6 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(59,130,246,0.15)] transition-shadow group-hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.3)]"
+                            <div
+                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(59,130,246,0.15)] transition-all duration-300 hover:-translate-y-1.5 group-hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.3)]"
                             >
                                 <CategorySlider slides={kristenSlides} fallbackTitle="Renungan Iman" />
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
 
@@ -164,25 +155,18 @@ export default function HomepageSlidesSection({ slides = [] }) {
                             {sliderSlides.length > 0 ? (
                                 <div className="relative">
                                     <div className="relative overflow-hidden rounded-2xl bg-white shadow-2xl shadow-emerald-500/20 dark:bg-slate-900/50 dark:shadow-none">
-                                        <AnimatePresence mode="wait">
-                                            <motion.div
-                                                key={safeActiveIndex}
-                                                initial={{ opacity: 0, scale: 0.98 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.98 }}
-                                                transition={{ duration: 0.35, ease: "easeInOut" }}
-                                                className="relative aspect-[3/4] sm:aspect-auto sm:h-[420px] lg:h-[600px] w-full"
-                                            >
-                                                <Image
-                                                    src={resolveImage(current.image_url)}
-                                                    alt={current.title || "Slide beranda"}
-                                                    fill
-                                                    priority={safeActiveIndex === 0}
-                                                    sizes="(max-width: 1024px) 100vw, 40vw"
-                                                    className="object-cover lg:object-contain"
-                                                />
-                                            </motion.div>
-                                        </AnimatePresence>
+                                        <div
+                                            className="relative aspect-[3/4] sm:aspect-auto sm:h-[420px] lg:h-[600px] w-full"
+                                        >
+                                            <Image
+                                                src={resolveImage(current.image_url)}
+                                                alt={current.title || "Slide beranda"}
+                                                fill
+                                                priority={safeActiveIndex === 0}
+                                                sizes="(max-width: 1024px) 100vw, 40vw"
+                                                className="object-cover lg:object-contain"
+                                            />
+                                        </div>
 
                                         {sliderSlides.length > 1 && (
                                             <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between">
@@ -191,48 +175,37 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                                 </div>
 
                                                 <div className="flex items-center gap-2">
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
+                                                    <button
                                                         type="button"
                                                         onClick={prevSlide}
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-black/35 text-white backdrop-blur transition hover:bg-black/55"
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-black/35 text-white backdrop-blur transition-all duration-200 hover:scale-105 hover:bg-black/55 active:scale-95"
                                                         aria-label="Slide sebelumnya"
                                                     >
                                                         <ChevronLeftIcon />
-                                                    </motion.button>
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
+                                                    </button>
+                                                    <button
                                                         type="button"
                                                         onClick={handleNextSlide}
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-black/35 text-white backdrop-blur transition hover:bg-black/55"
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-black/35 text-white backdrop-blur transition-all duration-200 hover:scale-105 hover:bg-black/55 active:scale-95"
                                                         aria-label="Slide berikutnya"
                                                     >
                                                         <ChevronRightIcon />
-                                                    </motion.button>
+                                                    </button>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
-                                    <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={safeActiveIndex}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            transition={{ duration: 0.25 }}
-                                            className="mt-6 text-center"
-                                        >
-                                            <h3 className="text-lg font-black leading-tight text-slate-900 dark:text-slate-100 sm:text-xl">
-                                                {current.title}
-                                            </h3>
-                                            <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600 dark:text-slate-300 sm:text-sm sm:leading-6">
-                                                {current.caption || "Informasi terbaru dari Kemenag Barito Utara."}
-                                            </p>
-                                        </motion.div>
-                                    </AnimatePresence>
+                                    <div
+                                        className="mt-6 text-center"
+                                    >
+                                        <h3 className="text-lg font-black leading-tight text-slate-900 dark:text-slate-100 sm:text-xl">
+                                            {current.title}
+                                        </h3>
+                                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600 dark:text-slate-300 sm:text-sm sm:leading-6">
+                                            {current.caption || "Informasi terbaru dari Kemenag Barito Utara."}
+                                        </p>
+                                    </div>
 
                                     {sliderSlides.length > 1 && (
                                         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -267,13 +240,11 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                 color="text-amber-800 dark:text-amber-200"
                                 align="right"
                             />
-                            <motion.div
-                                whileHover={{ y: -6 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(245,158,11,0.15)] transition-shadow group-hover:shadow-[0_20px_50px_-10px_rgba(245,158,11,0.3)]"
+                            <div
+                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(245,158,11,0.15)] transition-all duration-300 hover:-translate-y-1.5 group-hover:shadow-[0_20px_50px_-10px_rgba(245,158,11,0.3)]"
                             >
                                 <CategorySlider slides={islamSlides} fallbackTitle="Mutiara Hikmah" />
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
 
@@ -287,13 +258,11 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                 color="text-rose-800 dark:text-rose-200"
                                 align="right"
                             />
-                            <motion.div
-                                whileHover={{ y: -6 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(244,63,94,0.15)] transition-shadow group-hover:shadow-[0_20px_50px_-10px_rgba(244,63,94,0.3)]"
+                            <div
+                                className="rounded-2xl shadow-[0_20px_50px_-20px_rgba(244,63,94,0.15)] transition-all duration-300 hover:-translate-y-1.5 group-hover:shadow-[0_20px_50px_-10px_rgba(244,63,94,0.3)]"
                             >
                                 <CategorySlider slides={hinduSlides} fallbackTitle="Dharma Wacana" />
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
                 </div>

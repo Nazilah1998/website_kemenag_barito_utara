@@ -29,7 +29,7 @@ export default function SeksiDetailUI({ data, breadcrumb, menuTitle }) {
             <div className="absolute bottom-0 right-0 h-5 w-5 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"></div>
           </div>
           <div className="text-center sm:text-left flex-1 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Pejabat Struktural</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Pejabat Struktural</p>
             <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">{data.nama_kepala}</h2>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">NIP. {data.nip_kepala}</p>
           </div>
@@ -56,7 +56,7 @@ export default function SeksiDetailUI({ data, breadcrumb, menuTitle }) {
                       )}
                     </div>
                     <h4 className="font-semibold text-sm text-slate-900 dark:text-white leading-tight">{pegawai.nama}</h4>
-                    <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1 uppercase tracking-wider">{pegawai.jabatan}</p>
+                    <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 mt-1 uppercase tracking-wider">{pegawai.jabatan}</p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">NIP. {pegawai.nip}</p>
                   </div>
                 ))}

@@ -4,8 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { motion } from "framer-motion";
-
 const getExternalApps = (locale) => [
   {
     title: "PUSAKA",
@@ -71,30 +69,6 @@ const getExternalApps = (locale) => [
     icon: "/assets/apps/srikandi.png",
   },
 ];
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.07,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 90,
-      damping: 16,
-    },
-  },
-};
-
-const MotionLink = motion.create(Link);
 
 export default function ExternalAppsSection() {
   const { locale } = useLanguage();
@@ -224,24 +198,16 @@ export default function ExternalAppsSection() {
       </div>
 
       {/* DESKTOP PREMIUM GRID (7 KOLOM - 1 BARIS) */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
+      <div
         className="hidden lg:grid mt-12 gap-5 xl:grid-cols-7"
       >
         {apps.map((app) => (
-          <MotionLink
+          <Link
             key={app.title}
             href={app.href}
             target="_blank"
             rel="noopener noreferrer"
-            variants={cardVariants}
-            whileHover={{ y: -10, scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 150, damping: 15 }}
-            className="group relative flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center transition-all duration-500 hover:border-emerald-300 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)] dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:hover:border-emerald-500/50"
+            className="group relative flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center transition-all duration-500 hover:-translate-y-1 hover:scale-105 hover:border-emerald-300 hover:shadow-[0_20px_50px_rgba(16,185,129,0.12)] active:scale-95 dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-xl dark:hover:border-emerald-500/50"
           >
             {/* Background Glow Effect */}
             <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-b from-emerald-50/0 to-emerald-50/0 opacity-0 transition-opacity duration-500 group-hover:from-emerald-50/50 group-hover:to-transparent dark:group-hover:from-emerald-900/10" />
@@ -291,9 +257,9 @@ export default function ExternalAppsSection() {
                 />
               </svg>
             </div>
-          </MotionLink>
+          </Link>
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 }

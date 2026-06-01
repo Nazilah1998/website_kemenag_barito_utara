@@ -22,17 +22,16 @@ export function HeaderSearchForm({
   const { t } = useLanguage();
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(!collapsible);
-  const [prevPathname, setPrevPathname] = useState(pathname);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
 
-  // Adjust state during render phase if route changes (avoiding useEffect warning)
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
+  // Reset search when route changes
+  useEffect(() => {
     if (collapsible) {
-      setIsExpanded(false);
+      const id = setTimeout(() => setIsExpanded(false), 0);
+      return () => clearTimeout(id);
     }
-  }
+  }, [pathname, collapsible]);
 
   // Focus input when expanded
   useEffect(() => {
@@ -103,7 +102,7 @@ export function HeaderSearchForm({
         }
       >
         <form onSubmit={onSubmit} className="relative group flex-1">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-600 dark:text-slate-500 dark:group-focus-within:text-emerald-400">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-700 dark:text-slate-500 dark:group-focus-within:text-emerald-400">
             <SearchIcon className="h-4.5 w-4.5" />
           </div>
 
@@ -167,7 +166,7 @@ export function HeaderSearchForm({
                     }`}
                   >
                     <div
-                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === activeIndex ? "bg-white/20" : "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"}`}
+                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === activeIndex ? "bg-white/20" : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"}`}
                     >
                       <SectionIcon section={item.section} className="h-4 w-4" />
                     </div>
@@ -220,7 +219,7 @@ export function HeaderSearchForm({
             transition={{ duration: 0.12 }}
             type="button"
             onClick={() => setIsExpanded(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-emerald-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-emerald-400"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-emerald-400"
             aria-label="Open Search"
           >
             <SearchIcon className="h-5 w-5" />
@@ -316,7 +315,7 @@ export function HeaderSearchForm({
                         }`}
                       >
                         <div
-                          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === activeIndex ? "bg-white/20" : "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"}`}
+className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${index === activeIndex ? "bg-white/20" : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"}`}
                         >
                           <SectionIcon section={item.section} className="h-4 w-4" />
                         </div>

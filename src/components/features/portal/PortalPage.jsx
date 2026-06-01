@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteInfo } from "@/data/site";
 import { DesktopClockSection, MobileClockSection } from "./ClockSection";
+import HeroBackground from "./HeroBackground";
 
 const PORTAL_LINKS = [
   {
@@ -213,19 +214,7 @@ export default function PortalPage() {
 
   return (
     <div className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-900 selection:bg-emerald-500/30">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/assets/images/kantor-kemenag.jpg"
-          alt="Kantor Kemenag Barito Utara"
-          fill
-          sizes="100vw"
-          className="object-cover scale-105 blur-[2px] opacity-40 grayscale-[20%] transition-transform duration-1000"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/85 to-emerald-950/75" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/20 via-transparent to-blue-950/20 animate-gradient-shift" />
-      </div>
+      <HeroBackground />
 
       {/* DESKTOP VERSION */}
       <div className="animate-fade-in hidden md:flex relative z-10 w-full px-6 lg:px-10 xl:px-16 pt-8 flex-col h-full overflow-hidden"

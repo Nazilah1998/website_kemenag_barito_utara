@@ -101,7 +101,7 @@ export default function DatePicker({ value, onChange, label, buttonClassName }) 
                 day: "flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
                 day_button: "h-full w-full rounded-lg cursor-pointer",
                 selected: "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100",
-                today: "font-extrabold text-emerald-600 dark:text-emerald-400",
+                today: "font-extrabold text-emerald-700 dark:text-emerald-400",
                 outside: "text-slate-300 dark:text-slate-600",
                 disabled: "text-slate-200 dark:text-slate-700",
               }}

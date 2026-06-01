@@ -81,7 +81,7 @@ export default function LaporanDocumentPanel({
         >
             <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between border-b-2 border-slate-900 pb-6 dark:border-white">
                 <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-1.5">Data Terverifikasi</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-700 mb-1.5">Data Terverifikasi</p>
                     <h2
                         id="laporan-dokumen-title"
                         className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase"
@@ -157,12 +157,12 @@ export default function LaporanDocumentPanel({
                                         </div>
 
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="text-base font-black tracking-tight text-slate-900 dark:text-white leading-tight uppercase group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                                            <h3 className="text-base font-black tracking-tight text-slate-900 dark:text-white leading-tight uppercase group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
                                                 {doc.title}
                                             </h3>
 
                                             {activeCategory?.slug === "sop" ? (
-                                                <p className="mt-1.5 text-[11px] font-black leading-snug text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                                <p className="mt-1.5 text-[11px] font-black leading-snug text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
                                                     Bidang: {doc.description || "Layanan Sub Bagian Tata Usaha"}
                                                 </p>
                                             ) : null}
@@ -284,7 +284,7 @@ export default function LaporanDocumentPanel({
                                                                                 setEditForm((p) => ({ ...p, description: bidang }));
                                                                                 setIsEditDropdownOpen(false);
                                                                             }}
-                                                                            className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-white/10 dark:hover:bg-black/10 ${editForm.description === bidang || (!editForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-400 dark:text-emerald-600 bg-emerald-500/10 dark:bg-emerald-500/10" : "text-white dark:text-black"}`}
+                                                                            className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-white/10 dark:hover:bg-black/10 ${editForm.description === bidang || (!editForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-400 dark:text-emerald-700 bg-emerald-500/10 dark:bg-emerald-500/10" : "text-white dark:text-black"}`}
                                                                         >
                                                                             {bidang}
                                                                         </button>

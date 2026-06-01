@@ -118,7 +118,7 @@ export default function PpidPage() {
                   key={step.num}
                   className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <span className="text-xs font-bold tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+                  <span className="text-xs font-bold tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
                     LANGKAH {step.num}
                   </span>
                   <h3 className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">

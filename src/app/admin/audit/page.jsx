@@ -126,7 +126,7 @@ export default function AuditLogPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight flex items-center gap-3 text-slate-900 dark:text-white">
-            <History className="h-7 w-7 text-emerald-600" />
+            <History className="h-7 w-7 text-emerald-700" />
             Audit Log Aktivitas
           </h1>
           <p className="mt-1 text-sm text-slate-500">

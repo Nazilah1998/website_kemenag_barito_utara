@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 
 export function GalleryLightbox({
   item,
@@ -12,21 +11,13 @@ export function GalleryLightbox({
   if (!item) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md" 
+    <div 
+      className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md animate-[fadeIn_0.25s_ease-in-out]" 
       onClick={onClose}
     >
       <div className="relative flex min-h-screen items-center justify-center p-3 sm:p-6">
-        <motion.div 
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 100, damping: 18 }}
-          className="relative flex h-[94vh] w-full max-w-7xl items-center justify-center" 
+        <div 
+          className="relative flex h-[94vh] w-full max-w-7xl items-center justify-center animate-[scaleIn_0.3s_cubic-bezier(0.16,1,0.3,1)]" 
           onClick={(e) => e.stopPropagation()} 
           role="dialog" 
           aria-modal="true"
@@ -68,42 +59,34 @@ export function GalleryLightbox({
           )}
 
           <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.div 
-                key={item.imageUrl}
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.25 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
-                <Image
-                  src={item.imageUrl}
-                  alt="Preview"
-                  fill
-                  className="object-contain shadow-2xl"
-                  sizes="100vw"
-                />
-              </motion.div>
-            </AnimatePresence>
+            <div 
+              key={item.imageUrl}
+              className="absolute inset-0 flex items-center justify-center animate-[fadeIn_0.25s_ease-in-out]"
+            >
+              <Image
+                src={item.imageUrl}
+                alt="Preview"
+                fill
+                className="object-contain shadow-2xl"
+                sizes="100vw"
+              />
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 function LightboxButton({ onClick, label, children }) {
   return (
-    <motion.button
+    <button
       type="button" 
       onClick={onClick} 
       aria-label={label}
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.92 }}
-      className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/12 text-white backdrop-blur-md transition hover:bg-white/20 shadow-lg"
+      className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/12 text-white backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white/20 active:scale-95 shadow-lg"
     >
       {children}
-    </motion.button>
+    </button>
   );
 }

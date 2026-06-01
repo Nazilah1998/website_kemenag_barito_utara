@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { logError } from "@/lib/logger";
 
@@ -41,7 +40,7 @@ export function GalleryHeader({ count }) {
       <div className="group relative overflow-hidden rounded-3xl border border-emerald-100 bg-white p-6 shadow-xl transition-all duration-500 hover:shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-900">
         <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-500/5 blur-2xl transition-all duration-500 group-hover:bg-emerald-500/15" />
         <div className="relative flex flex-col items-center md:items-end">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-emerald-600 transition-colors">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-emerald-700 transition-colors">
             Total Dokumentasi
           </span>
           <div className="mt-1 flex items-baseline gap-1">
@@ -88,13 +87,9 @@ export function GalleryCard({ item, index = 0, onOpen, isActive, onToggle }) {
   };
 
   return (
-    <motion.article
-      layout
+    <article
       onClick={handleTap}
-      whileHover={{ y: -6, scale: 1.015 }}
-      whileTap={{ scale: 0.985 }}
-      transition={{ type: "spring", stiffness: 90, damping: 16 }}
-      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 cursor-pointer"
+      className="group relative aspect-[3/4] overflow-hidden rounded-3xl border border-slate-200/60 bg-white transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 cursor-pointer hover:-translate-y-1.5 hover:scale-[1.015] active:scale-[0.985]"
     >
       {/* Image Layer */}
       <div className="absolute inset-0 z-0">
@@ -153,7 +148,7 @@ export function GalleryCard({ item, index = 0, onOpen, isActive, onToggle }) {
           </div>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
 

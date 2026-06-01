@@ -12,7 +12,7 @@ export function SidebarNavLink({ href, label, icon, active, onNavigate }) {
         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
         }`}
     >
-      <span className={`transition-colors ${active ? "text-emerald-400" : "text-slate-400 group-hover:text-emerald-500"}`}>{icon}</span>
+      <span className={`transition-colors ${active ? "text-emerald-400" : "text-slate-400 group-hover:text-emerald-700"}`}>{icon}</span>
       <span>{label}</span>
     </Link>
   );

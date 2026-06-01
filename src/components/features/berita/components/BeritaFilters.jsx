@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
-import { motion, AnimatePresence } from "framer-motion";
-
 const SORT_OPTIONS = [
   { value: "newest", labelId: "Terbaru", labelEn: "Newest" },
   { value: "oldest", labelId: "Terlama", labelEn: "Oldest" },
@@ -236,7 +234,7 @@ export default function BeritaFilters({
           </div>
           <div className="flex items-center gap-2.5">
             {isPending && (
-              <span className="text-[10px] font-semibold text-emerald-600 animate-pulse mr-1">
+              <span className="text-[10px] font-semibold text-emerald-700 animate-pulse mr-1">
                 Memproses...
               </span>
             )}
@@ -284,15 +282,10 @@ export default function BeritaFilters({
         </div>
 
         {/* ── Filter Grid with smooth height animation on mobile ── */}
-        <AnimatePresence initial={false}>
-          {(!isMobile || isMobileFiltersOpen) && (
-            <motion.div
-              initial={isMobile ? { height: 0, opacity: 0 } : false}
-              animate={isMobile ? { height: "auto", opacity: 1 } : false}
-              exit={isMobile ? { height: 0, opacity: 0 } : false}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
+        {(!isMobile || isMobileFiltersOpen) && (
+          <div
+            className={`overflow-hidden transition-all duration-300 ${isMobile && !isMobileFiltersOpen ? 'max-h-0 opacity-0' : 'max-h-[1000px] opacity-100'}`}
+          >
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12 pt-1 pb-2">
                 {/* Search — spans 5 cols */}
                 <div className="lg:col-span-5">
@@ -354,9 +347,8 @@ export default function BeritaFilters({
                   </SelectField>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
 
         {/* ── Active Filters Row ── */}
         <div className={`mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800 transition-all ${hasActiveFilters ? "opacity-100" : "opacity-60"}`}>

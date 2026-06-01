@@ -443,7 +443,7 @@ export default function AdminSeksiDetailManager({ id }) {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
             Kembali ke Daftar
           </span>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight mt-0.5">
@@ -568,7 +568,7 @@ export default function AdminSeksiDetailManager({ id }) {
                   <div className="mt-3 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-[1.5rem] border border-slate-100 dark:border-slate-800/80 space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
                       <span>Posisi Foto Vertikal</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{seksiForm.foto_kepala_y ?? 50}%</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold">{seksiForm.foto_kepala_y ?? 50}%</span>
                     </div>
                     <input
                       type="range"
@@ -670,7 +670,7 @@ export default function AdminSeksiDetailManager({ id }) {
                         <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate mt-1.5 leading-none">
                           {pegawai.nama}
                         </h4>
-                        <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide mt-1.5 truncate">
+                        <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wide mt-1.5 truncate">
                           {pegawai.jabatan}
                         </p>
                         <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
@@ -835,7 +835,7 @@ export default function AdminSeksiDetailManager({ id }) {
                   <div className="mt-3 p-4 bg-slate-50 dark:bg-slate-900/30 rounded-[1.5rem] border border-slate-100 dark:border-slate-850 space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
                       <span>Posisi Foto Vertikal</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{pegawaiForm.foto_y ?? 50}%</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold">{pegawaiForm.foto_y ?? 50}%</span>
                     </div>
                     <input
                       type="range"

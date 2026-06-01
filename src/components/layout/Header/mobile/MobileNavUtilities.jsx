@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 
 export function MobileNavUtilities({
@@ -86,27 +85,18 @@ function MobileAdminLoginButton({ adminState }) {
 
       {/* Confirmation Modal via Portal */}
       {mounted && typeof document !== "undefined" && createPortal(
-        <AnimatePresence>
-          {showConfirm && (
-            <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm"
-                onClick={() => setShowConfirm(false)}
-              />
+        <div className={`fixed inset-0 z-[99999] transition-all duration-300 ${showConfirm ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+          <div className={`fixed inset-0 flex items-center justify-center p-4 transition-all duration-300 ${showConfirm ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm"
+              onClick={() => setShowConfirm(false)}
+            />
 
-              {/* Modal Panel */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"
-              >
+            {/* Modal Panel */}
+            <div
+              className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"
+            >
                 {/* Top red warning accent */}
                 <div className="h-1.5 w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-600" />
 
@@ -155,10 +145,9 @@ function MobileAdminLoginButton({ adminState }) {
                     </Link>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
-          )}
-        </AnimatePresence>,
+          </div>,
         document.body
       )}
     </>

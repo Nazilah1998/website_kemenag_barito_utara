@@ -42,7 +42,7 @@ export function StatusPill({ published }) {
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-[9px] font-black uppercase tracking-widest ${published
-        ? "bg-emerald-50 text-emerald-600 border-2 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50"
+        ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50"
         : "bg-amber-50 text-amber-600 border-2 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50"
         }`}
     >
@@ -180,7 +180,7 @@ export function FloatingFeedback({ message, error, onClose }) {
           <div
             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.25rem] ${isError
               ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400"
-              : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+              : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400"
               }`}
           >
             {isError ? <IconAlertCircle /> : <IconCheckCircle />}

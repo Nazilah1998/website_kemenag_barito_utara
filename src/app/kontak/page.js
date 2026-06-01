@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
 import KontakForm from "@/components/features/kontak/KontakForm";
 import { siteInfo, siteLinks } from "../../data/site";
@@ -137,12 +136,8 @@ export default function KontakPage() {
       <main className="bg-slate-50 transition-colors dark:bg-slate-950 overflow-hidden">
         <div className="w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
           <section className="grid gap-6 lg:grid-cols-2">
-            <motion.div 
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ type: "spring", stiffness: 80, damping: 15 }}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900"
+            <div 
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 animate-fade-in-up"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -187,14 +182,10 @@ export default function KontakPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div 
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ type: "spring", stiffness: 80, damping: 15 }}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900"
+            <div 
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 animate-fade-in-up"
             >
               <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                 {t("contact.mainContact")}
@@ -253,16 +244,12 @@ export default function KontakPage() {
                   </a>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </section>
 
           <section className="mt-10 grid gap-6 lg:grid-cols-[1fr_1fr]">
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ type: "spring", stiffness: 70, damping: 15, delay: 0.1 }}
-              className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900"
+            <div 
+              className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 animate-fade-in-up"
             >
               <div className="border-b border-slate-200 p-6 transition-colors dark:border-slate-800">
                 <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
@@ -303,16 +290,13 @@ export default function KontakPage() {
                   {t("contact.openInMaps")}
                 </a>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ type: "spring", stiffness: 70, damping: 15, delay: 0.2 }}
+            <div
+              className="animate-fade-in-up"
             >
               <KontakForm />
-            </motion.div>
+            </div>
           </section>
         </div>
       </main>

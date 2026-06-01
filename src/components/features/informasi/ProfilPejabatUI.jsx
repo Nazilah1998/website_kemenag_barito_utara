@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
 import Avatar from "@/components/ui/Avatar";
 
@@ -52,12 +51,8 @@ function ChevronDownIcon({ open }) {
 // ─── KEPALA KANTOR CARD (featured) ────────────────────────────────────────────
 function KepalaKantorCard({ pejabat }) {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#052033] via-[#0b3b46] to-[#0e5f55] text-white shadow-2xl shadow-emerald-900/30"
+    <div 
+      className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#052033] via-[#0b3b46] to-[#0e5f55] text-white shadow-2xl shadow-emerald-900/30 animate-fade-in-up"
     >
       {/* Decorative background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.25),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_40%)]" />
@@ -86,7 +81,7 @@ function KepalaKantorCard({ pejabat }) {
 
         {/* Info */}
         <div className="flex-1 text-center lg:text-left">
-          <p className="mb-2 inline-block rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
+          <p className="mb-2 inline-block rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
             Kementerian Agama Kabupaten Barito Utara
           </p>
           <h2 className="mt-3 text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white">
@@ -114,7 +109,7 @@ function KepalaKantorCard({ pejabat }) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -124,12 +119,8 @@ function PejabatCard({ pejabat, index }) {
   const isLong = pejabat.deskripsi && pejabat.deskripsi.length > 120;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: Math.min(index * 0.1, 0.5), ease: "easeOut" }}
-      className="h-full group relative flex flex-col overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-lg shadow-slate-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60 hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-emerald-800"
+    <div 
+      className="h-full group relative flex flex-col overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-lg shadow-slate-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60 hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-emerald-800 animate-fade-in-up"
     >
       {/* Top accent */}
       <div className="h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -154,7 +145,7 @@ function PejabatCard({ pejabat, index }) {
           <h3 className="text-base font-black tracking-tight text-slate-900 dark:text-white leading-tight">
             {pejabat.nama_kepala}
           </h3>
-          <p className="mt-1.5 text-[11px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+          <p className="mt-1.5 text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
             {pejabat.judul === "Sub Bagian Tata Usaha"
               ? "Kepala Sub Bagian Tata Usaha"
               : `Kepala ${pejabat.judul}`}
@@ -176,7 +167,7 @@ function PejabatCard({ pejabat, index }) {
             {isLong && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="mt-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors"
+                className="mt-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400 hover:text-emerald-700 transition-colors"
               >
                 {expanded ? "Sembunyikan" : "Baca Selengkapnya"}
                 <ChevronDownIcon open={expanded} />
@@ -196,7 +187,7 @@ function PejabatCard({ pejabat, index }) {
           </Link>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -218,7 +209,7 @@ export default function ProfilPejabatUI({ breadcrumb, kepalaKantor, pejabatList 
           <section>
             <div className="mb-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-gradient-to-r from-emerald-200 to-transparent dark:from-emerald-900" />
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400">
                 Pimpinan Tertinggi
               </span>
               <div className="h-px flex-1 bg-gradient-to-l from-emerald-200 to-transparent dark:from-emerald-900" />
@@ -257,7 +248,7 @@ export default function ProfilPejabatUI({ breadcrumb, kepalaKantor, pejabatList 
 
         {/* ── Bottom info strip ── */}
         <div className="rounded-[2rem] border border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/50 p-8 flex flex-col sm:flex-row items-center gap-6">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50">
             <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
