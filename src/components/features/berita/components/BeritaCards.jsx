@@ -123,7 +123,7 @@ export function NewsCard({ item }) {
     >
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
-        <div className="relative h-48 w-full overflow-hidden">
+        <div className="relative h-48 min-h-[192px] w-full overflow-hidden">
           <NewsCardImage
             item={item}
             className="object-cover transition-transform duration-700 group-hover:scale-105"

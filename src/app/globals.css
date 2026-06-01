@@ -2,6 +2,38 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(2%, 1%) scale(1.02);
+  }
+  66% {
+    transform: translate(-1%, -1%) scale(0.98);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@utility animate-marquee {
+  animation: marquee 100s linear infinite;
+}
+
+@utility animate-gradient-shift {
+  animation: gradientShift 15s ease-in-out infinite;
+}
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -801,24 +833,55 @@ summary {
 }
 /* Chat Widget Animations & Styles */
 @keyframes typingBounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-6px); opacity: 1; }
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
 }
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 @keyframes pulseGreen {
-  0%, 100% { box-shadow: 0 4px 24px rgba(5,150,105,0.45), 0 2px 8px rgba(0,0,0,0.2); }
-  50% { box-shadow: 0 4px 32px rgba(5,150,105,0.7), 0 2px 12px rgba(0,0,0,0.25); }
+  0%,
+  100% {
+    box-shadow:
+      0 4px 24px rgba(5, 150, 105, 0.45),
+      0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 4px 32px rgba(5, 150, 105, 0.7),
+      0 2px 12px rgba(0, 0, 0, 0.25);
+  }
 }
 
 .ai-chat-window {
-  transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: bottom right;
   width: 440px;
   height: 700px;
@@ -835,10 +898,12 @@ summary {
 }
 
 .ai-fab-button {
-  transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  bottom: 28px; 
+  transition:
+    opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  bottom: 28px;
   right: 28px;
-  width: 60px; 
+  width: 60px;
   height: 60px;
 }
 .ai-fab-button.hidden {
@@ -862,9 +927,9 @@ summary {
 }
 @media (max-width: 768px) {
   .ai-fab-button {
-    bottom: 20px; 
+    bottom: 20px;
     right: 20px;
-    width: 52px; 
+    width: 52px;
     height: 52px;
   }
   .ai-chat-window {

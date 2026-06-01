@@ -77,7 +77,7 @@ export default async function LaporanCategoryPage({ params }) {
         }
         breadcrumb={[
           { label: "Beranda", href: "/" },
-          { label: "Laporan", href: "/laporan" },
+          { label: "Laporan" },
           { label: category.title },
         ]}
       />
@@ -90,15 +90,7 @@ export default async function LaporanCategoryPage({ params }) {
 
         <section className="relative z-10 w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
           <div className="mb-10 flex flex-wrap items-center justify-between gap-6">
-            <Link
-              href="/laporan"
-              className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-[11px] font-bold text-slate-500 shadow-sm transition-all hover:border-emerald-500 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-emerald-700"
-            >
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-50 transition-all group-hover:bg-emerald-50 dark:bg-white/5 dark:group-hover:bg-emerald-900/30">
-                <ArrowLeftIcon />
-              </div>
-              <span>Back to Index</span>
-            </Link>
+
 
             <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 dark:bg-emerald-900/10">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />

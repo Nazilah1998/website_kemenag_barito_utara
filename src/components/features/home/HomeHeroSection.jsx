@@ -10,7 +10,7 @@ export default function HomeHeroSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative h-auto lg:h-[calc(100vh-140px)] min-h-[500px] lg:min-h-[600px] max-h-[900px] w-full overflow-hidden bg-slate-950 flex items-center py-16 sm:py-24 lg:py-0">
+    <section className="relative h-auto lg:h-[calc(100vh-140px)] min-h-[450px] lg:min-h-[600px] max-h-[900px] w-full overflow-hidden bg-slate-950 flex items-center py-10 sm:py-16 lg:py-0">
       <div className="absolute inset-0 z-0">
         <Image
           src="/assets/images/kantor-kemenag.jpg"
@@ -28,8 +28,8 @@ export default function HomeHeroSection() {
         <div className="absolute -right-20 bottom-10 h-[300px] w-[300px] rounded-full bg-blue-500/5 blur-[80px] animate-pulse delay-700" />
       </div>
 
-      <div className="relative z-10 w-full px-6 py-12 sm:px-10 sm:py-16 lg:py-8 lg:px-16 xl:px-24">
-        <div className="mx-auto grid max-w-[1600px] items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+      <div className="relative z-10 w-full px-5 py-6 sm:px-10 sm:py-12 lg:py-8 lg:px-16 xl:px-24">
+        <div className="mx-auto grid max-w-[1600px] items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div className="flex flex-col">
             <div className="group flex w-fit items-center gap-3 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md transition-all hover:border-emerald-500/50 animate-fade-in-up">
               <span className="relative flex h-1.5 w-1.5">
@@ -41,7 +41,7 @@ export default function HomeHeroSection() {
               </span>
             </div>
 
-            <h1 className="mt-6 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl animate-fade-in-up animate-delay-100">
+            <h1 className="mt-5 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl animate-fade-in-up animate-delay-100">
               {t("home.hero.title").split('.').map((part, i) => (
                 <span key={i} className={i === 0 ? "block" : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"}>
                   {part}{i === 0 && part ? "." : ""}
@@ -49,11 +49,11 @@ export default function HomeHeroSection() {
               ))}
             </h1>
 
-            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose animate-fade-in-up animate-delay-200">
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose animate-fade-in-up animate-delay-200">
               {t("home.hero.description")}
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4 animate-fade-in-up animate-delay-300">
+            <div className="mt-6 lg:mt-8 flex flex-wrap gap-3 sm:gap-4 animate-fade-in-up animate-delay-300">
               <a
                 href="https://ptsp.kemenag-baritoutara.com/"
                 target="_blank"
@@ -73,7 +73,7 @@ export default function HomeHeroSection() {
               </Link>
             </div>
 
-            <div className="mt-12 grid grid-cols-3 gap-6 sm:max-w-lg animate-fade-in-up animate-delay-400">
+            <div className="mt-8 lg:mt-12 grid grid-cols-3 gap-4 sm:gap-6 sm:max-w-lg animate-fade-in-up animate-delay-400">
               {[
                 { number: "24+", label: t("home.stats.layanan") },
                 { number: "120+", label: t("home.stats.berita") },
