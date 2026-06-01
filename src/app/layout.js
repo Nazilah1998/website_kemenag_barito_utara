@@ -131,8 +131,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL || ""} />
         <link rel="dns-prefetch" href={process.env.CLOUDFLARE_R2_ENDPOINT || ""} />
         <ThemeInitializer />

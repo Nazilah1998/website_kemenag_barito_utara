@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { siteInfo } from "@/data/site";
-import { Clock, Calendar, ShieldCheck, ShieldAlert } from "lucide-react";
+import { ShieldCheck, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
+import { DesktopClockSection, MobileClockSection } from "./ClockSection";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -214,7 +215,6 @@ const PORTAL_LINKS = [
 ];
 
 export default function PortalPage() {
-  const [time, setTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [portalData, setPortalData] = useState(null);
@@ -231,7 +231,6 @@ export default function PortalPage() {
   }, []);
 
   useEffect(() => {
-    // Deteksi jika berjalan dalam mode PWA (standalone)
     const detectPwa = () => {
       if (typeof window !== "undefined") {
         const isPwa =
@@ -247,43 +246,10 @@ export default function PortalPage() {
       detectPwa();
     });
 
-    const timer = setInterval(() => setTime(new Date()), 1000);
-
     return () => {
       cancelAnimationFrame(frame);
-      clearInterval(timer);
     };
   }, []);
-
-  const getStatus = () => {
-    const day = time.getDay();
-    const hour = time.getHours();
-    const minute = time.getMinutes();
-    const currentTime = hour * 100 + minute;
-
-    // Senin - Kamis: 07:30 - 16:00
-    // Jumat: 07:30 - 16:30
-    // Sabtu - Minggu: Tutup
-    let isOpen = false;
-    if (day >= 1 && day <= 4) {
-      if (currentTime >= 730 && currentTime <= 1600) isOpen = true;
-    } else if (day === 5) {
-      if (currentTime >= 730 && currentTime <= 1630) isOpen = true;
-    }
-
-    return isOpen;
-  };
-
-  const isOpen = getStatus();
-
-  const getTimezoneLabel = () => {
-    const offset = -new Date().getTimezoneOffset();
-    if (offset === 420) return "WIB";
-    if (offset === 480) return "WITA";
-    if (offset === 540) return "WIT";
-    const hours = offset / 60;
-    return `UTC${hours >= 0 ? "+" : ""}${hours}`;
-  };
 
   return (
     <div className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-slate-900 selection:bg-emerald-500/30">
@@ -338,58 +304,8 @@ export default function PortalPage() {
             </p>
           </motion.div>
 
-          {/* Status & Time Indicator - Desktop (Above Grid) */}
-          <motion.div
-            variants={headerVariants}
-            className="flex items-center gap-4 bg-white/5 backdrop-blur-xl px-5 py-1.5 rounded-full ring-1 ring-white/10 shadow-2xl mb-2"
-          >
-            <div className="flex items-center gap-3 border-r border-white/10 pr-6">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg tabular-nums">
-                <Clock className="w-5 h-5" />
-                {mounted
-                  ? time.toLocaleTimeString("id-ID", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                    })
-                  : "--:--:--"}
-                {mounted && <span className="text-[10px] font-bold text-slate-400 ml-1">{getTimezoneLabel()}</span>}
-              </div>
-              <div className="flex items-center gap-2 text-slate-400 text-[10px] font-medium uppercase tracking-widest">
-                <Calendar className="w-3.5 h-3.5" />
-                {mounted
-                  ? time.toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : "---"}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div
-                className={`flex items-center gap-2 font-bold text-xs uppercase tracking-widest ${mounted ? (isOpen ? "text-emerald-400" : "text-rose-400") : "text-slate-400"}`}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full ${mounted ? "animate-pulse" : ""} ${mounted ? (isOpen ? "bg-emerald-400" : "bg-rose-400") : "bg-slate-400"}`}
-                />
-                {mounted
-                  ? isOpen
-                    ? "Layanan Buka"
-                    : "Layanan Tutup"
-                  : "Memuat..."}
-              </div>
-              <p className="text-slate-500 text-[10px] font-medium border-l border-white/10 pl-4">
-                {mounted
-                  ? time.getDay() === 5
-                    ? "Jam Kerja: 07:30 - 16:30"
-                    : "Jam Kerja: 07:30 - 16:00"
-                  : "Memuat..."}
-              </p>
-            </div>
-          </motion.div>
+          {/* Status & Time Indicator - Desktop */}
+          <DesktopClockSection />
 
           {/* Berita Ticker - Desktop */}
           {portalData?.latestBerita?.length > 0 && (
@@ -553,56 +469,8 @@ export default function PortalPage() {
             </p>
           </motion.div>
 
-          {/* Enhanced Status & Time - Mobile (Above Grid) */}
-          <motion.div
-            variants={headerVariants}
-            className="flex flex-col items-center bg-white/5 backdrop-blur-lg px-4 py-2 rounded-2xl ring-1 ring-white/10 mb-3 w-full"
-          >
-            <div className="flex items-center justify-between w-full border-b border-white/5 pb-2 mb-2">
-              <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-sm tabular-nums">
-                <Clock className="w-3.5 h-3.5" />
-                {mounted
-                  ? time.toLocaleTimeString("id-ID", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "--:--"}
-                {mounted && <span className="text-[8px] font-bold text-slate-400 ml-0.5">{getTimezoneLabel()}</span>}
-              </div>
-              <div
-                className={`flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider ${mounted ? (isOpen ? "text-emerald-400" : "text-rose-400") : "text-slate-400"}`}
-              >
-                <div
-                  className={`w-1.5 h-1.5 rounded-full ${mounted ? "animate-pulse" : ""} ${mounted ? (isOpen ? "bg-emerald-400" : "bg-rose-400") : "bg-slate-400"}`}
-                />
-                {mounted
-                  ? isOpen
-                    ? "Layanan Buka"
-                    : "Layanan Tutup"
-                  : "Memuat"}
-              </div>
-            </div>
-            <div className="flex items-center justify-between w-full">
-              <div className="text-slate-400 text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {mounted
-                  ? time.toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : "---"}
-              </div>
-              <p className="text-slate-500 text-[9px] font-bold uppercase tracking-tighter">
-                {mounted
-                  ? time.getDay() === 5
-                    ? "07:30 - 16:30"
-                    : "07:30 - 16:00"
-                  : "Memuat"}
-              </p>
-            </div>
-          </motion.div>
+          {/* Enhanced Status & Time - Mobile */}
+          <MobileClockSection />
 
           {/* Berita Ticker - Mobile */}
           {portalData?.latestBerita?.length > 0 && (

@@ -44,6 +44,7 @@ export default function CategorySlider({ slides = [], fallbackTitle }) {
                     fill
                     sizes="(max-width: 1024px) 100vw, 16vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105 animate-[fadeIn_700ms_ease-in-out]"
+                    priority={index === 0}
                 />
                 {slides.length > 1 && (
                     <div className="absolute bottom-2 left-2 flex gap-1">

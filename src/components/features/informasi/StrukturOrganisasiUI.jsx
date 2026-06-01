@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { User } from "lucide-react";
 import { motion } from "framer-motion";
 import PageBanner from "@/components/common/PageBanner";
@@ -27,8 +28,7 @@ const ProfileNode = ({ data, variant = "secondary", className = "", delay = 0 })
       <div className={`relative h-20 w-20 sm:h-24 sm:w-24 mb-4 rounded-full overflow-hidden border-4 shadow-lg flex items-center justify-center shrink-0 
         ${isPrimary ? 'border-white/20 ring-4 ring-emerald-400/20' : 'border-slate-50 ring-4 ring-slate-100 dark:border-slate-800 dark:ring-slate-700/50'}`}>
         {data.image && data.image !== "/assets/branding/kemenag.svg" ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.image} alt={data.name} className="h-full w-full object-cover" style={{ objectPosition: `50% ${data.imageY ?? 50}%` }} />
+          <Image src={data.image} alt={data.name} fill className="object-cover" style={{ objectPosition: `50% ${data.imageY ?? 50}%` }} />
         ) : (
           <User className={`h-10 w-10 sm:h-12 sm:w-12 ${isPrimary ? 'text-white/60' : 'text-slate-400'}`} />
         )}

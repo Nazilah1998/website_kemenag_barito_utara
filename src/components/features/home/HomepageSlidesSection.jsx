@@ -26,19 +26,19 @@ function resolveImage(value = "") {
 export default function HomepageSlidesSection({ slides = [] }) {
     const { t } = useLanguage();
     const {
-        normalizedSlides,
-        katolikSlides,
-        kristenSlides,
-        islamSlides,
-        hinduSlides,
-        sliderSlides,
-        activeTab,
-        setActiveTab,
-        safeActiveIndex,
-        current,
-        prevSlide,
-        handleNextSlide,
-        setActiveIndex
+    normalizedSlides,
+    katolikSlides,
+    kristenSlides,
+    islamSlides,
+    hinduSlides,
+    sliderSlides,
+    activeTab,
+    setActiveTab,
+    safeActiveIndex,
+    current,
+    prevSlide,
+    handleNextSlide,
+    setActiveIndex
     } = useHomepageSlides(slides);
 
     if (normalizedSlides.length === 0) return null;
@@ -177,7 +177,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                                                     src={resolveImage(current.image_url)}
                                                     alt={current.title || "Slide beranda"}
                                                     fill
-                                                    priority
+                                                    priority={safeActiveIndex === 0}
                                                     sizes="(max-width: 1024px) 100vw, 40vw"
                                                     className="object-cover lg:object-contain"
                                                 />

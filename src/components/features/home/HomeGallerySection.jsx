@@ -245,7 +245,7 @@ function GalleryCard({ item, index = 0, locale, t, onPreview, isMobile = false, 
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 16vw"
           className="object-cover transition duration-700 group-hover:scale-110"
-          loading={index < 6 ? "eager" : "lazy"}
+          priority={index < 3}
         />
         {/* Multi-layered Overlays */}
         <div className={`absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent transition-opacity duration-500 ${isActive ? 'opacity-90' : 'opacity-70 lg:group-hover:opacity-90'}`} />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import {
   LogOut,
   User,
@@ -63,10 +64,11 @@ export default function AdminUserMenu({
         className="flex items-center gap-3 rounded-2xl border-2 border-slate-50 bg-slate-50/50 pl-2 pr-3 py-1.5 dark:border-white/5 dark:bg-white/5 transition-all hover:border-slate-200 dark:hover:border-white/10"
       >
         {currentProfile?.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img 
+          <Image 
             src={currentProfile.avatar_url} 
             alt="Avatar" 
+            width={32}
+            height={32}
             className="h-8 w-8 rounded-xl object-cover shadow-sm"
           />
         ) : (

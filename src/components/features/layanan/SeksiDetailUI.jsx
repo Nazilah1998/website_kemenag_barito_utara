@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { User } from "lucide-react";
 import PageBanner from "@/components/common/PageBanner";
 
@@ -21,8 +22,7 @@ export default function SeksiDetailUI({ data, breadcrumb, menuTitle }) {
         <div className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm dark:border-slate-800 dark:bg-[#0B1120] dark:text-slate-50 flex flex-col sm:flex-row items-center gap-6 p-6">
           <div className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-900 shadow-sm">
             {data.foto_kepala ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={data.foto_kepala} alt={data.nama_kepala} className="h-full w-full rounded-full object-cover" style={{ objectPosition: `50% ${data.foto_kepala_y ?? 50}%` }} />
+              <Image src={data.foto_kepala} alt={data.nama_kepala} width={96} height={96} className="h-full w-full rounded-full object-cover" style={{ objectPosition: `50% ${data.foto_kepala_y ?? 50}%` }} />
             ) : (
               <User className="h-10 w-10 text-slate-400" />
             )}
@@ -50,8 +50,7 @@ export default function SeksiDetailUI({ data, breadcrumb, menuTitle }) {
                   <div key={idx} className="flex flex-col items-center text-center p-4 rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50 hover:border-emerald-250 hover:bg-white transition-all">
                     <div className="relative h-16 w-16 mb-3 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 ring-2 ring-white dark:ring-slate-950 shadow-sm flex items-center justify-center">
                       {pegawai.foto ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={pegawai.foto} alt={pegawai.nama} className="h-full w-full object-cover" style={{ objectPosition: `50% ${pegawai.foto_y ?? 50}%` }} />
+                        <Image src={pegawai.foto} alt={pegawai.nama} width={64} height={64} className="h-full w-full object-cover" style={{ objectPosition: `50% ${pegawai.foto_y ?? 50}%` }} />
                       ) : (
                         <User className="h-8 w-8 text-slate-400" />
                       )}

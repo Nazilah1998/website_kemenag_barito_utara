@@ -81,10 +81,8 @@ export function GalleryLightbox({
                   src={item.imageUrl}
                   alt="Preview"
                   fill
-                  priority
                   className="object-contain shadow-2xl"
                   sizes="100vw"
-                  unoptimized
                 />
               </motion.div>
             </AnimatePresence>

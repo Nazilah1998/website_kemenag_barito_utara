@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Briefcase,
@@ -248,8 +249,7 @@ export default function AdminSeksiListManager() {
                       <div className="flex items-center gap-3">
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden ring-2 ring-white dark:ring-slate-900 shadow-sm">
                           {item.foto_kepala ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={item.foto_kepala} alt={item.nama_kepala} className="h-full w-full object-cover" style={{ objectPosition: `50% ${item.foto_kepala_y ?? 50}%` }} />
+                            <Image src={item.foto_kepala} alt={item.nama_kepala} fill className="object-cover" style={{ objectPosition: `50% ${item.foto_kepala_y ?? 50}%` }} />
                           ) : (
                             <User className="h-5 w-5 text-slate-400" />
                           )}

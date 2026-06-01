@@ -127,7 +127,6 @@ export default function ApaKataMerekaSection({ testimonials }) {
                                                 alt={data[activeIndex].name}
                                                 width={64}
                                                 height={64}
-                                                unoptimized
                                                 className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
                                             />
                                         </div>
@@ -229,7 +228,6 @@ export default function ApaKataMerekaSection({ testimonials }) {
                                                     alt={person.name}
                                                     width={64}
                                                     height={64}
-                                                    unoptimized
                                                     className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
                                                 />
                                             </div>
