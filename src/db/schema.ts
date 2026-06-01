@@ -471,6 +471,12 @@ export const layanan_publik = pgTable("layanan_publik", {
 	updated_at: timestamp({ precision: 6, withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey().notNull(),
+  value: jsonb("value").notNull().default({}),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
+});
+
 export const layanan_ptsp = pgTable("layanan_ptsp", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	seksi_id: uuid().notNull(),

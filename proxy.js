@@ -1,8 +1,4 @@
-import { updateSession } from "./src/lib/supabase/proxy";
-
-export async function proxy(request) {
-  return await updateSession(request);
-}
+export { proxy } from "./src/proxy";
 
 export const config = {
   matcher: [

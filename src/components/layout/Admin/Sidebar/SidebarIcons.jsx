@@ -86,6 +86,15 @@ export function SeksiIcon() {
   );
 }
 
+export function MaintenanceIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 9v4m0 4h.01M20.24 5.76A10.96 10.96 0 0 0 5.76 5.76M3.34 8.66A8.97 8.97 0 0 0 8.66 20.34M20.66 15.34A8.97 8.97 0 0 1 15.34 20.66" />
+      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+    </svg>
+  );
+}
+
 export function HalamanIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

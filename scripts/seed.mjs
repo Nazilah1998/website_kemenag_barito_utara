@@ -193,6 +193,28 @@ async function main() {
     console.log("Seksi sudah ada, lewati.");
   }
 
+  // Site settings — maintenance mode default
+  try {
+    const maintenanceExists = !(await isEmptyTable(schema.siteSettings));
+    if (!maintenanceExists) {
+      await db.insert(schema.siteSettings).values({
+        key: "maintenance_mode",
+        value: {
+          active: false,
+          title: "Pemeliharaan Sistem",
+          message: "Website sedang dalam perbaikan. Mohon kembali lagi beberapa saat.",
+          updatedBy: null,
+          updatedAt: null,
+        },
+      });
+      console.log("✓ Site settings (maintenance_mode) berhasil dibuat.");
+    } else {
+      console.log("✓ Site settings sudah ada, lewati.");
+    }
+  } catch (e) {
+    console.log("Site settings tidak bisa di-seed:", e.message);
+  }
+
   console.log("Seeding selesai!");
 }
 
