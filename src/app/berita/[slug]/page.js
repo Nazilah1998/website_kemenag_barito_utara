@@ -72,7 +72,7 @@ export async function generateMetadata({ params }) {
   );
   const url = `/berita/${berita.slug}`;
   const canonicalUrl = `${siteInfo.siteUrl}${url}`;
-  const image = berita.coverImage || `${siteInfo.siteUrl}${siteInfo.logoSrc}`;
+  const image = berita.coverImage || `${siteInfo.siteUrl}/assets/icons/kemenag-512.png`;
   const publishedTime =
     berita.publishedAt || berita.isoDate || berita.createdAt;
   const modifiedTime = berita.updatedAt || publishedTime;

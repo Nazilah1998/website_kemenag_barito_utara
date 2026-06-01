@@ -1,8 +1,5 @@
-/**
- * ThemeInitializer — inline script yang mencegah flash of unstyled content (FOUC).
- * Menggunakan raw <script> tag agar dieksekusi sebelum React hydration.
- * suppressHydrationWarning dipasang agar React tidak komplain perbedaan SSR vs client.
- */
+import Script from "next/script";
+
 export default function ThemeInitializer() {
   const scriptCode = `
     (function() {

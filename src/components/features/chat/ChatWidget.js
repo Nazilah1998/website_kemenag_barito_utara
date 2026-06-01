@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import "./ChatWidget.css";
 
 // ─── Inline SVG Icons ───────────────────────────────────────────────────────
 const IconBot = () => (

@@ -109,7 +109,7 @@ export function newsArticleSchema(berita: BeritaItem | null, { canonicalUrl }: {
   const url = canonicalUrl || `${BASE}/berita/${berita.slug}`;
   const image = berita.coverImage
     ? [String(berita.coverImage)]
-    : [`${BASE}${siteInfo.logoSrc}`];
+    : [`${BASE}/assets/icons/kemenag-512.png`];
   const datePublished =
     berita.publishedAt || berita.isoDate || berita.createdAt || null;
   const dateModified = berita.updatedAt || datePublished;

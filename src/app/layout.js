@@ -1,8 +1,9 @@
 import { Inter } from "next/font/google";
+import "./tailwind.css";
 import "./globals.css";
 import Providers from "@/components/layout/Providers";
 import AppShell from "@/components/layout/AppShell";
-import ThemeInitializer from "@/components/layout/ThemeInitializer";
+
 import { siteInfo } from "@/data/site";
 import dynamic from "next/dynamic";
 import {
@@ -131,9 +132,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL || ""} />
-        <link rel="dns-prefetch" href={process.env.CLOUDFLARE_R2_ENDPOINT || ""} />
-        <ThemeInitializer />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL || ""} />
+        <link rel="preconnect" href={process.env.CLOUDFLARE_R2_ENDPOINT || ""} />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" />
+        <link rel="preconnect" href="https://challenges.cloudflare.com" />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: "(function(){try{var e=\"site-theme\",t=document.documentElement,n=window.localStorage.getItem(e),r=n===\"light\"||n===\"dark\"?n:window.matchMedia(\"(prefers-color-scheme: dark)\").matches?\"dark\":\"light\";t.dataset.theme=r,r===\"dark\"?t.classList.add(\"dark\"):t.classList.remove(\"dark\"),t.style.colorScheme=r}catch(e){}})();",
+          }}
+        />
         <JsonLd
           data={[organizationSchema(), websiteSchema(), navigationSchema()]}
         />

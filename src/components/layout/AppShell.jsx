@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import Header from "./Header/Header";
-import Footer from "./Footer/Footer";
+
+const Header = dynamic(() => import("./Header/Header"));
+const Footer = dynamic(() => import("./Footer/Footer"));
 
 export default function AppShell({ children }) {
   const pathname = usePathname();

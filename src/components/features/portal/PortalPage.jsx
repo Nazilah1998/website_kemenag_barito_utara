@@ -4,47 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { siteInfo } from "@/data/site";
-import { ShieldCheck, ShieldAlert } from "lucide-react";
-import { motion } from "framer-motion";
 import { DesktopClockSection, MobileClockSection } from "./ClockSection";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.15,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 25 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 90,
-      damping: 14,
-    },
-  },
-};
-
-const headerVariants = {
-  hidden: { opacity: 0, y: -20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 80,
-      damping: 15,
-      delay: 0.05,
-    },
-  },
-};
 
 const PORTAL_LINKS = [
   {
@@ -268,17 +228,11 @@ export default function PortalPage() {
       </div>
 
       {/* DESKTOP VERSION */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="hidden md:flex relative z-10 w-full px-6 lg:px-10 xl:px-16 pt-8 flex-col h-full overflow-hidden"
+      <div className="animate-fade-in hidden md:flex relative z-10 w-full px-6 lg:px-10 xl:px-16 pt-8 flex-col h-full overflow-hidden"
       >
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Logo & Title Section */}
-          <motion.div
-            variants={headerVariants}
-            className="flex flex-col items-center text-center mb-2"
+          <div className="animate-fade-in flex flex-col items-center text-center mb-2" style={{animationDelay:'0.1s'}}
           >
             <div className="w-16 h-16 mb-3 relative bg-white/10 backdrop-blur-md p-2 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500">
               <Image
@@ -288,6 +242,7 @@ export default function PortalPage() {
                 height={48}
                 className="w-full h-full object-contain drop-shadow-lg"
                 unoptimized
+                priority
               />
             </div>
             <p className="mb-1 text-sm font-black uppercase tracking-[0.4em] text-emerald-500/90">
@@ -302,17 +257,14 @@ export default function PortalPage() {
               Akses cepat informasi dan layanan keagamaan Kabupaten Barito Utara
               dalam satu pintu.
             </p>
-          </motion.div>
+          </div>
 
           {/* Status & Time Indicator - Desktop */}
           <DesktopClockSection />
 
           {/* Berita Ticker - Desktop */}
           {portalData?.latestBerita?.length > 0 && (
-            <motion.div
-              variants={headerVariants}
-              className="w-full mt-1 overflow-hidden"
-            >
+            <div className="animate-fade-in w-full mt-1 overflow-hidden" style={{animationDelay:'0.15s'}}>
               <div className="relative flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-1.5 rounded-full ring-1 ring-white/10">
                 <span className="shrink-0 text-[9px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full leading-none flex items-center justify-center">
                   Terbaru
@@ -339,28 +291,23 @@ export default function PortalPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Portal Grid Section */}
           <div className="flex items-center justify-center w-full mt-2 py-2">
-            <motion.div
-              variants={containerVariants}
-              className="grid grid-cols-4 gap-x-5 gap-y-3 w-full"
-            >
-              {PORTAL_LINKS.map((link) => (
-                <motion.div
+            <div className="grid grid-cols-4 gap-x-5 gap-y-3 w-full">
+              {PORTAL_LINKS.map((link, idx) => (
+                <div
                   key={link.title}
-                  variants={itemVariants}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="h-full"
+                  className="animate-fade-in-up h-full"
+                  style={{animationDelay:`${0.2 + idx * 0.08}s`}}
                 >
                   <Link
                     href={link.href}
                     target={isStandalone ? undefined : "_blank"}
                     rel={isStandalone ? undefined : "noopener noreferrer"}
-                    className={`group relative p-4 rounded-3xl transition-all duration-300 flex flex-col items-start text-left h-full ${
+                    className={`group relative p-4 rounded-3xl transition-all duration-300 flex flex-col items-start text-left h-full hover:-translate-y-1.5 hover:scale-[1.02] active:scale-[0.98] ${
                       link.primary
                         ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50 hover:bg-emerald-600/30"
                         : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10 hover:bg-white/10 hover:ring-white/20"
@@ -409,37 +356,28 @@ export default function PortalPage() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
 
 
         </div>
 
         {/* Footer info */}
-        <motion.div
-          variants={headerVariants}
-          className="text-center opacity-60 hover:opacity-100 transition-opacity pb-4"
-        >
+        <div className="animate-fade-in text-center opacity-60 hover:opacity-100 transition-opacity pb-4" style={{animationDelay:'0.3s'}}>
           <p className="text-slate-500 text-[10px] font-medium tracking-widest uppercase">
             &copy; {new Date().getFullYear()} {siteInfo.name}
           </p>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* MOBILE VERSION */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="flex md:hidden relative z-10 w-full px-5 pt-8 flex-col h-full overflow-hidden"
+      <div className="animate-fade-in flex md:hidden relative z-10 w-full px-5 pt-8 flex-col h-full overflow-hidden"
       >
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Logo & Title Section */}
-          <motion.div
-            variants={headerVariants}
-            className="flex flex-col items-center text-center mb-3"
+          <div className="animate-fade-in flex flex-col items-center text-center mb-3" style={{animationDelay:'0.1s'}}
           >
             <div className="w-16 h-16 mb-2 relative bg-white/10 backdrop-blur-md p-2 rounded-2xl ring-1 ring-white/20 shadow-2xl">
               <Image
@@ -449,6 +387,7 @@ export default function PortalPage() {
                 height={48}
                 className="w-full h-full object-contain drop-shadow-lg"
                 unoptimized
+                priority
               />
             </div>
             <p className="mb-1 text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500/90">
@@ -467,17 +406,14 @@ export default function PortalPage() {
               <br />
               Kabupaten Barito Utara dalam satu pintu.
             </p>
-          </motion.div>
+          </div>
 
           {/* Enhanced Status & Time - Mobile */}
           <MobileClockSection />
 
           {/* Berita Ticker - Mobile */}
           {portalData?.latestBerita?.length > 0 && (
-            <motion.div
-              variants={headerVariants}
-              className="w-full mt-1 overflow-hidden"
-            >
+            <div className="animate-fade-in w-full mt-1 overflow-hidden" style={{animationDelay:'0.15s'}}>
               <div className="relative flex items-center gap-2 bg-white/5 backdrop-blur-md px-3.5 py-1.5 rounded-full ring-1 ring-white/10">
                 <span className="shrink-0 text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full leading-none flex items-center justify-center">
                   Baru
@@ -504,28 +440,23 @@ export default function PortalPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* Portal Grid Section */}
           <div className="flex items-center justify-center w-full mt-2 py-1">
-            <motion.div
-              variants={containerVariants}
-              className="grid grid-cols-2 gap-3 w-full"
-            >
-              {PORTAL_LINKS.map((link) => (
-                <motion.div
+            <div className="grid grid-cols-2 gap-3 w-full">
+              {PORTAL_LINKS.map((link, idx) => (
+                <div
                   key={link.title}
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full"
+                  className="animate-fade-in-up w-full"
+                  style={{animationDelay:`${0.2 + idx * 0.08}s`}}
                 >
                   <Link
                     href={link.href}
                     target={isStandalone ? undefined : "_blank"}
                     rel={isStandalone ? undefined : "noopener noreferrer"}
-                    className={`group relative p-5 rounded-2xl transition-all duration-300 flex flex-col items-center text-center w-full h-full ${
+                    className={`group relative p-5 rounded-2xl transition-all duration-300 flex flex-col items-center text-center w-full h-full hover:scale-[1.03] active:scale-[0.97] ${
                       link.primary
                         ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50"
                         : "bg-white/5 backdrop-blur-lg ring-1 ring-white/10"
@@ -544,24 +475,21 @@ export default function PortalPage() {
                       {link.title}
                     </h2>
                   </Link>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
 
 
         </div>
 
         {/* Footer info */}
-        <motion.div
-          variants={headerVariants}
-          className="text-center opacity-60 pb-4"
-        >
+        <div className="animate-fade-in text-center opacity-60 pb-4" style={{animationDelay:'0.3s'}}>
           <p className="text-slate-500 text-[6px] font-medium tracking-widest uppercase">
             &copy; {new Date().getFullYear()} {siteInfo.name}
           </p>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

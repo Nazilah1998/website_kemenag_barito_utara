@@ -5,9 +5,11 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
   useSyncExternalStore,
+  useCallback,
 } from "react";
-import { messages } from "../data/i18n";
+import { messagesId } from "../data/i18n-id";
 
 const LanguageContext = createContext(null);
 
@@ -27,7 +29,7 @@ function getLanguageSnapshot() {
 
   const savedLocale = window.localStorage.getItem(STORAGE_KEY);
 
-  if (savedLocale && messages[savedLocale]) {
+  if (savedLocale === "id" || savedLocale === "en") {
     return savedLocale;
   }
 
@@ -72,17 +74,32 @@ export function LanguageProvider({ children }) {
     getLanguageServerSnapshot,
   );
 
+  const [enMessages, setEnMessages] = useState(null);
+
+  useEffect(() => {
+    if (locale === "en" && !enMessages) {
+      import("../data/i18n-en.js").then((mod) =>
+        setEnMessages(mod.messagesEn),
+      );
+    }
+  }, [locale, enMessages]);
+
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
 
-  const setLocale = (nextLocale) => {
+  const setLocale = useCallback((nextLocale) => {
     if (typeof window === "undefined") return;
-    if (!messages[nextLocale]) return;
+    if (nextLocale !== "id" && nextLocale !== "en") return;
 
     window.localStorage.setItem(STORAGE_KEY, nextLocale);
     emitLanguageChange();
-  };
+  }, []);
+
+  const messages = useMemo(
+    () => ({ id: messagesId, en: enMessages }),
+    [enMessages],
+  );
 
   const value = useMemo(
     () => ({
@@ -90,10 +107,10 @@ export function LanguageProvider({ children }) {
       setLocale,
       t: (path) =>
         getByPath(messages[locale], path) ??
-        getByPath(messages[DEFAULT_LOCALE], path) ??
+        getByPath(messagesId, path) ??
         path,
     }),
-    [locale],
+    [locale, messages, setLocale],
   );
 
   return (
