@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import Image from "next/image";
+import DatePicker from "@/components/ui/DatePicker";
 
 export function GaleriFormModal({
   open,
@@ -50,18 +51,13 @@ export function GaleriFormModal({
           <div className="grid gap-8 sm:grid-cols-2">
             {/* Left: Date */}
             <div className="space-y-6">
-              <div className="group">
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-                  Tanggal Galeri
-                </label>
-                <input
-                  type="datetime-local"
-                  name="published_at"
-                  value={form.published_at ? form.published_at.slice(0, 16) : ""}
-                  onChange={onChange}
-                  className="h-14 w-full rounded-2xl border-2 border-slate-100 bg-white px-5 text-sm font-black text-slate-900 outline-none transition-all focus:border-slate-900 dark:border-white/5 dark:bg-slate-800/50 dark:text-white dark:focus:border-white"
-                />
-              </div>
+              <DatePicker
+                label="Tanggal Galeri"
+                value={form.published_at}
+                onChange={(date) =>
+                  onChange({ target: { name: "published_at", value: date } })
+                }
+              />
 
               <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-950/20">
                 <div className="flex items-start gap-3">

@@ -54,7 +54,7 @@ export function GalleryHeader({ count }) {
   );
 }
 
-export function GalleryCard({ item, onOpen, isActive, onToggle }) {
+export function GalleryCard({ item, index = 0, onOpen, isActive, onToggle }) {
   const { t, locale } = useLanguage();
 
   const handleDownload = async (e) => {
@@ -105,6 +105,7 @@ export function GalleryCard({ item, onOpen, isActive, onToggle }) {
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
           className="object-cover transition duration-700 group-hover:scale-110"
           unoptimized
+          loading={index < 6 ? "eager" : "lazy"}
         />
         {/* Multi-layered Overlays */}
         <div className={`absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent transition-opacity duration-500 ${isActive ? "opacity-90" : "opacity-60 lg:group-hover:opacity-90"}`} />

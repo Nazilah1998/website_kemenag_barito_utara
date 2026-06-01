@@ -26,8 +26,8 @@ export default function BeritaViewCounter({ slug, initialViews = 0 }) {
 
         const data = await response.json();
 
-        if (response.ok) {
-          setViews((prev) => prev + 1);
+        if (response.ok && typeof data.views === "number") {
+          setViews(data.views);
           sessionStorage.setItem(storageKey, "1");
         }
       } catch (err) {

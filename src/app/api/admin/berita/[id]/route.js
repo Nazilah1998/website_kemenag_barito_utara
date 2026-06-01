@@ -10,8 +10,8 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { db } from "@/lib/drizzle";
-import { berita, galeri } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { berita } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { logInfo, logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -218,42 +218,6 @@ async function buildPayload(
   };
 }
 
-async function syncRelatedGaleriMetadata(beritaItem) {
-  const [galeriItem] = await db
-    .select()
-    .from(galeri)
-    .where(
-      and(
-        eq(galeri.source_type, "berita"),
-        eq(galeri.source_id, beritaItem.id)
-      )
-    )
-    .limit(1);
-
-  if (!galeriItem) {
-    return;
-  }
-
-  const patch = {
-    title: beritaItem.title,
-    link_url: `/berita/${beritaItem.slug}`,
-    is_published: Boolean(beritaItem.is_published),
-    published_at: beritaItem.published_at,
-    updated_at: new Date()
-  };
-
-  if (!galeriItem.image_url) {
-    patch.image_url = beritaItem.cover_image;
-    patch.image_size_kb = beritaItem.cover_size_kb || 0;
-    patch.image_size_bytes = beritaItem.cover_size_bytes || 0;
-  }
-
-  await db
-    .update(galeri)
-    .set(patch)
-    .where(eq(galeri.id, galeriItem.id));
-}
-
 export async function GET(request, context) {
   const auth = await validateAdmin({
     allowEditor: true,
@@ -326,8 +290,6 @@ export async function PUT(request, context) {
       .where(eq(berita.id, safeId))
       .returning();
 
-    await syncRelatedGaleriMetadata(data);
-
     await revalidateBeritaPaths(data?.slug);
 
     if (existingItem.slug && existingItem.slug !== data.slug) {
@@ -396,42 +358,11 @@ export async function DELETE(request, context) {
 
     if (!existingItem) throw createHttpError("Berita tidak ditemukan.", 404);
 
-    const relatedGalleryRows = await db
-      .select({ id: galeri.id, image_url: galeri.image_url })
-      .from(galeri)
-      .where(
-        and(
-          eq(galeri.source_type, "berita"),
-          eq(galeri.source_id, safeId)
-        )
-      );
-
-    // Hapus berita dan galeri terkait dalam 1 transaksi
-    await db.transaction(async (tx) => {
-      await tx.delete(galeri).where(
-        and(
-          eq(galeri.source_type, "berita"),
-          eq(galeri.source_id, safeId)
-        )
-      );
-      await tx.delete(berita).where(eq(berita.id, safeId));
-    });
+    await db.delete(berita).where(eq(berita.id, safeId));
 
     try {
-      const filesToDelete = new Set();
-
       if (existingItem.cover_image) {
-        filesToDelete.add(existingItem.cover_image);
-      }
-
-      for (const row of relatedGalleryRows || []) {
-        if (row?.image_url) {
-          filesToDelete.add(row.image_url);
-        }
-      }
-
-      for (const fileUrl of filesToDelete) {
-        await removeStorageFileByPublicUrl(fileUrl);
+        await removeStorageFileByPublicUrl(existingItem.cover_image);
       }
     } catch (cleanupError) {
       logError("berita_id_storage_cleanup_warning", { error: cleanupError?.message });
@@ -448,15 +379,9 @@ export async function DELETE(request, context) {
       before: {
         slug: existingItem?.slug,
         cover_image: existingItem?.cover_image,
-        related_gallery_count: (relatedGalleryRows || []).length,
       },
       after: null,
       request,
-      metadata: {
-        deleted_gallery_ids: (relatedGalleryRows || [])
-          .map((row) => row?.id)
-          .filter(Boolean),
-      },
     });
 
     return apiResponse({

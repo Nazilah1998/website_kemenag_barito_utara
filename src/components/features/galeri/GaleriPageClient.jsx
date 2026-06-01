@@ -39,6 +39,7 @@ export default function GaleriPageClient({ items = [] }) {
                   <GalleryCard
                     key={itemId}
                     item={item}
+                    index={absoluteIndex}
                     isActive={tappedId === itemId}
                     onToggle={() => setTappedId(tappedId === itemId ? null : itemId)}
                     onOpen={() => g.setSelectedIndex(absoluteIndex)}

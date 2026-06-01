@@ -1,11 +1,7 @@
-const viewBuffer = new Map<string, number>();
-let flushTimer: ReturnType<typeof setTimeout> | null = null;
-const FLUSH_INTERVAL = 30_000;
-
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-function useUpstash(): boolean {
+function hasUpstash(): boolean {
   return Boolean(UPSTASH_URL && UPSTASH_TOKEN);
 }
 
@@ -28,65 +24,101 @@ async function upstashCommand(args: unknown[]): Promise<unknown | null> {
   }
 }
 
+async function getDbViews(slug: string): Promise<number> {
+  try {
+    const { db } = await import("@/lib/drizzle");
+    const { berita } = await import("@/db/schema");
+    const { eq } = await import("drizzle-orm");
+
+    const result = await db
+      .select({ views: berita.views })
+      .from(berita)
+      .where(eq(berita.slug, slug))
+      .limit(1);
+
+    return Number(result[0]?.views ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+const FLUSH_INTERVAL = 60_000;
+
 async function flushViews(): Promise<void> {
-  if (viewBuffer.size === 0) return;
+  if (!hasUpstash()) return;
 
-  const batch = new Map(viewBuffer);
-  viewBuffer.clear();
+  try {
+    const keysResult = await upstashCommand(["KEYS", "views:*"]);
+    const keys = Array.isArray(keysResult) ? keysResult : [];
+    if (keys.length === 0) return;
 
-  if (useUpstash()) {
+    const { db } = await import("@/lib/drizzle");
+    const { berita } = await import("@/db/schema");
+    const { eq } = await import("drizzle-orm");
+
     await Promise.all(
-      Array.from(batch.keys()).map(async (slug) => {
-        const redisVal = await upstashCommand(["GETSET", `view:${slug}`, "0"]);
-        if (redisVal !== null) {
-          batch.set(slug, Number(redisVal));
-        }
+      keys.map(async (key: string) => {
+        const slug = key.replace("views:", "");
+        const redisVal = await upstashCommand(["GET", key]);
+        if (redisVal === null || redisVal === undefined) return;
+
+        const views = Number(redisVal);
+        if (isNaN(views)) return;
+
+        await db
+          .update(berita)
+          .set({ views })
+          .where(eq(berita.slug, slug))
+          .catch((err: Error) => {
+            console.error(JSON.stringify({ event: "view_flush_error", slug, error: err.message }));
+          });
       }),
     );
+  } catch (error) {
+    console.error(JSON.stringify({ event: "view_flush_error", error: error?.message }));
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db: any = (await import("@/lib/drizzle")).db;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const berita: any = (await import("@/db/schema")).berita;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { eq, sql }: { eq: any; sql: any } = await import("drizzle-orm");
-
-  await Promise.all(
-    Array.from(batch.entries()).map(([slug, count]) =>
-      db
-        .update(berita)
-        .set({ views: sql`${berita.views} + ${count}` })
-        .where(eq(berita.slug, slug))
-        .catch((err: Error) => {
-          console.error(JSON.stringify({ event: "view_counter_flush_error", slug, error: err.message }));
-        }),
-    ),
-  );
 }
 
 function scheduleFlush(): void {
   if (flushTimer) return;
   flushTimer = setTimeout(() => {
     flushTimer = null;
-    flushViews();
+    flushViews().finally(() => scheduleFlush());
   }, FLUSH_INTERVAL);
 }
 
-export function incrementView(slug: string): number {
-  const current = viewBuffer.get(slug) || 0;
-  viewBuffer.set(slug, current + 1);
+export async function incrementView(slug: string): Promise<number> {
+  if (hasUpstash()) {
+    try {
+      const dbViews = await getDbViews(slug);
+      await upstashCommand(["SET", `views:${slug}`, String(dbViews), "NX"]);
 
-  if (useUpstash()) {
-    upstashCommand(["INCR", `view:${slug}`])
-      .then((count) => {
-        if (count === 1) {
-          upstashCommand(["EXPIRE", `view:${slug}`, "120"]);
-        }
-      })
-      .catch(() => {});
+      const total = await upstashCommand(["INCR", `views:${slug}`]);
+
+      if (typeof total === "number") {
+        scheduleFlush();
+        return total;
+      }
+    } catch {
+      // Redis gagal, fallback ke DB langsung
+    }
   }
 
-  scheduleFlush();
-  return viewBuffer.get(slug) as number;
+  try {
+    const { db } = await import("@/lib/drizzle");
+    const { berita } = await import("@/db/schema");
+    const { eq, sql } = await import("drizzle-orm");
+
+    const result = await db
+      .update(berita)
+      .set({ views: sql`${berita.views} + 1` })
+      .where(eq(berita.slug, slug))
+      .returning({ views: berita.views });
+
+    return Number(result[0]?.views ?? 0);
+  } catch (error) {
+    console.error(JSON.stringify({ event: "view_counter_error", slug, error: error?.message }));
+    return 0;
+  }
 }

@@ -22,6 +22,7 @@ import {
   IconClear
 } from "./BeritaIcons";
 import { BERITA_CATEGORIES } from "@/lib/berita-utils";
+import DatePicker from "@/components/ui/DatePicker";
 
 export function BeritaFormModal({
   open,
@@ -142,13 +143,13 @@ export function BeritaFormModal({
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Publikasi</label>
-                    <input
-                      type="datetime-local"
-                      name="published_at"
+                    <DatePicker
+                      label="Publikasi"
                       value={form.published_at}
-                      onChange={onChange}
-                      className="mt-1.5 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-900 outline-none dark:border-slate-800 dark:bg-slate-800/50 dark:text-white"
+                      buttonClassName="mt-1.5 h-12"
+                      onChange={(date) =>
+                        onChange({ target: { name: "published_at", value: date } })
+                      }
                     />
                   </div>
                 </div>

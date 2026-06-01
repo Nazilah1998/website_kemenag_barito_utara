@@ -29,7 +29,7 @@ export function GaleriTable({ items, loading, onEdit, onDelete, deletingId }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-      {items.map((item) => (
+      {items.map((item, index) => (
         <article key={item.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900">
           <Image
             src={item.image_url}
@@ -37,6 +37,7 @@ export function GaleriTable({ items, loading, onEdit, onDelete, deletingId }) {
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 16vw"
             className="object-cover transition-transform duration-700 group-hover:scale-110"
+            loading={index < 6 ? "eager" : "lazy"}
           />
           <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 

@@ -1,7 +1,7 @@
 import GaleriPageClient from "@/components/features/galeri/GaleriPageClient";
 import { db } from "@/lib/drizzle";
 import { galeri } from "@/db/schema";
-import { eq, desc, ne } from "drizzle-orm";
+import { eq, desc, ne, and } from "drizzle-orm";
 import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
 import { logError } from "@/lib/logger";
 
@@ -34,7 +34,7 @@ async function getPublishedGaleri() {
     let data = await db
       .select()
       .from(galeri)
-      .where(eq(galeri.is_published, true))
+      .where(and(eq(galeri.is_published, true), eq(galeri.source_type, "manual")))
       .orderBy(desc(galeri.published_at), desc(galeri.created_at));
 
     if (data && data.length > 0) {
@@ -45,7 +45,7 @@ async function getPublishedGaleri() {
     data = await db
       .select()
       .from(galeri)
-      .where(ne(galeri.is_published, false))
+      .where(and(ne(galeri.is_published, false), eq(galeri.source_type, "manual")))
       .orderBy(desc(galeri.published_at), desc(galeri.created_at));
 
     return mapGaleriItems(data);

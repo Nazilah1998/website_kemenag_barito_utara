@@ -4,7 +4,7 @@ import { compressImageToBase64 } from "@/lib/image-compress";
 const ITEMS_PER_PAGE = 12;
 
 const emptyForm = {
-  published_at: "",
+  published_at: null,
   gallery_upload_base64: "",
   image_url: "",
 };
@@ -60,14 +60,14 @@ export function useGaleriManager() {
 
   function handleOpenCreate() {
     setEditingId(null);
-    setForm({ ...emptyForm, published_at: new Date().toISOString() });
+    setForm({ ...emptyForm, published_at: new Date() });
     setOpenForm(true);
   }
 
   function handleOpenEdit(item) {
     setEditingId(item.id);
     setForm({
-      published_at: item.published_at || new Date().toISOString(),
+      published_at: item.published_at ? new Date(item.published_at) : new Date(),
       image_url: item.image_url || "",
       gallery_upload_base64: "",
     });

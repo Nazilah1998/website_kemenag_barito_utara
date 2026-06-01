@@ -16,9 +16,9 @@ export async function POST(request, context) {
   }
   try {
     const { slug } = await context.params;
-    incrementView(slug);
+    const views = await incrementView(slug);
 
-    return apiResponse({ ok: true });
+    return apiResponse({ ok: true, views });
   } catch (error) {
     logError("berita_view_error", { error: error?.message });
     return apiResponse(

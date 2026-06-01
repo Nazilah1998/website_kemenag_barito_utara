@@ -7,8 +7,6 @@ import {
   getMonthKey,
   getMonthLabelFromKey,
   slugPreview,
-  toDateTimeLocal,
-  getDefaultPublishedAt,
   countWords,
   estimateReadingTime,
   sanitizeSlugInput,
@@ -33,7 +31,7 @@ const emptyForm = {
   cover_upload_name: "",
   cover_upload_size_kb: 0,
   is_published: true,
-  published_at: "",
+  published_at: null,
 };
 
 export function useBeritaManager() {
@@ -54,7 +52,7 @@ export function useBeritaManager() {
   const [openForm, setOpenForm] = useState(false);
   const [form, setForm] = useState({
     ...emptyForm,
-    published_at: getDefaultPublishedAt(),
+    published_at: new Date(),
   });
   const [editingId, setEditingId] = useState(null);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -238,12 +236,10 @@ export function useBeritaManager() {
     return toCoverPreviewUrl(form.cover_image);
   }, [form.cover_upload_base64, form.cover_image]);
 
-  const galleryPreviewSrc = "";
-
   function resetForm() {
     setForm({
       ...emptyForm,
-      published_at: getDefaultPublishedAt(),
+      published_at: new Date(),
     });
     setEditingId(null);
     setSlugManuallyEdited(false);
@@ -281,9 +277,7 @@ export function useBeritaManager() {
       cover_upload_name: "",
       cover_upload_size_kb: 0,
       is_published: getItemPublishedState(item),
-      published_at: toDateTimeLocal(
-        getItemBaseDate(item) || new Date().toISOString(),
-      ),
+      published_at: new Date(getItemBaseDate(item) || new Date()),
     });
 
     setDirty(false);
@@ -312,8 +306,6 @@ export function useBeritaManager() {
   function handleConfirmCloseForm() {
     closeFormAndReset();
   }
-
-  function handleCloseGalleryForm() {}
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -354,7 +346,7 @@ export function useBeritaManager() {
       is_published: nextValue,
       published_at:
         nextValue && !prev.published_at
-          ? getDefaultPublishedAt()
+          ? new Date()
           : prev.published_at,
     }));
     setDirty(true);
@@ -514,14 +506,12 @@ export function useBeritaManager() {
     let publishedAtIso = "";
 
     if (form.published_at) {
-      const publishedDate = new Date(form.published_at);
-
-      if (Number.isNaN(publishedDate.getTime())) {
+      if (Number.isNaN(form.published_at.getTime())) {
         setError("Tanggal publish tidak valid.");
         return null;
       }
 
-      publishedAtIso = publishedDate.toISOString();
+      publishedAtIso = form.published_at.toISOString();
     }
 
     return {
