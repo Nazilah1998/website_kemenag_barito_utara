@@ -14,6 +14,7 @@ export function MaintenanceSidebar() {
               alt="Logo Kementerian Agama"
               width={26}
               height={26}
+              unoptimized
               className="h-6 w-auto object-contain"
               style={{ width: "auto" }}
             />

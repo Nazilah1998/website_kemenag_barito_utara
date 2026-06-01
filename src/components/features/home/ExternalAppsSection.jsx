@@ -166,6 +166,7 @@ export default function ExternalAppsSection() {
                         alt={app.title}
                         width={64}
                         height={64}
+                        unoptimized
                         className="h-full w-full object-contain"
                       />
                     </div>

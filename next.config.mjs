@@ -143,7 +143,8 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns,
-    qualities: [60, 70, 75, 85, 100],
+    deviceSizes: [640, 1080, 1920],
+    imageSizes: [128, 256, 384],
   },
   serverExternalPackages: [
     "@aws-sdk/client-s3",

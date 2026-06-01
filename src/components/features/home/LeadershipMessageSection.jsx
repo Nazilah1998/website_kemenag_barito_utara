@@ -13,6 +13,7 @@ export default function LeadershipMessageSection() {
               width={96}
               height={96}
               className="h-24 w-24 object-contain"
+              unoptimized
             />
           </div>
 

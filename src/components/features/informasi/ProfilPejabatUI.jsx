@@ -74,7 +74,6 @@ function KepalaKantorCard({ pejabat }) {
             src={pejabat.foto_kepala}
             alt={pejabat.nama_kepala}
             className="relative h-52 w-52 lg:h-64 lg:w-64 overflow-hidden rounded-full ring-4 ring-white/20 shadow-2xl"
-            priority
             sizes="(max-width: 1024px) 13rem, 16rem"
             foto_kepala_y={pejabat.foto_kepala_y ?? 50}
           />

@@ -272,7 +272,7 @@ const ChatWidget = () => {
               alt="Kemenag"
               width={40}
               height={40}
-              priority
+              unoptimized
               style={{
                 width: "65%",
                 height: "65%",
@@ -511,6 +511,7 @@ const ChatWidget = () => {
                       alt="Logo"
                       width={32}
                       height={32}
+                      unoptimized
                       style={{
                         width: "70%",
                         height: "70%",

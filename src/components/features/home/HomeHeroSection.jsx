@@ -17,7 +17,7 @@ export default function HomeHeroSection() {
           alt="Kantor Kementerian Agama Kabupaten Barito Utara"
           fill
           sizes="100vw"
-          quality={70}
+          quality={75}
           className="object-cover opacity-30 mix-blend-luminosity scale-105"
           priority
           fetchPriority="high"
@@ -119,7 +119,7 @@ function HomeFocusCard({ t }) {
           <div className="relative">
             <div className="absolute -inset-1.5 rounded-2xl bg-emerald-500/20 blur-lg animate-pulse" />
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-inner">
-              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={50} height={50} className="object-contain" priority />
+              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={50} height={50} className="object-contain" unoptimized />
             </div>
           </div>
           <div>

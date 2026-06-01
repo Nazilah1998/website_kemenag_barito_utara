@@ -23,7 +23,7 @@ export function MaintenanceContent({ title, featureName, description }) {
                 alt="Logo Kementerian Agama"
                 width={40}
                 height={40}
-                priority
+                unoptimized
                 className="h-10 w-auto object-contain"
                 style={{ width: "auto" }}
               />

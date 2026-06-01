@@ -12,7 +12,7 @@ export function FooterBrand() {
     <div>
       <div className="flex items-center gap-3">
         <div className="theme-footer-panel flex h-12 w-12 items-center justify-center rounded-2xl p-2">
-          <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} className="object-contain" />
+          <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} className="object-contain" unoptimized />
         </div>
         <div>
           <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong)">{siteInfo.logoTitleLine1}</p>

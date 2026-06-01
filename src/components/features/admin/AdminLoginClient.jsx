@@ -23,7 +23,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
       <div className="relative w-full max-w-[440px] animate-in fade-in zoom-in duration-500">
         <div className="mb-10 flex flex-col items-center text-center">
           <Link href="/" className="group mb-8 transition-transform hover:scale-110">
-            <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={72} height={72} priority className="drop-shadow-2xl" />
+            <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={72} height={72} unoptimized className="drop-shadow-2xl" />
           </Link>
 
           <div className="flex items-center gap-3 mb-4">
