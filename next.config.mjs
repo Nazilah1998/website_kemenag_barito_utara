@@ -153,7 +153,6 @@ const nextConfig = {
 "pdfjs-dist",
   ],
   experimental: {
-    browsersListForSwc: true,
     inlineCss: true,
     optimizePackageImports: [
       "lucide-react",
