@@ -8,24 +8,12 @@ import AppShell from "@/components/layout/AppShell";
 
 import { siteInfo } from "@/data/site";
 import Script from "next/script";
-import dynamic from "next/dynamic";
 import {
   organizationSchema,
   websiteSchema,
   navigationSchema,
 } from "@/lib/structured-data";
-
-const VercelAnalytics = dynamic(
-  () => import("@/components/layout/VercelAnalytics"),
-);
-const VercelSpeedInsights = dynamic(
-  () => import("@/components/layout/VercelSpeedInsights"),
-);
-const PwaRegister = dynamic(() => import("@/components/layout/PwaRegister"));
-const ChatWidget = dynamic(
-  () => import("@/components/features/chat/ChatWidget"),
-);
-const RealtimeSync = dynamic(() => import("@/components/common/RealtimeSync"));
+import DynamicImports from "@/components/layout/DynamicImports";
 import JsonLd from "@/components/features/seo/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -169,13 +157,8 @@ export default function RootLayout({ children }) {
       >
         <Providers>
           <AppShell>{children}</AppShell>
-          <ChatWidget />
-          <RealtimeSync />
         </Providers>
-
-        <VercelAnalytics />
-        <VercelSpeedInsights />
-        <PwaRegister />
+        <DynamicImports />
       </body>
     </html>
   );

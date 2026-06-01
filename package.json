@@ -36,6 +36,14 @@
     "react-easy-crop": "^5.5.7",
     "react-pdf": "^10.4.1"
   },
+  "browserslist": [
+    "last 1 chrome version",
+    "last 1 firefox version",
+    "last 1 safari version",
+    "last 1 edge version",
+    "> 0.5%",
+    "not dead"
+  ],
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
