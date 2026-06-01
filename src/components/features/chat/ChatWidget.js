@@ -269,10 +269,11 @@ const ChatWidget = () => {
             }}
           >
             <Image
-              src="/assets/icons/kemenag-512.png"
+              src="/assets/branding/kemenag.svg"
               alt="Kemenag"
               width={40}
               height={40}
+              priority
               unoptimized
               style={{
                 width: "65%",
@@ -508,7 +509,7 @@ const ChatWidget = () => {
                     }}
                   >
                     <Image
-                      src="/assets/icons/kemenag-512.png"
+                      src="/assets/branding/kemenag.svg"
                       alt="Logo"
                       width={32}
                       height={32}

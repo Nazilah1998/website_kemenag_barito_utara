@@ -46,7 +46,7 @@ function CalendarIcon({ className }) {
 }
 
 export function DesktopClockSection() {
-  const [time, setTime] = useState(() => new Date());
+  const [time, setTime] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -98,7 +98,7 @@ export function DesktopClockSection() {
 }
 
 export function MobileClockSection() {
-  const [time, setTime] = useState(() => new Date());
+  const [time, setTime] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);

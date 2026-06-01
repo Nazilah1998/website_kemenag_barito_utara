@@ -153,6 +153,7 @@ const nextConfig = {
 "pdfjs-dist",
   ],
   experimental: {
+    inlineCss: true,
     optimizePackageImports: [
       "lucide-react",
       "framer-motion",

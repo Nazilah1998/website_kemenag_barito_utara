@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Inter } from "next/font/google";
 import "./tailwind.css";
 import "./globals.css";
@@ -5,6 +7,7 @@ import Providers from "@/components/layout/Providers";
 import AppShell from "@/components/layout/AppShell";
 
 import { siteInfo } from "@/data/site";
+import Script from "next/script";
 import dynamic from "next/dynamic";
 import {
   organizationSchema,
@@ -26,6 +29,16 @@ const RealtimeSync = dynamic(() => import("@/components/common/RealtimeSync"));
 import JsonLd from "@/components/features/seo/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
+
+let criticalCss = "";
+try {
+  criticalCss = fs.readFileSync(
+    path.join(process.cwd(), "src/app/critical.css"),
+    "utf-8",
+  );
+} catch {
+  // Fallback: ignore, page will still render without inline CSS
+}
 
 export const metadata = {
   metadataBase: new URL(siteInfo.siteUrl),
@@ -132,12 +145,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL || ""} />
-        <link rel="preconnect" href={process.env.CLOUDFLARE_R2_ENDPOINT || ""} />
-        <link rel="preconnect" href="https://va.vercel-scripts.com" />
-        <link rel="preconnect" href="https://challenges.cloudflare.com" />
-        <script
-          suppressHydrationWarning
+        <link rel="preconnect" href={siteInfo.siteUrl} />
+        {criticalCss && (
+          <style
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: criticalCss }}
+          />
+        )}
+        <Script
+          id="theme-detection"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: "(function(){try{var e=\"site-theme\",t=document.documentElement,n=window.localStorage.getItem(e),r=n===\"light\"||n===\"dark\"?n:window.matchMedia(\"(prefers-color-scheme: dark)\").matches?\"dark\":\"light\";t.dataset.theme=r,r===\"dark\"?t.classList.add(\"dark\"):t.classList.remove(\"dark\"),t.style.colorScheme=r}catch(e){}})();",
           }}

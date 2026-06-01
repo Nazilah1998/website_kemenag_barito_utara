@@ -24,9 +24,14 @@ export default function RealtimeSync() {
         // Trigger a soft refresh to pull latest data from Server Components
         router.refresh();
       })
-      .subscribe((status) => {
+      .subscribe((status, err) => {
         if (status === "SUBSCRIBED") {
           logInfo("realtimesync_listening");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          logInfo("realtimesync_connection_failed", {
+            status,
+            error: err?.message,
+          });
         }
       });
 
