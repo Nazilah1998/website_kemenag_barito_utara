@@ -45,7 +45,7 @@ export default function LaporanDocumentsClient({ documents = [], categorySlug })
         );
     }
 
-    if (categorySlug === "sop-dan-standar-pelayanan") {
+    if (categorySlug === "sop") {
         return (
             <div className="w-full space-y-4">
                 {BIDANG_LIST.map((bidang, index) => {

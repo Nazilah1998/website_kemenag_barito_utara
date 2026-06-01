@@ -63,7 +63,19 @@ export function getNavigationItems(locale = "id") {
       ],
     },
 
-    { label: m.laporan, href: "/laporan" },
+    {
+      label: m.laporan,
+      href: "/laporan",
+      children: [
+        { label: m.laporanSop, href: "/laporan/sop" },
+        { label: m.laporanRenstra, href: "/laporan/renstra" },
+        { label: m.laporanPj, href: "/laporan/perjanjian-kinerja" },
+        { label: m.laporanRk, href: "/laporan/rencana-kinerja" },
+        { label: m.laporanCk, href: "/laporan/capaian-kinerja" },
+        { label: m.laporanLkj, href: "/laporan/laporan-kinerja" },
+        { label: m.laporanRkt, href: "/laporan/rencana-kerja-tahunan" },
+      ],
+    },
     { label: m.galeri, href: "/galeri" },
     { label: m.kontak, href: "/kontak" },
   ];

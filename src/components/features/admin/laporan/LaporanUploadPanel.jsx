@@ -81,7 +81,7 @@ export default function LaporanUploadPanel({
 
             <form className="flex-1 space-y-6" onSubmit={handleUpload} noValidate>
                 <div className="space-y-6">
-                    {activeCategory?.slug === "sop-dan-standar-pelayanan" && (
+                    {activeCategory?.slug === "sop" && (
                         <div className="space-y-2 relative">
                             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-slate-100 ml-1">
                                 SOP Bidang <span className="text-rose-500">*</span>

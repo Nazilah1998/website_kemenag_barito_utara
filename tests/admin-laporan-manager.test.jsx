@@ -14,9 +14,9 @@ describe("AdminLaporanCategoryManager", () => {
     const categories = [
         {
             id: "1",
-            slug: "laporan-tahunan",
-            title: "Laporan Tahunan",
-            description: "Kumpulan laporan tahunan",
+            slug: "sop",
+            title: "SOP dan Standar Pelayanan",
+            description: "Kumpulan SOP dan standar pelayanan",
         },
         {
             id: "2",
@@ -28,9 +28,9 @@ describe("AdminLaporanCategoryManager", () => {
 
     const category = {
         id: "1",
-        slug: "laporan-tahunan",
-        title: "Laporan Tahunan",
-        description: "Kumpulan laporan tahunan",
+        slug: "sop",
+        title: "SOP dan Standar Pelayanan",
+        description: "Kumpulan SOP dan standar pelayanan",
         documents: [
             {
                 id: 101,
@@ -57,7 +57,7 @@ describe("AdminLaporanCategoryManager", () => {
         expect(screen.getByText("Arsip Dokumen")).toBeInTheDocument();
 
         expect(
-            screen.getByRole("button", { name: /laporan tahunan/i }),
+            screen.getByRole("button", { name: /sop dan standar pelayanan/i }),
         ).toBeInTheDocument();
 
         expect(screen.getByText("Laporan 2025")).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe("AdminLaporanCategoryManager", () => {
         fireEvent.click(trigger);
 
         expect(
-            screen.getAllByRole("button", { name: /laporan tahunan/i })[0],
+            screen.getAllByRole("button", { name: /sop dan standar pelayanan/i })[0],
         ).toBeInTheDocument();
 
         expect(

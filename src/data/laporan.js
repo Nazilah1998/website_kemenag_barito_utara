@@ -1,6 +1,6 @@
 export const laporanCategories = [
   {
-    slug: "sop-dan-standar-pelayanan",
+    slug: "sop",
     icon: "clipboard-check",
     title: "SOP dan Standar Pelayanan",
     description:

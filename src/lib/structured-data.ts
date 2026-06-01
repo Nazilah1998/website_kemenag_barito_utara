@@ -24,8 +24,8 @@ export function organizationSchema() {
     "@context": "https://schema.org",
     "@type": ["GovernmentOrganization", "GovernmentOffice"],
     "@id": `${BASE}#organization`,
-    name: "Kementerian Agama Kabupaten Barito Utara",
-    alternateName: ["Kemenag Barito Utara", "Kemenag Barut"],
+    name: siteInfo.shortName,
+    alternateName: ["Kementerian Agama Kabupaten Barito Utara", "Kemenag Barut"],
     url: `${BASE}/`,
     logo: {
       "@type": "ImageObject",
