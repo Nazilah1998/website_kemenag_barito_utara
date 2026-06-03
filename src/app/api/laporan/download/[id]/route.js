@@ -58,11 +58,6 @@ export async function GET(request, { params }) {
       targetUrl = `${baseUrl}${targetUrl}`;
     }
     
-    // Instead of forcing download through streams (since file could be in R2/S3),
-    // redirecting is the easiest way. If the user wants a forced download,
-    // they can add ?download=true to the target URL, or the client can handle it.
-    // Given the previous setup, redirect is safe.
-
     const response = NextResponse.redirect(targetUrl);
     response.headers.set("Access-Control-Allow-Origin", "*");
     response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");

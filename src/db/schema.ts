@@ -83,6 +83,8 @@ export const news = pgTable("news", {
 			name: "news_category_id_fkey"
 		}).onDelete("set null"),
 	unique("news_slug_key").on(table.slug),
+	index("idx_news_author_id").using("btree", table.author_id.asc().nullsLast().op("uuid_ops")),
+	index("idx_news_category_id").using("btree", table.category_id.asc().nullsLast().op("uuid_ops")),
 	pgPolicy("Public can read published news", { as: "permissive", for: "select", to: ["public"], using: sql`(status = 'published'::text)` }),
 	pgPolicy("Editors can manage news", { as: "permissive", for: "all", to: ["authenticated"] }),
 	check("news_status_check", sql`status = ANY (ARRAY['draft'::text, 'review'::text, 'published'::text, 'archived'::text])`),
@@ -116,6 +118,7 @@ export const berita = pgTable("berita", {
 			name: "berita_author_id_fkey"
 		}).onDelete("set null"),
 	unique("berita_slug_key").on(table.slug),
+	index("idx_berita_author_id").using("btree", table.author_id.asc().nullsLast().op("uuid_ops")),
 	pgPolicy("Berita published readable by anyone", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 ]);
 
@@ -141,6 +144,7 @@ export const dokumen = pgTable("dokumen", {
 			name: "dokumen_author_id_fkey"
 		}).onDelete("set null"),
 	unique("dokumen_slug_key").on(table.slug),
+	index("idx_dokumen_author_id").using("btree", table.author_id.asc().nullsLast().op("uuid_ops")),
 	pgPolicy("public read published dokumen", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 ]);
 
@@ -165,6 +169,7 @@ export const agenda = pgTable("agenda", {
 			name: "agenda_author_id_fkey"
 		}).onDelete("set null"),
 	unique("agenda_slug_key").on(table.slug),
+	index("idx_agenda_author_id").using("btree", table.author_id.asc().nullsLast().op("uuid_ops")),
 	pgPolicy("public read published agenda", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 ]);
 
@@ -229,6 +234,7 @@ export const report_documents = pgTable("report_documents", {
 }, (table) => [
 	index("idx_report_documents_view_count").using("btree", table.view_count.desc().nullsFirst().op("int8_ops")),
 	index("idx_report_documents_year").using("btree", table.year.desc().nullsFirst().op("int4_ops")),
+	index("idx_report_documents_category_id").using("btree", table.category_id.asc().nullsLast().op("uuid_ops")),
 	foreignKey({
 			columns: [table.category_id],
 			foreignColumns: [report_categories.id],
@@ -311,6 +317,7 @@ export const static_pages = pgTable("static_pages", {
 			name: "static_pages_author_id_fkey"
 		}).onDelete("set null"),
 	unique("static_pages_slug_key").on(table.slug),
+	index("idx_static_pages_author_id").using("btree", table.author_id.asc().nullsLast().op("uuid_ops")),
 	pgPolicy("static_pages_select_public", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 	pgPolicy("static_pages_select_admin", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
@@ -358,6 +365,7 @@ export const editor_requests = pgTable("editor_requests", {
 			name: "editor_requests_user_id_fkey"
 		}).onDelete("cascade"),
 	unique("editor_requests_user_id_key").on(table.user_id),
+	index("idx_editor_requests_reviewed_by").using("btree", table.reviewed_by.asc().nullsLast().op("uuid_ops")),
 	check("editor_requests_status_check", sql`status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])`),
 ]);
 

@@ -169,19 +169,19 @@ describe("POST", () => {
   });
 
   it("201 sukses", async () => {
-    uploadBase64Image.mockResolvedValue({ publicUrl: "https://r2.test/img.webp", mimeType: "image/webp", sizeBytes: 50000 });
+    uploadBase64Image.mockResolvedValue({ publicUrl: "https://storage.test/img.webp", mimeType: "image/webp", sizeBytes: 50000 });
     const res = await POST(req("http://localhost/api/admin/galeri", { method: "POST", body: { gallery_upload_base64: "data:image/webp;base64," + "a".repeat(100) } }));
     const b = await res.json();
     expect(res.status).toBe(200);
     expect(b.message).toContain("berhasil disimpan");
-    expect(b.item.image_url).toBe("https://r2.test/img.webp");
+    expect(b.item.image_url).toBe("https://storage.test/img.webp");
   });
 });
 
 describe("PUT", () => {
   beforeEach(() => {
     vi.clearAllMocks(); auth();
-    mockDb.__setStore([{ id: "g-1", title: "Lama", image_url: "https://r2.test/lama.webp", image_size_kb: 100, image_size_bytes: 100000, published_at: new Date("2025-01-01") }]);
+    mockDb.__setStore([{ id: "g-1", title: "Lama", image_url: "https://storage.test/lama.webp", image_size_kb: 100, image_size_bytes: 100000, published_at: new Date("2025-01-01") }]);
   });
 
   it("400 tanpa id", async () => {
@@ -197,14 +197,14 @@ describe("PUT", () => {
     const b = await res.json();
     expect(res.status).toBe(200);
     expect(b.message).toContain("berhasil diperbarui");
-    expect(b.item.image_url).toBe("https://r2.test/lama.webp");
+    expect(b.item.image_url).toBe("https://storage.test/lama.webp");
   });
 });
 
 describe("DELETE", () => {
   beforeEach(() => {
     vi.clearAllMocks(); auth();
-    mockDb.__setStore([{ id: "g-1", image_url: "https://r2.test/lama.webp" }]);
+    mockDb.__setStore([{ id: "g-1", image_url: "https://storage.test/lama.webp" }]);
   });
 
   it("400 tanpa id", async () => {
@@ -220,6 +220,6 @@ describe("DELETE", () => {
     const b = await res.json();
     expect(res.status).toBe(200);
     expect(b.message).toContain("berhasil dihapus");
-    expect(removeStorageFileByPublicUrl).toHaveBeenCalledWith("https://r2.test/lama.webp");
+    expect(removeStorageFileByPublicUrl).toHaveBeenCalledWith("https://storage.test/lama.webp");
   });
 });

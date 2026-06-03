@@ -1,6 +1,6 @@
 # Website Kemenag Barito Utara
 
-Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js 16 App Router** dengan halaman publik, panel admin CMS lengkap, integrasi Supabase Auth & Cloudflare R2 Storage, PWA, chatbot AI multi-model, dan pengujian otomatis dengan Vitest & Playwright.
+Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js 16 App Router** dengan halaman publik, panel admin CMS lengkap, integrasi Supabase Auth & Storage, PWA, chatbot AI multi-model, dan pengujian otomatis dengan Vitest & Playwright.
 
 ## Teknologi utama
 
@@ -10,7 +10,7 @@ Website resmi Kementerian Agama Kabupaten Barito Utara berbasis **Next.js 16 App
 | UI | React 19, Tailwind CSS 4 |
 | Database | Drizzle ORM → PostgreSQL (via Supabase) |
 | Auth & Realtime | Supabase |
-| File Storage | Cloudflare R2 |
+| File Storage | Supabase Storage |
 | AI Chatbot | Google Gemini / Groq / Mistral / OpenRouter (multi-model fallback) |
 | Testing | Vitest (unit), Playwright (E2E) |
 | SEO | Structured Data JSON-LD, Sitemap dinamis, Robots.txt |
@@ -64,11 +64,8 @@ GROQ_API_KEY=
 MISTRAL_API_KEY=
 OPENROUTER_API_KEY=
 
-# Cloudflare R2
-CLOUDFLARE_R2_ACCESS_KEY_ID=
-CLOUDFLARE_R2_SECRET_ACCESS_KEY=
-CLOUDFLARE_R2_ENDPOINT=
-CLOUDFLARE_R2_BUCKET_NAME=
+# Supabase CMS Storage
+NEXT_PUBLIC_SUPABASE_CMS_BUCKET=cms-media
 
 # Cloudflare Turnstile
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=

@@ -26,7 +26,24 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { fullName, email, avatarUrl, accessToken } = body;
+    const { fullName, email, avatarUrl, avatarBase64, accessToken } = body;
+
+    let finalAvatarUrl = avatarUrl;
+    
+    if (avatarBase64) {
+      try {
+        const { uploadBase64Image } = await import("@/lib/storage-media");
+        const res = await uploadBase64Image({ 
+          dataUrl: avatarBase64, 
+          folder: "avatars", 
+          fileNameStem: "avatar" 
+        });
+        finalAvatarUrl = res.publicUrl;
+      } catch (err) {
+        logError("update_profile_avatar_upload", { error: err?.message });
+        return apiResponse({ message: "Gagal mengunggah foto profil." }, 500);
+      }
+    }
 
     if (!accessToken) {
       return apiResponse({ message: "Akses ditolak." }, 400);
@@ -68,7 +85,7 @@ export async function POST(request) {
           .set({
             ...(fullName ? { full_name: fullName } : {}),
             ...(email ? { email: email } : {}),
-            ...(avatarUrl !== undefined ? { avatar_url: avatarUrl } : {}),
+            ...(finalAvatarUrl !== undefined ? { avatar_url: finalAvatarUrl } : {}),
             updated_at: new Date()
           })
           .where(eq(profiles.id, user.id));

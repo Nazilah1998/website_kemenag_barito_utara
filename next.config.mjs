@@ -13,6 +13,10 @@ const remotePatterns = [
     protocol: "https",
     hostname: "cdn.kemenag-baritoutara.com",
   },
+  {
+    protocol: "https",
+    hostname: "tcvwuttdwyufxvkacyal.supabase.co",
+  },
 ];
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -20,10 +24,11 @@ let supabaseHost = null;
 
 if (supabaseUrl) {
   try {
-    supabaseHost = new URL(supabaseUrl).hostname;
+    const supabaseUrlObj = new URL(supabaseUrl);
+    supabaseHost = supabaseUrlObj.hostname;
 
     remotePatterns.push({
-      protocol: "https",
+      protocol: supabaseUrlObj.protocol.replace(":", ""),
       hostname: supabaseHost,
     });
   } catch {
@@ -41,19 +46,6 @@ const isProd = process.env.NODE_ENV === "production";
 function buildCsp() {
   const supabase = supabaseHost ? `https://${supabaseHost}` : "";
   const wsSupabase = supabaseHost ? `wss://${supabaseHost}` : "";
-  const r2Endpoint = process.env.CLOUDFLARE_R2_ENDPOINT || "";
-
-  if (r2Endpoint) {
-    try {
-      const r2Host = new URL(r2Endpoint).hostname;
-      remotePatterns.push({
-        protocol: "https",
-        hostname: r2Host,
-      });
-    } catch {
-      // ignore
-    }
-  }
 
   const directives = {
     "default-src": ["'self'"],
@@ -79,7 +71,6 @@ function buildCsp() {
       "https://challenges.cloudflare.com",
       supabase,
       wsSupabase,
-      r2Endpoint,
     ].filter(Boolean),
     "frame-src": [
       "'self'",
@@ -148,10 +139,8 @@ const nextConfig = {
     imageSizes: [128, 256, 384],
   },
   serverExternalPackages: [
-    "@aws-sdk/client-s3",
-    "@aws-sdk/s3-request-presigner",
     "pg",
-"pdfjs-dist",
+    "pdfjs-dist",
   ],
   experimental: {
     inlineCss: true,
@@ -240,6 +229,14 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/storage/:path*",
+        destination: "/api/storage/media/:path*",
       },
     ];
   },

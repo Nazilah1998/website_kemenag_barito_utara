@@ -6,16 +6,7 @@ export const CMS_MEDIA_BUCKET: string =
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-// Alias for backwards compatibility with existing code calling uploadBase64Image
-export async function uploadBase64Image(args: {
-  dataUrl: string;
-  folder?: string;
-  fileNameStem?: string;
-}) {
-  return uploadBase64ImageToSupabase(args);
-}
-
-export async function uploadBase64ImageToSupabase({
+export async function uploadBase64Image({
   dataUrl,
   folder = "seksi",
   fileNameStem = "image",
@@ -61,7 +52,9 @@ export async function uploadBase64ImageToSupabase({
   };
 }
 
-export async function removeSupabaseFileByPublicUrl(publicUrl = ""): Promise<boolean> {
+export const uploadBase64ImageToSupabase = uploadBase64Image;
+
+export async function removeStorageFileByPublicUrl(publicUrl = ""): Promise<boolean> {
   const path = extractStoragePathFromPublicUrl(publicUrl);
 
   if (!path) {
@@ -77,17 +70,14 @@ export async function removeSupabaseFileByPublicUrl(publicUrl = ""): Promise<boo
     .remove([path]);
 
   if (error) {
-    logError("supabase_storage_delete_failed", { error: error as Error });
+    logError("storage_delete_failed", { error: error as Error });
     return false;
   }
 
   return true;
 }
 
-// Alias for backwards compatibility
-export async function removeStorageFileByPublicUrl(publicUrl: string): Promise<boolean> {
-  return removeSupabaseFileByPublicUrl(publicUrl);
-}
+export const removeSupabaseFileByPublicUrl = removeStorageFileByPublicUrl;
 
 export function isCmsStoragePublicUrl(value = ""): boolean {
   return extractStoragePathFromPublicUrl(value) !== null;
@@ -139,7 +129,7 @@ function extractStoragePathFromPublicUrl(publicUrl = ""): string | null {
   if (!publicUrl) return null;
 
   try {
-    const marker = "/api/storage/r2/";
+    const marker = "/api/storage/media/";
     const index = publicUrl.indexOf(marker);
 
     if (index !== -1) {

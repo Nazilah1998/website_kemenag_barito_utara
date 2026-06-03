@@ -22,14 +22,7 @@ if (!supabasePublishableKey) {
   );
 }
 
-const r2KeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID ?? "";
-const r2SecretKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY ?? "";
-const r2Endpoint = process.env.CLOUDFLARE_R2_ENDPOINT ?? "";
 const turnstileSecret = process.env.TURNSTILE_SECRET_KEY ?? "";
-
-if (!r2KeyId || !r2SecretKey || !r2Endpoint) {
-  logWarn("env_r2_credentials_incomplete");
-}
 
 if (!turnstileSecret) {
   logWarn("env_turnstile_secret_missing");
@@ -46,12 +39,6 @@ interface Env {
   supabaseServiceRoleKey: string;
   turnstileSiteKey: string;
   turnstileSecretKey: string;
-  r2: {
-    accessKeyId: string;
-    secretAccessKey: string;
-    endpoint: string;
-    bucketName: string;
-  };
 }
 
 export const env: Env = {
@@ -61,12 +48,6 @@ export const env: Env = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   turnstileSiteKey: readEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", ""),
   turnstileSecretKey: turnstileSecret,
-  r2: {
-    accessKeyId: r2KeyId,
-    secretAccessKey: r2SecretKey,
-    endpoint: r2Endpoint,
-    bucketName: process.env.CLOUDFLARE_R2_BUCKET_NAME ?? "",
-  },
 };
 
 export function assertServiceRoleKey(): string {

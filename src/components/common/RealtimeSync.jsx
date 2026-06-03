@@ -15,28 +15,33 @@ export default function RealtimeSync() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Subscribe to a global broadcast channel
-    const channel = supabase.channel("site-updates");
+    let channel;
+    try {
+      // Subscribe to a global broadcast channel
+      channel = supabase.channel("site-updates");
 
-    channel
-      .on("broadcast", { event: "refresh-content" }, (payload) => {
-        logInfo("realtimesync_broadcast_received", { payload });
-        // Trigger a soft refresh to pull latest data from Server Components
-        router.refresh();
-      })
-      .subscribe((status, err) => {
-        if (status === "SUBSCRIBED") {
-          logInfo("realtimesync_listening");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          logInfo("realtimesync_connection_failed", {
-            status,
-            error: err?.message,
-          });
-        }
-      });
+      channel
+        .on("broadcast", { event: "refresh-content" }, (payload) => {
+          logInfo("realtimesync_broadcast_received", { payload });
+          // Trigger a soft refresh to pull latest data from Server Components
+          router.refresh();
+        })
+        .subscribe((status, err) => {
+          if (status === "SUBSCRIBED") {
+            logInfo("realtimesync_listening");
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            // Diam-diam — koneksi Realtime tidak tersedia di dev lokal
+            logInfo("realtimesync_unavailable", { status });
+          }
+        });
+    } catch {
+      // Abaikan error koneksi Realtime
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) {
+        supabase.removeChannel(channel).catch(() => {});
+      }
     };
   }, [supabase, router]);
 

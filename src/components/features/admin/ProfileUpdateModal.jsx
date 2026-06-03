@@ -132,29 +132,18 @@ export default function ProfileUpdateModal({ open, onClose, profile, onUpdateSuc
       if (!session) throw new Error("Sesi tidak valid");
 
       let finalAvatarUrl = profile?.avatar_url;
+      let avatarBase64 = null;
 
-      // Upload avatar jika ada perubahan
+      // Konversi avatarFile ke base64
       if (avatarFile) {
-        const fileExt = "jpg";
-        const fileName = `${session.user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `public/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, avatarFile, { upsert: true, contentType: "image/jpeg" });
-
-        if (uploadError) {
-          throw new Error("Gagal mengunggah foto profil: " + uploadError.message);
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-          
-        finalAvatarUrl = publicUrlData.publicUrl;
+        avatarBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(avatarFile);
+        });
       }
 
-      // Update ke database
+      // Update ke database (server yang akan handle upload)
       const response = await fetch("/api/admin/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -162,6 +151,7 @@ export default function ProfileUpdateModal({ open, onClose, profile, onUpdateSuc
           fullName,
           email,
           avatarUrl: finalAvatarUrl,
+          avatarBase64,
           accessToken: session.access_token
         }),
       });

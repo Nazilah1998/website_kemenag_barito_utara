@@ -4,7 +4,7 @@
 - **Next.js 16** (App Router, Turbopack), React 19, Tailwind CSS 4
 - **Drizzle ORM** (PostgreSQL via Supabase) — two schemas: `auth` + `public`
 - **Supabase** for Auth & Storage only (not DB queries)
-- **Cloudflare R2** for file/media storage
+- **Supabase Storage** for file/media storage
 - **Vitest** (unit), **Playwright** (E2E)
 - **Google Gemini / Groq / Mistral / OpenRouter** — multi-model AI chatbot fallback
 
@@ -83,10 +83,10 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - Required: `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - AI keys: `GEMINI_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`
 - Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`
-- R2: `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_ENDPOINT`, `CLOUDFLARE_R2_BUCKET_NAME`
+- Supabase CMS bucket: `NEXT_PUBLIC_SUPABASE_CMS_BUCKET` (default `cms-media`)
 - Optional: `NEXT_PUBLIC_SITE_URL` (defaults to `https://baritoutara.kemenag.go.id`), `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (fallback to `ANON_KEY`)
 - Optional Upstash Redis: `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (in-memory Map fallback if absent). Used by:
-  - Rate limiter (`src/lib/rate-limit.js`) — 13 API endpoints (login, chat, kontak, search, view counter, image proxy, R2 proxy, laporan, admin endpoints)
+  - Rate limiter (`src/lib/rate-limit.js`) — 13 API endpoints (login, chat, kontak, search, view counter, image proxy, media proxy, laporan, admin endpoints)
   - View counter (`src/lib/view-counter.js`) — `INCR` + batch flush every 30s to DB; `GETSET` atomically reads/resets during flush
 
 ## Notes
