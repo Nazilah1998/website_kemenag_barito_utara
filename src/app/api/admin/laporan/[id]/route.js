@@ -1,6 +1,5 @@
 import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { validateAdmin } from "@/lib/cms-utils";
-import { uploadToR2, deleteFromR2 } from "@/lib/r2";
 import {
   buildSafePdfFilename,
   validateDocumentPayload,
@@ -13,6 +12,10 @@ import { db } from "@/lib/drizzle";
 import { report_documents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { logError } from "@/lib/logger";
+
+// Supabase replacements
+import { createAdminClient } from "@/lib/supabase/admin";
+import { CMS_MEDIA_BUCKET } from "@/lib/storage-media";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +81,19 @@ export async function PUT(request, context) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const fileUrl = await uploadToR2(buffer, storagePath, "application/pdf");
+        // Upload to Supabase Storage
+        const supabase = createAdminClient();
+        const { error: uploadError } = await supabase.storage.from(CMS_MEDIA_BUCKET).upload(storagePath, buffer, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+        
+        if (uploadError) {
+          throw new Error(`Gagal upload PDF ke Supabase: ${uploadError.message}`);
+        }
+        
+        const { data: publicUrlData } = supabase.storage.from(CMS_MEDIA_BUCKET).getPublicUrl(storagePath);
+        const fileUrl = publicUrlData?.publicUrl || "";
 
         replacementFileData = {
           file_name: safeFilename,
@@ -119,7 +134,8 @@ export async function PUT(request, context) {
       .returning();
 
     if (replacementFileData && existingDoc?.file_path) {
-      await deleteFromR2(existingDoc.file_path);
+      const supabase = createAdminClient();
+      await supabase.storage.from(CMS_MEDIA_BUCKET).remove([existingDoc.file_path]);
     }
 
     await recordAudit({
@@ -172,7 +188,8 @@ export async function DELETE(request, context) {
     await db.delete(report_documents).where(eq(report_documents.id, id));
 
     if (existingDoc.file_path) {
-      await deleteFromR2(existingDoc.file_path);
+      const supabase = createAdminClient();
+      await supabase.storage.from(CMS_MEDIA_BUCKET).remove([existingDoc.file_path]);
     }
 
     await recordAudit({

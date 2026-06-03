@@ -9,10 +9,13 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { report_categories, report_documents } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { uploadToR2 } from "@/lib/r2";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { revalidatePath } from "next/cache";
 import { logError } from "@/lib/logger";
+
+// Supabase replacements
+import { createAdminClient } from "@/lib/supabase/admin";
+import { CMS_MEDIA_BUCKET } from "@/lib/storage-media";
 
 export const dynamic = "force-dynamic";
 
@@ -73,8 +76,19 @@ export async function POST(request) {
     const buffer = Buffer.from(arrayBuffer);
     const storagePath = `laporan/files/${filename}`;
 
-    // Upload to Cloudflare R2
-    const fileUrl = await uploadToR2(buffer, storagePath, "application/pdf");
+    // Upload to Supabase Storage
+    const supabase = createAdminClient();
+    const { error: uploadError } = await supabase.storage.from(CMS_MEDIA_BUCKET).upload(storagePath, buffer, {
+      contentType: "application/pdf",
+      upsert: true,
+    });
+    
+    if (uploadError) {
+      throw new Error(`Gagal upload dokumen ke Supabase: ${uploadError.message}`);
+    }
+    
+    const { data: publicUrlData } = supabase.storage.from(CMS_MEDIA_BUCKET).getPublicUrl(storagePath);
+    const fileUrl = publicUrlData?.publicUrl || "";
 
     const [document] = await db
       .insert(report_documents)
