@@ -16,7 +16,7 @@ export function MaintenanceSidebar() {
               height={26}
               unoptimized
               className="h-6 w-auto object-contain"
-              style={{ width: "auto" }}
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
 

@@ -36,7 +36,6 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   );
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any).auth.getClaims();
   } catch (error) {
     logWarn("supabase_session_invalid", { error: error as Error });

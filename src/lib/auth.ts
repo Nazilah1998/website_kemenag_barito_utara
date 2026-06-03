@@ -118,7 +118,6 @@ export async function getCurrentSessionContext(): Promise<SessionContext> {
   const {
     data: { user },
     error: userError,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } = await (supabase as any).auth.getUser();
 
   if (userError && !isMissingSessionError(userError)) {
@@ -152,7 +151,6 @@ export async function getCurrentSessionContext(): Promise<SessionContext> {
     profileRole = "super_admin";
   } else if (!profileRole) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const [adminRow] = await (db as any)
         .select({ role: admin_users.role })
         .from(admin_users)

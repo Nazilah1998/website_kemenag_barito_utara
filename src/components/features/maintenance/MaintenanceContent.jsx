@@ -25,7 +25,7 @@ export function MaintenanceContent({ title, featureName, description }) {
                 height={40}
                 unoptimized
                 className="h-10 w-auto object-contain"
-                style={{ width: "auto" }}
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
 
