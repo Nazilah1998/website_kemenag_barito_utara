@@ -1,4 +1,3 @@
-import { uploadToR2, deleteFromR2, getR2PublicUrl } from "./r2";
 import { createAdminClient } from "./supabase/admin";
 import { logError } from "@/lib/logger";
 
@@ -7,32 +6,13 @@ export const CMS_MEDIA_BUCKET: string =
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export async function uploadBase64Image({
-  dataUrl,
-  folder = "berita",
-  fileNameStem = "image",
-}: {
+// Alias for backwards compatibility with existing code calling uploadBase64Image
+export async function uploadBase64Image(args: {
   dataUrl: string;
   folder?: string;
   fileNameStem?: string;
 }) {
-  const parsed = parseDataUrl(dataUrl);
-
-  if (!ALLOWED_MIME_TYPES.includes(parsed.mimeType)) {
-    throw new Error("Tipe file gambar tidak didukung.");
-  }
-
-  const ext = mimeTypeToExt(parsed.mimeType);
-  const path = buildStoragePath(folder, fileNameStem, ext);
-
-  const publicUrl = await uploadToR2(parsed.buffer, path, parsed.mimeType);
-
-  return {
-    path,
-    publicUrl,
-    mimeType: parsed.mimeType,
-    sizeBytes: parsed.buffer.length,
-  };
+  return uploadBase64ImageToSupabase(args);
 }
 
 export async function uploadBase64ImageToSupabase({
@@ -104,16 +84,9 @@ export async function removeSupabaseFileByPublicUrl(publicUrl = ""): Promise<boo
   return true;
 }
 
+// Alias for backwards compatibility
 export async function removeStorageFileByPublicUrl(publicUrl: string): Promise<boolean> {
-  const path = extractStoragePathFromPublicUrl(publicUrl);
-
-  if (!path) {
-    return false;
-  }
-
-  await deleteFromR2(path);
-
-  return true;
+  return removeSupabaseFileByPublicUrl(publicUrl);
 }
 
 export function isCmsStoragePublicUrl(value = ""): boolean {

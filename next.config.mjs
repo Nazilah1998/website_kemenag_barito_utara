@@ -138,6 +138,7 @@ const cacheNoStore = {
 };
 
 const nextConfig = {
+  output: "standalone",
   compress: true,
   poweredByHeader: false,
   images: {
