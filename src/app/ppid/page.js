@@ -28,7 +28,7 @@ const informationCategories = [
     href: "/informasi/dasar-hukum",
   },
   {
-    title: "Informasi Dikecualikan",
+    title: "Informasi yang Dikecualikan",
     description:
       "Informasi yang dikecualikan sesuai UU KIP Pasal 17 seperti data pribadi, rahasia jabatan, dan keamanan negara.",
     href: "/informasi",
