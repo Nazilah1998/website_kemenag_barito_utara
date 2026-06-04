@@ -24,6 +24,10 @@ function isMaintenanceApiPath(pathname) {
   return pathname === "/api/maintenance-status";
 }
 
+function isHealthCheckPath(pathname) {
+  return pathname === "/api/health";
+}
+
 function isPublicAsset(pathname) {
   return (
     pathname.startsWith("/_next/static") ||
@@ -200,6 +204,7 @@ async function checkMaintenance(request) {
 
   if (isAdminPath(pathname) || isAdminApiPath(pathname)) return null;
   if (isMaintenanceApiPath(pathname)) return null;
+  if (isHealthCheckPath(pathname)) return null;
   if (isPublicAsset(pathname)) return null;
 
   // COBA 1: Upstash Redis (edge-compatible, sub-millisecond)
@@ -285,6 +290,7 @@ async function guardAdmin(request) {
 
   if (adminPage && ADMIN_PUBLIC_PATHS.has(pathname)) return null;
   if (adminApi && ADMIN_API_PUBLIC.has(pathname)) return null;
+  if (isHealthCheckPath(pathname)) return null;
 
   const response = NextResponse.next({ request });
   const supabase = createEdgeSupabase(request, response);
