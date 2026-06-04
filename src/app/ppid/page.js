@@ -16,7 +16,7 @@ const informationCategories = [
     href: "/laporan/laporan-kinerja",
   },
   {
-    title: "Informasi Serta-Merta",
+    title: "Informasi Serta $ Merta",
     description:
       "Informasi yang wajib diumumkan serta-merta karena dapat mengancam hajat hidup orang banyak.",
     href: "/informasi/regulasi",
