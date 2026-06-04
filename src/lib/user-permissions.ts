@@ -5,6 +5,7 @@ import { ROLES, getRolePermissions } from "@/lib/permissions";
 import { db } from "@/lib/drizzle";
 import { profiles, editor_requests, user_permissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logError } from "@/lib/logger";
 
 function forbiddenUrl(
   message = "Anda tidak memiliki izin untuk mengakses halaman ini.",
@@ -66,35 +67,68 @@ export async function getUserPermissionContext({
     };
   }
 
+  let profile: { email?: string | null; is_active?: boolean } | null = null;
+  let request: { status?: string | null } | null = null;
+  let approved = false;
+  let isActive = false;
+  let requestStatus: string | null = null;
+
+  try {
+    // Keep critical auth state queries together.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [profilesRes, requestsRes]: [any[], any[]] = await Promise.all([
+      db
+        .select({
+          id: profiles.id,
+          email: profiles.email,
+          role: profiles.role,
+          is_active: profiles.is_active,
+        })
+        .from(profiles)
+        .where(eq(profiles.id, userId as string))
+        .limit(1),
+      db
+        .select({ status: editor_requests.status })
+        .from(editor_requests)
+        .where(eq(editor_requests.user_id, userId as string))
+        .limit(1),
+    ]);
+
+    profile = profilesRes[0] || null;
+    request = requestsRes[0] || null;
+
+    requestStatus = request?.status || null;
+    approved = requestStatus === "approved";
+    isActive = Boolean(profile?.is_active);
+  } catch (error) {
+    logError("permission_context_core_query_failed", {
+      userId,
+      error: error as Error,
+    });
+    profile = null;
+    request = null;
+    requestStatus = null;
+    approved = false;
+    isActive = false;
+  }
+
+  // Query custom permissions separately so transient DB issues here
+  // don't break admin page rendering or auth flow.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [profilesRes, requestsRes, permissionsList]: [any[], any[], any[]] = await Promise.all([
-    db
-      .select({
-        id: profiles.id,
-        email: profiles.email,
-        role: profiles.role,
-        is_active: profiles.is_active,
-      })
-      .from(profiles)
-      .where(eq(profiles.id, userId as string))
-      .limit(1),
-    db
-      .select({ status: editor_requests.status })
-      .from(editor_requests)
-      .where(eq(editor_requests.user_id, userId as string))
-      .limit(1),
-    db
+  let permissionsList: any[] = [];
+  try {
+    permissionsList = await db
       .select({ permission: user_permissions.permission })
       .from(user_permissions)
-      .where(eq(user_permissions.user_id, userId as string)),
-  ]);
+      .where(eq(user_permissions.user_id, userId as string));
+  } catch (error) {
+    logError("permission_query_failed", {
+      userId,
+      error: error as Error,
+    });
+    permissionsList = [];
+  }
 
-  const profile = profilesRes[0] || null;
-  const request = requestsRes[0] || null;
-
-  const requestStatus = request?.status || null;
-  const approved = requestStatus === "approved";
-  const isActive = Boolean(profile?.is_active);
   const customPermissions = (permissionsList || [])
     .map((item: { permission?: string }) => item.permission)
     .filter(Boolean);
@@ -112,7 +146,10 @@ export async function getUserPermissionContext({
   };
 }
 
-export function hasUserPermission(permissionContext: PermissionContext | null, permission: string | null): boolean {
+export function hasUserPermission(
+  permissionContext: PermissionContext | null,
+  permission: string | null,
+): boolean {
   if (!permissionContext || !permission) return false;
   if (permissionContext.isSuperAdmin) return true;
   return Array.isArray(permissionContext.permissions)
@@ -120,7 +157,10 @@ export function hasUserPermission(permissionContext: PermissionContext | null, p
     : false;
 }
 
-export function hasAnyUserPermission(permissionContext: PermissionContext | null, permissions: string[] = []): boolean {
+export function hasAnyUserPermission(
+  permissionContext: PermissionContext | null,
+  permissions: string[] = [],
+): boolean {
   if (!permissions.length) return false;
   return permissions.some((permission) =>
     hasUserPermission(permissionContext, permission),
