@@ -53,7 +53,7 @@ export async function POST(req) {
     // ─── LOOP FALLBACK ENGINE ────────────────────────────────
     for (const engine of ENGINES) {
       // Safety check: Jika sudah berjalan lebih dari 8 detik, hentikan loop
-      // untuk menghindari Vercel timeout (biasanya 10 detik)
+      // untuk menghindari timeout server (biasanya 10 detik)
       if (Date.now() - startTime > 8000) {
         logWarn("chat_engine_timeout");
         break;

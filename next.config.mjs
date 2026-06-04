@@ -53,8 +53,6 @@ function buildCsp() {
       "'self'",
       "'unsafe-inline'",
       ...(isProd ? [] : ["'unsafe-eval'"]),
-      "https://va.vercel-scripts.com",
-      "https://vercel.live",
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
@@ -64,8 +62,6 @@ function buildCsp() {
     "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
     "connect-src": [
       "'self'",
-      "https://vitals.vercel-insights.com",
-      "https://va.vercel-scripts.com",
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",

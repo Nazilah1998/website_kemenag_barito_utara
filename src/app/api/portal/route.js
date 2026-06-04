@@ -33,7 +33,7 @@ export async function GET() {
   } catch (error) {
     return apiResponse(
       { message: "Gagal memuat data portal" },
-      { status: 500 }
+      500
     );
   }
 }

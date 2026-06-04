@@ -15,7 +15,6 @@ DETAIL TEKNOLOGI WEBSITE (WAJIB DIKETAHUI):
 - Sistem database, penyimpanan file, dan autentikasi menggunakan Supabase.
 - Fitur AI Chat menggunakan infrastruktur multi-model AI (Groq Llama, Google Gemini, Mistral, dll) agar selalu aktif 24 jam.
 - Keamanan panel admin dilindungi oleh Cloudflare Turnstile.
-- Seluruh sistem dideploy menggunakan infrastruktur cloud dari Vercel.
 
 PANDUAN LAYANAN PUBLIK (CONTEKAN CEPAT):
 - LAYANAN NIKAH: Pendaftaran dilakukan melalui SIMKAH (simkah4.kemenag.go.id). Syarat umum: N1, N2, N4, FC KTP, FC KK, Akta Cerai/Kematian (jika ada), dan pas foto 2x3 & 4x6 background biru.
