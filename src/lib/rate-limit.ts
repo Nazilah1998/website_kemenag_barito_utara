@@ -1,3 +1,5 @@
+import { redis, hasRedis } from "./redis";
+
 interface RateLimitResult {
   ok: boolean;
   remaining: number;
@@ -24,11 +26,37 @@ interface RequestLike {
 const memoryBuckets = new Map<string, MemoryBucket>();
 const MEMORY_CLEANUP_INTERVAL = 60_000;
 
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+async function localRedisRateLimit({ key, limit, windowMs }: { key: string; limit: number; windowMs: number }): Promise<RateLimitResult> {
+  if (!redis) return { ok: true, remaining: limit - 1 };
 
-function shouldUseUpstash(): boolean {
-  return Boolean(UPSTASH_URL && UPSTASH_TOKEN);
+  const windowSec = Math.max(1, Math.ceil(windowMs / 1000));
+  
+  try {
+    const count = await redis.incr(key);
+
+    if (count === 1) {
+      await redis.expire(key, windowSec);
+    }
+
+    if (count > limit) {
+      const ttl = await redis.ttl(key);
+      const retryAfter = ttl > 0 ? ttl : windowSec;
+
+      return {
+        ok: false,
+        remaining: 0,
+        retryAfter,
+      };
+    }
+
+    return {
+      ok: true,
+      remaining: Math.max(0, limit - count),
+    };
+  } catch (error) {
+    // Fallback if redis fails
+    return { ok: true, remaining: limit - 1 };
+  }
 }
 
 let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
@@ -45,56 +73,6 @@ function scheduleMemoryCleanup(): void {
     }
     if (memoryBuckets.size > 0) scheduleMemoryCleanup();
   }, MEMORY_CLEANUP_INTERVAL);
-}
-
-async function upstashCommand(args: unknown[]): Promise<unknown | null> {
-  try {
-    const response = await fetch(UPSTASH_URL as string, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${UPSTASH_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(args),
-      cache: "no-store",
-    });
-
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    return data?.result ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function upstashRateLimit({ key, limit, windowMs }: { key: string; limit: number; windowMs: number }): Promise<RateLimitResult> {
-  const windowSec = Math.max(1, Math.ceil(windowMs / 1000));
-  const count = await upstashCommand(["INCR", key]);
-
-  if (typeof count !== "number") {
-    return { ok: true, remaining: Math.max(0, limit - 1) };
-  }
-
-  if (count === 1) {
-    await upstashCommand(["EXPIRE", key, String(windowSec), "NX"]);
-  }
-
-  if (count > limit) {
-    const ttl = await upstashCommand(["TTL", key]);
-    const retryAfter = typeof ttl === "number" && ttl > 0 ? ttl : windowSec;
-
-    return {
-      ok: false,
-      remaining: 0,
-      retryAfter,
-    };
-  }
-
-  return {
-    ok: true,
-    remaining: Math.max(0, limit - count),
-  };
 }
 
 function memoryRateLimit({ key, limit, windowMs }: { key: string; limit: number; windowMs: number }): RateLimitResult {
@@ -137,8 +115,8 @@ function memoryRateLimit({ key, limit, windowMs }: { key: string; limit: number;
 export async function rateLimit({ key, limit = 10, windowMs = 60_000 }: { key: string; limit?: number; windowMs?: number }): Promise<RateLimitResult> {
   const safeKey = `rl:${String(key || "anon")}`;
 
-  if (shouldUseUpstash()) {
-    return upstashRateLimit({
+  if (hasRedis()) {
+    return localRedisRateLimit({
       key: safeKey,
       limit,
       windowMs,

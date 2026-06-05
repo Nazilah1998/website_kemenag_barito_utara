@@ -1,28 +1,4 @@
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-function hasUpstash(): boolean {
-  return Boolean(UPSTASH_URL && UPSTASH_TOKEN);
-}
-
-async function upstashCommand(args: unknown[]): Promise<unknown | null> {
-  try {
-    const response = await fetch(UPSTASH_URL as string, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${UPSTASH_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(args),
-      cache: "no-store",
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data?.result ?? null;
-  } catch {
-    return null;
-  }
-}
+import { redis, hasRedis } from "./redis";
 
 async function getDbViews(slug: string): Promise<number> {
   try {
@@ -46,12 +22,11 @@ let flushTimer: ReturnType<typeof setTimeout> | null = null;
 const FLUSH_INTERVAL = 60_000;
 
 async function flushViews(): Promise<void> {
-  if (!hasUpstash()) return;
+  if (!hasRedis() || !redis) return;
 
   try {
-    const keysResult = await upstashCommand(["KEYS", "views:*"]);
-    const keys = Array.isArray(keysResult) ? keysResult : [];
-    if (keys.length === 0) return;
+    const keys = await redis.keys("views:*");
+    if (!keys || keys.length === 0) return;
 
     const { db } = await import("@/lib/drizzle");
     const { berita } = await import("@/db/schema");
@@ -60,7 +35,7 @@ async function flushViews(): Promise<void> {
     await Promise.all(
       keys.map(async (key: string) => {
         const slug = key.replace("views:", "");
-        const redisVal = await upstashCommand(["GET", key]);
+        const redisVal = await redis.get(key);
         if (redisVal === null || redisVal === undefined) return;
 
         const views = Number(redisVal);
@@ -89,12 +64,16 @@ function scheduleFlush(): void {
 }
 
 export async function incrementView(slug: string): Promise<number> {
-  if (hasUpstash()) {
+  if (hasRedis() && redis) {
     try {
       const dbViews = await getDbViews(slug);
-      await upstashCommand(["SET", `views:${slug}`, String(dbViews), "NX"]);
+      
+      const exists = await redis.exists(`views:${slug}`);
+      if (!exists) {
+        await redis.set(`views:${slug}`, String(dbViews));
+      }
 
-      const total = await upstashCommand(["INCR", `views:${slug}`]);
+      const total = await redis.incr(`views:${slug}`);
 
       if (typeof total === "number") {
         scheduleFlush();
