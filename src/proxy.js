@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { updateSession } from "./lib/supabase/proxy";
 
-const ADMIN_PUBLIC_PATHS = new Set(["/admin/login"]);
+const ADMIN_PUBLIC_PATHS = new Set([
+  "/admin/login",
+  "/admin/forgot-password",  // Halaman lupa password — tidak perlu login
+  "/admin/update-password",  // Halaman reset password via link email
+]);
 const ADMIN_API_PUBLIC = new Set([
   "/api/admin/login",
   "/api/admin/logout",
   "/api/admin/session",
+  "/api/admin/reset-password",   // Kirim email reset — tidak perlu login
+  "/api/admin/update-password",  // Update password via token email — tidak perlu login
 ]);
+
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;

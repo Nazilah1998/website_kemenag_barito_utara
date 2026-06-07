@@ -119,7 +119,7 @@ function HomeFocusCard({ t }) {
           <div className="relative">
             <div className="absolute -inset-1.5 rounded-2xl bg-emerald-500/20 blur-lg animate-pulse" />
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-inner">
-              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={50} height={50} className="object-contain" unoptimized />
+              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={50} height={50} style={{ width: "auto", height: "auto" }} className="object-contain" unoptimized />
             </div>
           </div>
           <div>

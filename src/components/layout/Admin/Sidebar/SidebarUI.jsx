@@ -1,20 +1,26 @@
 import React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import AdminLogoutButton from "./AdminLogoutButton";
 
 export function SidebarNavLink({ href, label, icon, active, onNavigate }) {
   return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      className={`group flex items-center gap-3 rounded-2xl px-5 py-3.5 text-[11px] font-black uppercase tracking-widest transition-all ${active
-        ? "bg-slate-900 text-white shadow-xl shadow-slate-900/10 dark:bg-white dark:text-black dark:shadow-white/5"
-        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-        }`}
+    <motion.div
+      whileHover={!active ? { x: 3 } : {}}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
-      <span className={`transition-colors ${active ? "text-emerald-400" : "text-slate-400 group-hover:text-emerald-700"}`}>{icon}</span>
-      <span>{label}</span>
-    </Link>
+      <Link
+        href={href}
+        onClick={onNavigate}
+        className={`group flex items-center gap-3 rounded-2xl px-5 py-3.5 text-[11px] font-black uppercase tracking-widest transition-all ${active
+          ? "bg-slate-900 text-white shadow-xl shadow-slate-900/10 dark:bg-white dark:text-black dark:shadow-white/5"
+          : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+          }`}
+      >
+        <span className={`transition-colors ${active ? "text-emerald-400" : "text-slate-400 group-hover:text-emerald-700"}`}>{icon}</span>
+        <span>{label}</span>
+      </Link>
+    </motion.div>
   );
 }
 

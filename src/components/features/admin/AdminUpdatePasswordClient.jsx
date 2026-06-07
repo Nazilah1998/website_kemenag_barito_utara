@@ -71,7 +71,7 @@ function UpdatePasswordHeader() {
     <>
       <div className="flex items-center justify-between gap-4">
         <Link href="/" className="inline-flex items-center gap-3">
-          <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={44} height={44} unoptimized />
+          <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={44} height={44} style={{ width: "auto", height: "auto" }} unoptimized />
           <div>
             <p className="text-sm font-bold text-slate-900">{siteInfo.shortName}</p>
             <p className="text-xs text-slate-500">Panel Admin</p>

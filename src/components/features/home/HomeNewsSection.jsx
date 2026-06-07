@@ -2,8 +2,20 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import FillImageWithFallback from "@/components/features/berita/components/FillImageWithFallback";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+};
+
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09 } },
+};
+
 export default function HomeNewsSection({ latestBerita = [], popularBerita = [] }) {
   const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -42,8 +54,14 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
   return (
     <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20 overflow-hidden">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
+      <motion.div
+        className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-60px" }}
+        variants={staggerContainer}
+      >
+        <motion.div variants={fadeInUp}>
           <p className="text-xs font-black uppercase tracking-[0.32em] text-emerald-700 dark:text-emerald-300">
             {t("nav.berita")}
           </p>
@@ -53,9 +71,9 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
           <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 dark:text-slate-400">
             {t("home.news.description") || "Berita resmi dari Kementerian Agama Kabupaten Barito Utara untuk masyarakat."}
           </p>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fadeInUp}>
           <Link
             href="/berita"
             className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 transition-all duration-300 hover:border-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-white"
@@ -63,8 +81,8 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
             {t("actions.viewAll") || "Lihat Semua Berita"}
             <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* 1. MOBILE & TABLET LAYOUT (lg:hidden) */}
       <div className="mt-10 lg:hidden space-y-12">
@@ -186,19 +204,24 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
             </span>
           </div>
 
-          <div
+          <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 flex-grow"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
           >
             {displayLatest.map((item, index) => (
-              <NewsCard
-                key={item.slug}
-                item={item}
-                index={index}
-                t={t}
-                priority={index === 0}
-              />
+              <motion.div key={item.slug} variants={fadeInUp}>
+                <NewsCard
+                  item={item}
+                  index={index}
+                  t={t}
+                  priority={index === 0}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Right Column: Popular News (Col span 4) */}

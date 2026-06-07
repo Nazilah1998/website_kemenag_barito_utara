@@ -1,13 +1,22 @@
 "use client";
-
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import Turnstile from "@/components/ui/Turnstile";
 import { siteInfo } from "@/data/site";
 import { useAdminLogin } from "@/hooks/useAdminLogin";
 import { EyeIcon, inputClassName, LoginLoading } from "./login/LoginUI";
 import { LogIn, ArrowLeft } from "lucide-react";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 32 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
 
 export default function AdminLoginClient({ initialUnauthorized = false }) {
   const l = useAdminLogin(initialUnauthorized);
@@ -20,11 +29,27 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
       <div className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-500/5" />
       <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-blue-500/10 blur-[120px] dark:bg-blue-500/5" />
 
-      <div className="relative w-full max-w-[440px] animate-in fade-in zoom-in duration-500">
-        <div className="mb-10 flex flex-col items-center text-center">
-          <Link href="/" className="group mb-8 transition-transform hover:scale-110">
-            <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={72} height={72} unoptimized className="drop-shadow-2xl" />
-          </Link>
+      <motion.div
+        className="relative w-full max-w-[440px]"
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
+      >
+        {/* Logo & Header */}
+        <motion.div
+          className="mb-10 flex flex-col items-center text-center"
+          variants={fadeInUp}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 3 }}
+            whileTap={{ scale: 0.95 }}
+            className="mb-8"
+          >
+            <Link href="/">
+              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={72} height={72} style={{ width: "auto", height: "auto" }} unoptimized className="drop-shadow-2xl" />
+            </Link>
+          </motion.div>
 
           <div className="flex items-center gap-3 mb-4">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -39,9 +64,14 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
           <p className="mt-3 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
             Kementerian Agama Kabupaten Barito Utara
           </p>
-        </div>
+        </motion.div>
 
-        <div className="rounded-[2.5rem] border-2 border-white bg-white/90 p-8 shadow-2xl backdrop-blur-xl dark:border-white/5 dark:bg-slate-900/90 sm:p-10">
+        {/* Form Card */}
+        <motion.div
+          className="rounded-[2.5rem] border-2 border-white bg-white/90 p-8 shadow-2xl backdrop-blur-xl dark:border-white/5 dark:bg-slate-900/90 sm:p-10"
+          variants={fadeInUp}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <form onSubmit={l.handleSubmit} className="space-y-5">
             <EmailField value={l.email} onChange={l.setEmail} />
 
@@ -60,16 +90,25 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               />
             </div>
 
-            {l.error && (
-              <div id="admin-login-error" className="flex items-start gap-3 rounded-2xl border-2 border-rose-100 bg-rose-50 p-4 animate-in slide-in-from-top-2 dark:border-rose-900/30 dark:bg-rose-950/20">
-                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white">
-                  <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="4">
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-                <p className="text-xs font-bold leading-relaxed text-rose-700 dark:text-rose-400">{l.error}</p>
-              </div>
-            )}
+            <AnimatePresence>
+              {l.error && (
+                <motion.div
+                  id="admin-login-error"
+                  initial={{ opacity: 0, y: -8, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -8, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="flex items-start gap-3 rounded-2xl border-2 border-rose-100 bg-rose-50 p-4 dark:border-rose-900/30 dark:bg-rose-950/20 overflow-hidden"
+                >
+                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white">
+                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="4">
+                      <path d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-bold leading-relaxed text-rose-700 dark:text-rose-400">{l.error}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <SubmitButton submitting={l.submitting} disabled={!l.email || !l.password || !l.turnstileToken} />
           </form>
@@ -80,14 +119,18 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               Kembali ke Beranda
             </Link>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-8 text-center">
+        <motion.div
+          className="mt-8 text-center"
+          variants={fadeInUp}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
             © {new Date().getFullYear()} {siteInfo.shortName} · Secure Access Only
           </p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
@@ -121,9 +164,11 @@ function PasswordField({ value, onChange, show, onToggleShow, onKeyState, capsLo
 
 function SubmitButton({ submitting, disabled }) {
   return (
-    <button
+    <motion.button
       type="submit"
       disabled={submitting || disabled}
+      whileHover={!disabled && !submitting ? { scale: 1.02 } : {}}
+      whileTap={!disabled && !submitting ? { scale: 0.97 } : {}}
       className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
     >
       <span className="relative z-10 flex items-center gap-2">
@@ -135,7 +180,6 @@ function SubmitButton({ submitting, disabled }) {
         )}
       </span>
       <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
-    </button>
+    </motion.button>
   );
 }
-

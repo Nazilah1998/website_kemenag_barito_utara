@@ -8,7 +8,7 @@ export function HeaderLogo() {
   return (
     <Link href="/" className="flex min-w-0 items-center gap-3">
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 p-2 ring-1 ring-emerald-100 dark:bg-emerald-500/10 dark:ring-emerald-500/20">
-        <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} className="h-auto w-10 object-contain" unoptimized />
+        <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} style={{ width: "auto", height: "auto" }} className="h-auto w-10 object-contain" unoptimized />
       </span>
       <div className="min-w-0">
         <p className="truncate text-sm font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{siteInfo.logoTitleLine1}</p>

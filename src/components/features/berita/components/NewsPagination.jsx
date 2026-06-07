@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 
 function ChevronLeftIcon() {
@@ -98,16 +99,18 @@ export default function NewsPagination({
             aria-label={t("nav.berita") + " pagination"}
             className="mt-10 flex flex-wrap items-center justify-center gap-3"
         >
-            <Link
+            <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
+              <Link
                 href={pageHref(Math.max(1, currentPage - 1))}
                 aria-disabled={currentPage === 1}
                 className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-slate-700 transition ${currentPage === 1
                     ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-600"
                     : "border-slate-300 bg-white hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
                     }`}
-            >
+              >
                 <ChevronLeftIcon />
-            </Link>
+              </Link>
+            </motion.div>
 
             {items.map((item, index) =>
                 item === "..." ? (
@@ -118,30 +121,33 @@ export default function NewsPagination({
                         ...
                     </span>
                 ) : (
-                    <Link
-                        key={item}
-                        href={pageHref(item)}
-                        aria-current={item === currentPage ? "page" : undefined}
-                        className={`inline-flex h-11 min-w-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition ${item === currentPage
-                            ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-600 dark:bg-emerald-600"
-                            : "border-slate-300 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
-                            }`}
-                    >
-                        {item}
-                    </Link>
+                    <motion.div key={item} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
+                      <Link
+                          href={pageHref(item)}
+                          aria-current={item === currentPage ? "page" : undefined}
+                          className={`inline-flex h-11 min-w-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition ${item === currentPage
+                              ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-600 dark:bg-emerald-600"
+                              : "border-slate-300 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
+                              }`}
+                      >
+                          {item}
+                      </Link>
+                    </motion.div>
                 ),
             )}
 
-            <Link
+            <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}>
+              <Link
                 href={pageHref(Math.min(totalPages, currentPage + 1))}
                 aria-disabled={currentPage === totalPages}
                 className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-slate-700 transition ${currentPage === totalPages
                     ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-600"
                     : "border-slate-300 bg-white hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-400"
                     }`}
-            >
+              >
                 <ChevronRightIcon />
-            </Link>
+              </Link>
+            </motion.div>
         </nav>
     );
 }
