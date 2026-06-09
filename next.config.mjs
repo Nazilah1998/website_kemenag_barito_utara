@@ -134,16 +134,10 @@ const nextConfig = {
     deviceSizes: [640, 1080, 1920],
     imageSizes: [128, 256, 384],
   },
-  serverExternalPackages: [
-    "pg",
-    "pdfjs-dist",
-  ],
+  serverExternalPackages: ["pg", "pdfjs-dist"],
   experimental: {
     inlineCss: true,
-    optimizePackageImports: [
-      "lucide-react",
-      "framer-motion",
-    ],
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   allowedDevOrigins: ["127.0.0.1"],
   async headers() {
@@ -155,7 +149,13 @@ const nextConfig = {
       // Service worker — selalu fresh
       {
         source: "/sw.js",
-        headers: [...securityHeaders, { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+        headers: [
+          ...securityHeaders,
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
       },
       // Admin & API — jangan cache
       {
@@ -236,6 +236,31 @@ const nextConfig = {
       },
     ];
   },
+
+  // ====================================================================================
+  // PERHATIAN: JANGAN di-uncomment (jangan diaktifkan) sebelum domain go.id aktif 100%!
+  // Jika diaktifkan sekarang, pengunjung web akan diarahkan ke domain yang belum jadi.
+  // Setelah admin pusat selesai memproses IP dan domain go.id sudah bisa dibuka normal,
+  // barulah Anda hapus tanda komentar (//) di bawah ini lalu deploy ulang.
+  // ====================================================================================
+  /*
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "kemenag-baritoutara.com" }],
+        destination: "https://baritoutara.kemenag.go.id/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.kemenag-baritoutara.com" }],
+        destination: "https://baritoutara.kemenag.go.id/:path*",
+        permanent: true,
+      },
+    ];
+  },
+  */
 };
 
 export default nextConfig;
