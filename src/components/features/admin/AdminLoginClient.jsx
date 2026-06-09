@@ -47,7 +47,14 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
             className="mb-8"
           >
             <Link href="/">
-              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={72} height={72} style={{ width: "auto", height: "auto" }} unoptimized className="drop-shadow-2xl" />
+              <Image
+                src={siteInfo.logoSrc}
+                alt={siteInfo.shortName}
+                width={72}
+                height={72}
+                className="w-20 h-20 object-contain drop-shadow-2xl"
+                unoptimized
+              />
             </Link>
           </motion.div>
 
@@ -76,9 +83,12 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
             <EmailField value={l.email} onChange={l.setEmail} />
 
             <PasswordField
-              value={l.password} onChange={l.setPassword}
-              show={l.showPassword} onToggleShow={() => l.setShowPassword(!l.showPassword)}
-              onKeyState={l.handlePasswordKeyState} capsLock={l.capsLock}
+              value={l.password}
+              onChange={l.setPassword}
+              show={l.showPassword}
+              onToggleShow={() => l.setShowPassword(!l.showPassword)}
+              onKeyState={l.handlePasswordKeyState}
+              capsLock={l.capsLock}
               error={l.error}
             />
 
@@ -101,20 +111,34 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
                   className="flex items-start gap-3 rounded-2xl border-2 border-rose-100 bg-rose-50 p-4 dark:border-rose-900/30 dark:bg-rose-950/20 overflow-hidden"
                 >
                   <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white">
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="4">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-3 w-3"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    >
                       <path d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
-                  <p className="text-xs font-bold leading-relaxed text-rose-700 dark:text-rose-400">{l.error}</p>
+                  <p className="text-xs font-bold leading-relaxed text-rose-700 dark:text-rose-400">
+                    {l.error}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <SubmitButton submitting={l.submitting} disabled={!l.email || !l.password || !l.turnstileToken} />
+            <SubmitButton
+              submitting={l.submitting}
+              disabled={!l.email || !l.password || !l.turnstileToken}
+            />
           </form>
 
           <div className="mt-8 flex flex-col items-center gap-4 text-center">
-            <Link href="/beranda" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
+            <Link
+              href="/beranda"
+              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+            >
               <ArrowLeft className="h-3.5 w-3.5" strokeWidth={3} />
               Kembali ke Beranda
             </Link>
@@ -127,7 +151,7 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
-            © {new Date().getFullYear()} {siteInfo.shortName} · Secure Access Only
+            © {new Date().getFullYear()} {siteInfo.shortName}
           </p>
         </motion.div>
       </motion.div>
@@ -138,26 +162,78 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
 function EmailField({ value, onChange }) {
   return (
     <div className="group">
-      <label htmlFor="admin-email" className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Email Admin</label>
-      <input id="admin-email" type="email" value={value} onChange={(e) => onChange(e.target.value)} className={inputClassName()} placeholder="nama@gmail.com" autoComplete="email" required />
+      <label
+        htmlFor="admin-email"
+        className="mb-2 block text-[9px] font-black uppercase tracking-[0.25em] text-slate-400"
+      >
+        Email Admin
+      </label>
+      <input
+        id="admin-email"
+        type="email"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={inputClassName()}
+        placeholder="nama@gmail.com"
+        autoComplete="email"
+        required
+      />
     </div>
   );
 }
 
-function PasswordField({ value, onChange, show, onToggleShow, onKeyState, capsLock, error }) {
+function PasswordField({
+  value,
+  onChange,
+  show,
+  onToggleShow,
+  onKeyState,
+  capsLock,
+  error,
+}) {
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-2">
-        <label htmlFor="admin-password" className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Security Password</label>
-        <Link href="/admin/forgot-password" className="text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Lupa?</Link>
+        <label
+          htmlFor="admin-password"
+          className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400"
+        >
+          Security Password
+        </label>
+        <Link
+          href="/admin/forgot-password"
+          className="text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400"
+        >
+          Lupa?
+        </Link>
       </div>
       <div className="relative">
-        <input id="admin-password" type={show ? "text" : "password"} value={value} onChange={(e) => onChange(e.target.value)} onKeyUp={onKeyState} onKeyDown={onKeyState} className={inputClassName(true)} placeholder="••••••••" autoComplete="current-password" aria-invalid={Boolean(error)} required />
-        <button type="button" onClick={onToggleShow} className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-white/5 dark:hover:text-white transition-all">
+        <input
+          id="admin-password"
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyUp={onKeyState}
+          onKeyDown={onKeyState}
+          className={inputClassName(true)}
+          placeholder="••••••••"
+          autoComplete="current-password"
+          aria-invalid={Boolean(error)}
+          required
+        />
+        <button
+          type="button"
+          onClick={onToggleShow}
+          className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-300 hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-white/5 dark:hover:text-white transition-all"
+        >
           <EyeIcon isOpen={show} />
         </button>
       </div>
-      {capsLock && <p className="mt-2 text-[9px] font-black text-amber-600 uppercase tracking-widest">CAPS LOCK AKTIF</p>}
+      {capsLock && (
+        <p className="mt-2 text-[9px] font-black text-amber-600 uppercase tracking-widest">
+          CAPS LOCK AKTIF
+        </p>
+      )}
     </div>
   );
 }
@@ -172,7 +248,9 @@ function SubmitButton({ submitting, disabled }) {
       className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900 text-xs font-black uppercase tracking-[0.25em] text-white transition-all hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-black dark:hover:bg-slate-200"
     >
       <span className="relative z-10 flex items-center gap-2">
-        {submitting ? "Memverifikasi..." : (
+        {submitting ? (
+          "Memverifikasi..."
+        ) : (
           <>
             Masuk ke Dashboard
             <LogIn className="h-4 w-4" strokeWidth={2.5} />

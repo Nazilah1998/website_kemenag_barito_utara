@@ -23,6 +23,14 @@ export default function RealtimeSync() {
       channel
         .on("broadcast", { event: "refresh-content" }, (payload) => {
           logInfo("realtimesync_broadcast_received", { payload });
+          
+          // Jika admin mengaktifkan/menonaktifkan maintenance mode, lakukan hard reload 
+          // agar semua sesi user yang terbuka langsung dialihkan/direfresh seketika.
+          if (payload?.payload?.entity === "maintenance_mode") {
+            window.location.reload();
+            return;
+          }
+
           // Trigger a soft refresh to pull latest data from Server Components
           router.refresh();
         })

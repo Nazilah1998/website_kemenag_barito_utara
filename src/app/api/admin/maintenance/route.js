@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { validateAdmin } from "@/lib/cms-utils";
 import { recordAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
+import { broadcastRefresh } from "@/lib/realtime-service";
 
 export const dynamic = "force-dynamic";
 
@@ -57,10 +58,8 @@ export async function POST(request) {
           throw new Error(`Redis sync failed: ${res.statusText}`);
         }
       } catch (error) {
-        return NextResponse.json(
-          { message: `Failed to sync maintenance mode to cache: ${error.message}` },
-          { status: 500 },
-        );
+        console.warn(`[Warning] Failed to sync maintenance mode to cache: ${error.message}`);
+        // Jangan return 500 di sini, biarkan berlanjut agar DB tetap terupdate
       }
     }
 
@@ -74,6 +73,7 @@ export async function POST(request) {
     });
 
     revalidatePath("/", "layout");
+    await broadcastRefresh("maintenance_mode");
 
     return NextResponse.json({
       ok: true,
@@ -83,6 +83,7 @@ export async function POST(request) {
         : "Mode maintenance telah dinonaktifkan. Situs kembali normal.",
     });
   } catch (error) {
+    console.error("[Maintenance API Error]:", error);
     return NextResponse.json(
       { message: error.message || "Gagal mengubah mode maintenance." },
       { status: 500 },

@@ -70,7 +70,7 @@ function RegisterHeader() {
     <div className="flex flex-col items-center text-center">
       <div className="flex items-center gap-4 mb-6">
         <Link href="/" className="transition-transform hover:scale-110">
-          <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={56} height={56} style={{ width: "auto", height: "auto" }} unoptimized className="drop-shadow-xl" />
+          <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={56} height={56} className="w-14 h-14 object-contain drop-shadow-xl" unoptimized />
         </Link>
         <div className="h-10 w-px bg-slate-100 dark:bg-white/5" />
         <div className="text-left">

@@ -82,125 +82,191 @@ function maintenancePageHTML({ title, message }) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${title} — Kemenag Barito Utara</title>
+<title>Sistem Dalam Pemeliharaan — Kemenag Barito Utara</title>
 <meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="/assets/branding/kemenag.svg" type="image/svg+xml" />
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;
-    background:linear-gradient(135deg,#064e3b 0%,#022c22 50%,#021a17 100%);
-    color:#fff;
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background-color:#fafafa;
+    color:#1e293b;
     min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .bg-glow {
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:800px;
+    height:500px;
+    background:radial-gradient(ellipse at top, rgba(16,185,129,0.15) 0%, rgba(250,250,250,0) 70%);
+    z-index:0;
+    pointer-events:none;
+  }
+  .container {
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:600px;
+    padding:2rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+  .header {
+    margin-bottom:2.5rem;
+  }
+  .logo {
+    width:80px;
+    height:80px;
+    margin:0 auto 1rem;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  }
+  .logo img {
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .title-main {
+    font-size:1.5rem;
+    font-weight:900;
+    color:#065f46;
+    letter-spacing:0.1em;
+    line-height:1.3;
+  }
+  .title-sub {
+    font-size:0.75rem;
+    font-weight:800;
+    color:#10b981;
+    letter-spacing:0.15em;
+    margin-top:0.5rem;
+    text-transform:uppercase;
+  }
+  .card {
+    background:#ffffff;
+    border-radius:1.5rem;
+    padding:3rem 2.5rem;
+    width:100%;
+    box-shadow:0 20px 40px -10px rgba(0,0,0,0.05);
+    border-top:4px solid #34d399;
+    position:relative;
+  }
+  .icon-wrapper {
+    width:56px;
+    height:56px;
+    background:#fff7ed;
+    border:1px solid #ffedd5;
+    border-radius:1rem;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:2rem;
+    margin:0 auto 1.5rem;
+    color:#f97316;
   }
-  .card{
-    background:rgba(255,255,255,0.04);
-    backdrop-filter:blur(24px);
-    -webkit-backdrop-filter:blur(24px);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:2.5rem;
-    padding:3rem 2.5rem 2.5rem;
-    max-width:480px;
-    width:100%;
-    text-align:center;
-    box-shadow:0 25px 60px -16px rgba(0,0,0,0.6);
+  .icon-wrapper svg {
+    width:28px;
+    height:28px;
   }
-  .logo{
-    width:72px;height:72px;
-    margin:0 auto 1.25rem;
-    border-radius:1.25rem;
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.08);
-    display:flex;align-items:center;justify-content:center;
-    overflow:hidden;
-    padding:12px;
+  .card h1 {
+    font-size:2rem;
+    font-weight:900;
+    color:#0f172a;
+    margin-bottom:1rem;
+    letter-spacing:-0.03em;
   }
-  .logo img{width:100%;height:100%;object-fit:contain}
-  .badge{
-    display:inline-block;
-    background:rgba(16,185,129,0.15);
-    color:#34d399;
-    font-size:10px;font-weight:800;
-    text-transform:uppercase;
-    letter-spacing:0.35em;
-    padding:0.5rem 1.25rem;
+  .card p {
+    font-size:1rem;
+    color:#64748b;
+    line-height:1.6;
+    margin-bottom:2.5rem;
+  }
+  .badges {
+    display:flex;
+    gap:1rem;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .badge {
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    padding:0.5rem 1rem;
     border-radius:999px;
-    border:1px solid rgba(16,185,129,0.2);
-    margin-bottom:1.25rem;
+    font-size:0.75rem;
+    font-weight:700;
+    color:#334155;
   }
-  h1{
-    font-size:1.5rem;font-weight:900;
-    line-height:1.25;margin-bottom:0.75rem;
-    letter-spacing:-0.02em;
+  .badge.orange .dot {
+    width:8px;
+    height:8px;
+    background:#f59e0b;
+    border-radius:50%;
   }
-  p{font-size:0.9375rem;line-height:1.7;color:rgba(255,255,255,0.6);margin-bottom:2rem}
-  .status-grid{
-    display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;
-    margin-bottom:0;
+  .badge.green svg {
+    width:14px;
+    height:14px;
+    color:#10b981;
   }
-  .status-item{
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.06);
-    border-radius:1.25rem;
-    padding:0.875rem 1rem;
-    text-align:left;
+  .footer {
+    margin-top:4rem;
+    font-size:0.75rem;
+    color:#94a3b8;
+    font-weight:500;
   }
-  .status-label{
-    font-size:8px;font-weight:800;
-    text-transform:uppercase;
-    letter-spacing:0.25em;
-    color:rgba(255,255,255,0.3);
-    margin-bottom:0.2rem;
-  }
-  .status-value{
-    font-size:11px;font-weight:700;
-    color:rgba(255,255,255,0.85);
-  }
-  .footer{
-    font-size:10px;
-    color:rgba(255,255,255,0.25);
-    margin-top:1.5rem;
-    padding-top:1.25rem;
-    border-top:1px solid rgba(255,255,255,0.05);
-  }
-  .dot-emerald{color:#34d399}
-  .dot-rose{color:#fb7185}
   @media(max-width:480px){
-    .card{padding:2rem 1.5rem}.status-grid{grid-template-columns:1fr}
-    h1{font-size:1.3rem}.logo{width:60px;height:60px}
+    .card { padding:2rem 1.5rem; }
+    .card h1 { font-size:1.5rem; }
+    .title-main { font-size:1.2rem; }
   }
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">
-      <img src="/assets/icons/kemenag-512.png" alt="Kemenag" />
+  <div class="bg-glow"></div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="/assets/branding/kemenag.svg" alt="Kemenag" />
+      </div>
+      <div class="title-main">KEMENTERIAN AGAMA<br/>REPUBLIK INDONESIA</div>
+      <div class="title-sub">Kantor Kabupaten Barito Utara</div>
     </div>
-    <div class="badge">Mode Maintenance</div>
-    <h1>${title}</h1>
-    <p>${message}</p>
-    <div class="status-grid">
-      <div class="status-item">
-        <div class="status-label">Status</div>
-        <div class="status-value dot-emerald">Pemeliharaan</div>
+    <div class="card">
+      <div class="icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+        </svg>
       </div>
-      <div class="status-item">
-        <div class="status-label">Layanan</div>
-        <div class="status-value dot-rose">Ditutup Sementara</div>
-      </div>
-      <div class="status-item">
-        <div class="status-label">Diharapkan</div>
-        <div class="status-value">Segera Kembali</div>
-      </div>
-      <div class="status-item">
-        <div class="status-label">Kantor</div>
-        <div class="status-value">Kemenag Barito Utara</div>
+      <h1>Sistem Dalam<br/>Pemeliharaan</h1>
+      <p>Sistem sedang dinonaktifkan oleh admin. Silakan kembali beberapa saat lagi.</p>
+      
+      <div class="badges">
+        <div class="badge orange">
+          <div class="dot"></div>
+          Sedang Dalam Pengerjaan
+        </div>
+        <div class="badge green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          Data Anda Tetap Aman
+        </div>
       </div>
     </div>
-    <div class="footer">Kementerian Agama Kabupaten Barito Utara</div>
+    
+    <div class="footer">
+      &copy; 2026 Website Kemenag Barito Utara. Hak Cipta Dilindungi.
+    </div>
   </div>
 </body>
 </html>`;
