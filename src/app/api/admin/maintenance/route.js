@@ -6,6 +6,7 @@ import { validateAdmin } from "@/lib/cms-utils";
 import { recordAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { redis, hasRedis } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
 
@@ -40,25 +41,12 @@ export async function POST(request) {
         set: { value, updatedAt: new Date().toISOString() },
       });
 
-    // Sync ke Redis agar middleware edge bisa baca tanpa fetch internal API
-    const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-    const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
-    if (UPSTASH_URL && UPSTASH_TOKEN) {
+    // Sync ke Redis lokal (ioredis) agar API baca lebih cepat
+    if (hasRedis() && redis) {
       try {
-        const res = await fetch(UPSTASH_URL, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${UPSTASH_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(["SET", "maintenance:mode", JSON.stringify(value)]),
-          signal: AbortSignal.timeout(3000),
-        });
-        if (!res.ok) {
-          throw new Error(`Redis sync failed: ${res.statusText}`);
-        }
+        await redis.set("maintenance:mode", JSON.stringify(value));
       } catch (error) {
-        console.warn(`[Warning] Failed to sync maintenance mode to cache: ${error.message}`);
+        console.warn(`[Warning] Failed to sync maintenance mode to Redis cache: ${error.message}`);
         // Jangan return 500 di sini, biarkan berlanjut agar DB tetap terupdate
       }
     }

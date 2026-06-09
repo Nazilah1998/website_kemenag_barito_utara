@@ -16,8 +16,6 @@ const ADMIN_API_PUBLIC = new Set([
 ]);
 
 
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 function isAdminPath(pathname) {
   return pathname.startsWith("/admin");
@@ -280,44 +278,7 @@ async function checkMaintenance(request) {
   if (isHealthCheckPath(pathname)) return null;
   if (isPublicAsset(pathname)) return null;
 
-  // COBA 1: Upstash Redis (edge-compatible, sub-millisecond)
-  if (UPSTASH_URL && UPSTASH_TOKEN) {
-    try {
-      const res = await fetch(`${UPSTASH_URL}/get/maintenance:mode`, {
-        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
-        signal: AbortSignal.timeout(2000),
-      });
-      if (res.ok) {
-        const raw = await res.json();
-        if (raw?.result) {
-          const data = JSON.parse(raw.result);
-          if (data?.active) {
-            return new Response(
-              maintenancePageHTML({
-                title: data.title || "Pemeliharaan Sistem",
-                message:
-                  data.message ||
-                  "Website sedang dalam perbaikan. Mohon kembali lagi beberapa saat.",
-              }),
-              {
-                status: 503,
-                headers: {
-                  "Content-Type": "text/html; charset=utf-8",
-                  "Cache-Control": "no-store, must-revalidate",
-                  "Retry-After": "3600",
-                },
-              },
-            );
-          }
-          return null;
-        }
-      }
-    } catch {
-      // Redis gagal, lanjut ke fallback
-    }
-  }
-
-  // COBA 2: Internal API fetch (fallback)
+  // Cek ke internal API
   try {
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL ||
@@ -326,6 +287,7 @@ async function checkMaintenance(request) {
 
     const res = await fetch(`${origin}/api/maintenance-status`, {
       signal: AbortSignal.timeout(3000),
+      cache: "no-store",
     });
 
     if (!res.ok) return null;
