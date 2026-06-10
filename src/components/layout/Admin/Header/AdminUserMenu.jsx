@@ -12,6 +12,7 @@ import {
   Settings,
   UserCircle,
   Lock,
+  Bot,
 } from "lucide-react";
 import Link from "next/link";
 import PasswordUpdateModal from "@/components/features/admin/PasswordUpdateModal";
@@ -31,11 +32,30 @@ export default function AdminUserMenu({
   const [currentProfile, setCurrentProfile] = useState(profile);
   const menuRef = useRef(null);
 
+  const [isAiWidgetEnabled, setIsAiWidgetEnabled] = useState(true);
+
   useEffect(() => {
     if (profile) {
       setCurrentProfile(profile);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsAiWidgetEnabled(localStorage.getItem("admin_hide_ai_widget") !== "true");
+    }
+  }, []);
+
+  const toggleAiWidget = () => {
+    const newValue = !isAiWidgetEnabled;
+    setIsAiWidgetEnabled(newValue);
+    if (!newValue) {
+      localStorage.setItem("admin_hide_ai_widget", "true");
+    } else {
+      localStorage.removeItem("admin_hide_ai_widget");
+    }
+    window.dispatchEvent(new Event("widget_visibility_changed"));
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -91,7 +111,7 @@ export default function AdminUserMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl shadow-slate-200/50 ring-1 ring-black/5 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:shadow-none animate-in fade-in zoom-in-95 duration-100 z-50">
+        <div className="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl shadow-slate-200/50 ring-1 ring-black/5 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:shadow-none animate-in fade-in zoom-in-95 duration-100 z-50">
           <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800 mb-1 sm:hidden">
             <p className="truncate text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">
               {currentProfile?.full_name || compactName}
@@ -140,6 +160,22 @@ export default function AdminUserMenu({
             >
               <Lock size={16} />
               <span>Ubah Password</span>
+            </button>
+
+            <button
+              onClick={() => {
+                toggleAiWidget();
+                // do not close menu so user can toggle back and forth
+              }}
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400"
+            >
+              <div className="flex items-center gap-2.5">
+                <Bot size={16} />
+                <span>Aktifkan WidgetAI</span>
+              </div>
+              <div className={`w-8 h-4.5 flex items-center rounded-full transition-colors ${isAiWidgetEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${isAiWidgetEnabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
             </button>
           </div>
 

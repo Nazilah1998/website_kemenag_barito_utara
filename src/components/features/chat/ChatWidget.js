@@ -139,6 +139,28 @@ const ChatWidget = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [skipAutoFocus, setSkipAutoFocus] = useState(false);
+  const [isWidgetHidden, setIsWidgetHidden] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const checkHidden = () => {
+        setIsWidgetHidden(localStorage.getItem("admin_hide_ai_widget") === "true");
+      };
+      
+      // Check initial state
+      checkHidden();
+      
+      // Listen to storage event (if changed from other tabs)
+      window.addEventListener("storage", checkHidden);
+      // Listen to custom event (if changed from same tab)
+      window.addEventListener("widget_visibility_changed", checkHidden);
+      
+      return () => {
+        window.removeEventListener("storage", checkHidden);
+        window.removeEventListener("widget_visibility_changed", checkHidden);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     // Deteksi jika harus melewati auto-focus (Mobile, Tablet, atau PWA)
@@ -238,6 +260,8 @@ const ChatWidget = () => {
   const handleQuickAction = (text) => sendMessage(text);
 
   // ─── Render ─────────────────────────────────────────────────────────────
+  if (isWidgetHidden) return null;
+
   return (
     <>
       {/* ─── FAB Button ─────────────────── */}

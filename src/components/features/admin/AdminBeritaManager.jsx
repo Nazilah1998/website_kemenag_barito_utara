@@ -35,10 +35,10 @@ export default function AdminBeritaManager() {
         onClose={() => { m.setMessage(""); m.setError(""); }}
       />
 
-      <section className="space-y-8">
+      <section className="space-y-5 sm:space-y-8">
         <BeritaStats stats={m.stats} />
 
-        <div className="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+        <div className="rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 bg-white p-4 sm:p-8 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
           <BeritaFilters
             query={m.query} setQuery={m.setQuery}
             statusFilter={m.statusFilter} setStatusFilter={m.setStatusFilter}

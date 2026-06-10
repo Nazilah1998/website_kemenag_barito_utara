@@ -83,7 +83,7 @@ export default function PasswordUpdateModal({ open, onClose }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.93, y: 24 }}
             transition={{ type: "spring", stiffness: 300, damping: 26 }}
-            className="relative w-full max-w-md overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+            className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white p-6 sm:p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="flex flex-col items-center text-center">
               <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] border-4 border-white bg-emerald-50 text-emerald-700 shadow-xl shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-800 dark:text-emerald-500 dark:shadow-none">
@@ -97,7 +97,7 @@ export default function PasswordUpdateModal({ open, onClose }) {
                 Pastikan password baru Anda kuat dan mudah diingat.
               </p>
 
-              <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              <form onSubmit={handleSubmit} className="mt-8 w-full space-y-4 text-left">
                 <PasswordInput
                   label="Password baru" value={password} placeholder="Minimal 8 karakter"
                   onChange={(e) => setPassword(e.target.value)} show={showPassword}
@@ -133,13 +133,13 @@ export default function PasswordUpdateModal({ open, onClose }) {
                   )}
                 </AnimatePresence>
 
-                <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row-reverse">
+                <div className="mt-8 flex w-full flex-col gap-3">
                   <motion.button
                     type="submit"
                     disabled={loading || !password || !confirmPassword}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-600 px-6 text-[12px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 disabled:opacity-50 sm:w-auto"
+                    className="flex h-11 w-full items-center justify-center rounded-2xl bg-emerald-600 px-6 text-[12px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {loading ? "Menyimpan..." : "Simpan"}
                   </motion.button>
@@ -149,7 +149,7 @@ export default function PasswordUpdateModal({ open, onClose }) {
                     disabled={loading}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="flex h-12 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-[12px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-slate-900 hover:text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-white dark:hover:text-white sm:w-auto"
+                    className="flex h-11 w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-[12px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-slate-900 hover:text-slate-900 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-white dark:hover:text-white"
                   >
                     Batal
                   </motion.button>

@@ -121,7 +121,7 @@ export async function POST(request) {
 
     revalidatePath("/");
     revalidatePath("/beranda");
-    revalidateTag("home-public-slides");
+    revalidateTag("home-public-slides", "max");
     broadcastRefresh("slider");
 
     return apiResponse({

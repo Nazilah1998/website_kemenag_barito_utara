@@ -15,7 +15,7 @@ import { logError } from "@/lib/logger";
 
 // Supabase replacements
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CMS_MEDIA_BUCKET } from "@/lib/storage-media";
+import { LAPORAN_DOCUMENTS_BUCKET } from "@/lib/storage-media";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +78,7 @@ export async function POST(request) {
 
     // Upload to Supabase Storage
     const supabase = createAdminClient();
-    const { error: uploadError } = await supabase.storage.from(CMS_MEDIA_BUCKET).upload(storagePath, buffer, {
+    const { error: uploadError } = await supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).upload(storagePath, buffer, {
       contentType: "application/pdf",
       upsert: true,
     });
@@ -87,7 +87,7 @@ export async function POST(request) {
       throw new Error(`Gagal upload dokumen ke Supabase: ${uploadError.message}`);
     }
     
-    const { data: publicUrlData } = supabase.storage.from(CMS_MEDIA_BUCKET).getPublicUrl(storagePath);
+    const { data: publicUrlData } = supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).getPublicUrl(storagePath);
     const fileUrl = publicUrlData?.publicUrl || "";
 
     const [document] = await db

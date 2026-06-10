@@ -15,7 +15,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "db:push": "npx drizzle-kit push"
+    "db:push": "npx drizzle-kit push",
+    "fix-favicon": "node -e \"const fs=require('fs'); fs.copyFileSync('public/assets/icons/kemenag-192.png', 'src/app/favicon.ico')\""
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",

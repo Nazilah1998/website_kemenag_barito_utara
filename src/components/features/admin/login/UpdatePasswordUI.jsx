@@ -43,7 +43,7 @@ export function PasswordInput({ label, value, onChange, show, onToggle, placehol
         <input
           type={show ? "text" : "password"} value={value} onChange={onChange}
           placeholder={placeholder} required
-          className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-5 py-3.5 text-sm font-bold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 shadow-sm pr-12"
+          className="w-full rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 shadow-sm pr-12 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-900"
         />
         <button
           type="button" onClick={onToggle}

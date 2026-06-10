@@ -4,6 +4,9 @@ import { logError } from "@/lib/logger";
 export const CMS_MEDIA_BUCKET: string =
   process.env.NEXT_PUBLIC_SUPABASE_CMS_BUCKET || "cms-media";
 
+export const LAPORAN_DOCUMENTS_BUCKET: string =
+  process.env.NEXT_PUBLIC_SUPABASE_LAPORAN_BUCKET || "laporan-documents";
+
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function uploadBase64Image({

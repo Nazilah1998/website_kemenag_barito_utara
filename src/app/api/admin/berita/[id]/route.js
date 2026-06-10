@@ -33,8 +33,8 @@ async function revalidateBeritaPaths(slug) {
     revalidatePath("/berita"),
     revalidatePath("/admin"),
     revalidatePath("/admin/berita"),
-    revalidateTag("home-latest-berita"),
-    revalidateTag("home-popular-berita"),
+    revalidateTag("home-latest-berita", "max"),
+    revalidateTag("home-popular-berita", "max"),
     slug ? revalidatePath(`/berita/${slug}`) : Promise.resolve(),
   ]);
 

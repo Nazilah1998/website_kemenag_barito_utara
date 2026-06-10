@@ -95,57 +95,67 @@ function MobileAdminLoginButton({ adminState }) {
 
             {/* Modal Panel */}
             <div
-              className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"
+              className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-200/50 dark:bg-slate-900/95 dark:ring-white/10 dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]"
             >
-                {/* Top red warning accent */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-600" />
+              {/* Top red warning accent */}
+              <div className="absolute top-0 left-0 right-0 h-1.5 w-full bg-gradient-to-r from-rose-600 via-red-500 to-rose-600" />
 
-                <div className="p-7">
-                  {/* Warning Triangle Icon */}
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30 ring-1 ring-red-100/80 dark:ring-red-900/40">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="h-6 w-6 text-red-600 dark:text-red-400"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                      <line x1="12" y1="9" x2="12" y2="13" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
+              {/* Decorative Background */}
+              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-500/5 blur-3xl pointer-events-none" />
+              <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+
+              <div className="relative p-7 z-10">
+                <div className="flex flex-col items-center text-center">
+                  {/* Glowing Warning Icon */}
+                  <div className="relative mb-5">
+                    <div className="absolute inset-0 rounded-full bg-red-500/20 blur-xl animate-pulse" />
+                    <div className="relative flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-gradient-to-b from-red-50 to-rose-100/50 dark:from-red-950/50 dark:to-rose-900/20 ring-1 ring-red-500/20 shadow-inner">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="h-8 w-8 text-red-600 dark:text-red-400 animate-[pulse_1.5s_ease-in-out_infinite]"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-base font-black text-slate-900 dark:text-white">
-                      Peringatan Akses Terbatas
-                    </h3>
-                  </div>
+                  <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white mb-2">
+                    Peringatan Akses
+                  </h3>
 
-                  <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    Halaman ini hanya dapat diakses oleh <strong className="text-red-600 dark:text-red-400">Admin Kantor Kemenag Barito Utara</strong>.
-                    Apakah Anda admin kantor yang berwenang?
+                  <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400 max-w-[260px]">
+                    Halaman ini dikhususkan bagi <strong className="font-bold text-red-600 dark:text-red-400">Admin Kemenag Barito Utara</strong>.
                   </p>
+                </div>
 
-                  <div className="mt-6 flex gap-3">
-                    <button
-                      onClick={() => setShowConfirm(false)}
-                      className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      Bukan, Kembali
-                    </button>
-                    <Link
-                      href="/admin"
-                      onClick={() => setShowConfirm(false)}
-                      className="flex-1 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 py-3 text-center text-[11px] font-black uppercase tracking-widest text-white transition hover:from-red-700 hover:to-rose-700 hover:shadow-lg hover:shadow-red-500/20"
-                    >
+                <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="flex-1 rounded-2xl border border-slate-200 bg-white py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-50 hover:border-slate-300 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-white/20 active:scale-95"
+                  >
+                    Kembali
+                  </button>
+                  <Link
+                    href="/admin"
+                    onClick={() => setShowConfirm(false)}
+                    className="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 py-3.5 text-center text-[11px] font-black uppercase tracking-widest text-white transition-all hover:shadow-[0_8px_20px_-6px_rgba(225,29,72,0.5)] active:scale-95"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
                       Ya, Masuk
-                    </Link>
-                  </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </span>
+                    <div className="absolute inset-0 bg-white/20 transition-transform duration-500 translate-y-full group-hover:translate-y-0" />
+                  </Link>
                 </div>
               </div>
+            </div>
             </div>
           </div>,
         document.body

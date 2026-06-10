@@ -48,7 +48,7 @@ function revalidateGaleriPaths() {
   revalidatePath("/beranda");
   revalidatePath("/galeri");
   revalidatePath("/admin/galeri");
-  revalidateTag("home-latest-galeri-v2");
+  revalidateTag("home-latest-galeri-v2", "max");
   broadcastRefresh("galeri");
 }
 

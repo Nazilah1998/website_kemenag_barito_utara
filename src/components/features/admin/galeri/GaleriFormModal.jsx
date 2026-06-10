@@ -22,14 +22,14 @@ export function GaleriFormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[210] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-500" onClick={onClose} />
+    <div className="fixed inset-0 z-[210] flex items-center justify-center p-3 sm:p-4">
+      <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-500" />
 
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50 shadow-2xl animate-in zoom-in-95 duration-500 dark:border-slate-800 dark:bg-slate-900">
+      <div className="relative w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden rounded-3xl sm:rounded-[2.5rem] border border-slate-200 bg-slate-50 shadow-2xl animate-in zoom-in-95 duration-500 dark:border-slate-800 dark:bg-slate-900">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-white px-8 py-6 dark:border-slate-800 dark:bg-slate-900/50">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-5 py-4 sm:px-8 sm:py-6 dark:border-slate-800 dark:bg-slate-900/50">
           <div>
-            <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
+            <h3 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
               {editingId ? "Perbarui Visual" : "Tambah Visual"}
             </h3>
             <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -38,19 +38,19 @@ export function GaleriFormModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all dark:bg-slate-800"
+            className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all dark:bg-slate-800"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" strokeWidth="3">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-8">
-          <div className="grid gap-8 sm:grid-cols-2">
+        <div className="p-5 sm:p-8 overflow-y-auto flex-1">
+          <div className="grid gap-5 sm:gap-8 sm:grid-cols-2">
             {/* Left: Date */}
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               <DatePicker
                 label="Tanggal Galeri"
                 value={form.published_at}
@@ -83,7 +83,7 @@ export function GaleriFormModal({
                 onDragLeave={onImageDragLeave}
                 onDrop={onImageDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`relative flex aspect-[3/4] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[2rem] border-2 border-dashed p-6 transition-all ${
+                className={`relative flex aspect-[3/4] w-full sm:w-auto mx-auto max-w-[220px] sm:max-w-none cursor-pointer flex-col items-center justify-center overflow-hidden border-2 border-dashed p-6 transition-all ${
                   isDraggingImage
                     ? "border-emerald-500 bg-emerald-500/10 scale-[1.02]"
                     : "border-slate-200 bg-white hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-white"
@@ -122,17 +122,17 @@ export function GaleriFormModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-white px-8 py-6 dark:border-slate-800 dark:bg-slate-900/50">
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:px-8 sm:py-6 dark:border-slate-800 dark:bg-slate-900/50">
           <button
             onClick={onClose}
-            className="h-12 rounded-xl border-2 border-slate-50 px-8 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all dark:border-white/5 dark:hover:bg-white/5"
+            className="h-10 sm:h-12 rounded-xl border-2 border-slate-50 px-5 sm:px-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all dark:border-white/5 dark:hover:bg-white/5"
           >
             Batal
           </button>
           <button
             onClick={onSave}
             disabled={saving || uploadingImage}
-            className="group relative flex h-14 items-center gap-3 overflow-hidden rounded-2xl bg-slate-900 px-10 text-[11px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-slate-900 dark:shadow-none"
+            className="group relative flex h-10 sm:h-14 items-center gap-2 sm:gap-3 overflow-hidden rounded-xl sm:rounded-2xl bg-slate-900 px-6 sm:px-10 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-slate-900 dark:shadow-none"
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
             

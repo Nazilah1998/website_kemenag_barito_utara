@@ -46,7 +46,7 @@ export default function AdminShell({ children }) {
           </div>
         </header>
 
-        <main className="min-w-0 px-4 py-5 sm:px-6 xl:px-8">{children}</main>
+        <main className="min-w-0 px-2 py-3 sm:px-6 sm:py-5 xl:px-8">{children}</main>
       </div>
     </div>
   );

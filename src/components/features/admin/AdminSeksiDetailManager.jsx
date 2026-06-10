@@ -424,7 +424,7 @@ export default function AdminSeksiDetailManager({ id }) {
   }
 
   return (
-    <section className="space-y-8 pb-12">
+    <section className="space-y-5 sm:space-y-8 pb-12">
       <FloatingFeedback
         message={message}
         error={error}
@@ -435,33 +435,33 @@ export default function AdminSeksiDetailManager({ id }) {
       />
 
       {/* Top Navigation / Breadcrumb */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <Link
           href="/admin/seksi"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-slate-100 bg-white text-slate-500 transition-all hover:border-slate-900 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:border-white dark:hover:text-white"
+          className="inline-flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border-2 border-slate-100 bg-white text-slate-500 transition-all hover:border-slate-900 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:border-white dark:hover:text-white"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Link>
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+        <div className="min-w-0 flex-1">
+          <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
             Kembali ke Daftar
           </span>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight mt-0.5">
+          <h1 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight mt-0.5 truncate">
             {seksiData?.judul || "Kelola Seksi"}
           </h1>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
         {/* LEFT COLUMN: Seksi & Kepala Seksi Form (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950">
-            <h2 className="text-base font-black uppercase tracking-widest text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+          <div className="rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 bg-white p-4 sm:p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950">
+            <h2 className="text-sm sm:text-base font-black uppercase tracking-widest text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
               <User className="h-4 w-4 text-emerald-500" />
               Profil Seksi & Pejabat
             </h2>
 
-            <form onSubmit={handleSaveSeksi} className="mt-6 space-y-5">
+            <form onSubmit={handleSaveSeksi} className="mt-5 sm:mt-6 space-y-4 sm:space-y-5">
               {/* Judul Seksi */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
@@ -521,7 +521,7 @@ export default function AdminSeksiDetailManager({ id }) {
                   onDragOver={handleKasiDragOver}
                   onDragLeave={handleKasiDragLeave}
                   onDrop={handleKasiDrop}
-                  className={`flex flex-col items-center justify-center p-6 rounded-3xl border-2 border-dashed transition-all duration-350 ${
+                  className={`flex flex-col items-center justify-center p-5 sm:p-6 rounded-3xl border-2 border-dashed transition-all duration-350 ${
                     isDraggingKasi
                       ? "border-emerald-500 bg-emerald-500/10 scale-[1.02]"
                       : "border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-transparent"
@@ -611,9 +611,9 @@ export default function AdminSeksiDetailManager({ id }) {
 
         {/* RIGHT COLUMN: Pegawai Seksi CRUD (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h2 className="text-base font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 bg-white p-4 sm:p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-3 sm:gap-0">
+              <h2 className="text-sm sm:text-base font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                 <Users className="h-4 w-4 text-emerald-500" />
                 Struktur Staf Pegawai ({pegawaiList.length})
               </h2>
@@ -621,7 +621,7 @@ export default function AdminSeksiDetailManager({ id }) {
               <button
                 type="button"
                 onClick={handleOpenAddPegawai}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-slate-800 transition dark:bg-white dark:text-black dark:hover:bg-slate-250 active:scale-95"
+                className="inline-flex justify-center items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-slate-800 transition dark:bg-white dark:text-black dark:hover:bg-slate-250 active:scale-95"
               >
                 <Plus className="h-3.5 w-3.5 stroke-[3]" />
                 Tambah Staf
@@ -708,27 +708,28 @@ export default function AdminSeksiDetailManager({ id }) {
 
       {/* PEGAWAI CRUD MODAL (ADD / EDIT) */}
       {openPegawaiModal && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-3 sm:p-4">
           <div
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setOpenPegawaiModal(false)}
           />
 
-          <div className="relative w-full max-w-lg animate-in zoom-in slide-in-from-bottom-8 duration-300 overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-8 py-6">
-              <h3 className="text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white">
+          <div className="relative w-full max-w-lg max-h-[95vh] flex flex-col animate-in zoom-in slide-in-from-bottom-8 duration-300 overflow-hidden rounded-3xl sm:rounded-[2.5rem] border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 dark:border-slate-800 px-5 py-4 sm:px-8 sm:py-6">
+              <h3 className="text-sm sm:text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white">
                 {editingPegawai ? "Edit Data Pegawai" : "Tambah Pegawai Baru"}
               </h3>
               <button
                 type="button"
                 onClick={() => setOpenPegawaiModal(false)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-xl transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSavePegawai} className="p-8 space-y-5">
+            <div className="overflow-y-auto overflow-x-hidden flex-1">
+              <form onSubmit={handleSavePegawai} className="p-5 sm:p-8 space-y-4 sm:space-y-5">
               {/* Nama Pegawai */}
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
@@ -912,7 +913,8 @@ export default function AdminSeksiDetailManager({ id }) {
                   Batalkan
                 </button>
               </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}

@@ -23,7 +23,7 @@ export default function AdminLaporanCategoryManager({
     });
 
     return (
-        <div className="space-y-12 animate-in fade-in duration-700 delay-100">
+        <div className="space-y-6 sm:space-y-12 animate-in fade-in duration-700 delay-100">
             <FloatingFeedback
                 message={admin.actionFeedback?.message || admin.uploadFeedback?.message}
                 error={admin.actionFeedback?.type === "error" || admin.uploadFeedback?.type === "error" ? (admin.actionFeedback?.message || admin.uploadFeedback?.message) : ""}
@@ -33,7 +33,7 @@ export default function AdminLaporanCategoryManager({
             />
 
             {/* Category Selection Area */}
-            <div className="rounded-[3rem] border border-slate-100 bg-white p-12 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
+            <div className="rounded-[1.5rem] sm:rounded-[3rem] border border-slate-100 bg-white p-4 sm:p-12 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
                 <LaporanCategoryPanel
                     categories={categories}
                     activeSlug={admin.activeSlug}
@@ -44,10 +44,10 @@ export default function AdminLaporanCategoryManager({
             </div>
 
             {/* Content Area: Form & List */}
-            <div className="grid gap-8 xl:grid-cols-12">
+            <div className="grid gap-6 sm:gap-8 xl:grid-cols-12">
                 {/* Left Side: Upload Form */}
                 <div className="xl:col-span-5 flex flex-col h-full">
-                    <div className="flex-1 rounded-[3rem] border border-slate-100 bg-white p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
+                    <div className="flex-1 rounded-[1.5rem] sm:rounded-[3rem] border border-slate-100 bg-white p-4 sm:p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
                         <LaporanUploadPanel
                             activeCategory={admin.activeCategory}
                             docForm={admin.docForm}
@@ -64,7 +64,7 @@ export default function AdminLaporanCategoryManager({
 
                 {/* Right Side: Document List */}
                 <div className="xl:col-span-7 flex flex-col h-full">
-                    <div className="flex-1 rounded-[3rem] border border-slate-100 bg-white p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
+                    <div className="flex-1 rounded-[1.5rem] sm:rounded-[3rem] border border-slate-100 bg-white p-4 sm:p-10 shadow-2xl shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
                         <LaporanDocumentPanel
                             activeCategory={admin.activeCategory}
                             activeSlug={admin.activeSlug}

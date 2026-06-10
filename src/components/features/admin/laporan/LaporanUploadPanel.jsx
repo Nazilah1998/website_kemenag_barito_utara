@@ -62,7 +62,7 @@ export default function LaporanUploadPanel({
             aria-labelledby="laporan-upload-title"
             aria-busy={savingDocument}
         >
-            <div className="mb-8 pb-6 border-b-2 border-slate-900 dark:border-white">
+            <div className="mb-5 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-slate-900 dark:border-white">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg dark:bg-white dark:text-black mb-5">
                     <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="3">
                         <path d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
@@ -70,7 +70,7 @@ export default function LaporanUploadPanel({
                 </div>
                 <h2
                     id="laporan-upload-title"
-                    className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none"
+                    className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none"
                 >
                     Upload Baru
                 </h2>
@@ -79,8 +79,8 @@ export default function LaporanUploadPanel({
                 </p>
             </div>
 
-            <form className="flex-1 space-y-6" onSubmit={handleUpload} noValidate>
-                <div className="space-y-6">
+            <form className="flex-1 space-y-4 sm:space-y-6" onSubmit={handleUpload} noValidate>
+                <div className="space-y-4 sm:space-y-6">
                     {activeCategory?.slug === "sop" && (
                         <div className="space-y-2 relative">
                             <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-slate-100 ml-1">
@@ -138,7 +138,7 @@ export default function LaporanUploadPanel({
                         onChange={(e) => setDocForm((prev) => ({ ...prev, title: e.target.value }))}
                     />
 
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                         <Input
                             inputId="laporan-year"
                             label="Tahun"
@@ -155,7 +155,7 @@ export default function LaporanUploadPanel({
                             File PDF <span className="text-rose-500">*</span>
                         </label>
                         <div 
-                            className="relative group mt-1"
+                            className="relative group mt-1 w-full min-w-0"
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
@@ -167,17 +167,19 @@ export default function LaporanUploadPanel({
                                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <div className={`flex flex-col items-center justify-center min-h-[120px] w-full rounded-2xl border-2 border-dashed px-5 py-6 transition-all ${isDragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20" : "border-slate-200 bg-slate-50/50 group-hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/30 dark:group-hover:border-white"}`}>
+                            <div className={`flex flex-col items-center justify-center min-h-[120px] w-full min-w-0 overflow-hidden rounded-2xl border-2 border-dashed px-4 py-6 transition-all ${isDragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20" : "border-slate-200 bg-slate-50/50 group-hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/30 dark:group-hover:border-white"}`}>
                                 {selectedFile || docForm.file_name ? (
                                     <>
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 mb-3">
+                                        <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 mb-3">
                                             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
                                                 <path d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
-                                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-full px-2 text-center">
-                                            {selectedFile?.name || docForm.file_name}
-                                        </span>
+                                        <div className="w-full min-w-0 max-w-full px-2 text-center flex flex-col items-center">
+                                            <span className="block w-full max-w-full line-clamp-2 break-all text-xs font-bold text-slate-900 dark:text-white text-balance">
+                                                {selectedFile?.name || docForm.file_name}
+                                            </span>
+                                        </div>
                                         <span className="text-[10px] font-medium text-slate-400 mt-1">Klik atau seret file PDF lain untuk mengganti</span>
                                     </>
                                 ) : (
@@ -196,7 +198,7 @@ export default function LaporanUploadPanel({
                         </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border-2 border-slate-100 bg-slate-50/50 p-6 dark:border-slate-800 dark:bg-slate-800/30">
+                    <div className="overflow-hidden rounded-xl sm:rounded-2xl border-2 border-slate-100 bg-slate-50/50 p-4 sm:p-6 dark:border-slate-800 dark:bg-slate-800/30">
                         <label className="flex cursor-pointer items-center gap-4">
                             <div className="relative flex items-center">
                                 <input

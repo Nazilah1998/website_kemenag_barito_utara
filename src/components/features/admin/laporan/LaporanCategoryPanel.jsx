@@ -38,14 +38,14 @@ export default function LaporanCategoryPanel({
     }
 
     return (
-        <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-top-4 duration-700">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div className="flex flex-col gap-6 sm:gap-8 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 sm:gap-8">
                 <div>
                     <div className="flex items-center gap-3 mb-4">
                         <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Database Dokumen</p>
                     </div>
-                    <h2 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
+                    <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
                         {activeCategory?.title || "Kategori Dokumen"}
                     </h2>
                     <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg">
@@ -57,7 +57,7 @@ export default function LaporanCategoryPanel({
                 <div className="relative w-full lg:w-[360px]" ref={dropdownRef}>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className={`group flex w-full h-14 items-center justify-between rounded-2xl border-2 transition-all duration-300 ${isOpen
+                        className={`group flex w-full h-12 sm:h-14 items-center justify-between rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ${isOpen
                             ? "border-slate-900 bg-white shadow-xl dark:border-white dark:bg-slate-900"
                             : "border-slate-100 bg-slate-50/50 hover:border-slate-900 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-white"
                             }`}
@@ -84,8 +84,8 @@ export default function LaporanCategoryPanel({
 
                     {/* Dropdown Menu */}
                     {isOpen && (
-                        <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-full overflow-hidden rounded-[2rem] border-2 border-slate-900 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 dark:border-white dark:bg-slate-900">
-                            <div className="max-h-[300px] overflow-y-auto p-3 custom-scrollbar">
+                        <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-full overflow-hidden rounded-3xl sm:rounded-[2rem] border-2 border-slate-900 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 dark:border-white dark:bg-slate-900">
+                            <div className="max-h-[250px] sm:max-h-[300px] overflow-y-auto p-3 custom-scrollbar">
                                 {categories.map((cat) => {
                                     const isActive = activeSlug === cat.slug;
                                     return (

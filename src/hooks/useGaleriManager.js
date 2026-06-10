@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { compressImageToBase64 } from "@/lib/image-compress";
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 10;
 
 const emptyForm = {
   published_at: null,

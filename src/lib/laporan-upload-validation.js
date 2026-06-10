@@ -10,7 +10,7 @@ export function sanitizeBaseFilename(value = "") {
     .normalize("NFKD")
     .replace(/[^\w\s-]/g, "")
     .trim()
-    .replace(/[_\-\s]+/g, "&")
+    .replace(/[_\-\s]+/g, "-") // Changed to dash instead of ampersand
     .slice(0, 80);
 }
 

@@ -10,27 +10,27 @@ export const statToneMap = {
 
 export function StatCard({ label, value, helper, icon, tone = "emerald" }) {
   return (
-    <div className="group relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-8 shadow-2xl shadow-slate-200/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-slate-300/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none">
+    <div className="group relative overflow-hidden rounded-2xl sm:rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-4 sm:p-8 shadow-2xl shadow-slate-200/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-slate-300/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none">
       <div className="absolute inset-0 bg-white opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:bg-slate-800/50" />
 
-      <div className="relative z-10 flex items-start justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 group-hover:text-slate-600 transition-colors dark:group-hover:text-slate-300">
+      <div className="relative z-10 flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest sm:tracking-[0.25em] text-slate-400 group-hover:text-slate-600 transition-colors dark:group-hover:text-slate-300 leading-relaxed truncate sm:whitespace-normal">
             {label}
           </p>
-          <p className="mt-3 text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+          <p className="mt-1 sm:mt-3 text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
             {value}
           </p>
         </div>
 
-        <div className="flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-slate-900 text-white shadow-xl shadow-slate-900/20 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 dark:bg-white dark:text-black dark:shadow-none">
-          {React.cloneElement(icon, { className: "w-7 h-7" })}
+        <div className="flex h-10 w-10 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-xl sm:rounded-[1.5rem] bg-slate-900 text-white shadow-xl shadow-slate-900/20 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 dark:bg-white dark:text-black dark:shadow-none absolute right-4 top-4 sm:static">
+          {React.cloneElement(icon, { className: "w-5 h-5 sm:w-7 sm:h-7" })}
         </div>
       </div>
 
-      <div className="relative z-10 mt-8 flex items-center gap-2 border-t border-slate-100 pt-5 dark:border-slate-800/50">
-        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+      <div className="relative z-10 mt-4 sm:mt-8 flex items-center gap-2 border-t border-slate-100 pt-3 sm:pt-5 dark:border-slate-800/50">
+        <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 animate-pulse"></div>
+        <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 truncate">
           {helper}
         </p>
       </div>
@@ -229,7 +229,7 @@ export function ModernSelect({ label, value, options = [], onChange, name }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`mt-1.5 flex h-12 w-full items-center justify-between rounded-2xl border bg-white px-5 text-sm font-bold text-slate-900 outline-none transition-all dark:bg-slate-800/50 dark:text-white ${isOpen
+        className={`mt-1.5 flex h-12 sm:h-14 w-full items-center justify-between rounded-xl sm:rounded-2xl border bg-white px-4 sm:px-5 text-xs sm:text-sm font-bold text-slate-900 outline-none transition-all dark:bg-slate-800/50 dark:text-white ${isOpen
           ? "border-slate-900 ring-4 ring-slate-900/5 dark:border-white dark:ring-white/5"
           : "border-slate-200 dark:border-slate-800"
           }`}

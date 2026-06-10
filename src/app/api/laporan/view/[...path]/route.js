@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request, { params }) {
   const ip = getClientIp(request);
   const limitCheck = await rateLimit({
-    key: `laporan-download:${ip}`,
-    limit: 20,
+    key: `laporan-view:${ip}`,
+    limit: 30,
     windowMs: 60_000,
   });
 
@@ -21,14 +21,20 @@ export async function GET(request, { params }) {
   }
   try {
     const resolvedParams = await params;
-    const id = resolvedParams?.id;
+    const pathParts = resolvedParams?.path || [];
+    const id = pathParts[0];
 
     if (!id) {
       return apiResponse({ message: "ID dokumen tidak valid." }, 400);
     }
 
     const [doc] = await db
-      .select({ id: report_documents.id, file_url: report_documents.file_url, file_name: report_documents.file_name, is_published: report_documents.is_published })
+      .select({
+        id: report_documents.id,
+        file_url: report_documents.file_url,
+        file_name: report_documents.file_name,
+        is_published: report_documents.is_published,
+      })
       .from(report_documents)
       .where(eq(report_documents.id, id))
       .limit(1);
@@ -45,10 +51,12 @@ export async function GET(request, { params }) {
       return apiResponse({ message: "URL file dokumen tidak tersedia." }, 404);
     }
 
-    // Increment download count atomically
+    // Increment view count atomically using Drizzle sql template
     await db
       .update(report_documents)
-      .set({ download_count: sql`${report_documents.download_count} + 1` })
+      .set({
+        view_count: sql`${report_documents.view_count} + 1`
+      })
       .where(eq(report_documents.id, id));
 
     // Construct absolute URL if the path is relative
@@ -57,17 +65,29 @@ export async function GET(request, { params }) {
       const baseUrl = new URL(request.url).origin;
       targetUrl = `${baseUrl}${targetUrl}`;
     }
-    
-    const response = NextResponse.redirect(targetUrl);
-    response.headers.set("Access-Control-Allow-Origin", "*");
-    response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
-    response.headers.set("Access-Control-Allow-Headers", "*");
-    return response;
+
+    // Proxy the file to hide long Supabase URL
+    const fileResponse = await fetch(targetUrl);
+    if (!fileResponse.ok) {
+      throw new Error("Gagal mengambil dokumen dari server penyimpanan.");
+    }
+
+    const headers = new Headers();
+    headers.set("Content-Type", "application/pdf");
+    const safeFilename = doc.file_name || `dokumen-${id}.pdf`;
+    headers.set("Content-Disposition", `inline; filename="${safeFilename}"`); // inline for viewing with proper filename
+    headers.set("Access-Control-Allow-Origin", "*");
+    headers.set("Cache-Control", "public, max-age=3600");
+
+    return new Response(fileResponse.body, {
+      status: 200,
+      headers,
+    });
   } catch (error) {
-    logError("laporan_download_redirect_error", { error: error?.message });
+    logError("laporan_view_redirect_error", { error: error?.message });
     return apiResponse(
       {
-        message: error?.message || "Terjadi kesalahan saat mengunduh dokumen.",
+        message: error?.message || "Terjadi kesalahan saat membuka dokumen.",
       },
       500,
     );

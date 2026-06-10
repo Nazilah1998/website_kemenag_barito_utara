@@ -43,7 +43,8 @@ export function normalizeLaporanDocument(doc = {}) {
   const description = toText(doc?.description, "");
   const id = doc?.id || "";
 
-  const viewHref = id ? `/api/laporan/view/${id}` : fileUrl || "#";
+  const safeFilename = doc?.file_name || `dokumen-${id}.pdf`;
+  const viewHref = id ? `/api/laporan/view/${id}/${safeFilename}` : fileUrl || "#";
 
   return {
     id,

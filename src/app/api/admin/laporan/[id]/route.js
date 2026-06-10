@@ -15,7 +15,7 @@ import { logError } from "@/lib/logger";
 
 // Supabase replacements
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CMS_MEDIA_BUCKET } from "@/lib/storage-media";
+import { LAPORAN_DOCUMENTS_BUCKET } from "@/lib/storage-media";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +83,7 @@ export async function PUT(request, context) {
 
         // Upload to Supabase Storage
         const supabase = createAdminClient();
-        const { error: uploadError } = await supabase.storage.from(CMS_MEDIA_BUCKET).upload(storagePath, buffer, {
+        const { error: uploadError } = await supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).upload(storagePath, buffer, {
           contentType: "application/pdf",
           upsert: true,
         });
@@ -92,7 +92,7 @@ export async function PUT(request, context) {
           throw new Error(`Gagal upload PDF ke Supabase: ${uploadError.message}`);
         }
         
-        const { data: publicUrlData } = supabase.storage.from(CMS_MEDIA_BUCKET).getPublicUrl(storagePath);
+        const { data: publicUrlData } = supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).getPublicUrl(storagePath);
         const fileUrl = publicUrlData?.publicUrl || "";
 
         replacementFileData = {
@@ -135,7 +135,7 @@ export async function PUT(request, context) {
 
     if (replacementFileData && existingDoc?.file_path) {
       const supabase = createAdminClient();
-      await supabase.storage.from(CMS_MEDIA_BUCKET).remove([existingDoc.file_path]);
+      await supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).remove([existingDoc.file_path]);
     }
 
     await recordAudit({
@@ -189,7 +189,7 @@ export async function DELETE(request, context) {
 
     if (existingDoc.file_path) {
       const supabase = createAdminClient();
-      await supabase.storage.from(CMS_MEDIA_BUCKET).remove([existingDoc.file_path]);
+      await supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).remove([existingDoc.file_path]);
     }
 
     await recordAudit({

@@ -79,7 +79,7 @@ export default function LaporanDocumentPanel({
             aria-busy={isLoading}
             className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-700 delay-150"
         >
-            <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between border-b-2 border-slate-900 pb-6 dark:border-white">
+            <div className="mb-5 sm:mb-8 flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-end lg:justify-between border-b-2 border-slate-900 pb-4 sm:pb-6 dark:border-white">
                 <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-700 mb-1.5">Data Terverifikasi</p>
                     <h2
@@ -143,17 +143,19 @@ export default function LaporanDocumentPanel({
                         return (
                             <article
                                 key={doc.id}
-                                className={`group relative overflow-hidden rounded-[2rem] border-2 transition-all duration-500 ${isEditing
-                                    ? "border-slate-900 bg-slate-900 shadow-xl dark:border-white dark:bg-white scale-[1.01] z-20"
+                                className={`group relative overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border-2 transition-all duration-500 ${isEditing
+                                    ? "border-emerald-500 bg-slate-50 shadow-xl dark:border-emerald-500 dark:bg-slate-900 scale-[1.01] z-20"
                                     : "border-slate-100 bg-white hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/20 dark:hover:border-white"
                                     }`}
                             >
                                 {!isEditing ? (
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-slate-900 text-white shadow-md group-hover:scale-105 transition-transform dark:bg-white dark:text-black">
-                                            <span className="text-[11px] font-black">
-                                                {(currentPage - 1) * 3 + index + 1}
-                                            </span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
+                                        <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                                            <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-[14px] bg-slate-900 text-white shadow-md group-hover:scale-105 transition-transform dark:bg-slate-800 dark:text-white">
+                                                <span className="text-[11px] font-black">
+                                                    {(currentPage - 1) * 3 + index + 1}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div className="min-w-0 flex-1">
@@ -168,8 +170,8 @@ export default function LaporanDocumentPanel({
                                             ) : null}
                                         </div>
 
-                                        <div className="flex flex-col items-end gap-3 shrink-0">
-                                            <div className="flex flex-wrap items-center justify-end gap-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
+                                        <div className="flex flex-col items-start sm:items-end gap-3 shrink-0 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-slate-100 dark:border-slate-800 sm:border-0">
+                                            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-3 text-[9px] font-black uppercase tracking-widest text-slate-400 w-full sm:w-auto">
                                                 <div className="flex items-center gap-1">
                                                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="4"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                                     {doc.view_count || 0} Lihat
@@ -184,9 +186,9 @@ export default function LaporanDocumentPanel({
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                                                 <a
-                                                    href={`/api/laporan/view/${doc.id}`}
+                                                    href={`/api/laporan/view/${doc.id}/${doc.file_name || 'dokumen.pdf'}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     title="Preview"
@@ -238,13 +240,13 @@ export default function LaporanDocumentPanel({
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="p-8 animate-in fade-in duration-500">
-                                        <div className="flex items-center justify-between mb-8 border-b border-white/10 dark:border-black/10 pb-6">
+                                    <div className="p-5 sm:p-8 animate-in fade-in duration-500">
+                                        <div className="flex items-center justify-between mb-5 sm:mb-8 border-b border-slate-200 dark:border-slate-800 pb-4 sm:pb-6">
                                             <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 dark:text-black/50">Sistem Pembaruan</p>
-                                                <h3 className="text-xl font-black text-white dark:text-black tracking-tighter uppercase">Edit Dokumen</h3>
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Sistem Pembaruan</p>
+                                                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Edit Dokumen</h3>
                                             </div>
-                                            <button onClick={onCancelEdit} className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white hover:text-black dark:bg-black/10 dark:text-black dark:hover:bg-black dark:hover:text-white transition-all">
+                                            <button onClick={onCancelEdit} className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-all">
                                                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 18L18 6M6 6l12 12" /></svg>
                                             </button>
                                         </div>
@@ -252,17 +254,17 @@ export default function LaporanDocumentPanel({
                                         <div className="space-y-6">
                                             {activeCategory?.slug === "sop" && (
                                                 <div className="space-y-2 relative">
-                                                    <label className="text-[10px] font-black uppercase tracking-[0.15em] text-white/50 dark:text-black/50 ml-1">
+                                                    <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 ml-1">
                                                         SOP Bidang <span className="text-rose-500">*</span>
                                                     </label>
                                                     <div className="relative">
                                                         <button
                                                             type="button"
                                                             onClick={() => setIsEditDropdownOpen(!isEditDropdownOpen)}
-                                                            className="flex w-full h-12 items-center justify-between rounded-2xl border-2 px-4 text-xs font-bold outline-none transition-all !bg-white/5 !border-white/20 !text-white dark:!bg-black/5 dark:!border-black/20 dark:!text-black text-left"
+                                                            className="flex w-full h-12 items-center justify-between rounded-2xl border-2 px-4 text-xs font-bold outline-none transition-all bg-white border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white text-left focus:border-emerald-500 dark:focus:border-emerald-500"
                                                         >
                                                             <span>{editForm.description || "Layanan Sub Bagian Tata Usaha"}</span>
-                                                            <svg viewBox="0 0 24 24" className={`h-4 w-4 text-white/50 dark:text-black/50 transition-transform duration-300 ${isEditDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="3">
+                                                            <svg viewBox="0 0 24 24" className={`h-4 w-4 text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isEditDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="3">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                                             </svg>
                                                         </button>
@@ -275,7 +277,7 @@ export default function LaporanDocumentPanel({
                                                                     className="fixed inset-0 z-20 cursor-default"
                                                                     onClick={() => setIsEditDropdownOpen(false)}
                                                                 />
-                                                                <div className="absolute left-0 right-0 mt-2 py-2 bg-slate-900 dark:bg-white border border-white/10 dark:border-black/10 rounded-2xl shadow-xl z-30 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                                                <div className="absolute left-0 right-0 mt-2 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-30 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
                                                                     {BIDANG_LIST.map((bidang) => (
                                                                         <button
                                                                             key={bidang}
@@ -284,7 +286,7 @@ export default function LaporanDocumentPanel({
                                                                                 setEditForm((p) => ({ ...p, description: bidang }));
                                                                                 setIsEditDropdownOpen(false);
                                                                             }}
-                                                                            className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-white/10 dark:hover:bg-black/10 ${editForm.description === bidang || (!editForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-400 dark:text-emerald-700 bg-emerald-500/10 dark:bg-emerald-500/10" : "text-white dark:text-black"}`}
+                                                                            className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700/50 ${editForm.description === bidang || (!editForm.description && bidang === "Layanan Sub Bagian Tata Usaha") ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10" : "text-slate-700 dark:text-slate-300"}`}
                                                                         >
                                                                             {bidang}
                                                                         </button>
@@ -300,7 +302,7 @@ export default function LaporanDocumentPanel({
                                                 <Input
                                                     inputId={`edit-title-${doc.id}`}
                                                     label="Judul Dokumen"
-                                                    className="!h-12 !bg-white/5 !border-white/20 !text-white placeholder:text-white/30 dark:!bg-black/5 dark:!border-black/20 dark:!text-black"
+                                                    className="!h-12 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-emerald-500"
                                                     value={editForm.title}
                                                     onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
                                                 />
@@ -309,16 +311,16 @@ export default function LaporanDocumentPanel({
                                                     inputId={`edit-year-${doc.id}`}
                                                     label="Tahun"
                                                     type="number"
-                                                    className="!h-12 !bg-white/5 !border-white/20 !text-white dark:!bg-black/5 dark:!border-black/20 dark:!text-black"
+                                                    className="!h-12 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-emerald-500"
                                                     value={editForm.year}
                                                     onChange={(e) => setEditForm((p) => ({ ...p, year: e.target.value }))}
                                                 />
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 dark:text-black/50 ml-1">Update File</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1">Update File</label>
                                                 <div 
-                                                    className="relative group mt-1"
+                                                    className="relative group mt-1 w-full min-w-0"
                                                     onDragOver={handleDragOverEdit}
                                                     onDragLeave={handleDragLeaveEdit}
                                                     onDrop={handleDropEdit}
@@ -330,27 +332,29 @@ export default function LaporanDocumentPanel({
                                                         onChange={(e) => setEditFile(e.target.files?.[0] || null)}
                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                     />
-                                                    <div className={`flex flex-col items-center justify-center min-h-[120px] w-full rounded-2xl border-2 border-dashed px-5 py-6 transition-all ${isDraggingEdit ? "border-emerald-500 bg-emerald-500/20 dark:bg-emerald-500/20" : "border-white/20 bg-white/5 group-hover:border-white/50 dark:border-black/20 dark:bg-black/5 dark:group-hover:border-black/50"}`}>
+                                                    <div className={`flex flex-col items-center justify-center min-h-[120px] w-full min-w-0 overflow-hidden rounded-2xl border-2 border-dashed px-4 py-6 transition-all ${isDraggingEdit ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "border-slate-200 bg-white group-hover:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:group-hover:border-emerald-500"}`}>
                                                         {editFile ? (
                                                             <>
-                                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white dark:bg-emerald-500 dark:text-white mb-3">
+                                                                <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 mb-3">
                                                                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
                                                                         <path d="M5 13l4 4L19 7" />
                                                                     </svg>
                                                                 </div>
-                                                                <span className="text-xs font-bold text-white dark:text-black truncate max-w-full px-2 text-center">
-                                                                    {editFile.name}
-                                                                </span>
-                                                                <span className="text-[10px] font-medium text-white/50 dark:text-black/50 mt-1">Klik atau seret file PDF lain untuk mengganti</span>
+                                                                <div className="w-full min-w-0 max-w-full px-2 text-center flex flex-col items-center">
+                                                                    <span className="block w-full max-w-full line-clamp-2 break-all text-xs font-bold text-slate-900 dark:text-white text-balance">
+                                                                        {editFile.name}
+                                                                    </span>
+                                                                </div>
+                                                                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1">Klik atau seret file PDF lain untuk mengganti</span>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors mb-3 ${isDraggingEdit ? "bg-emerald-500 text-white" : "bg-white/10 text-white/50 dark:bg-black/10 dark:text-black/50 group-hover:bg-white group-hover:text-black dark:group-hover:bg-black dark:group-hover:text-white"}`}>
+                                                                <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors mb-3 ${isDraggingEdit ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-500 dark:group-hover:bg-emerald-500/10 dark:group-hover:text-emerald-400"}`}>
                                                                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                                         <path d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
                                                                     </svg>
                                                                 </div>
-                                                                <span className={`text-[11px] font-black uppercase tracking-widest text-center ${isDraggingEdit ? "text-emerald-500" : "text-white/60 dark:text-black/60 group-hover:text-white dark:group-hover:text-black"}`}>
+                                                                <span className={`text-[11px] font-black uppercase tracking-widest text-center ${isDraggingEdit ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"}`}>
                                                                     {isDraggingEdit ? "Lepaskan File PDF di sini" : "Pilih / Drag File PDF Baru"}
                                                                 </span>
                                                             </>
@@ -359,29 +363,29 @@ export default function LaporanDocumentPanel({
                                                 </div>
                                             </div>
 
-                                            <label className="flex cursor-pointer items-center gap-4 group/check bg-white/5 p-4 rounded-xl border-2 border-white/10 dark:bg-black/5 dark:border-black/10">
+                                            <label className="flex cursor-pointer items-center gap-4 group/check bg-white p-4 rounded-xl border-2 border-slate-200 dark:bg-slate-800 dark:border-slate-700">
                                                 <div className="relative flex items-center">
                                                     <input
                                                         type="checkbox"
                                                         checked={Boolean(editForm.is_published)}
                                                         onChange={(e) => setEditForm((p) => ({ ...p, is_published: e.target.checked }))}
-                                                        className="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-white/20 bg-white/10 transition-all checked:bg-white dark:border-black/20 dark:bg-black/10 dark:checked:bg-black"
+                                                        className="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-slate-200 bg-slate-50 transition-all checked:border-emerald-500 checked:bg-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:checked:border-emerald-500 dark:checked:bg-emerald-500"
                                                     />
-                                                    <svg className="pointer-events-none absolute h-6 w-6 p-1 text-slate-900 opacity-0 transition-opacity peer-checked:opacity-100 dark:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5">
+                                                    <svg className="pointer-events-none absolute h-6 w-6 p-1 text-white opacity-0 transition-opacity peer-checked:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5">
                                                         <path d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <span className="text-[11px] font-black uppercase tracking-widest text-white dark:text-black block">Status Publikasi</span>
+                                                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white block">Status Publikasi</span>
                                                 </div>
                                             </label>
 
-                                            <div className="flex flex-col sm:flex-row items-center gap-3 pt-6 border-t border-white/10 dark:border-black/10">
+                                            <div className="flex flex-col sm:flex-row items-center gap-3 pt-6 border-t border-slate-200 dark:border-slate-800">
                                                 <Button
                                                     type="button"
                                                     onClick={() => onSaveEdit(doc.id)}
                                                     loading={isSavingEdit}
-                                                    className="w-full sm:flex-1 !bg-white !text-black hover:!bg-slate-100 dark:!bg-black dark:!text-white dark:hover:!bg-slate-900 shadow-none h-12"
+                                                    className="w-full sm:flex-1 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 shadow-none h-12"
                                                 >
                                                     Simpan
                                                 </Button>
@@ -390,7 +394,7 @@ export default function LaporanDocumentPanel({
                                                     tone="ghost"
                                                     onClick={onCancelEdit}
                                                     disabled={isSavingEdit}
-                                                    className="w-full sm:w-auto !bg-transparent !border-white/20 !text-white/70 hover:!text-white hover:!bg-white/10 dark:!border-black/20 dark:!text-black/60 dark:hover:!text-black dark:hover:!bg-black/10 h-12"
+                                                    className="w-full sm:w-auto !bg-transparent border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 h-12"
                                                 >
                                                     Batal
                                                 </Button>
@@ -403,7 +407,7 @@ export default function LaporanDocumentPanel({
                     })}
 
                     {totalPages > 1 && (
-                        <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t-2 border-slate-900 pt-8 dark:border-white lg:flex-row">
+                        <div className="mt-8 sm:mt-12 flex flex-col items-center justify-between gap-5 sm:gap-6 border-t-2 border-slate-900 pt-6 sm:pt-8 dark:border-white lg:flex-row">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                                 <span className="text-slate-900 dark:text-white">{currentPage}</span> / <span className="text-slate-900 dark:text-white">{totalPages}</span>
                             </p>
@@ -456,7 +460,7 @@ export default function LaporanDocumentPanel({
                 </div>
 
             ) : (
-                <div className="flex flex-col items-center justify-center rounded-[3rem] border-4 border-dashed border-slate-100 bg-slate-50/20 py-32 text-center dark:border-slate-800 dark:bg-slate-900/10">
+                <div className="flex flex-col items-center justify-center rounded-[2rem] sm:rounded-[3rem] border-4 border-dashed border-slate-100 bg-slate-50/20 py-16 sm:py-32 text-center dark:border-slate-800 dark:bg-slate-900/10">
                     <div className="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-slate-900 text-white dark:bg-white dark:text-black mb-8 shadow-2xl">
                         <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

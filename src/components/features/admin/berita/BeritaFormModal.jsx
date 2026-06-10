@@ -191,7 +191,7 @@ export function BeritaFormModal({
                     suppressContentEditableWarning
                     onInput={onEditorInput}
                     onPaste={onEditorPaste}
-                    className="min-h-[300px] sm:flex-1 overflow-y-auto custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/30 px-6 py-5 text-sm leading-relaxed text-slate-700 outline-none focus:ring-4 focus:ring-slate-900/5 dark:border-slate-800/50 dark:bg-slate-900/40 dark:text-slate-300"
+                    className="min-h-[300px] sm:flex-1 overflow-y-auto custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/30 px-6 py-5 text-sm leading-relaxed text-slate-700 outline-none focus:ring-4 focus:ring-slate-900/5 selection:bg-emerald-200 selection:text-emerald-900 dark:border-slate-800/50 dark:bg-slate-900/40 dark:text-slate-300 dark:selection:bg-emerald-600/60 dark:selection:text-white"
                   />
                 </div>
               </div>

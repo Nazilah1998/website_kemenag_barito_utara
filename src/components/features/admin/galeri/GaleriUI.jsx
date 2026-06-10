@@ -22,26 +22,26 @@ export function GaleriPagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6 dark:border-slate-800/50">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+    <div className="mt-5 sm:mt-8 flex flex-row items-center justify-center gap-3 sm:gap-6 border-t border-slate-100 pt-4 sm:pt-6 dark:border-slate-800/50">
+      <button
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+        className="flex h-8 sm:h-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200 bg-white px-3 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-900 transition hover:bg-slate-50 disabled:opacity-30 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+      >
+        Prev
+      </button>
+
+      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400">
         Halaman <span className="text-slate-900 dark:text-white">{currentPage}</span> dari {totalPages}
       </p>
-      <div className="flex gap-2">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => onPageChange(currentPage - 1)}
-          className="flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[10px] font-black uppercase tracking-widest text-slate-900 transition hover:bg-slate-50 disabled:opacity-30 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-        >
-          Prev
-        </button>
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => onPageChange(currentPage + 1)}
-          className="flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-[10px] font-black uppercase tracking-widest text-slate-900 transition hover:bg-slate-50 disabled:opacity-30 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
-        >
-          Next
-        </button>
-      </div>
+
+      <button
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+        className="flex h-8 sm:h-10 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200 bg-white px-3 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-900 transition hover:bg-slate-50 disabled:opacity-30 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+      >
+        Next
+      </button>
     </div>
   );
 }

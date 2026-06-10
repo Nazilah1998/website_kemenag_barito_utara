@@ -10,7 +10,7 @@ export default function AdminHomepageSlidesManager() {
   const s = useSlidesManager();
 
   return (
-    <section className="space-y-12">
+    <section className="space-y-6 sm:space-y-12">
       <FloatingFeedback
         message={s.message}
         error={s.error}
@@ -44,7 +44,7 @@ export default function AdminHomepageSlidesManager() {
       </div>
 
       {/* Content Card */}
-      <div className="rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-8 shadow-2xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none">
+      <div className="rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-4 sm:p-8 shadow-2xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none">
         <div className="mb-8 flex items-center justify-between border-b border-slate-100 pb-6 dark:border-slate-800/50">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>

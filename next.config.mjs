@@ -234,6 +234,10 @@ const nextConfig = {
         source: "/storage/:path*",
         destination: "/api/storage/media/:path*",
       },
+      {
+        source: "/favicon.ico",
+        destination: "/assets/icons/kemenag-192.png",
+      },
     ];
   },
 
