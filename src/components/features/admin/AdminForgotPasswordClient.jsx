@@ -251,10 +251,23 @@ export default function AdminForgotPasswordClient() {
                   <input
                     id="otp"
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={f.otp}
                     onChange={(e) =>
-                      f.setOtp(e.target.value.replace(/\\D/g, "").slice(0, 6))
+                      f.setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
+                    onKeyDown={(e) => {
+                      // Allow only numbers and control keys
+                      if (
+                        !/[0-9]/.test(e.key) &&
+                        !['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete', 'Enter'].includes(e.key) &&
+                        !e.ctrlKey &&
+                        !e.metaKey
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                     placeholder="• • • • • •"
                     required
                     className={`${inputClassName()} text-center text-2xl tracking-[0.5em] font-black`}

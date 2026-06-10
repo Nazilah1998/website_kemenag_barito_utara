@@ -1,10 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { siteInfo } from "@/data/site";
 import { CloseIcon, HamburgerIcon } from "./HeaderIcons";
+import { useSiteSettings } from "@/context/SettingsContext";
 
 export function HeaderLogo() {
+  const { siteInfo } = useSiteSettings();
+  
   return (
     <Link href="/" className="flex min-w-0 items-center gap-3">
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 p-2 ring-1 ring-emerald-100 dark:bg-emerald-500/10 dark:ring-emerald-500/20">

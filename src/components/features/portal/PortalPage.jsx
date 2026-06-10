@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { siteInfo } from "@/data/site";
 import { DesktopClockSection, MobileClockSection } from "./ClockSection";
 import HeroBackground from "./HeroBackground";
+import { useSiteSettings } from "@/context/SettingsContext";
 
 const PORTAL_LINKS = [
   {
@@ -180,6 +180,7 @@ export default function PortalPage() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [portalData, setPortalData] = useState(null);
   const [portalLoading, setPortalLoading] = useState(true);
+  const { siteInfo } = useSiteSettings();
 
   useEffect(() => {
     fetch("/api/portal")
@@ -239,7 +240,7 @@ export default function PortalPage() {
             </p>
             <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none max-w-5xl px-2 text-center">
               <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                Kementerian Agama Kabupaten Barito Utara
+                {siteInfo.name}
               </span>
             </h1>
             <p className="mt-1 text-slate-400 text-sm max-w-none font-medium px-4 whitespace-nowrap">
@@ -384,10 +385,10 @@ export default function PortalPage() {
             </p>
             <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none px-2">
               <span className="text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                Kementerian Agama
+                {siteInfo.logoTitleLine1}
               </span>
               <span className="text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                Kabupaten Barito Utara
+                {siteInfo.logoTitleLine2}
               </span>
             </h1>
             <p className="mt-2 text-slate-400 text-[9px] font-medium px-2 leading-relaxed">

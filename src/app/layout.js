@@ -129,7 +129,22 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }) {
+import { db } from "@/lib/drizzle";
+import { siteSettings } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+async function getGlobalIdentitySettings() {
+  try {
+    const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "identity")).limit(1);
+    return row?.value || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+export default async function RootLayout({ children }) {
+  const settings = await getGlobalIdentitySettings();
+
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
@@ -155,7 +170,7 @@ export default function RootLayout({ children }) {
         className={`${inter.className} antialiased`}
         suppressHydrationWarning
       >
-        <Providers>
+        <Providers initialSettings={settings}>
           <AppShell>{children}</AppShell>
         </Providers>
         <DynamicImports />

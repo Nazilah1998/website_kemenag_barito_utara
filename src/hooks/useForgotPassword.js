@@ -60,30 +60,10 @@ export function useForgotPassword() {
       return;
     }
 
-    setSubmitting(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: email.trim().toLowerCase(),
-        token: otp,
-        type: 'recovery',
-      });
-
-      if (error) {
-        throw new Error("Kode OTP tidak valid atau sudah kadaluarsa.");
-      }
-
-      // Berhasil verifikasi OTP, lanjut ke step 2 (Update Password)
-      setSuccess("OTP valid. Silakan buat password baru.");
-      setStep(2);
-    } catch (err) {
-      setError(err?.message || "Gagal memverifikasi OTP.");
-    } finally {
-      setSubmitting(false);
-    }
+    // Untuk custom OTP bypass, kita memindahkan validasi OTP bersamaan 
+    // dengan submit password baru agar lebih cepat dan ringkas.
+    setSuccess("Format OTP diterima. Silakan buat sandi baru.");
+    setStep(2);
   }
 
   async function handleResetPassword(e) {
@@ -104,54 +84,30 @@ export function useForgotPassword() {
     setSuccess("");
 
     try {
-      const supabase = createClient();
-      
-      // 1. Coba ambil sesi otomatis
-      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      // 2. Jika gagal, coba ambil manual dari URL (Hash Fragment)
-      if (!session) {
-        const hash = window.location.hash;
-        if (hash && hash.includes("access_token=")) {
-          const params = new URLSearchParams(hash.substring(1));
-          const accessToken = params.get("access_token");
-          const refreshToken = params.get("refresh_token");
-          
-          if (accessToken) {
-            const { data, error: setSessionError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken || "",
-            });
-            if (!setSessionError) session = data.session;
-          }
-        }
-      }
-
-      if (!session) {
-        throw new Error("Sesi tidak terdeteksi. Silakan Refresh halaman ini satu kali (F5), lalu coba Simpan kembali.");
-      }
-
-      // Gunakan API Backend kita sendiri untuk bypass aturan MFA/AAL2 Supabase
       const response = await fetch("/api/admin/update-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          otp: otp,
           password: password,
-          accessToken: session.access_token
         })
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Gagal memperbarui password.");
+        throw new Error(result.message || "Gagal memperbarui password.");
       }
 
-      // Beri jeda sebentar sebelum logout
+      setSuccess("Sandi berhasil diubah! Mengarahkan ke halaman login...");
+      setStep(3);
+      
+      const supabase = createClient();
       await new Promise(resolve => setTimeout(resolve, 800));
       await supabase.auth.signOut();
-
-      setSuccess("Password berhasil diperbarui.");
+      
+      window.location.href = "/login";
       setStep(3); // success step
     } catch (err) {
       setError(err?.message || "Gagal memperbarui password.");

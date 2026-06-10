@@ -1,13 +1,14 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { siteInfo, siteLinks } from "@/data/site";
 import { FooterLink, FooterInfoItem, SocialIconLink } from "./FooterUI";
 import { FacebookIcon, XIcon, InstagramIcon, YouTubeIcon, TikTokIcon } from "./FooterIcons";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SettingsContext";
 
 export function FooterBrand() {
   const { t } = useLanguage();
+  const { siteInfo } = useSiteSettings();
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -61,6 +62,7 @@ export function FooterMenu() {
 
 export function FooterContact() {
   const { t } = useLanguage();
+  const { siteInfo, siteLinks } = useSiteSettings();
   return (
     <div>
       <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "var(--footer-fg)" }}>
@@ -69,7 +71,7 @@ export function FooterContact() {
       <div className="mt-3 space-y-3">
         <FooterInfoItem label={t("footer.email")} value={siteInfo.email} href={siteLinks.emailHref} />
         <FooterInfoItem label={t("footer.phone")} value={siteInfo.phone} href={siteLinks.phoneHref} />
-        <FooterInfoItem label={t("footer.officeHours")} value={t("contact.officeHours")} />
+        <FooterInfoItem label={t("footer.officeHours")} value={siteInfo.officeHours ? siteInfo.officeHours[0] : t("contact.officeHours")} />
         <FooterInfoItem label={t("footer.region")} value={t("footer.regionValue")} />
       </div>
     </div>
@@ -78,6 +80,7 @@ export function FooterContact() {
 
 export function FooterSocial() {
   const { t } = useLanguage();
+  const { siteLinks } = useSiteSettings();
   const socialLinks = [
     { label: "Instagram", href: siteLinks.instagram, icon: InstagramIcon },
     { label: "YouTube", href: siteLinks.youtube, icon: YouTubeIcon },

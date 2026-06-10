@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { siteInfo } from "@/data/site";
+import { useSiteSettings } from "@/context/SettingsContext";
 
 export default function HomeHeroSection() {
   const { t } = useLanguage();
@@ -110,6 +111,7 @@ export default function HomeHeroSection() {
 }
 
 function HomeFocusCard({ t }) {
+  const { siteInfo } = useSiteSettings();
   return (
     <div className="group relative overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/40 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-700 hover:border-emerald-500/30 hover:bg-slate-900/60 hover:-translate-y-1">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />

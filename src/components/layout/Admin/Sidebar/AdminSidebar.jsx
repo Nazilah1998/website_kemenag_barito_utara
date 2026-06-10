@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import { PERMISSIONS } from "@/lib/permissions";
 import { SidebarNavLink } from "./SidebarUI";
-import { DashboardIcon, NewsIcon, FolderIcon, SliderIcon, UsersIcon, AuditIcon, MailIcon, GalleryIcon, SeksiIcon, HalamanIcon, MaintenanceIcon } from "./SidebarIcons";
+import { DashboardIcon, NewsIcon, FolderIcon, SliderIcon, UsersIcon, AuditIcon, MailIcon, GalleryIcon, SeksiIcon, HalamanIcon, MaintenanceIcon, SettingsIcon } from "./SidebarIcons";
 
 function hasAccess(context, permission) {
   if (!context) return false;
@@ -27,6 +27,7 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
     { href: "/admin/pesan", label: "Pesan & Pengaduan", icon: <MailIcon />, active: pathname.startsWith("/admin/pesan"), show: hasAccess(ctx, PERMISSIONS.KONTAK_MANAGE) },
     { href: "/admin/audit", label: "Audit Log", icon: <AuditIcon />, active: pathname.startsWith("/admin/audit"), show: hasAccess(ctx, PERMISSIONS.AUDIT_VIEW) },
     { href: "/admin/editors", label: "Manajemen Editor", icon: <UsersIcon />, active: pathname.startsWith("/admin/editors"), show: role === "super_admin" },
+    { href: "/admin/pengaturan", label: "Pengaturan Identitas", icon: <SettingsIcon />, active: pathname.startsWith("/admin/pengaturan"), show: role === "super_admin" },
     { href: "/admin/maintenance", label: "Mode Maintenance", icon: <MaintenanceIcon />, active: pathname.startsWith("/admin/maintenance"), show: role === "super_admin" },
   ];
 

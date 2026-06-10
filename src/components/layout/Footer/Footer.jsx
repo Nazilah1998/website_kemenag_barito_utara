@@ -1,9 +1,10 @@
-import { siteInfo } from "@/data/site";
 import { FooterBrand, FooterMenu, FooterContact, FooterSocial } from "./FooterSections";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SettingsContext";
 
 export default function Footer() {
   const { t } = useLanguage();
+  const { siteInfo } = useSiteSettings();
   const year = new Date().getFullYear();
 
   return (

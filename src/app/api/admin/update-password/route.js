@@ -1,9 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
 import { apiResponse } from "@/lib/api-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { env } from "@/lib/env";
 import { logError } from "@/lib/logger";
+import { redis, hasRedis } from "@/lib/redis";
+
+const globalOtpStore = globalThis.otpStore || new Map();
 
 export async function POST(request) {
   try {
@@ -23,33 +24,61 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { password, accessToken } = body;
+    const { email, otp, password } = body;
 
-    if (!password || !accessToken) {
+    if (!email || !otp || !password) {
       return apiResponse({ message: "Data tidak lengkap" }, 400);
     }
 
-    // 1) Validasi token user secara fail-closed
-    const supabase = createClient(env.supabaseUrl, env.supabasePublishableKey);
+    const cleanEmail = email.trim().toLowerCase();
+    let isValidOtp = false;
 
-    const { data, error: authError } = await supabase.auth.getUser(accessToken);
-
-    const user = data?.user;
-
-    if (authError || !user) {
-      return apiResponse({ message: "Sesi tidak valid atau kadaluarsa" }, 401);
+    // 1) Validasi OTP kustom
+    try {
+      if (hasRedis()) {
+        const storedOtp = await redis.get(`otp:${cleanEmail}`);
+        if (storedOtp === otp) {
+          isValidOtp = true;
+          await redis.del(`otp:${cleanEmail}`); // Hapus setelah dipakai
+        }
+      } else {
+        const data = globalOtpStore.get(`otp:${cleanEmail}`);
+        if (data && data.otp === otp && Date.now() < data.expiresAt) {
+          isValidOtp = true;
+          globalOtpStore.delete(`otp:${cleanEmail}`);
+        }
+      }
+    } catch (err) {
+      logError("otp_verification_error", { error: err.message });
+      return apiResponse({ message: "Gagal memverifikasi OTP" }, 500);
     }
 
-    // 2) Update password hanya untuk user dari token tersebut
-    const supabaseAdmin = createAdminClient();
+    if (!isValidOtp) {
+      return apiResponse({ message: "Kode OTP tidak valid atau sudah kedaluwarsa" }, 401);
+    }
 
-    const { error: updateError } =
-      await supabaseAdmin.auth.admin.updateUserById(user.id, {
-        password: password,
-      });
+    // 2) Cari User ID berdasarkan Email
+    const supabaseAdmin = createAdminClient();
+    const { data: usersData, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (usersError) {
+      logError("list_users_for_update_error", { error: usersError.message });
+      return apiResponse({ message: "Terjadi kesalahan pada database user" }, 500);
+    }
+
+    const user = usersData?.users?.find(u => u.email === cleanEmail);
+
+    if (!user) {
+      return apiResponse({ message: "User tidak ditemukan" }, 404);
+    }
+
+    // 3) Update password menggunakan Service Role
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+      password: password,
+    });
 
     if (updateError) {
-      // Jangan leak detail internal dari Supabase
+      logError("update_password_supabase_error", { error: updateError.message });
       return apiResponse({ message: "Gagal memperbarui password" }, 500);
     }
 
