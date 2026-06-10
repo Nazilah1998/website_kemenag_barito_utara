@@ -12,6 +12,7 @@ export function useForgotPassword() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [otp, setOtp] = useState("");
   const [turnstileToken, setTurnstileToken] = useState(null);
 
   // Detect step from URL (e.g. after redirect from email)
@@ -42,10 +43,44 @@ export function useForgotPassword() {
       const data = await res.json();
       if (!data.ok) throw new Error(data.message);
 
-      setSuccess(data.message);
-      setStep(4); // Show "Email Sent" state
+      setSuccess("Kode OTP telah dikirim ke email Anda.");
+      setStep(4); // Show OTP Input state
     } catch (err) {
       setError(err?.message || "Gagal mengirim permintaan pemulihan.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleVerifyOtp(e) {
+    if (e) e.preventDefault();
+
+    if (!otp || otp.length < 6) {
+      setError("Masukkan 6 digit kode OTP.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: otp,
+        type: 'recovery',
+      });
+
+      if (error) {
+        throw new Error("Kode OTP tidak valid atau sudah kadaluarsa.");
+      }
+
+      // Berhasil verifikasi OTP, lanjut ke step 2 (Update Password)
+      setSuccess("OTP valid. Silakan buat password baru.");
+      setStep(2);
+    } catch (err) {
+      setError(err?.message || "Gagal memverifikasi OTP.");
     } finally {
       setSubmitting(false);
     }
@@ -152,8 +187,10 @@ export function useForgotPassword() {
     success, setSuccess,
     submitting, setSubmitting,
     handleVerifyEmail,
+    handleVerifyOtp,
     handleResetPassword,
     strength, // Ekspos data kekuatan password
-    turnstileToken, setTurnstileToken
+    turnstileToken, setTurnstileToken,
+    otp, setOtp
   };
 }

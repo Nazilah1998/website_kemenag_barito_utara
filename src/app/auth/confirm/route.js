@@ -38,7 +38,13 @@ export async function GET(request) {
     });
 
     if (!error) {
-      return NextResponse.redirect(redirectTo);
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = returnTo || next || "/admin";
+      redirectUrl.searchParams.delete("token_hash");
+      redirectUrl.searchParams.delete("type");
+      redirectUrl.searchParams.delete("next");
+      redirectUrl.searchParams.delete("return_to");
+      return NextResponse.redirect(redirectUrl);
     }
   }
 

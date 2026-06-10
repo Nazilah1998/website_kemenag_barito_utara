@@ -119,7 +119,7 @@ export async function POST(request) {
       request,
     });
 
-    revalidatePath("/laporan");
+    revalidatePath("/laporan", "layout");
     broadcastRefresh("laporan");
 
     return apiResponse({

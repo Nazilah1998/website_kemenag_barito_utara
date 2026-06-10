@@ -149,7 +149,7 @@ export async function PUT(request, context) {
       request,
     });
 
-    revalidatePath("/laporan");
+    revalidatePath("/laporan", "layout");
     broadcastRefresh("laporan");
 
     return apiResponse({
@@ -202,7 +202,7 @@ export async function DELETE(request, context) {
       request,
     });
 
-    revalidatePath("/laporan");
+    revalidatePath("/laporan", "layout");
     broadcastRefresh("laporan");
 
     return apiResponse({
