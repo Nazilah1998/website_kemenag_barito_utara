@@ -33,6 +33,7 @@ interface RequestLike {
 
 const auditBuffer: AuditRecord[] = [];
 const AUDIT_BATCH_SIZE = 10;
+const AUDIT_MAX_BUFFER_SIZE = 200; // Batas maksimum buffer — cegah memory leak saat DB down
 const AUDIT_FLUSH_INTERVAL = 5_000;
 let auditFlushTimer: ReturnType<typeof setTimeout> | null = null;
 let auditFlushLock = false;
@@ -91,22 +92,27 @@ async function flushAuditBuffer(): Promise<void> {
 
   auditFlushLock = true;
 
+  // Ambil semua record yang ada sekarang
+  const batch = auditBuffer.splice(0, auditBuffer.length);
+
+  if (batch.length === 0) {
+    auditFlushLock = false;
+    return;
+  }
+
   try {
-    const batch = auditBuffer.splice(0, auditBuffer.length);
-
-    if (batch.length === 0) return;
-
     await db.insert(admin_audit_log).values(batch);
   } catch (error: unknown) {
     logWarn("audit_batch_flush_error", { error: error as Error });
 
-    const batch = auditBuffer.splice(0, auditBuffer.length);
-
+    // Fallback: coba satu per satu — batch yang sudah di-splice tidak dimasukkan kembali
     for (const record of batch) {
       try {
         await db.insert(admin_audit_log).values(record);
       } catch (e: unknown) {
         logWarn("audit_single_insert_error", { error: e as Error });
+        // Record yang benar-benar gagal dibuang — lebih baik hilang 1 log
+        // daripada memory leak tak terbatas
       }
     }
   } finally {
@@ -162,9 +168,16 @@ export async function recordAudit({
       user_agent: request?.headers?.get?.("user-agent") || null,
     };
 
+    // Cegah memory leak: jika buffer sudah penuh (DB down lama), buang record terlama
+    if (auditBuffer.length >= AUDIT_MAX_BUFFER_SIZE) {
+      auditBuffer.shift(); // hapus yang paling lama
+      logWarn("audit_buffer_overflow", { dropped: 1, bufferSize: auditBuffer.length });
+    }
+
     auditBuffer.push(record);
     scheduleAuditFlush();
 
+    // Flush segera jika buffer mencapai ukuran batch
     if (auditBuffer.length >= AUDIT_BATCH_SIZE) {
       await flushAuditBuffer();
     }

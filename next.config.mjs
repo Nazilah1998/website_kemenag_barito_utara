@@ -247,7 +247,6 @@ const nextConfig = {
   // Setelah admin pusat selesai memproses IP dan domain go.id sudah bisa dibuka normal,
   // barulah Anda hapus tanda komentar (//) di bawah ini lalu deploy ulang.
   // ====================================================================================
-  /*
   async redirects() {
     return [
       {
@@ -264,7 +263,6 @@ const nextConfig = {
       },
     ];
   },
-  */
 };
 
 export default nextConfig;

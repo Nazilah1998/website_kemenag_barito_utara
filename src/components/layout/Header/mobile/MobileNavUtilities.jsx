@@ -98,41 +98,35 @@ function MobileAdminLoginButton({ adminState }) {
               className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-200/50 dark:bg-slate-900/95 dark:ring-white/10 dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]"
             >
               {/* Top red warning accent */}
-              <div className="absolute top-0 left-0 right-0 h-1.5 w-full bg-gradient-to-r from-rose-600 via-red-500 to-rose-600" />
-
-              {/* Decorative Background */}
-              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-red-500/5 blur-3xl pointer-events-none" />
-              <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-1.5 w-full bg-red-500" />
 
               <div className="relative p-7 z-10">
                 <div className="flex flex-col items-center text-center">
-                  {/* Glowing Warning Icon */}
-                  <div className="relative mb-5">
-                    <div className="absolute inset-0 rounded-full bg-red-500/20 blur-xl animate-pulse" />
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-gradient-to-b from-red-50 to-rose-100/50 dark:from-red-950/50 dark:to-rose-900/20 ring-1 ring-red-500/20 shadow-inner">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="h-8 w-8 text-red-600 dark:text-red-400 animate-[pulse_1.5s_ease-in-out_infinite]"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
-                    </div>
+                  {/* Clean Warning Icon */}
+                  <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="h-8 w-8 text-red-600 dark:text-red-400"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
                   </div>
 
-                  <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                     Peringatan Akses
                   </h3>
 
-                  <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400 max-w-[260px]">
-                    Halaman ini dikhususkan bagi <strong className="font-bold text-red-600 dark:text-red-400">Admin Kemenag Barito Utara</strong>.
-                  </p>
+                  <div className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    <p>Halaman ini dikhususkan bagi</p>
+                    <p className="font-bold text-red-600 dark:text-red-400">Admin Kemenag Barito Utara.</p>
+                  </div>
                 </div>
 
                 <div className="mt-7 flex flex-col sm:flex-row gap-3">
