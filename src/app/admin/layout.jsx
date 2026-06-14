@@ -8,6 +8,7 @@ const AUTH_PATHS = new Set([
   "/admin/login",
   "/admin/forgot-password",
   "/admin/register-editor",
+  "/admin/update-password",
 ]);
 
 export default function AdminLayout({ children }) {

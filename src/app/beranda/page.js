@@ -15,6 +15,7 @@ const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNew
 const HomeGallerySection = dynamic(() => import("@/components/features/home/HomeGallerySection"));
 const HomepageSlidesSection = dynamic(() => import("@/components/features/home/HomepageSlidesSection"));
 const ExternalAppsSection = dynamic(() => import("@/components/features/home/ExternalAppsSection"));
+import ScrollReveal from "@/components/common/ScrollReveal";
 
 // Cache 5 menit — konten jarang berubah
 export const revalidate = 300;
@@ -79,27 +80,47 @@ export default async function HomePage() {
     <main className="theme-page min-h-screen">
       <HomeHeroSection />
 
-      <div className="pt-8 lg:pt-10">
+      <ScrollReveal delay={0.1}>
+        <div className="pt-8 lg:pt-10">
+          <SectionDivider />
+        </div>
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.2}>
+        <ApaKataMerekaSection testimonials={testimonials} />
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.1}>
         <SectionDivider />
-      </div>
+      </ScrollReveal>
 
-      <ApaKataMerekaSection testimonials={testimonials} />
+      <ScrollReveal delay={0.2}>
+        <HomeNewsSection latestBerita={latestBerita} popularBerita={popularBerita} />
+      </ScrollReveal>
 
-      <SectionDivider />
+      <ScrollReveal delay={0.1}>
+        <SectionDivider />
+      </ScrollReveal>
 
-      <HomeNewsSection latestBerita={latestBerita} popularBerita={popularBerita} />
+      <ScrollReveal delay={0.2}>
+        <HomeGallerySection latestGaleri={latestGaleri} />
+      </ScrollReveal>
 
-      <SectionDivider />
+      <ScrollReveal delay={0.1}>
+        <SectionDivider />
+      </ScrollReveal>
 
-      <HomeGallerySection latestGaleri={latestGaleri} />
+      <ScrollReveal delay={0.2}>
+        <HomepageSlidesSection slides={homepageSlides} />
+      </ScrollReveal>
 
-      <SectionDivider />
+      <ScrollReveal delay={0.1}>
+        <SectionDivider />
+      </ScrollReveal>
 
-      <HomepageSlidesSection slides={homepageSlides} />
-
-      <SectionDivider />
-
-      <ExternalAppsSection />
+      <ScrollReveal delay={0.2}>
+        <ExternalAppsSection />
+      </ScrollReveal>
     </main>
   );
 }

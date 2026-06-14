@@ -10,7 +10,7 @@ export default function BeritaDetailHeader({ title }) {
   return (
     <PageBanner
       title={title}
-      eyebrow={t("berita.publicService")}
+      eyebrow={t("nav.berita")}
       breadcrumb={[
         { label: t("nav.home"), href: "/" },
         { label: t("nav.berita"), href: "/berita" },

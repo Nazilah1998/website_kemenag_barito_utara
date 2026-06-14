@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 const SORT_OPTIONS = [
@@ -29,9 +30,24 @@ function FilterChip({ children, onRemove }) {
 }
 
 // ── Modern styled select field ──
-function SelectField({ id, label, value, onChange, children }) {
+function SelectField({ id, label, value, onChange, options, placeholder }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((opt) => opt.value === value) || (placeholder ? { label: placeholder, value: "" } : options[0]);
+
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5" ref={containerRef}>
       {label && (
         <label
           htmlFor={id}
@@ -40,16 +56,14 @@ function SelectField({ id, label, value, onChange, children }) {
           {label}
         </label>
       )}
-      <div className="group relative">
-        <select
-          id={id}
-          value={value}
-          onChange={onChange}
-          className="
-            h-11 w-full cursor-pointer appearance-none rounded-xl
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={`
+            flex h-11 w-full items-center justify-between rounded-xl
             border border-slate-200 bg-slate-50/80
-            pl-4 pr-9
-            text-[12.5px] font-semibold text-slate-800
+            px-4 text-[12.5px] font-semibold text-slate-800
             outline-none ring-0
             transition-all duration-200
             hover:border-emerald-400 hover:bg-white
@@ -57,16 +71,64 @@ function SelectField({ id, label, value, onChange, children }) {
             dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200
             dark:hover:border-emerald-600
             dark:focus:border-emerald-500 dark:focus:bg-slate-800/60
-          "
+            ${isOpen ? "border-emerald-500 bg-white dark:border-emerald-500 dark:bg-slate-800/60" : ""}
+          `}
         >
-          {children}
-        </select>
-        {/* Custom chevron */}
-        <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-emerald-500 dark:text-slate-500">
-          <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" stroke="currentColor" strokeWidth="2.5">
+          <span className="truncate">{selectedOption?.label || ""}</span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-emerald-500" : ""}`}
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
             <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </div>
+        </button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15 }}
+              className="absolute z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900 custom-scrollbar"
+            >
+              {placeholder && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange({ target: { value: "" } });
+                    setIsOpen(false);
+                  }}
+                  className={`
+                    flex w-full items-center rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors
+                    ${!value ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}
+                  `}
+                >
+                  {placeholder}
+                </button>
+              )}
+              {options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange({ target: { value: opt.value } });
+                    setIsOpen(false);
+                  }}
+                  className={`
+                    flex w-full items-center rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors
+                    ${value === opt.value ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}
+                  `}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -217,10 +279,10 @@ export default function BeritaFilters({
   const selectedSortLabel = sortOptions.find(o => o.value === (values.sort || "newest"))?.label;
 
   return (
-    <section className="relative mb-8 overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
+    <section className="relative mb-8 rounded-[24px] border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
 
       {/* Top accent line */}
-      <div className="h-[3px] w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500" />
+      <div className="h-[3px] w-full rounded-t-[24px] bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500" />
 
       <div className="p-5 sm:p-6">
 
@@ -242,6 +304,7 @@ export default function BeritaFilters({
             {/* Beautiful Animated Mobile Filter Toggle */}
             <button
               onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+              aria-expanded={isMobileFiltersOpen}
               className="
                 flex lg:hidden items-center gap-2 rounded-xl
                 bg-emerald-50 px-3.5 py-2 text-[11px] font-black uppercase tracking-wider text-emerald-700
@@ -284,7 +347,7 @@ export default function BeritaFilters({
         {/* ── Filter Grid with smooth height animation on mobile ── */}
         {(!isMobile || isMobileFiltersOpen) && (
           <div
-            className={`overflow-hidden transition-all duration-300 ${isMobile && !isMobileFiltersOpen ? 'max-h-0 opacity-0' : 'max-h-[1000px] opacity-100'}`}
+            className={`transition-all duration-300 ${isMobile && !isMobileFiltersOpen ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-[1000px] opacity-100 overflow-visible'}`}
           >
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12 pt-1 pb-2">
                 {/* Search — spans 5 cols */}
@@ -304,14 +367,9 @@ export default function BeritaFilters({
                     label={t("berita.categoryLabel")}
                     value={values.category || ""}
                     onChange={(e) => updateFilters({ category: e.target.value })}
-                  >
-                    <option value="">{t("berita.allCategories")}</option>
-                    {translatedCategories.map((item) => (
-                      <option key={item.value} value={item.value}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </SelectField>
+                    options={translatedCategories}
+                    placeholder={t("berita.allCategories")}
+                  />
                 </div>
 
                 {/* Month — spans 2 cols */}
@@ -321,14 +379,9 @@ export default function BeritaFilters({
                     label={t("berita.monthLabel")}
                     value={values.month || ""}
                     onChange={(e) => updateFilters({ month: e.target.value })}
-                  >
-                    <option value="">{t("berita.allMonths")}</option>
-                    {translatedMonths.map((item) => (
-                      <option key={item.value} value={item.value}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </SelectField>
+                    options={translatedMonths}
+                    placeholder={t("berita.allMonths")}
+                  />
                 </div>
 
                 {/* Sort — spans 2 cols */}
@@ -338,13 +391,8 @@ export default function BeritaFilters({
                     label={t("berita.sortLabel")}
                     value={values.sort || "newest"}
                     onChange={(e) => updateFilters({ sort: e.target.value })}
-                  >
-                    {sortOptions.map((item) => (
-                      <option key={item.value} value={item.value}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </SelectField>
+                    options={sortOptions}
+                  />
                 </div>
               </div>
           </div>

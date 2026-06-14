@@ -8,7 +8,7 @@ function ActionButton({ onClick, children, type = "button" }) {
         <button
             type={type}
             onClick={onClick}
-            className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-slate-800 dark:hover:text-emerald-400"
+            className="inline-flex h-11 w-full items-center justify-center rounded-2xl border border-slate-200 px-1 sm:px-4 text-[10px] sm:text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-slate-800 dark:hover:text-emerald-400 text-center leading-tight"
         >
             {children}
         </button>
@@ -22,7 +22,7 @@ function buildAbsoluteUrl(path = "") {
 }
 
 export default function BeritaDetailActions({ title, path }) {
-    const { t } = useLanguage();
+    const { t, locale } = useLanguage();
     const [copied, setCopied] = useState(false);
 
     async function handleCopyLink() {
@@ -54,6 +54,12 @@ export default function BeritaDetailActions({ title, path }) {
         await handleCopyLink();
     }
 
+    function handleWhatsAppShare() {
+        const absoluteUrl = buildAbsoluteUrl(path);
+        const text = encodeURIComponent(`${title} - ${absoluteUrl}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+    }
+
     return (
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -64,10 +70,11 @@ export default function BeritaDetailActions({ title, path }) {
                 {t("newsDetail.actionDesc")}
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-3">
-                <ActionButton onClick={handleShare}>{t("actions.share")}</ActionButton>
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                <ActionButton onClick={handleShare}>Bagikan</ActionButton>
+                <ActionButton onClick={handleWhatsAppShare}>WhatsApp</ActionButton>
                 <ActionButton onClick={handleCopyLink}>
-                    {copied ? (t("locale") === "en" ? "Link copied" : "Tautan tersalin") : t("actions.copyLink")}
+                    {copied ? (locale === "en" ? "Tersalin" : "Tersalin") : "Salin Link"}
                 </ActionButton>
             </div>
 

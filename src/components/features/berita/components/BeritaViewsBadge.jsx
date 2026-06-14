@@ -7,7 +7,7 @@ export default function BeritaViewsBadge({ views = 0, className = "", isSmall = 
 
     return (
         <div
-            className={`inline-flex items-center gap-1.5 ${isSmall ? "text-[9px]" : "text-[11px]"} text-slate-400 dark:text-slate-500 ${className}`.trim()}
+            className={`inline-flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 ${className}`.trim()}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"

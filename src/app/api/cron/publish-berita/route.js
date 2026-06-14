@@ -46,8 +46,8 @@ async function runScheduledPublish() {
     }
     revalidatePath("/berita");
     revalidatePath("/");
-    revalidateTag("home-latest-berita", "max");
-    revalidateTag("home-popular-berita", "max");
+    revalidateTag("home-latest-berita");
+    revalidateTag("home-popular-berita");
   }
 
   return {

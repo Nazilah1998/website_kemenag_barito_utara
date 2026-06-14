@@ -18,6 +18,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -40,6 +41,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -61,6 +63,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -81,6 +84,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -101,6 +105,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -122,6 +127,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -143,6 +149,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -163,6 +170,7 @@ const PORTAL_LINKS = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -176,9 +184,9 @@ const PORTAL_LINKS = [
 ];
 
 export default function PortalPage() {
-  const [mounted, setMounted] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [portalData, setPortalData] = useState(null);
+  const [portalError, setPortalError] = useState(false);
   const [portalLoading, setPortalLoading] = useState(true);
   const { siteInfo } = useSiteSettings();
 
@@ -187,8 +195,9 @@ export default function PortalPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data?.beritaCount !== undefined) setPortalData(data);
+        else setPortalError(true);
       })
-      .catch(() => {})
+      .catch(() => { setPortalError(true); })
       .finally(() => setPortalLoading(false));
   }, []);
 
@@ -204,7 +213,6 @@ export default function PortalPage() {
     };
 
     const frame = requestAnimationFrame(() => {
-      setMounted(true);
       detectPwa();
     });
 
@@ -240,7 +248,10 @@ export default function PortalPage() {
             </p>
             <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none max-w-5xl px-2 text-center">
               <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                {siteInfo.name}
+                {siteInfo.logoTitleLine1}
+              </span>
+              <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent mt-1">
+                {siteInfo.logoTitleLine2}
               </span>
             </h1>
             <p className="mt-1 text-slate-400 text-sm max-w-none font-medium px-4 whitespace-nowrap">
@@ -253,7 +264,11 @@ export default function PortalPage() {
           <DesktopClockSection />
 
           {/* Berita Ticker - Desktop */}
-          {portalData?.latestBerita?.length > 0 && (
+          {portalError ? (
+            <div className="animate-fade-in w-full mt-1 overflow-hidden flex justify-center" style={{animationDelay:'0.15s'}}>
+              <span className="text-[10px] text-rose-400/80 font-medium bg-rose-500/10 px-3 py-1 rounded-full ring-1 ring-rose-500/20">Gagal memuat berita terbaru</span>
+            </div>
+          ) : portalData?.latestBerita?.length > 0 && (
             <div className="animate-fade-in w-full mt-1 overflow-hidden" style={{animationDelay:'0.15s'}}>
               <div className="relative flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-1.5 rounded-full ring-1 ring-white/10">
                 <span className="shrink-0 text-[9px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full leading-none flex items-center justify-center">
@@ -295,8 +310,8 @@ export default function PortalPage() {
                 >
                   <Link
                     href={link.href}
-                    target={isStandalone ? undefined : "_blank"}
-                    rel={isStandalone ? undefined : "noopener noreferrer"}
+                    target={link.href.startsWith("http") ? "_blank" : (isStandalone ? undefined : "_blank")}
+                    rel={link.href.startsWith("http") ? "noopener noreferrer" : (isStandalone ? undefined : "noopener noreferrer")}
                     className={`group relative p-4 rounded-3xl transition-all duration-300 flex flex-col items-start text-left h-full hover:-translate-y-1.5 hover:scale-[1.02] active:scale-[0.98] ${
                       link.primary
                         ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50 hover:bg-emerald-600/30"
@@ -402,7 +417,11 @@ export default function PortalPage() {
           <MobileClockSection />
 
           {/* Berita Ticker - Mobile */}
-          {portalData?.latestBerita?.length > 0 && (
+          {portalError ? (
+            <div className="animate-fade-in w-full mt-1 overflow-hidden flex justify-center" style={{animationDelay:'0.15s'}}>
+              <span className="text-[9px] text-rose-400/80 font-medium bg-rose-500/10 px-3 py-1 rounded-full ring-1 ring-rose-500/20">Gagal memuat berita terbaru</span>
+            </div>
+          ) : portalData?.latestBerita?.length > 0 && (
             <div className="animate-fade-in w-full mt-1 overflow-hidden" style={{animationDelay:'0.15s'}}>
               <div className="relative flex items-center gap-2 bg-white/5 backdrop-blur-md px-3.5 py-1.5 rounded-full ring-1 ring-white/10">
                 <span className="shrink-0 text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full leading-none flex items-center justify-center">
@@ -444,8 +463,8 @@ export default function PortalPage() {
                 >
                   <Link
                     href={link.href}
-                    target={isStandalone ? undefined : "_blank"}
-                    rel={isStandalone ? undefined : "noopener noreferrer"}
+                    target={link.href.startsWith("http") ? "_blank" : (isStandalone ? undefined : "_blank")}
+                    rel={link.href.startsWith("http") ? "noopener noreferrer" : (isStandalone ? undefined : "noopener noreferrer")}
                     className={`group relative p-5 rounded-2xl transition-all duration-300 flex flex-col items-center text-center w-full h-full hover:scale-[1.03] active:scale-[0.97] ${
                       link.primary
                         ? "bg-emerald-600/20 backdrop-blur-xl ring-1 ring-emerald-500/50"

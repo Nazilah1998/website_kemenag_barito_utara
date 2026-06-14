@@ -2,20 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import BeritaDetailActions from "./BeritaDetailActions";
 import BeritaViewCounter from "./BeritaViewCounter";
+import BeritaTextToSpeech from "./BeritaTextToSpeech";
 
-function formatDate(isoDate, locale) {
-  if (!isoDate) return "-";
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
+import { formatDate } from "@/lib/date-utils";
+import { estimateReadingTime } from "@/lib/berita-utils";
+
+const FALLBACK_IMAGE = "/assets/branding/kemenag.svg";
 
 export function BeritaDetailBreadcrumb({ title }) {
   const { t } = useLanguage();
@@ -30,18 +26,29 @@ export function BeritaDetailBreadcrumb({ title }) {
   );
 }
 
-export function BeritaDetailSidebar({ category, isoDate, views, title, slug }) {
+export function BeritaDetailSidebar({ category, isoDate, views, title, slug, author, content, relatedItems }) {
   const { t, locale } = useLanguage();
   const displayDate = formatDate(isoDate, locale);
   const displayCategory = t(`berita.categories.${category}`) || category;
+  const readingTime = estimateReadingTime(content || "");
 
   return (
     <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+      <div className="hidden xl:block">
+        <BeritaTextToSpeech title={title} content={content} />
+      </div>
+      
       <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("berita.infoTitle")}</p>
         <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-          <InfoRow label={t("berita.categoryLabel")} value={displayCategory} />
+          <InfoRow label={t("berita.categoryLabel")} value={
+            <Link href={`/berita?category=${encodeURIComponent(category)}`} className="text-emerald-700 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-sm">
+              {displayCategory}
+            </Link>
+          } />
+          <InfoRow label="Penulis" value={author || "Admin Kemenag"} />
           <InfoRow label={t("berita.dateLabel")} value={displayDate} />
+          <InfoRow label="Waktu Baca" value={`${readingTime} menit`} />
           <div className="flex items-start justify-between gap-4">
             <span>{t("berita.viewsLabel")}</span>
             <BeritaViewCounter slug={slug} initialViews={views} />
@@ -65,7 +72,7 @@ function InfoRow({ label, value, isRight = false }) {
 export function BeritaDetailBackLink() {
   const { t } = useLanguage();
   return (
-    <Link href="/berita" className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300">
+    <Link href="/berita" className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-sm">
       <span aria-hidden="true">←</span>
       {t("berita.backToNews")}
     </Link>

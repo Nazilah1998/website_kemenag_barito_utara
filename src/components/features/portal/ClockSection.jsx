@@ -85,7 +85,7 @@ export function DesktopClockSection() {
           className={`flex items-center gap-2 font-bold text-xs uppercase tracking-widest ${isOpen ? "text-emerald-400" : "text-rose-400"}`}
         >
           <div
-            className={`w-2 h-2 rounded-full animate-pulse ${isOpen ? "bg-emerald-400" : "bg-rose-400"}`}
+            className={`w-2 h-2 rounded-full motion-safe:animate-pulse ${isOpen ? "bg-emerald-400" : "bg-rose-400"}`}
           />
           {isOpen ? "Layanan Buka" : "Layanan Tutup"}
         </div>
@@ -124,7 +124,7 @@ export function MobileClockSection() {
           className={`flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider ${isOpen ? "text-emerald-400" : "text-rose-400"}`}
         >
           <div
-            className={`w-1.5 h-1.5 rounded-full animate-pulse ${isOpen ? "bg-emerald-400" : "bg-rose-400"}`}
+            className={`w-1.5 h-1.5 rounded-full motion-safe:animate-pulse ${isOpen ? "bg-emerald-400" : "bg-rose-400"}`}
           />
           {isOpen ? "Layanan Buka" : "Layanan Tutup"}
         </div>

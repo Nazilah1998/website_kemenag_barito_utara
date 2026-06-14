@@ -108,6 +108,9 @@ export const berita = pgTable("berita", {
 	cover_size_kb: integer().default(0).notNull(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	cover_size_bytes: bigint({ mode: "number" }).default(0).notNull(),
+	reaction_bermanfaat: integer().default(0).notNull(),
+	reaction_inspiratif: integer().default(0).notNull(),
+	reaction_informatif: integer().default(0).notNull(),
 }, (table) => [
 	index("idx_berita_published_at").using("btree", table.published_at.desc().nullsFirst().op("timestamptz_ops")),
 	index("idx_berita_schedule").using("btree", table.is_published.asc().nullsLast().op("timestamptz_ops"), table.published_at.asc().nullsLast().op("bool_ops")).where(sql`((is_published = false) AND (published_at IS NOT NULL))`),

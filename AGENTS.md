@@ -1,6 +1,7 @@
 # AGENTS.md — Kemenag Barito Utara
 
 ## Stack
+
 - **Next.js 16** (App Router, Turbopack), React 19, Tailwind CSS 4
 - **Drizzle ORM** (PostgreSQL via Supabase) — two schemas: `auth` + `public`
 - **Supabase** for Auth & Storage only (not DB queries)
@@ -9,29 +10,33 @@
 - **Google Gemini / Groq / Mistral / OpenRouter** — multi-model AI chatbot fallback
 
 ## Critical: Middleware (`proxy.js`)
+
 Next.js 16 uses `proxy.js` (not `middleware.js`). **Two files export `proxy` + `config`:**
+
 - `/proxy.js` (root) — delegates to `src/lib/supabase/proxy` (session refresh only)
 - `src/proxy.js` — admin guard + `updateSession` (full middleware)
 
 Do **NOT** create `middleware.js` — it breaks admin auth.
 
 ## Commands (Windows PowerShell — use `;` not `&&`)
-| Action | Command |
-|--------|---------|
-| Dev server | `npm run dev` |
-| Build | `npm run build` |
-| Start (prod) | `npm run start` |
-| Lint | `npm run lint` |
-| Unit tests | `npm test` (Vitest; `tests/**/*.test.{js,jsx}`) |
-| Watch tests | `npm run test:watch` |
-| Coverage | `npm run test:coverage` |
-| E2E tests | `npm run test:e2e` (Playwright; `tests/e2e/`) |
-| E2E UI mode | `npm run test:e2e:ui` |
-| DB push | `npm run db:push` |
+
+| Action       | Command                                         |
+| ------------ | ----------------------------------------------- |
+| Dev server   | `npm run dev`                                   |
+| Build        | `npm run build`                                 |
+| Start (prod) | `npm run start`                                 |
+| Lint         | `npm run lint`                                  |
+| Unit tests   | `npm test` (Vitest; `tests/**/*.test.{js,jsx}`) |
+| Watch tests  | `npm run test:watch`                            |
+| Coverage     | `npm run test:coverage`                         |
+| E2E tests    | `npm run test:e2e` (Playwright; `tests/e2e/`)   |
+| E2E UI mode  | `npm run test:e2e:ui`                           |
+| DB push      | `npm run db:push`                               |
 
 No `typecheck` or `lint:fix` script exists despite README claims.
 
 ## Architecture
+
 - **Alias**: `@/*` → `./src/*` (jsconfig.json + vitest.config.mjs)
 - **Root layout**: `src/app/layout.js` — includes ChatWidget, RealtimeSync, Providers, JsonLd structured data
 - **Entrypoints**: `src/app/page.js` (home), `src/app/admin/` (14 sub-routes)
@@ -45,7 +50,8 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - **SEO structured data**: `src/lib/structured-data.js` — `organizationSchema()`, `websiteSchema()`, `newsArticleSchema()`, `breadcrumbSchema()`, `contactPageSchema()`, `navigationSchema()`
 
 ## UI / Layout
-- Every public page MUST use `<PageBanner />` from `src/components/common/PageBanner.jsx` at top
+
+- Every public page MUST use `<PageBanner />` from `src/components/common/PageBanner.jsx` at top (Exception: `/beranda` and `/error`)
 - **DO NOT** use `max-w-*` wrappers — use `w-full px-6 sm:px-10 lg:px-16 xl:px-20`
 - Chatbot AI widget: `src/components/features/chat/ChatWidget.js`
 - CSS: Tailwind v4 (`@import "tailwindcss"` in `globals.css`; `postcss.config.mjs` uses `@tailwindcss/postcss`)
@@ -55,6 +61,7 @@ No `typecheck` or `lint:fix` script exists despite README claims.
   - `<StatCard />`, `<StatusPill />`, `<ActionIconButton />`, `<ToggleSwitch />`, `<SlidePagination />`
 
 ## Database
+
 - Drizzle ORM only — never raw SQL
 - Source of truth: `src/db/schema.ts` (~104 models incl. auth schema)
 - App models: `admin_audit_log`, `admin_users`, `agenda`, `berita`, `categories`, `documents`, `dokumen`, `editor_requests`, `galeri`, `homepage_slides`, `kontak_pesan`, `news`, `profiles`, `report_categories`, `report_documents`, `static_pages`, `user_permissions`, `seksi`, `pegawai_seksi`, `layanan_ptsp`, `link_aplikasi_seksi`, `layanan_publik`, `testimonials`
@@ -63,12 +70,14 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - Drizzle Kit introspection: `npx drizzle-kit pull` generates `src/db/schema.ts` + `src/db/relations.ts`
 
 ## Testing
+
 - Vitest: happy-dom, `@testing-library/jest-dom/vitest`, `next/navigation` mocked (see `vitest.setup.js`)
 - Playwright: single project (chromium), base URL `http://127.0.0.1:3000`, auto-starts dev server
 - 7 unit test files in `tests/`: `admin-laporan-manager`, `laporan-admin-reducer`, `laporan-admin-utils`, `permissions`, `rate-limit`, `structured-data`, `validation`
 - 1 E2E spec in `tests/e2e/`
 
 ## SEO & PWA
+
 - JSON-LD injected at root layout via `<JsonLd />` from `src/components/features/seo/JsonLd.jsx`
 - Active schemas: `organizationSchema` (GovernmentOrganization + GovernmentOffice) + `websiteSchema` + `navigationSchema`
 - Organization schema includes: `logo` (`/assets/icons/kemenag-512.png`), `image` array (logo + logo-share + kantor photo), `priceRange: "Gratis"`
@@ -79,6 +88,7 @@ No `typecheck` or `lint:fix` script exists despite README claims.
 - CSP includes `worker-src 'self'` to allow Service Worker registration
 
 ## Environment
+
 - `.env*` files are gitignored — create `.env.local` from scratch
 - Required: `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - AI keys: `GEMINI_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`
@@ -90,6 +100,7 @@ No `typecheck` or `lint:fix` script exists despite README claims.
   - View counter (`src/lib/view-counter.js`) — `INCR` + batch flush every 30s to DB; `GETSET` atomically reads/resets during flush
 
 ## Notes
+
 - ESLint: flat config (`eslint.config.mjs`), `eslint-config-next/core-web-vitals`
 - Security headers (CSP, HSTS, X-Frame-Options, Referrer-Policy) configured in `next.config.mjs`
 - CSP includes `worker-src 'self'` for PWA Service Worker support

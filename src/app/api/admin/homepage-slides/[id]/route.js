@@ -123,7 +123,7 @@ export async function PATCH(request, context) {
 
     revalidatePath("/");
     revalidatePath("/beranda");
-    revalidateTag("home-public-slides", "max");
+    revalidateTag("home-public-slides");
     broadcastRefresh("slider");
 
     return apiResponse({
@@ -179,7 +179,7 @@ export async function DELETE(request, context) {
 
     revalidatePath("/");
     revalidatePath("/beranda");
-    revalidateTag("home-public-slides", "max");
+    revalidateTag("home-public-slides");
     broadcastRefresh("slider");
 
     return apiResponse({

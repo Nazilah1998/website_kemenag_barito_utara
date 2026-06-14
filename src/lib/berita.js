@@ -2,21 +2,9 @@ import { unstable_noStore as noStore } from "next/cache";
 import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
 import { eq, and, ne, desc, asc, gt, lt } from "drizzle-orm";
-import { normalizeCoverImageUrl, toCoverPreviewUrl } from "@/lib/cover-image";
+import { toCoverPreviewUrl } from "@/lib/cover-image";
 import { logWarn, logError } from "@/lib/logger";
-
-export function formatDateIndonesia(value) {
-  if (!value) return "-";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
+import { formatDate } from "@/lib/date-utils";
 
 export function normalizeBerita(item = {}) {
   if (!item) return null;
@@ -44,7 +32,7 @@ export function normalizeBerita(item = {}) {
     title: item.title || "",
     excerpt: item.excerpt || "",
     category: item.category || "Umum",
-    date: formatDateIndonesia(isoDate),
+    date: formatDate(isoDate),
     isoDate,
     coverImage: toCoverPreviewUrl(rawCoverImage),
     cover_image: rawCoverImage,
@@ -58,6 +46,7 @@ export function normalizeBerita(item = {}) {
     updatedAt,
     updated_at: updatedAt,
     views: Number(item.views || 0),
+    author: item.profiles?.full_name || item.author || "Admin Kemenag",
   };
 }
 
@@ -191,17 +180,6 @@ export async function getBeritaBySlug(slug, options = {}) {
     logError("getBeritaBySlug_error", { error: error?.message });
     return null;
   }
-}
-
-export function estimateReadingTime(value = "", wordsPerMinute = 200) {
-  const plainText = stripHtml(value);
-  const totalWords = plainText
-    ? plainText.split(/\s+/).filter(Boolean).length
-    : 0;
-
-  if (totalWords === 0) return 1;
-
-  return Math.max(1, Math.ceil(totalWords / wordsPerMinute));
 }
 
 export async function getRelatedBerita(currentSlug, category, limit = 3) {

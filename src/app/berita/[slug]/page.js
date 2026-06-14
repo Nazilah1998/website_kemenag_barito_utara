@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import PageBanner from "@/components/common/PageBanner";
-import CoverImageWithFallback from "@/components/features/berita/components/CoverImageWithFallback";
+import CoverImageLightbox from "@/components/features/berita/components/CoverImageLightbox";
 import {
   BeritaDetailBackLink,
   BeritaDetailDateText,
@@ -8,11 +8,14 @@ import {
 } from "@/components/features/berita/components/BeritaDetailLocalized";
 import { BeritaDetailNavigation } from "@/components/features/berita/components/BeritaDetailNavigation";
 import BeritaDetailHeader from "@/components/features/berita/components/BeritaDetailHeader";
+import BeritaTextToSpeech from "@/components/features/berita/components/BeritaTextToSpeech";
+import BeritaReactions from "@/components/features/berita/components/BeritaReactions";
 import {
   getAdjacentBerita,
   getBeritaBySlug,
   getRelatedBerita,
-} from "../../../lib/berita";
+} from "@/lib/berita";
+import { stripHtml, sanitizeEditorHtml } from "@/lib/berita-utils";
 import JsonLd from "@/components/features/seo/JsonLd";
 import { breadcrumbSchema, newsArticleSchema } from "@/lib/structured-data";
 import { siteInfo } from "@/data/site";
@@ -25,26 +28,7 @@ function truncateText(value = "", maxLength = 180) {
   return `${value.slice(0, maxLength - 3).trim()}...`;
 }
 
-function toGoogleDriveDownloadUrl(url = "") {
-  if (!url) return FALLBACK_IMAGE;
-  const value = String(url);
-  const fileIdMatch =
-    value.match(/\/d\/([^/]+)/) ||
-    value.match(/[?&]id=([^&]+)/) ||
-    value.match(/\/uc\?.*id=([^&]+)/);
 
-  if (fileIdMatch?.[1]) {
-    return `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-  }
-  return value;
-}
-
-function stripTags(value = "") {
-  return String(value)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function toIso(value) {
   if (!value) return undefined;
@@ -67,7 +51,7 @@ export async function generateMetadata({ params }) {
   }
 
   const description = truncateText(
-    berita.excerpt || stripTags(berita.content) || siteInfo.description,
+    berita.excerpt || stripHtml(berita.content) || siteInfo.description,
     180,
   );
   const url = `/berita/${berita.slug}`;
@@ -121,11 +105,10 @@ export default async function DetailBeritaPage({ params }) {
 
   const [relatedItems, adjacent] = await Promise.all([
     getRelatedBerita(berita.slug, berita.category, 4),
-    getAdjacentBerita(berita.slug),
+    getAdjacentBerita(berita),
   ]);
 
   const coverImage = berita.coverImage || FALLBACK_IMAGE;
-  const coverImageDownloadUrl = toGoogleDriveDownloadUrl(coverImage);
 
   return (
     <>
@@ -147,23 +130,15 @@ export default async function DetailBeritaPage({ params }) {
 
                   {/* Cover Image — float left so text wraps beside it and continues below */}
                   <div className="not-prose float-left mr-6 mb-4 w-full sm:w-[44%] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
-                    <a
-                      href={coverImageDownloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block w-full aspect-[16/9] cursor-pointer overflow-hidden bg-slate-50 dark:bg-slate-900"
-                      title="Buka atau unduh gambar"
-                    >
-                      <CoverImageWithFallback
-                        src={coverImage}
-                        alt={berita.title}
-                        width={800}
-                        height={450}
-                        priority
-                        className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.02]"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 44vw, 560px"
-                      />
-                    </a>
+                    <CoverImageLightbox
+                      src={coverImage}
+                      alt={berita.title}
+                      width={800}
+                      height={450}
+                      priority={true}
+                      className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 44vw, 560px"
+                    />
                     <div className="bg-slate-50 dark:bg-slate-900/60 px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-1.5">
                       <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
                         Foto Berita: {berita.title}
@@ -174,14 +149,28 @@ export default async function DetailBeritaPage({ params }) {
                     </div>
                   </div>
 
+                  {/* Mobile TTS Widget: Visible only on < xl screens, sits between cover image and text */}
+                  <div className="not-prose block xl:hidden mb-6 clear-both sm:clear-none">
+                    <BeritaTextToSpeech title={berita.title} content={berita.content} />
+                  </div>
+
                   {/* Content flows beside the float, then below it */}
                   <div
                     className="[&_*]:clear-none [&_div]:!w-auto [&_div]:!block [&_div]:!max-w-none break-words"
-                    dangerouslySetInnerHTML={{ __html: berita.content || "" }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeEditorHtml(berita.content) }}
                   />
 
                   {/* Clearfix — ensures article card wraps around the float */}
                   <div className="not-prose clear-both" />
+                  
+                  {/* Reaction Widget */}
+                  <div className="not-prose clear-both w-full">
+                     <BeritaReactions slug={berita.slug} initialReactions={{
+                        reaction_bermanfaat: berita.reaction_bermanfaat || 0,
+                        reaction_inspiratif: berita.reaction_inspiratif || 0,
+                        reaction_informatif: berita.reaction_informatif || 0
+                     }} />
+                  </div>
                 </article>
               </div>
 
@@ -191,6 +180,8 @@ export default async function DetailBeritaPage({ params }) {
                 views={berita.views}
                 title={berita.title}
                 slug={berita.slug}
+                author={berita.author}
+                content={berita.content}
               />
             </div>
           </article>

@@ -45,27 +45,41 @@ function clampPage(value, max) {
   return value;
 }
 
-export const metadata = {
-  title: "Berita",
-  description:
-    "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
-  alternates: {
-    canonical: `${siteInfo.siteUrl}/berita`,
-  },
-  openGraph: {
-    title: "Berita",
-    description:
-      "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
-    url: `${siteInfo.siteUrl}/berita`,
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Berita",
-    description:
-      "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.",
-  },
-};
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const q = typeof params?.q === "string" ? params.q.trim() : "";
+  const category = typeof params?.category === "string" ? params.category : "";
+
+  let dynamicTitle = "Berita";
+  let dynamicDescription = "Publikasi berita dan informasi terbaru Kementerian Agama Kabupaten Barito Utara.";
+
+  if (q) {
+    dynamicTitle = `Pencarian Berita: ${q}`;
+    dynamicDescription = `Hasil pencarian berita untuk kata kunci "${q}" di Kementerian Agama Kabupaten Barito Utara.`;
+  } else if (category) {
+    dynamicTitle = `Kategori Berita: ${category}`;
+    dynamicDescription = `Kumpulan berita dengan kategori ${category} di Kementerian Agama Kabupaten Barito Utara.`;
+  }
+
+  return {
+    title: dynamicTitle,
+    description: dynamicDescription,
+    alternates: {
+      canonical: `${siteInfo.siteUrl}/berita`,
+    },
+    openGraph: {
+      title: dynamicTitle,
+      description: dynamicDescription,
+      url: `${siteInfo.siteUrl}/berita`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dynamicTitle,
+      description: dynamicDescription,
+    },
+  };
+}
 
 export const revalidate = 60;
 
