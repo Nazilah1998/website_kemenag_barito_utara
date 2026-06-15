@@ -92,6 +92,32 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
               error={l.error}
             />
 
+            <div className="flex items-center">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={l.rememberMe}
+                onClick={() => l.setRememberMe(!l.rememberMe)}
+                className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-opacity-75 ${
+                  l.rememberMe ? "bg-emerald-600" : "bg-slate-300 dark:bg-slate-700"
+                }`}
+              >
+                <span className="sr-only">Ingat Saya</span>
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    l.rememberMe ? "translate-x-4" : "translate-x-0"
+                  }`}
+                />
+              </button>
+              <label
+                onClick={() => l.setRememberMe(!l.rememberMe)}
+                className="ml-3 block text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 cursor-pointer select-none"
+              >
+                Ingat Saya
+              </label>
+            </div>
+
             <div className="pt-2 flex justify-center w-full">
               <Turnstile
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
@@ -198,13 +224,13 @@ function PasswordField({
           htmlFor="admin-password"
           className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400"
         >
-          Security Password
+        Password
         </label>
         <Link
           href="/admin/forgot-password"
           className="text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400"
         >
-          Lupa?
+          Lupa Password?
         </Link>
       </div>
       <div className="relative">

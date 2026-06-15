@@ -89,6 +89,7 @@ export default function AdminUserMenu({
             alt="Avatar" 
             width={32}
             height={32}
+            unoptimized
             className="h-8 w-8 rounded-xl object-cover shadow-sm"
           />
         ) : (

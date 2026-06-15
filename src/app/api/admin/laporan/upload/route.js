@@ -72,13 +72,11 @@ export async function POST(request) {
     }
 
     const filename = buildSafePdfFilename(file.name, category.slug);
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
     const storagePath = `laporan/files/${filename}`;
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage secara langsung menggunakan File streaming (tanpa Buffer manual)
     const supabase = createAdminClient();
-    const { error: uploadError } = await supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).upload(storagePath, buffer, {
+    const { error: uploadError } = await supabase.storage.from(LAPORAN_DOCUMENTS_BUCKET).upload(storagePath, file, {
       contentType: "application/pdf",
       upsert: true,
     });

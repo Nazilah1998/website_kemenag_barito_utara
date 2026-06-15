@@ -133,16 +133,23 @@ export async function getUserPermissionContext({
     .map((item: { permission?: string }) => item.permission)
     .filter(Boolean);
 
+  const basePermissions = getRolePermissions(normalizedRole);
+  const allPermissions = Array.from(new Set([...basePermissions, ...customPermissions]));
+  
+  const isRoleAdmin = normalizedRole === ROLES.ADMIN;
+  const finalApproved = isRoleAdmin ? true : approved;
+  const finalActive = isRoleAdmin ? true : isActive;
+
   return {
     role: normalizedRole || null,
     email: profile?.email || email || null,
     isSuperAdmin: false,
-    isAdmin: false,
-    isEditor: normalizedRole === ROLES.EDITOR,
-    isActive,
-    approved,
-    requestStatus,
-    permissions: approved && isActive ? (customPermissions as string[]) : [],
+    isAdmin: isRoleAdmin,
+    isEditor: normalizedRole === ROLES.EDITOR || isRoleAdmin,
+    isActive: finalActive,
+    approved: finalApproved,
+    requestStatus: isRoleAdmin ? "approved" : requestStatus,
+    permissions: (finalApproved && finalActive) ? (allPermissions as string[]) : [],
   };
 }
 

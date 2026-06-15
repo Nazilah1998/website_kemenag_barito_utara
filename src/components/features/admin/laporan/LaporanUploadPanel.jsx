@@ -58,25 +58,30 @@ export default function LaporanUploadPanel({
 
     return (
         <section
-            className="flex flex-col h-full animate-in fade-in slide-in-from-left-4 duration-700"
+            className="relative flex flex-col h-full overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-b from-white to-slate-50/50 border border-slate-100 shadow-2xl shadow-emerald-900/5 p-5 sm:p-8 md:p-10 dark:from-slate-900 dark:to-slate-900/50 dark:border-slate-800 dark:shadow-emerald-500/5 animate-in fade-in slide-in-from-left-4 duration-700"
             aria-labelledby="laporan-upload-title"
             aria-busy={savingDocument}
         >
-            <div className="mb-5 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-slate-900 dark:border-white">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white shadow-lg dark:bg-white dark:text-black mb-5">
-                    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="3">
-                        <path d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
+            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-72 h-72 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 mb-6 sm:mb-8 pb-5 sm:pb-6 border-b border-slate-200/60 dark:border-slate-700/60 flex items-start gap-4 sm:gap-5">
+                <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-[1rem] sm:rounded-[1.25rem] bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 ring-4 ring-emerald-500/10">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                 </div>
-                <h2
-                    id="laporan-upload-title"
-                    className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none"
-                >
-                    Upload Baru
-                </h2>
-                <p className="mt-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                    Kategori: <span className="text-slate-900 dark:text-white underline decoration-emerald-500 decoration-2 underline-offset-4">{activeCategory?.title || "—"}</span>
-                </p>
+                <div>
+                    <h2
+                        id="laporan-upload-title"
+                        className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase"
+                    >
+                        Upload Baru
+                    </h2>
+                    <p className="mt-1 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+                        {activeCategory?.title || "—"}
+                    </p>
+                </div>
             </div>
 
             <form className="flex-1 space-y-4 sm:space-y-6" onSubmit={handleUpload} noValidate>
@@ -167,30 +172,31 @@ export default function LaporanUploadPanel({
                                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <div className={`flex flex-col items-center justify-center min-h-[120px] w-full min-w-0 overflow-hidden rounded-2xl border-2 border-dashed px-4 py-6 transition-all ${isDragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20" : "border-slate-200 bg-slate-50/50 group-hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/30 dark:group-hover:border-white"}`}>
+                            <div className={`relative flex flex-col items-center justify-center min-h-[160px] w-full min-w-0 overflow-hidden rounded-[1.5rem] border-2 border-dashed px-6 py-8 transition-all duration-300 ${isDragging ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 scale-[1.02] shadow-xl shadow-emerald-500/20" : "border-slate-200 bg-white/50 hover:bg-white hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-slate-700 dark:bg-slate-800/30 dark:hover:border-emerald-500 dark:hover:bg-slate-800"}`}>
                                 {selectedFile || docForm.file_name ? (
                                     <>
-                                        <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 mb-3">
-                                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
-                                                <path d="M5 13l4 4L19 7" />
+                                        <div className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-700 dark:from-emerald-900/60 dark:to-emerald-800/40 dark:text-emerald-400 mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                            <div className="absolute inset-0 rounded-[1.25rem] border border-white/40 dark:border-emerald-400/20" />
+                                            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
                                         <div className="w-full min-w-0 max-w-full px-2 text-center flex flex-col items-center">
-                                            <span className="block w-full max-w-full line-clamp-2 break-all text-xs font-bold text-slate-900 dark:text-white text-balance">
+                                            <span className="block w-full max-w-full line-clamp-2 break-all text-sm font-bold text-slate-900 dark:text-white">
                                                 {selectedFile?.name || docForm.file_name}
                                             </span>
+                                            <span className="text-[10px] font-bold text-slate-500 mt-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full transition-colors group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:group-hover:bg-emerald-900/30 dark:group-hover:text-emerald-400">Klik atau seret file PDF lain untuk mengganti</span>
                                         </div>
-                                        <span className="text-[10px] font-medium text-slate-400 mt-1">Klik atau seret file PDF lain untuk mengganti</span>
                                     </>
                                 ) : (
                                     <>
-                                        <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors mb-3 ${isDragging ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400" : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black"}`}>
-                                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
+                                        <div className={`relative flex h-14 w-14 items-center justify-center rounded-[1.25rem] transition-all duration-300 mb-4 ${isDragging ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-110" : "bg-white text-slate-400 shadow-sm border border-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-500 group-hover:border-emerald-200 dark:group-hover:bg-emerald-900/40 dark:group-hover:text-emerald-400"}`}>
+                                            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0-12l-4 4m4-4l4 4M4 20h16" />
                                             </svg>
                                         </div>
-                                        <span className={`text-[11px] font-black uppercase tracking-widest text-center ${isDragging ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"}`}>
-                                            {isDragging ? "Lepaskan File PDF di sini" : "Pilih / Drag File PDF"}
+                                        <span className={`text-[11px] font-black uppercase tracking-widest text-center transition-colors ${isDragging ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"}`}>
+                                            {isDragging ? "Lepaskan PDF di sini" : "Pilih / Drag File PDF"}
                                         </span>
                                     </>
                                 )}
@@ -198,8 +204,8 @@ export default function LaporanUploadPanel({
                         </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-xl sm:rounded-2xl border-2 border-slate-100 bg-slate-50/50 p-4 sm:p-6 dark:border-slate-800 dark:bg-slate-800/30">
-                        <label className="flex cursor-pointer items-center gap-4">
+                    <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm p-4 sm:p-5 transition-all hover:border-emerald-200 hover:shadow-emerald-500/5 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-emerald-500/30">
+                        <label className="flex cursor-pointer items-center gap-4 group/publish">
                             <div className="relative flex items-center">
                                 <input
                                     type="checkbox"
@@ -207,14 +213,14 @@ export default function LaporanUploadPanel({
                                     onChange={(e) =>
                                         setDocForm((prev) => ({ ...prev, is_published: e.target.checked }))
                                     }
-                                    className="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-slate-200 bg-white transition-all checked:border-slate-900 checked:bg-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:checked:border-white dark:checked:bg-white"
+                                    className="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-slate-300 bg-slate-50 transition-all checked:border-emerald-500 checked:bg-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:checked:border-emerald-500 dark:checked:bg-emerald-500"
                                 />
-                                <svg className="pointer-events-none absolute h-6 w-6 p-1 text-white opacity-0 transition-opacity peer-checked:opacity-100 dark:text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5">
+                                <svg className="pointer-events-none absolute h-6 w-6 p-1 text-white opacity-0 transition-opacity peer-checked:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5">
                                     <path d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
                             <div>
-                                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white block">
+                                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white block group-hover/publish:text-emerald-600 dark:group-hover/publish:text-emerald-400 transition-colors">
                                     Publikasikan Langsung
                                 </span>
                             </div>
@@ -224,12 +230,12 @@ export default function LaporanUploadPanel({
 
                 <Feedback {...uploadFeedback} />
 
-                <div className="flex flex-col sm:flex-row items-center gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3 pt-6 border-t border-slate-200/60 dark:border-slate-700/60 mt-auto">
                     <Button
                         type="submit"
                         loading={savingDocument}
                         size="md"
-                        className="w-full sm:flex-1 h-12"
+                        className="w-full sm:flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 border-0"
                         icon={<svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4"><path d="M5 13l4 4L19 7" /></svg>}
                     >
                         Simpan Dokumen
@@ -240,7 +246,7 @@ export default function LaporanUploadPanel({
                         size="md"
                         onClick={resetForm}
                         disabled={savingDocument}
-                        className="w-full sm:w-auto h-12"
+                        className="w-full sm:w-auto h-12 border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800 bg-white dark:bg-slate-900"
                     >
                         Reset
                     </Button>

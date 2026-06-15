@@ -16,6 +16,7 @@ export function useAdminLogin(initialUnauthorized) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loadingSession, setLoadingSession] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +26,18 @@ export function useAdminLogin(initialUnauthorized) {
       ? "Sesi Anda tidak valid atau tidak memiliki akses admin."
       : "",
   );
+
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem("admin_remember_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+    } catch (e) {
+      // ignore local storage errors
+    }
+  }, []);
 
   const [turnstileToken, setTurnstileToken] = useState(null);
 
@@ -93,6 +106,17 @@ export function useAdminLogin(initialUnauthorized) {
         setError(mapLoginError(payload));
         return;
       }
+
+      try {
+        if (rememberMe) {
+          localStorage.setItem("admin_remember_email", email.trim().toLowerCase());
+        } else {
+          localStorage.removeItem("admin_remember_email");
+        }
+      } catch (e) {
+        // ignore
+      }
+
       window.location.href = "/admin";
     } catch (err) {
       setError(err?.message || "Terjadi kesalahan jaringan saat login.");
@@ -115,6 +139,8 @@ export function useAdminLogin(initialUnauthorized) {
     setError,
     turnstileToken,
     setTurnstileToken,
+    rememberMe,
+    setRememberMe,
     handlePasswordKeyState,
     handleSubmit,
   };

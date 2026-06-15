@@ -135,9 +135,13 @@ const nextConfig = {
     imageSizes: [128, 256, 384],
   },
   serverExternalPackages: ["pg", "pdfjs-dist"],
+  serverActions: {
+    bodySizeLimit: "50mb",
+  },
   experimental: {
     inlineCss: true,
     optimizePackageImports: ["lucide-react", "framer-motion"],
+    middlewareClientMaxBodySize: "50mb",
   },
   allowedDevOrigins: ["127.0.0.1"],
   async headers() {

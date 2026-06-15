@@ -40,7 +40,7 @@ export function EditorCard({
         <div className="flex flex-col md:flex-row md:items-center gap-8 flex-1">
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[1.5rem] bg-slate-900 text-white shadow-xl group-hover:scale-110 transition-transform dark:bg-white dark:text-black border-2 border-transparent group-hover:border-emerald-500">
             {editor.avatar_url ? (
-              <Image src={editor.avatar_url} alt={editor.full_name || "Editor Avatar"} fill sizes="64px" className="object-cover" />
+              <Image src={editor.avatar_url} alt={editor.full_name || "Editor Avatar"} fill sizes="64px" className="object-cover" unoptimized />
             ) : (
               <span className="text-xl font-black">{index}</span>
             )}

@@ -79,6 +79,13 @@ export async function GET(request, { params }) {
     headers.set("Access-Control-Allow-Origin", "*");
     headers.set("Cache-Control", "public, max-age=3600");
 
+    // Teruskan header penting agar browser bisa me-render PDF besar secara bertahap (streaming/inline)
+    const contentLength = fileResponse.headers.get("content-length");
+    if (contentLength) headers.set("Content-Length", contentLength);
+    
+    const acceptRanges = fileResponse.headers.get("accept-ranges");
+    if (acceptRanges) headers.set("Accept-Ranges", acceptRanges);
+
     return new Response(fileResponse.body, {
       status: 200,
       headers,
