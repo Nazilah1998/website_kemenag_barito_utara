@@ -1,6 +1,8 @@
 import { pgTable, foreignKey, unique, pgPolicy, check, uuid, text, boolean, timestamp, integer, uniqueIndex, index, bigint, jsonb, pgSchema } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
+export const kemenagWebsiteSchema = pgSchema("kemenag_website");
+
 export const authSchema = pgSchema("auth");
 
 export const users = authSchema.table("users", {
@@ -12,7 +14,7 @@ export const users = authSchema.table("users", {
 
 
 
-export const profiles = pgTable("profiles", {
+export const profiles = kemenagWebsiteSchema.table("profiles", {
 	id: uuid().primaryKey().notNull(),
 	full_name: text(),
 	email: text(),
@@ -37,7 +39,7 @@ export const profiles = pgTable("profiles", {
 	check("profiles_role_check", sql`role = ANY (ARRAY['super_admin'::text, 'admin'::text, 'editor'::text, 'reviewer'::text])`),
 ]);
 
-export const categories = pgTable("categories", {
+export const categories = kemenagWebsiteSchema.table("categories", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	type: text().notNull(),
 	name: text().notNull(),
@@ -54,7 +56,7 @@ export const categories = pgTable("categories", {
 	check("categories_type_check", sql`type = ANY (ARRAY['news'::text, 'announcement'::text, 'document'::text, 'agenda'::text])`),
 ]);
 
-export const news = pgTable("news", {
+export const news = kemenagWebsiteSchema.table("news", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	title: text().notNull(),
 	slug: text().notNull(),
@@ -90,7 +92,7 @@ export const news = pgTable("news", {
 	check("news_status_check", sql`status = ANY (ARRAY['draft'::text, 'review'::text, 'published'::text, 'archived'::text])`),
 ]);
 
-export const berita = pgTable("berita", {
+export const berita = kemenagWebsiteSchema.table("berita", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	slug: text().notNull(),
 	title: text().notNull(),
@@ -125,7 +127,7 @@ export const berita = pgTable("berita", {
 	pgPolicy("Berita published readable by anyone", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 ]);
 
-export const dokumen = pgTable("dokumen", {
+export const dokumen = kemenagWebsiteSchema.table("dokumen", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	slug: text().notNull(),
 	title: text().notNull(),
@@ -151,7 +153,7 @@ export const dokumen = pgTable("dokumen", {
 	pgPolicy("public read published dokumen", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 ]);
 
-export const agenda = pgTable("agenda", {
+export const agenda = kemenagWebsiteSchema.table("agenda", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	slug: text().notNull(),
 	title: text().notNull(),
@@ -176,7 +178,7 @@ export const agenda = pgTable("agenda", {
 	pgPolicy("public read published agenda", { as: "permissive", for: "select", to: ["anon", "authenticated"], using: sql`(is_published = true)` }),
 ]);
 
-export const admin_audit_log = pgTable("admin_audit_log", {
+export const admin_audit_log = kemenagWebsiteSchema.table("admin_audit_log", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	actor_id: uuid(),
 	actor_email: text(),
@@ -200,7 +202,7 @@ export const admin_audit_log = pgTable("admin_audit_log", {
   WHERE ((p.id = auth.uid()) AND (lower(p.role) = ANY (ARRAY['admin'::text, 'super_admin'::text])))))` }),
 ]);
 
-export const documents = pgTable("documents", {
+export const documents = kemenagWebsiteSchema.table("documents", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	category: text().notNull(),
 	title: text().notNull(),
@@ -213,7 +215,7 @@ export const documents = pgTable("documents", {
 	index("idx_documents_category").using("btree", table.category.asc().nullsLast().op("text_ops"), table.created_at.desc().nullsFirst().op("text_ops")),
 ]);
 
-export const report_documents = pgTable("report_documents", {
+export const report_documents = kemenagWebsiteSchema.table("report_documents", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	category_id: uuid().notNull(),
 	title: text().notNull(),
@@ -247,7 +249,7 @@ export const report_documents = pgTable("report_documents", {
 	pgPolicy("admin_all_report_documents", { as: "permissive", for: "all", to: ["authenticated"] }),
 ]);
 
-export const kontak_pesan = pgTable("kontak_pesan", {
+export const kontak_pesan = kemenagWebsiteSchema.table("kontak_pesan", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	nama: text().notNull(),
 	whatsapp: text().notNull(),
@@ -265,7 +267,7 @@ export const kontak_pesan = pgTable("kontak_pesan", {
   WHERE ((p.id = auth.uid()) AND (lower(p.role) = ANY (ARRAY['admin'::text, 'super_admin'::text])))))` }),
 ]);
 
-export const admin_users = pgTable("admin_users", {
+export const admin_users = kemenagWebsiteSchema.table("admin_users", {
 	user_id: uuid().primaryKey().notNull(),
 	full_name: text(),
 	role: text().default('admin').notNull(),
@@ -283,7 +285,7 @@ export const admin_users = pgTable("admin_users", {
 	check("admin_users_role_check", sql`role = ANY (ARRAY['super_admin'::text, 'admin'::text, 'editor'::text])`),
 ]);
 
-export const galeri = pgTable("galeri", {
+export const galeri = kemenagWebsiteSchema.table("galeri", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	title: text().notNull(),
 	image_url: text().notNull(),
@@ -302,7 +304,7 @@ export const galeri = pgTable("galeri", {
 	index("idx_galeri_source_type_source_id").using("btree", table.source_type.asc().nullsLast().op("text_ops"), table.source_id.asc().nullsLast().op("text_ops")),
 ]);
 
-export const static_pages = pgTable("static_pages", {
+export const static_pages = kemenagWebsiteSchema.table("static_pages", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	slug: text().notNull(),
 	title: text().notNull(),
@@ -325,7 +327,7 @@ export const static_pages = pgTable("static_pages", {
 	pgPolicy("static_pages_select_admin", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const report_categories = pgTable("report_categories", {
+export const report_categories = kemenagWebsiteSchema.table("report_categories", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	slug: text().notNull(),
 	title: text().notNull(),
@@ -341,7 +343,7 @@ export const report_categories = pgTable("report_categories", {
 	pgPolicy("admin_read_report_categories", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const editor_requests = pgTable("editor_requests", {
+export const editor_requests = kemenagWebsiteSchema.table("editor_requests", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	user_id: uuid().notNull(),
 	full_name: text().notNull(),
@@ -372,7 +374,7 @@ export const editor_requests = pgTable("editor_requests", {
 	check("editor_requests_status_check", sql`status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text])`),
 ]);
 
-export const user_permissions = pgTable("user_permissions", {
+export const user_permissions = kemenagWebsiteSchema.table("user_permissions", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	user_id: uuid().notNull(),
 	permission: text().notNull(),
@@ -389,7 +391,7 @@ export const user_permissions = pgTable("user_permissions", {
 	unique("user_permissions_user_id_permission_key").on(table.user_id, table.permission),
 ]);
 
-export const homepage_slides = pgTable("homepage_slides", {
+export const homepage_slides = kemenagWebsiteSchema.table("homepage_slides", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	title: text().notNull(),
 	caption: text().default('').notNull(),
@@ -406,7 +408,7 @@ export const homepage_slides = pgTable("homepage_slides", {
 	pgPolicy("homepage_slides_select_admin", { as: "permissive", for: "select", to: ["authenticated"] }),
 ]);
 
-export const seksi = pgTable("seksi", {
+export const seksi = kemenagWebsiteSchema.table("seksi", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	slug: text().notNull(),
 	judul: text().notNull(),
@@ -421,7 +423,7 @@ export const seksi = pgTable("seksi", {
 	uniqueIndex("seksi_slug_key").using("btree", table.slug.asc().nullsLast().op("text_ops")),
 ]);
 
-export const link_aplikasi_seksi = pgTable("link_aplikasi_seksi", {
+export const link_aplikasi_seksi = kemenagWebsiteSchema.table("link_aplikasi_seksi", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	seksi_id: uuid().notNull(),
 	nama: text().notNull(),
@@ -438,7 +440,7 @@ export const link_aplikasi_seksi = pgTable("link_aplikasi_seksi", {
 		}).onDelete("cascade"),
 ]);
 
-export const testimonials = pgTable("testimonials", {
+export const testimonials = kemenagWebsiteSchema.table("testimonials", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	name: text().notNull(),
 	role: text().notNull(),
@@ -452,7 +454,7 @@ export const testimonials = pgTable("testimonials", {
 	locale: text().default('id').notNull(),
 });
 
-export const pegawai_seksi = pgTable("pegawai_seksi", {
+export const pegawai_seksi = kemenagWebsiteSchema.table("pegawai_seksi", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	seksi_id: uuid().notNull(),
 	nama: text().notNull(),
@@ -471,7 +473,7 @@ export const pegawai_seksi = pgTable("pegawai_seksi", {
 		}).onDelete("cascade"),
 ]);
 
-export const layanan_publik = pgTable("layanan_publik", {
+export const layanan_publik = kemenagWebsiteSchema.table("layanan_publik", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	title: text().notNull(),
 	description: text().notNull(),
@@ -482,13 +484,13 @@ export const layanan_publik = pgTable("layanan_publik", {
 	updated_at: timestamp({ precision: 6, withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
-export const siteSettings = pgTable("site_settings", {
+export const siteSettings = kemenagWebsiteSchema.table("site_settings", {
   key: text("key").primaryKey().notNull(),
   value: jsonb("value").notNull().default({}),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
 });
 
-export const layanan_ptsp = pgTable("layanan_ptsp", {
+export const layanan_ptsp = kemenagWebsiteSchema.table("layanan_ptsp", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	seksi_id: uuid().notNull(),
 	nama: text().notNull(),
