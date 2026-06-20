@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function BeritaReactions({ slug, initialReactions }) {
@@ -10,21 +10,63 @@ export default function BeritaReactions({ slug, initialReactions }) {
     inspiratif: initialReactions?.reaction_inspiratif || 0,
     informatif: initialReactions?.reaction_informatif || 0
   });
-  const [userReacted, setUserReacted] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
+  const [userReacted, setUserReacted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(null);
 
+  useEffect(() => {
+    // Gunakan setTimeout agar setState tidak dipanggil secara sinkron
+    // langsung di dalam body effect, menghindari warning linter.
+    const timer = setTimeout(() => {
+      if (typeof window !== "undefined") {
+        const savedReaction = localStorage.getItem(`react_berita_${slug}`);
+        if (savedReaction) {
+          setUserReacted(true);
+          setSelectedType(savedReaction);
+        }
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [slug]);
+
   const handleReact = async (type) => {
-    if (userReacted) return;
-    
+    let action = "add";
+    let previousType = null;
+
+    if (userReacted) {
+      if (selectedType === type) {
+        action = "remove";
+      } else {
+        action = "switch";
+        previousType = selectedType;
+      }
+    }
+
     // Optimistic UI update
     setIsAnimating(type);
-    setReactions(prev => ({
-      ...prev,
-      [type]: prev[type] + 1
-    }));
-    setUserReacted(true);
-    setSelectedType(type);
+    
+    setReactions(prev => {
+      const next = { ...prev };
+      if (action === "remove") {
+        next[type] = Math.max(0, next[type] - 1);
+      } else if (action === "switch") {
+        next[previousType] = Math.max(0, next[previousType] - 1);
+        next[type] = next[type] + 1;
+      } else {
+        next[type] = next[type] + 1;
+      }
+      return next;
+    });
+
+    if (action === "remove") {
+      setUserReacted(false);
+      setSelectedType(null);
+      if (typeof window !== "undefined") localStorage.removeItem(`react_berita_${slug}`);
+    } else {
+      setUserReacted(true);
+      setSelectedType(type);
+      if (typeof window !== "undefined") localStorage.setItem(`react_berita_${slug}`, type);
+    }
 
     try {
       const res = await fetch(`/api/berita/${slug}/react`, {
@@ -32,20 +74,70 @@ export default function BeritaReactions({ slug, initialReactions }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ type }),
+        body: JSON.stringify({ type, action, previousType }),
       });
       
       if (!res.ok) {
         // Revert if failed
-        setReactions(prev => ({ ...prev, [type]: prev[type] - 1 }));
-        setUserReacted(false);
-        setSelectedType(null);
+        setReactions(prev => {
+           const revert = { ...prev };
+           if (action === "remove") {
+             revert[type] = revert[type] + 1;
+           } else if (action === "switch") {
+             revert[previousType] = revert[previousType] + 1;
+             revert[type] = Math.max(0, revert[type] - 1);
+           } else {
+             revert[type] = Math.max(0, revert[type] - 1);
+           }
+           return revert;
+        });
+        
+        if (action === "remove") {
+          setUserReacted(true);
+          setSelectedType(type);
+          if (typeof window !== "undefined") localStorage.setItem(`react_berita_${slug}`, type);
+        } else if (action === "switch") {
+          setUserReacted(true);
+          setSelectedType(previousType);
+          if (typeof window !== "undefined") localStorage.setItem(`react_berita_${slug}`, previousType);
+        } else {
+          setUserReacted(false);
+          setSelectedType(null);
+          if (typeof window !== "undefined") localStorage.removeItem(`react_berita_${slug}`);
+        }
+        
+        if (res.status === 429) {
+          alert("Anda terlalu sering mengubah reaksi. Silakan coba lagi nanti.");
+        }
       }
     } catch (err) {
-      // Revert if failed
-      setReactions(prev => ({ ...prev, [type]: prev[type] - 1 }));
-      setUserReacted(false);
-      setSelectedType(null);
+      // Revert if failed (network error)
+      setReactions(prev => {
+         const revert = { ...prev };
+         if (action === "remove") {
+           revert[type] = revert[type] + 1;
+         } else if (action === "switch") {
+           revert[previousType] = revert[previousType] + 1;
+           revert[type] = Math.max(0, revert[type] - 1);
+         } else {
+           revert[type] = Math.max(0, revert[type] - 1);
+         }
+         return revert;
+      });
+      
+      if (action === "remove") {
+        setUserReacted(true);
+        setSelectedType(type);
+        if (typeof window !== "undefined") localStorage.setItem(`react_berita_${slug}`, type);
+      } else if (action === "switch") {
+        setUserReacted(true);
+        setSelectedType(previousType);
+        if (typeof window !== "undefined") localStorage.setItem(`react_berita_${slug}`, previousType);
+      } else {
+        setUserReacted(false);
+        setSelectedType(null);
+        if (typeof window !== "undefined") localStorage.removeItem(`react_berita_${slug}`);
+      }
     }
     
     setTimeout(() => setIsAnimating(null), 1000);
@@ -77,12 +169,11 @@ export default function BeritaReactions({ slug, initialReactions }) {
             <button
               key={opt.type}
               onClick={() => handleReact(opt.type)}
-              disabled={userReacted && !isSelected}
               className={`
                 relative group flex flex-col items-center justify-center py-3 px-1 sm:p-4 rounded-3xl transition-all duration-300
-                ${userReacted && !isSelected ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:-translate-y-1 cursor-pointer'}
+                hover:-translate-y-1 cursor-pointer
                 ${isSelected ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800/50 shadow-inner' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 hover:shadow-md'}
-                border w-full
+                border w-full active:scale-95
               `}
             >
               <div className="text-3xl mb-2 transition-transform duration-300 group-hover:scale-110">

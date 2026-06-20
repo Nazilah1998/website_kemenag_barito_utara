@@ -43,6 +43,7 @@ export const messagesEn = {
       zi: "Integrity Zone",
       ziArea: "Area of Change - ZI",
       ziVideo: "Development Video - ZI",
+      ziBerita: "Integrity Zone News",
       laporan: "Report",
       laporanSop: "SOP & Service Standards",
       laporanRenstra: "Strategic Plan",

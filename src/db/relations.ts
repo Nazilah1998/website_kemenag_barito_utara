@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm/relations";
-import { users, profiles, news, categories, berita, dokumen, agenda, report_categories, report_documents, admin_users, static_pages, editor_requests, user_permissions, seksi, link_aplikasi_seksi, pegawai_seksi, layanan_ptsp } from "./schema";
+
+import { users, profiles, news, categories, berita, dokumen, agenda, report_categories, report_documents, admin_users, static_pages, editor_requests, user_permissions, seksi, pegawai_seksi } from "./schema";
 
 export const profilesRelations = relations(profiles, ({one, many}) => ({
 	users: one(users, {
@@ -106,29 +107,13 @@ export const user_permissionsRelations = relations(user_permissions, ({one}) => 
 	}),
 }));
 
-export const link_aplikasi_seksiRelations = relations(link_aplikasi_seksi, ({one}) => ({
-	seksi: one(seksi, {
-		fields: [link_aplikasi_seksi.seksi_id],
-		references: [seksi.id]
-	}),
-}));
-
 export const seksiRelations = relations(seksi, ({many}) => ({
-	link_aplikasi_seksis: many(link_aplikasi_seksi),
 	pegawai_seksis: many(pegawai_seksi),
-	layanan_ptsps: many(layanan_ptsp),
 }));
 
 export const pegawai_seksiRelations = relations(pegawai_seksi, ({one}) => ({
 	seksi: one(seksi, {
 		fields: [pegawai_seksi.seksi_id],
-		references: [seksi.id]
-	}),
-}));
-
-export const layanan_ptspRelations = relations(layanan_ptsp, ({one}) => ({
-	seksi: one(seksi, {
-		fields: [layanan_ptsp.seksi_id],
 		references: [seksi.id]
 	}),
 }));

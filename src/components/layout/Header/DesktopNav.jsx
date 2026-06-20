@@ -75,7 +75,9 @@ export function DesktopNav({
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 10 }}
                       transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                      className="absolute left-0 top-full z-50 pt-2 min-w-[240px]"
+                      className={`absolute top-full z-50 pt-2 min-w-[240px] ${
+                        ['Laporan', 'Zona Integritas', 'Report', 'Integrity Zone'].includes(item.label) ? 'right-0' : 'left-0'
+                      }`}
                     >
                       <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
                         {/* Decorative Background for Dropdown */}

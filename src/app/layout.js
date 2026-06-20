@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./tailwind.css";
 import "./globals.css";
 import Providers from "@/components/layout/Providers";
 import AppShell from "@/components/layout/AppShell";
+import MaintenancePage from "@/components/layout/MaintenancePage";
 
 import { siteInfo } from "@/data/site";
 import Script from "next/script";
@@ -16,7 +17,7 @@ import {
 import DynamicImports from "@/components/layout/DynamicImports";
 import JsonLd from "@/components/features/seo/JsonLd";
 
-const inter = Inter({ subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
 let criticalCss = "";
 try {
@@ -142,8 +143,33 @@ async function getGlobalIdentitySettings() {
   }
 }
 
+async function getGlobalMaintenanceSettings() {
+  try {
+    const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "maintenance_mode")).limit(1);
+    return row?.value || { active: false };
+  } catch (error) {
+    return { active: false };
+  }
+}
+
 export default async function RootLayout({ children }) {
-  const settings = await getGlobalIdentitySettings();
+  const [settings, maintenance] = await Promise.all([
+    getGlobalIdentitySettings(),
+    getGlobalMaintenanceSettings()
+  ]);
+
+  if (maintenance?.active) {
+    return (
+      <html lang="id" suppressHydrationWarning>
+        <head>
+          <link rel="icon" href="/assets/branding/kemenag.svg" type="image/svg+xml" />
+        </head>
+        <body className={`${jakarta.className} antialiased`} suppressHydrationWarning>
+          <MaintenancePage title={maintenance.title} message={maintenance.message} />
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>
@@ -167,7 +193,7 @@ export default async function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${inter.className} antialiased`}
+        className={`${jakarta.className} antialiased`}
         suppressHydrationWarning
       >
         <Providers initialSettings={settings}>

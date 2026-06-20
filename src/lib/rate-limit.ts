@@ -80,6 +80,16 @@ function memoryRateLimit({ key, limit, windowMs }: { key: string; limit: number;
   const current = memoryBuckets.get(key);
 
   if (!current || now - current.startedAt > windowMs) {
+    // Prevent memory leaks: max 5000 IPs tracked in memory if Redis is down
+    if (memoryBuckets.size > 5000) {
+      // Clear oldest entries (maps iterate in insertion order)
+      let count = 0;
+      for (const [k] of memoryBuckets) {
+        memoryBuckets.delete(k);
+        if (++count > 1000) break;
+      }
+    }
+    
     memoryBuckets.set(key, {
       startedAt: now,
       count: 1,

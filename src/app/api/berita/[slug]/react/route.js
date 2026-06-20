@@ -9,36 +9,44 @@ export async function POST(req, { params }) {
   try {
     const { slug } = await params;
     
-    // Rate Limiting: 10 requests per 60 seconds per IP to prevent spamming
+    // Rate Limiting: Allow up to 20 requests per IP per day to allow changing minds/switching
     const ip = getClientIp(req);
     const rl = await rateLimit({
       key: `react_berita_${ip}_${slug}`,
-      limit: 10,
-      windowMs: 60000
+      limit: 20,
+      windowMs: 1000 * 60 * 60 * 24 // 1 hari
     });
     
     if (!rl.ok) {
-      return NextResponse.json({ error: "Terlalu banyak permintaan. Silakan tunggu sebentar." }, { status: 429 });
+      return NextResponse.json({ error: "Anda sudah memberikan reaksi pada berita ini." }, { status: 429 });
     }
 
     const body = await req.json();
-    const { type } = body;
+    const { type, action = "add", previousType } = body;
 
     const allowedTypes = ['bermanfaat', 'inspiratif', 'informatif'];
-    if (!allowedTypes.includes(type)) {
+    if (!allowedTypes.includes(type) || (previousType && !allowedTypes.includes(previousType))) {
       return NextResponse.json({ error: "Tipe reaksi tidak valid." }, { status: 400 });
     }
 
-    // Increment reaction count safely using SQL
-    let updateColumn;
-    if (type === 'bermanfaat') updateColumn = berita.reaction_bermanfaat;
-    if (type === 'inspiratif') updateColumn = berita.reaction_inspiratif;
-    if (type === 'informatif') updateColumn = berita.reaction_informatif;
+    let updateQuery = {};
+    if (action === "remove") {
+      const col = type === 'bermanfaat' ? 'reaction_bermanfaat' : type === 'inspiratif' ? 'reaction_inspiratif' : 'reaction_informatif';
+      updateQuery = { [col]: sql`GREATEST(0, ${berita[col]} - 1)` };
+    } else if (action === "switch" && previousType) {
+      const colNew = type === 'bermanfaat' ? 'reaction_bermanfaat' : type === 'inspiratif' ? 'reaction_inspiratif' : 'reaction_informatif';
+      const colOld = previousType === 'bermanfaat' ? 'reaction_bermanfaat' : previousType === 'inspiratif' ? 'reaction_inspiratif' : 'reaction_informatif';
+      updateQuery = { 
+        [colNew]: sql`${berita[colNew]} + 1`,
+        [colOld]: sql`GREATEST(0, ${berita[colOld]} - 1)` 
+      };
+    } else {
+      const col = type === 'bermanfaat' ? 'reaction_bermanfaat' : type === 'inspiratif' ? 'reaction_inspiratif' : 'reaction_informatif';
+      updateQuery = { [col]: sql`${berita[col]} + 1` };
+    }
 
     const [updated] = await db.update(berita)
-      .set({
-        [type === 'bermanfaat' ? 'reaction_bermanfaat' : type === 'inspiratif' ? 'reaction_inspiratif' : 'reaction_informatif']: sql`${updateColumn} + 1`
-      })
+      .set(updateQuery)
       .where(eq(berita.slug, slug))
       .returning();
 

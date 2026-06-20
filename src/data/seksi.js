@@ -7,28 +7,6 @@ export const dataSeksi = [
     foto_kepala: null, // Will use a placeholder if null
     deskripsi:
       "Subbagian Tata Usaha mempunyai tugas melakukan koordinasi penyusunan rencana, evaluasi, laporan dan kehumasan, urusan keuangan, perbendaharaan, akuntansi, dan pelaporan keuangan, serta urusan organisasi, tata laksana, kepegawaian, hukum, kerukunan umat beragama, dan dukungan administrasi bagi seluruh satuan organisasi di lingkungan Kantor Kementerian Agama Kabupaten Barito Utara.",
-    layanan_ptsp: [
-      { nama: "Penerimaan Surat Masuk", estimasi: "Langsung" },
-      { nama: "Legalisir Dokumen Kepegawaian / SK", estimasi: "1 Hari Kerja" },
-      {
-        nama: "Layanan Permohonan Informasi Publik (PPID)",
-        estimasi: "Sesuai Ketentuan PPID",
-      },
-      { nama: "Konsultasi Kepegawaian & Hukum", estimasi: "Jam Kerja" },
-    ],
-    link_aplikasi: [
-      {
-        nama: "PUSAKA Kemenag",
-        url: "https://pusaka.kemenag.go.id/",
-        icon: "Smartphone",
-      },
-      { nama: "SIMPEG", url: "https://simpeg.kemenag.go.id/", icon: "Users" },
-      {
-        nama: "SRIKANDI",
-        url: "https://srikandi.arsip.go.id/",
-        icon: "FileText",
-      },
-    ],
     pegawai: [
       {
         nama: "MUHAMMAD NAZILAH, S.E",
@@ -70,11 +48,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Seksi Bimbingan Masyarakat Islam mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi di bidang bimbingan masyarakat Islam.",
-    layanan_ptsp: [
-      { nama: "Layanan Rekomendasi Pindah Nikah", estimasi: "1 Hari Kerja" },
-      { nama: "Layanan Konsultasi Syariah", estimasi: "Jam Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
   {
@@ -85,11 +58,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Seksi Pendidikan Agama Islam mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi di bidang pendidikan agama Islam pada sekolah umum.",
-    layanan_ptsp: [
-      { nama: "Layanan Rekomendasi Guru PAI", estimasi: "1 Hari Kerja" },
-      { nama: "Layanan Pengambilan SK TPG", estimasi: "1 Hari Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
   {
@@ -100,11 +68,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Seksi Pendidikan Diniyah dan Pondok Pesantren mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi di bidang pendidikan diniyah dan pondok pesantren.",
-    layanan_ptsp: [
-      { nama: "Layanan Izin Operasional Ponpes", estimasi: "7 Hari Kerja" },
-      { nama: "Layanan Rekomendasi Bantuan Ponpes", estimasi: "3 Hari Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
   {
@@ -115,11 +78,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Seksi Pendidikan Madrasah mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi di bidang pendidikan madrasah.",
-    layanan_ptsp: [
-      { nama: "Layanan Rekomendasi Pindah Siswa", estimasi: "1 Hari Kerja" },
-      { nama: "Layanan Legalisir Ijazah", estimasi: "1 Hari Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
   {
@@ -130,11 +88,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Penyelenggara Hindu mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi di bidang bimbingan masyarakat Hindu.",
-    layanan_ptsp: [
-      { nama: "Layanan Rekomendasi Pasraman", estimasi: "3 Hari Kerja" },
-      { nama: "Layanan Bantuan Rumah Ibadah Hindu", estimasi: "5 Hari Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
   {
@@ -145,11 +98,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Penyelenggara Zakat dan Wakaf mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi di bidang zakat dan wakaf.",
-    layanan_ptsp: [
-      { nama: "Layanan Rekomendasi Nazhir Wakaf", estimasi: "2 Hari Kerja" },
-      { nama: "Layanan Konsultasi Zakat", estimasi: "Jam Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
   {
@@ -160,11 +108,6 @@ export const dataSeksi = [
     foto_kepala: null,
     deskripsi:
       "Kantor Urusan Agama mempunyai tugas melaksanakan sebagian tugas Kantor Kementerian Agama Kabupaten di bidang urusan agama Islam dalam wilayah kecamatan.",
-    layanan_ptsp: [
-      { nama: "Layanan Pendaftaran Nikah", estimasi: "1 Hari Kerja" },
-      { nama: "Layanan Legalisir Buku Nikah", estimasi: "1 Hari Kerja" },
-    ],
-    link_aplikasi: [],
     pegawai: [],
   },
 ];

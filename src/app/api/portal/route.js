@@ -21,7 +21,7 @@ export async function GET() {
         .from(berita)
         .where(eq(berita.is_published, true))
         .orderBy(desc(berita.published_at))
-        .limit(8),
+        .limit(5),
     ]);
 
     return apiResponse({

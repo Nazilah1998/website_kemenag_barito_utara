@@ -423,23 +423,6 @@ export const seksi = kemenagWebsiteSchema.table("seksi", {
 	uniqueIndex("seksi_slug_key").using("btree", table.slug.asc().nullsLast().op("text_ops")),
 ]);
 
-export const link_aplikasi_seksi = kemenagWebsiteSchema.table("link_aplikasi_seksi", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	seksi_id: uuid().notNull(),
-	nama: text().notNull(),
-	url: text().notNull(),
-	icon: text().notNull(),
-	sort_order: integer().default(0).notNull(),
-	created_at: timestamp({ precision: 6, withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
-}, (table) => [
-	index("link_aplikasi_seksi_seksi_id_idx").using("btree", table.seksi_id.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.seksi_id],
-			foreignColumns: [seksi.id],
-			name: "link_aplikasi_seksi_seksi_id_fkey"
-		}).onDelete("cascade"),
-]);
-
 export const testimonials = kemenagWebsiteSchema.table("testimonials", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	name: text().notNull(),
@@ -490,18 +473,3 @@ export const siteSettings = kemenagWebsiteSchema.table("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
 });
 
-export const layanan_ptsp = kemenagWebsiteSchema.table("layanan_ptsp", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	seksi_id: uuid().notNull(),
-	nama: text().notNull(),
-	estimasi: text().notNull(),
-	sort_order: integer().default(0).notNull(),
-	created_at: timestamp({ precision: 6, withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
-}, (table) => [
-	index("layanan_ptsp_seksi_id_idx").using("btree", table.seksi_id.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.seksi_id],
-			foreignColumns: [seksi.id],
-			name: "layanan_ptsp_seksi_id_fkey"
-		}).onDelete("cascade"),
-]);

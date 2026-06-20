@@ -45,7 +45,6 @@ export async function GET(request) {
           or(
             ilike(berita.title, searchTerm),
             ilike(berita.excerpt, searchTerm),
-            ilike(berita.content, searchTerm),
           )
         )
       )
@@ -86,7 +85,6 @@ export async function GET(request) {
           or(
             ilike(static_pages.title, searchTerm),
             ilike(static_pages.description, searchTerm),
-            ilike(static_pages.content, searchTerm),
           )
         )
       )

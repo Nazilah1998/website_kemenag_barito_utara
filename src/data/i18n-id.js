@@ -43,6 +43,7 @@ export const messagesId = {
       zi: "Zona Integritas",
       ziArea: "Area Perubahan - ZI",
       ziVideo: "Video Pembangunan - ZI",
+      ziBerita: "Berita Zona Integritas",
       laporan: "Laporan",
       laporanSop: "SOP & Standar Pelayanan",
       laporanRenstra: "Rencana Strategis",

@@ -14,6 +14,7 @@ import {
   getAdjacentBerita,
   getBeritaBySlug,
   getRelatedBerita,
+  getAllBerita,
 } from "@/lib/berita";
 import { stripHtml, sanitizeEditorHtml } from "@/lib/berita-utils";
 import JsonLd from "@/components/features/seo/JsonLd";
@@ -37,6 +38,13 @@ function toIso(value) {
 }
 
 export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const latestBerita = await getAllBerita({ limit: 100 });
+  return latestBerita.map((item) => ({
+    slug: item.slug,
+  }));
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
