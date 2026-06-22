@@ -22,6 +22,7 @@ export async function getVisitorStats() {
   const todayStr = getTodayDateStr();
   let total = INITIAL_TOTAL;
   let today = 0;
+  let dbToday = 0;
 
   try {
     // 1. Fetch from DB
@@ -36,11 +37,8 @@ export async function getVisitorStats() {
       total = data?.total ?? INITIAL_TOTAL;
       if (total < INITIAL_TOTAL) total = INITIAL_TOTAL;
       
-      // Fallback: If no Redis, use DB's today count
-      if (!hasRedis() || !redis) {
-        if (data?.todayDate === todayStr) {
-          today = data?.todayCount || 0;
-        }
+      if (data?.todayDate === todayStr) {
+        dbToday = data?.todayCount || 0;
       }
     } else {
       // Seed initial data
@@ -50,13 +48,23 @@ export async function getVisitorStats() {
       }).catch(() => {}); // Ignore concurrent insert errors
     }
 
+    today = dbToday;
+
     // 2. Add pending from Redis
     if (hasRedis() && redis) {
       const pendingTotalStr = await redis.get("visitor:total_pending");
       const pendingTotal = Number(pendingTotalStr || 0);
 
       const todayCountStr = await redis.get(`visitor:today:${todayStr}`);
-      today = Number(todayCountStr || 0);
+      const redisToday = Number(todayCountStr || 0);
+
+      // If redis has less than db, it means redis lost the key.
+      // We should use dbToday and optionally add pendingTotal as a rough estimate
+      if (redisToday > dbToday) {
+        today = redisToday;
+      } else if (redisToday > 0 && redisToday < dbToday) {
+         today = dbToday + pendingTotal;
+      }
 
       total += pendingTotal;
     }
@@ -106,7 +114,13 @@ async function flushVisitorStats() {
       
       // Determine today's count to sync back to DB
       const dbTodayCount = currentData?.todayDate === todayStr ? (currentData?.todayCount || 0) : 0;
-      const syncedTodayCount = redisToday > 0 ? redisToday : dbTodayCount + delta; // roughly
+      const syncedTodayCount = redisToday > dbTodayCount ? redisToday : dbTodayCount + delta;
+
+      // Heal Redis if it lost data
+      if (redisToday < syncedTodayCount) {
+        await redis.set(`visitor:today:${todayStr}`, syncedTodayCount);
+        await redis.expire(`visitor:today:${todayStr}`, 48 * 3600);
+      }
 
       await db
         .update(siteSettings)

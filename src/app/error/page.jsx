@@ -1,5 +1,9 @@
 export const metadata = {
   title: "Terjadi kesalahan",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function ErrorPage({ searchParams }) {

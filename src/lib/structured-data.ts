@@ -25,7 +25,7 @@ export function organizationSchema() {
     "@type": ["GovernmentOrganization", "GovernmentOffice"],
     "@id": `${BASE}#organization`,
     name: siteInfo.shortName,
-    alternateName: ["Kementerian Agama Kabupaten Barito Utara", "Kemenag Barut"],
+    alternateName: ["Kemenag Barito Utara", "Kemenag Barut"],
     url: `${BASE}/`,
     logo: {
       "@type": "ImageObject",
@@ -89,10 +89,7 @@ export function websiteSchema() {
     "@id": `${BASE}#website`,
     url: `${BASE}/`,
     name: "Kemenag Barito Utara",
-    alternateName: [
-      "Kementerian Agama Kabupaten Barito Utara",
-      "Kemenag Barut",
-    ],
+    alternateName: ["Kemenag Barito Utara", "Kemenag Barut"],
     description: siteInfo.description,
     inLanguage: "id-ID",
     publisher: { "@id": `${BASE}#organization` },
@@ -104,7 +101,10 @@ export function websiteSchema() {
   };
 }
 
-export function newsArticleSchema(berita: BeritaItem | null, { canonicalUrl }: { canonicalUrl?: string } = {}) {
+export function newsArticleSchema(
+  berita: BeritaItem | null,
+  { canonicalUrl }: { canonicalUrl?: string } = {},
+) {
   if (!berita) return null;
   const url = canonicalUrl || `${BASE}/berita/${berita.slug}`;
   const image = berita.coverImage

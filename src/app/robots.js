@@ -19,6 +19,8 @@ export default function robots() {
           "/auth/",
           "/login",
           "/debug-error",
+          "/error",
+          "/error/",
           "/pencarian?",
         ],
       },

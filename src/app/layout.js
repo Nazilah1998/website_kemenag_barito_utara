@@ -85,7 +85,7 @@ export const metadata = {
     locale: "id_ID",
     url: new URL("/", siteInfo.siteUrl).toString(),
     siteName: "Kemenag Barito Utara",
-    title: `${siteInfo.name}`,
+    title: `${siteInfo.shortName}`,
     description: siteInfo.description,
     images: [
       {

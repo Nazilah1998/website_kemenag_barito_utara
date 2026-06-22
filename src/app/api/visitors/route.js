@@ -3,6 +3,8 @@ import { getVisitorStats, incrementVisitorStats } from "@/lib/visitor-tracker";
 import { rateLimit } from "@/lib/rate-limit";
 
 // Disable caching to get real-time stats
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 export async function GET() {

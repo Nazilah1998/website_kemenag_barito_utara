@@ -62,6 +62,11 @@ export default function VisitorStats() {
     isFetchingRef.current = true;
     trackVisitor();
 
+    // Polling untuk update statistik (setiap 30 detik)
+    const intervalId = setInterval(() => {
+      if (isSubscribed) fetchStats();
+    }, 30000);
+
     // 3. Setup Supabase Realtime Presence untuk Sedang Online
     const supabase = createClient();
     
@@ -92,6 +97,7 @@ export default function VisitorStats() {
 
     return () => {
       isSubscribed = false;
+      clearInterval(intervalId);
       // Properly untrack presence before leaving
       channel.untrack().then(() => {
         supabase.removeChannel(channel);
