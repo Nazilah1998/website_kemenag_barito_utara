@@ -12,21 +12,21 @@ const surveyChannels = [
     title: "Survey Kepuasan Masyarakat (SKM)",
     description:
       "Pengukuran kualitas pelayanan publik berdasarkan Peraturan Menteri PANRB Nomor 14 Tahun 2017.",
-    href: "https://bit.ly/skm-kemenag-barut",
+    href: "/survey/skm",
     badge: "SKM",
   },
   {
     title: "Survey Persepsi Anti Korupsi (SPAK)",
     description:
       "Pengukuran persepsi masyarakat terhadap integritas dan pencegahan korupsi pada unit pelayanan.",
-    href: "https://bit.ly/spak-kemenag-barut",
+    href: "/survey/spak",
     badge: "SPAK",
   },
   {
     title: "Survey Pelayanan PTSP",
     description:
       "Penilaian khusus untuk layanan satu pintu (PTSP) di kantor Kemenag Barito Utara.",
-    href: "https://bit.ly/ptsp-kemenag-barut",
+    href: "/survey/ptsp",
     badge: "PTSP",
   },
 ];
@@ -81,8 +81,8 @@ export default function SurveyPage() {
                   </p>
                   <Link
                     href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={item.href.startsWith("http") ? "_blank" : undefined}
+                    rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                     className="mt-4 inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
                   >
                     Isi Survey

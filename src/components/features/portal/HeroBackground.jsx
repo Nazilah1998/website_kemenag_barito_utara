@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function HeroBackground() {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="fixed inset-0 z-0 overflow-hidden w-full h-full">
       <Image
         src="/assets/images/kantor-kemenag.jpg"
         alt="Kantor Kemenag Barito Utara"
