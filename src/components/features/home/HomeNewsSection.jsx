@@ -88,17 +88,17 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
       <div className="mt-10 lg:hidden space-y-12">
         {/* Slider for latest news */}
         <div>
-          <div className="overflow-hidden">
+          <div className="relative overflow-hidden py-4 -mx-6 sm:-mx-10">
             <div
               className="flex transition-transform duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]"
-              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+              style={{ transform: `translateX(calc(50% - ${activeIndex * 82 + 41}%))` }}
             >
               {displayLatest.map((item, index) => {
                 const isActive = index === activeIndex;
                 return (
                   <div
                     key={item.slug}
-                    className={`w-full flex-none px-1 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isActive ? "scale-100 opacity-100" : "scale-90 opacity-40 blur-[1px]"}`}
+                    className={`w-[82%] flex-none px-1 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isActive ? "scale-100 opacity-100 z-10" : "scale-[0.95] opacity-50 blur-[1px]"}`}
                   >
                     <NewsCard item={item} index={index} t={t} isSlider priority={index === activeIndex} />
                   </div>
@@ -299,7 +299,7 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 function NewsCard({ item, index, t, className = "", isSlider = false, priority = false }) {
   return (
     <article
-      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-2 hover:scale-[1.01] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-2' : ''} ${className}`}
+      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-2 hover:scale-[1.01] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-1' : ''} ${className}`}
     >
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}

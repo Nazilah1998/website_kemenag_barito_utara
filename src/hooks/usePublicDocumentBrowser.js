@@ -40,11 +40,7 @@ export function usePublicDocumentBrowser(documents) {
         ...prev,
         [docId]: (prev[docId] || Number(doc?.view_count || 0)) + 1,
       }));
-      fetch("/api/laporan/view", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: docId }),
-      }).catch(() => {});
+      // View count sudah dihitung oleh GET proxy di /api/laporan/view/[...path]
     }
     window.open(url, "_blank", "noopener,noreferrer");
   }, []);

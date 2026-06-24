@@ -8,16 +8,23 @@ export function MobileNavUtilities({
   adminState
 }) {
   return (
-    <div className="mt-auto border-t border-slate-100 p-6 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/50">
+    <>
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
+      <div className="mt-auto border-t border-slate-100/50 p-6 dark:border-slate-800/50 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
       <div className="grid grid-cols-2 gap-4">
         {/* Language Switcher */}
         <div className="flex flex-col gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Bahasa</p>
-          <div className="flex items-center gap-1 rounded-2xl bg-white p-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Bahasa</p>
+          <div className="flex items-center gap-1 rounded-[1.25rem] bg-slate-100/50 p-1 shadow-inner dark:bg-slate-800/50">
             {["id", "en"].map((l) => (
               <button
                 key={l} onClick={() => setLocale(l)}
-                className={`flex-1 rounded-xl py-2 text-xs font-black uppercase transition ${locale === l ? "bg-emerald-600 text-white shadow-md shadow-emerald-200 dark:shadow-none" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
+                className={`flex-1 rounded-xl py-2.5 text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${locale === l ? "bg-white text-emerald-600 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:bg-slate-700 dark:text-emerald-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
               >
                 {l}
               </button>
@@ -27,21 +34,21 @@ export function MobileNavUtilities({
 
         {/* Theme Switcher */}
         <div className="flex flex-col gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Tema</p>
-          <div className="flex items-center gap-1 rounded-2xl bg-white p-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Tema</p>
+          <div className="flex items-center gap-1 rounded-[1.25rem] bg-slate-100/50 p-1 shadow-inner dark:bg-slate-800/50">
             <button
               onClick={setLightTheme}
-              className={`flex-1 flex justify-center rounded-xl py-2 transition ${theme === "light" ? "bg-amber-500 text-white shadow-md shadow-amber-200" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
+              className={`group flex-1 flex justify-center rounded-xl py-2.5 transition-all duration-300 ${theme === "light" ? "bg-white text-amber-500 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:bg-slate-700" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
               aria-label="Light Mode"
             >
-              <SunIcon className="h-4 w-4" />
+              <SunIcon className={`h-4 w-4 transition-transform duration-500 ${theme === "light" ? "rotate-90 scale-110" : "group-hover:rotate-45"}`} />
             </button>
             <button
               onClick={setDarkTheme}
-              className={`flex-1 flex justify-center rounded-xl py-2 transition ${theme === "dark" ? "bg-indigo-600 text-white shadow-md dark:shadow-none" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"}`}
+              className={`group flex-1 flex justify-center rounded-xl py-2.5 transition-all duration-300 ${theme === "dark" ? "bg-white text-indigo-500 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:bg-slate-700 dark:text-indigo-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
               aria-label="Dark Mode"
             >
-              <MoonIcon className="h-4 w-4" />
+              <MoonIcon className={`h-4 w-4 transition-transform duration-500 ${theme === "dark" ? "-rotate-12 scale-110" : "group-hover:-rotate-12"}`} />
             </button>
           </div>
         </div>
@@ -49,6 +56,7 @@ export function MobileNavUtilities({
 
       <MobileAdminLoginButton adminState={adminState} />
     </div>
+    </>
   );
 }
 
@@ -61,27 +69,35 @@ function MobileAdminLoginButton({ adminState }) {
     return () => clearTimeout(timer);
   }, []);
 
-  if (adminState?.user) {
-    return (
-      <Link
-        href="/admin"
-        className="mt-6 flex items-center justify-center gap-2 w-full rounded-2xl bg-emerald-700 py-4 text-center text-sm font-black text-white shadow-xl shadow-emerald-200 transition hover:bg-emerald-800 active:scale-95 dark:shadow-none"
-      >
-        <div className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
-        Panel Admin
-      </Link>
-    );
-  }
+    if (adminState?.user) {
+        return (
+            <Link
+                href="/admin"
+                className="group relative mt-6 flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-[1.25rem] bg-emerald-600 px-4 py-4 text-sm font-black text-white shadow-[0_8px_20px_-6px_rgba(5,150,105,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-8px_rgba(5,150,105,0.6)] active:scale-[0.98] dark:shadow-none"
+            >
+                <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:200%_100%] animate-[shimmer_2s_infinite]" />
+                <div className="relative z-10 flex h-2 w-2 items-center justify-center">
+                    <div className="absolute h-2 w-2 animate-ping rounded-full bg-emerald-200 opacity-75" />
+                    <div className="relative h-1.5 w-1.5 rounded-full bg-white" />
+                </div>
+                <span className="relative z-10">Panel Admin</span>
+            </Link>
+        );
+    }
 
-  return (
-    <>
-      <button
-        onClick={() => setShowConfirm(true)}
-        className="mt-6 flex items-center justify-center gap-2 w-full rounded-2xl bg-emerald-700 py-4 text-center text-sm font-black text-white shadow-xl shadow-emerald-200 transition hover:bg-emerald-800 active:scale-95 dark:shadow-none"
-      >
-        <div className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
-        Login Admin
-      </button>
+    return (
+        <>
+            <button
+                onClick={() => setShowConfirm(true)}
+                className="group relative mt-6 flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-[1.25rem] bg-emerald-600 px-4 py-4 text-sm font-black text-white shadow-[0_8px_20px_-6px_rgba(5,150,105,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_25px_-8px_rgba(5,150,105,0.6)] active:scale-[0.98] dark:shadow-none"
+            >
+                <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:200%_100%] animate-[shimmer_2s_infinite]" />
+                <div className="relative z-10 flex h-2 w-2 items-center justify-center">
+                    <div className="absolute h-2 w-2 animate-ping rounded-full bg-emerald-200 opacity-75" />
+                    <div className="relative h-1.5 w-1.5 rounded-full bg-white" />
+                </div>
+                <span className="relative z-10">Login Admin</span>
+            </button>
 
       {/* Confirmation Modal via Portal */}
       {mounted && typeof document !== "undefined" && createPortal(

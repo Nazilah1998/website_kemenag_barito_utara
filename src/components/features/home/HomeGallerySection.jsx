@@ -68,10 +68,10 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
 
       {/* 1. MOBILE & TABLET SLIDER */}
       <div className="mt-10 lg:hidden">
-        <div className="overflow-hidden">
+        <div className="relative overflow-hidden py-4 -mx-6 sm:-mx-10">
           <div
             className="flex transition-transform duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]"
-            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+            style={{ transform: `translateX(calc(50% - ${activeIndex * 75 + 37.5}%))` }}
           >
             {latestGaleri.map((item, index) => {
               const isSliderActive = index === activeIndex;
@@ -79,7 +79,7 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
               return (
                 <div
                   key={itemId}
-                  className={`w-full flex-none px-1 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isSliderActive ? "scale-100 opacity-100" : "scale-90 opacity-40 blur-[1px]"}`}
+                  className={`w-[75%] flex-none px-1 sm:px-2 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isSliderActive ? "scale-100 opacity-100 z-10" : "scale-[0.92] opacity-40 grayscale-[30%] blur-[1px]"}`}
                 >
                   <GalleryCard
                     item={item}

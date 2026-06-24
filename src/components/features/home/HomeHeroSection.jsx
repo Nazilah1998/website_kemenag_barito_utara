@@ -7,6 +7,40 @@ import { useLanguage } from "@/context/LanguageContext";
 import { siteInfo } from "@/data/site";
 import { useSiteSettings } from "@/context/SettingsContext";
 
+function AnimatedCounter({ value }) {
+  const [count, setCount] = React.useState("0");
+
+  React.useEffect(() => {
+    const numericMatch = value.match(/\d+/);
+    if (!numericMatch) {
+      setCount(value);
+      return;
+    }
+
+    const target = parseInt(numericMatch[0], 10);
+    const suffix = value.replace(numericMatch[0], "");
+
+    let current = 0;
+    const duration = 2000; // 2 detik animasi
+    const intervalTime = 20;
+    const step = Math.max(1, Math.floor(target / (duration / intervalTime)));
+
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        setCount(target + suffix);
+        clearInterval(timer);
+      } else {
+        setCount(current + suffix);
+      }
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return <>{count}</>;
+}
+
 export default function HomeHeroSection() {
   const { t } = useLanguage();
 
@@ -43,11 +77,21 @@ export default function HomeHeroSection() {
             </div>
 
             <h1 className="mt-5 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl animate-fade-in-up animate-delay-100">
-              {t("home.hero.title").split('.').map((part, i) => (
-                <span key={i} className={i === 0 ? "block" : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"}>
-                  {part}{i === 0 && part ? "." : ""}
-                </span>
-              ))}
+              {t("home.hero.title")
+                .split(".")
+                .map((part, i) => (
+                  <span
+                    key={i}
+                    className={
+                      i === 0
+                        ? "block"
+                        : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"
+                    }
+                  >
+                    {part}
+                    {i === 0 && part ? "." : ""}
+                  </span>
+                ))}
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose animate-fade-in-up animate-delay-200">
@@ -61,7 +105,9 @@ export default function HomeHeroSection() {
                 rel="noopener noreferrer"
                 className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-emerald-700 px-6 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition-all hover:bg-emerald-600 hover:-translate-y-0.5 hover:shadow-[0_0_20px_-5px_rgba(4,120,87,0.5)] active:scale-[0.98]"
               >
-                <span className="relative z-10">{t("home.hero.ctaLayanan")}</span>
+                <span className="relative z-10">
+                  {t("home.hero.ctaLayanan")}
+                </span>
                 <ArrowRightIcon className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-transform duration-500 group-hover:translate-x-0" />
               </a>
@@ -76,12 +122,17 @@ export default function HomeHeroSection() {
 
             <div className="mt-8 lg:mt-12 grid grid-cols-3 gap-4 sm:gap-6 sm:max-w-lg animate-fade-in-up animate-delay-400">
               {[
-                { number: "24+", label: t("home.stats.layanan") },
-                { number: "120+", label: t("home.stats.berita") },
+                { number: "50+", label: t("home.stats.layanan") },
+                { number: "150+", label: t("home.stats.berita") },
                 { number: "100%", label: t("home.stats.dokumen") },
               ].map((stat, i) => (
-                <div key={i} className="group flex flex-col gap-1 cursor-pointer transition-transform hover:-translate-y-1">
-                  <span className="text-xl font-black text-white lg:text-3xl">{stat.number}</span>
+                <div
+                  key={i}
+                  className="group flex flex-col gap-1 cursor-pointer transition-transform hover:-translate-y-1"
+                >
+                  <span className="text-xl font-black text-white lg:text-3xl">
+                    <AnimatedCounter value={stat.number} />
+                  </span>
                   <div className="h-0.5 w-6 rounded-full bg-emerald-500/50 transition-all group-hover:w-full group-hover:bg-emerald-500" />
                   <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/80">
                     {stat.label}
@@ -121,28 +172,48 @@ function HomeFocusCard({ t }) {
           <div className="relative">
             <div className="absolute -inset-1.5 rounded-2xl bg-emerald-500/20 blur-lg animate-pulse" />
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-slate-900 p-3 shadow-inner">
-              <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={50} height={50} style={{ width: "auto", height: "auto" }} className="object-contain" unoptimized />
+              <Image
+                src={siteInfo.logoSrc}
+                alt={siteInfo.shortName}
+                width={50}
+                height={50}
+                style={{ width: "auto", height: "auto" }}
+                className="object-contain"
+                unoptimized
+              />
             </div>
           </div>
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.5em] text-emerald-400 opacity-80">{siteInfo.shortName}</p>
-            <h2 className="mt-1 text-xl font-black tracking-tight text-white">{t("home.focus.subtitle")}</h2>
+            <p className="text-[9px] font-black uppercase tracking-[0.5em] text-emerald-400 opacity-80">
+              {siteInfo.shortName}
+            </p>
+            <h2 className="mt-1 text-xl font-black tracking-tight text-white">
+              {t("home.focus.subtitle")}
+            </h2>
           </div>
         </div>
 
         <div className="mt-8 space-y-5 rounded-[24px] border border-white/5 bg-white/5 p-6 transition-colors group-hover:bg-white/[0.08]">
           <div className="flex items-center gap-3">
             <div className="h-1 w-6 rounded-full bg-emerald-500" />
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">{t("home.focus.title")}</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-400">
+              {t("home.focus.title")}
+            </p>
           </div>
 
           <div className="space-y-4">
-            {[t("home.focus.point1"), t("home.focus.point2"), t("home.focus.point3")].map((item, i) => (
+            {[
+              t("home.focus.point1"),
+              t("home.focus.point2"),
+              t("home.focus.point3"),
+            ].map((item, i) => (
               <div key={i} className="flex items-start gap-3 group/item">
                 <div className="mt-1 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-emerald-500/50 text-[9px] text-emerald-500 transition-colors group-hover/item:bg-emerald-500 group-hover/item:text-white">
                   ✓
                 </div>
-                <p className="text-[13px] leading-relaxed text-slate-400 transition-colors group-hover/item:text-slate-200">{item}</p>
+                <p className="text-[13px] leading-relaxed text-slate-400 transition-colors group-hover/item:text-slate-200">
+                  {item}
+                </p>
               </div>
             ))}
           </div>
@@ -170,9 +241,13 @@ function HomeFocusCard({ t }) {
 function StatusBox({ label, value, color, glow }) {
   return (
     <div className="rounded-2xl border border-white/5 bg-white/5 p-4 cursor-pointer transition-all hover:scale-[1.03] hover:-translate-y-0.5">
-      <p className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-400/70">{label}</p>
+      <p className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-400/70">
+        {label}
+      </p>
       <div className="mt-2 flex items-center gap-2">
-        <div className={`h-2 w-2 rounded-full ${color} ${glow} shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse`} />
+        <div
+          className={`h-2 w-2 rounded-full ${color} ${glow} shadow-[0_0_8px_rgba(0,0,0,0.5)] animate-pulse`}
+        />
         <p className="text-base font-black text-white">{value}</p>
       </div>
     </div>
@@ -181,8 +256,19 @@ function StatusBox({ label, value, color, glow }) {
 
 function ArrowRightIcon({ className = "" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M5 12h14M12 5l7 7-7 7"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

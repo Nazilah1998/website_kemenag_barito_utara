@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import dynamic from "next/dynamic";
-import { getLatestBeritaHome, getPopularBeritaHome } from "../../lib/berita-home";
+import { getLatestBeritaHome, getPopularBeritaHome, getBeritaPerBidangHome } from "../../lib/berita-home";
 import { getLatestGaleriHome } from "../../lib/galeri-home";
 import { getPublicHomepageSlides } from "../../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
@@ -12,6 +12,7 @@ import { eq, asc } from "drizzle-orm";
 import { logError } from "@/lib/logger";
 
 const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNewsSection"));
+const HomeNewsPerCategorySection = dynamic(() => import("@/components/features/home/HomeNewsPerCategorySection"));
 const HomeGallerySection = dynamic(() => import("@/components/features/home/HomeGallerySection"));
 const HomepageSlidesSection = dynamic(() => import("@/components/features/home/HomepageSlidesSection"));
 const ExternalAppsSection = dynamic(() => import("@/components/features/home/ExternalAppsSection"));
@@ -68,9 +69,10 @@ const getCachedTestimonials = unstable_cache(
 );
 
 export default async function HomePage() {
-  const [latestBerita, popularBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
+  const [latestBerita, popularBerita, groupedBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
     getLatestBeritaHome(),
     getPopularBeritaHome(),
+    getBeritaPerBidangHome(),
     getLatestGaleriHome(),
     getPublicHomepageSlides(),
     getCachedTestimonials(),
@@ -97,6 +99,12 @@ export default async function HomePage() {
       <ScrollReveal delay={0.2}>
         <HomeNewsSection latestBerita={latestBerita} popularBerita={popularBerita} />
       </ScrollReveal>
+
+      {groupedBerita && groupedBerita.length > 0 && (
+        <ScrollReveal delay={0.2}>
+          <HomeNewsPerCategorySection groupedBerita={groupedBerita} />
+        </ScrollReveal>
+      )}
 
       <ScrollReveal delay={0.1}>
         <SectionDivider />

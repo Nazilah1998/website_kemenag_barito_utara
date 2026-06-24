@@ -11,8 +11,8 @@ export function MobileNavHeader({ onClose }) {
       <div className="flex items-center gap-3">
         <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={36} height={36} className="w-9 h-9 object-contain" unoptimized />
         <p className="text-sm font-black uppercase tracking-wide text-emerald-800 dark:text-emerald-300 leading-tight">
-          <span className="block">{siteInfo.logoTitleLine1}</span>
-          <span className="block">{siteInfo.logoTitleLine2}</span>
+          <span className="block">KEMENAG</span>
+          <span className="block">BARITO UTARA</span>
         </p>
 
       </div>

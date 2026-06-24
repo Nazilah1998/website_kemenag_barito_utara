@@ -140,14 +140,22 @@ async function flushVisitorStats() {
   }
 }
 
-export async function incrementVisitorStats() {
+export async function incrementVisitorStats(path?: string | null) {
   const todayStr = getTodayDateStr();
 
+  // ── Simpan path untuk analytics ────────────────────────────────
+  if (path && hasRedis() && redis) {
+    try {
+      await redis.hincrby("visitor:pages", path, 1);
+      await redis.expire("visitor:pages", 48 * 3600);
+    } catch { /* non-critical */ }
+  }
+
+  // ── Increment total & today ────────────────────────────────────
   if (hasRedis() && redis) {
     try {
       await redis.incr("visitor:total_pending");
       await redis.incr(`visitor:today:${todayStr}`);
-      // Expire daily key after 48h to prevent Redis bloat
       await redis.expire(`visitor:today:${todayStr}`, 48 * 3600);
 
       if (!flushTimer) {
@@ -160,18 +168,17 @@ export async function incrementVisitorStats() {
       console.error("[visitor-tracker] incrementVisitorStats error:", error);
     }
   } else {
-    // Fallback if no Redis - use atomic jsonb_set update
     try {
       const result = await db
         .select()
         .from(siteSettings)
         .where(eq(siteSettings.key, VISITOR_KEY))
         .limit(1);
-      
+
       if (result.length > 0) {
         await db
           .update(siteSettings)
-          .set({ 
+          .set({
             value: sql`
               jsonb_set(
                 jsonb_set(
@@ -181,17 +188,17 @@ export async function incrementVisitorStats() {
                     (GREATEST(COALESCE((${siteSettings.value}->>'total')::int, ${INITIAL_TOTAL}), ${INITIAL_TOTAL}) + 1)::text::jsonb
                   ),
                   '{todayCount}',
-                  (CASE 
-                    WHEN ${siteSettings.value}->>'todayDate' = ${todayStr} 
+                  (CASE
+                    WHEN ${siteSettings.value}->>'todayDate' = ${todayStr}
                     THEN COALESCE((${siteSettings.value}->>'todayCount')::int, 0) + 1
-                    ELSE 1 
+                    ELSE 1
                   END)::text::jsonb
                 ),
                 '{todayDate}',
                 to_jsonb(${todayStr}::text)
               )
-            `, 
-            updatedAt: new Date().toISOString() 
+            `,
+            updatedAt: new Date().toISOString()
           })
           .where(eq(siteSettings.key, VISITOR_KEY));
       } else {

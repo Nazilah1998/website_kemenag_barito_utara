@@ -2,7 +2,7 @@ import React from "react";
 
 export default function SectionHeader({ label, title, color, center = false, align = "left" }) {
     return (
-        <div className={`mb-6 ${center ? "text-center" : align === "right" ? "lg:text-right" : "text-left"}`}>
+        <div className={`mb-6 ${center ? "text-center" : align === "right" ? "text-center lg:text-right" : "text-center lg:text-left"}`}>
             <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${color}`}>
                 {label}
             </p>
