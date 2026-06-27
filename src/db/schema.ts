@@ -473,3 +473,13 @@ export const siteSettings = kemenagWebsiteSchema.table("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
 });
 
+export const kemenagPtspSchema = pgSchema("kemenag_ptsp");
+
+export const ptspServices = kemenagPtspSchema.table("ptsp_services", {
+  id: bigint("id", { mode: "bigint" }).primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  category: text("category").notNull().default("public"),
+  sortOrder: integer("sort_order").default(0),
+});

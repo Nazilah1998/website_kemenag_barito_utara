@@ -85,9 +85,10 @@ export function DesktopNav({
 
                         <ul className="relative z-10 space-y-0.5">
                           {item.children.map((child) => (
-                            <li key={child.href}>
+                            <li key={child.label}>
                               <Link
                                 href={child.href}
+                                {...(child.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                                 className="group/item flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
                               >
                                 <span>{child.label}</span>

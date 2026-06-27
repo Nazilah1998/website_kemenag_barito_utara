@@ -4,12 +4,14 @@ import { getLatestBeritaHome, getPopularBeritaHome, getBeritaPerBidangHome } fro
 import { getLatestGaleriHome } from "../../lib/galeri-home";
 import { getPublicHomepageSlides } from "../../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
+import LayananPtspSection from "@/components/features/home/LayananPtspSection";
 import ApaKataMerekaSection from "@/components/features/home/ApaKataMerekaSection";
 import { siteInfo } from "@/data/site";
 import { db } from "@/lib/drizzle";
 import { testimonials } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { logError } from "@/lib/logger";
+import { getPtspServicesHome } from "@/lib/ptsp-services";
 
 const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNewsSection"));
 const HomeNewsPerCategorySection = dynamic(() => import("@/components/features/home/HomeNewsPerCategorySection"));
@@ -69,12 +71,21 @@ const getCachedTestimonials = unstable_cache(
 );
 
 export default async function HomePage() {
-  const [latestBerita, popularBerita, groupedBerita, latestGaleri, homepageSlides, testimonials] = await Promise.all([
+  const [
+    latestBerita,
+    popularBerita,
+    groupedBerita,
+    latestGaleri,
+    slidesData,
+    ptspServices,
+    testimonialData
+  ] = await Promise.all([
     getLatestBeritaHome(),
     getPopularBeritaHome(),
     getBeritaPerBidangHome(),
     getLatestGaleriHome(),
     getPublicHomepageSlides(),
+    getPtspServicesHome(),
     getCachedTestimonials(),
   ]);
 
@@ -88,8 +99,16 @@ export default async function HomePage() {
         </div>
       </ScrollReveal>
 
-      <ScrollReveal delay={0.2}>
-        <ApaKataMerekaSection testimonials={testimonials} />
+      {/* Layanan PTSP */}
+      <ScrollReveal>
+        <LayananPtspSection services={ptspServices} />
+      </ScrollReveal>
+
+      <SectionDivider />
+
+      {/* Apa Kata Mereka */}
+      <ScrollReveal>
+        <ApaKataMerekaSection testimonials={testimonialData} />
       </ScrollReveal>
 
       <ScrollReveal delay={0.1}>
@@ -119,7 +138,7 @@ export default async function HomePage() {
       </ScrollReveal>
 
       <ScrollReveal delay={0.2}>
-        <HomepageSlidesSection slides={homepageSlides} />
+        <HomepageSlidesSection slides={slidesData} />
       </ScrollReveal>
 
       <ScrollReveal delay={0.1}>

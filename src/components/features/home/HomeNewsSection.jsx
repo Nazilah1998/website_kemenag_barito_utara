@@ -39,6 +39,16 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
     setActiveIndex((prev) => (prev === 0 ? displayLatest.length - 1 : prev - 1));
   };
 
+  const handleScroll = (e) => {
+    const container = e.target;
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = container.offsetWidth * 0.82; 
+    const newIndex = Math.round(scrollLeft / itemWidth);
+    if (newIndex !== activeIndex) {
+      setActiveIndex(newIndex);
+    }
+  };
+
   if (displayLatest.length === 0) {
     return (
       <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20 overflow-hidden">
@@ -85,56 +95,33 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
       </motion.div>
 
       {/* 1. MOBILE & TABLET LAYOUT (lg:hidden) */}
-      <div className="mt-10 lg:hidden space-y-12">
+      <div className="mt-6 lg:hidden space-y-12">
         {/* Slider for latest news */}
         <div>
-          <div className="relative overflow-hidden py-4 -mx-6 sm:-mx-10">
-            <div
-              className="flex transition-transform duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]"
-              style={{ transform: `translateX(calc(50% - ${activeIndex * 82 + 41}%))` }}
-            >
-              {displayLatest.map((item, index) => {
-                const isActive = index === activeIndex;
-                return (
-                  <div
-                    key={item.slug}
-                    className={`w-[82%] flex-none px-1 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isActive ? "scale-100 opacity-100 z-10" : "scale-[0.95] opacity-50 blur-[1px]"}`}
-                  >
-                    <NewsCard item={item} index={index} t={t} isSlider priority={index === activeIndex} />
-                  </div>
-                );
-              })}
-            </div>
+          <div 
+            className="relative flex overflow-x-auto snap-x snap-mandatory pb-6 pt-4 -mx-6 sm:-mx-10 px-6 sm:px-10 gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            onScroll={handleScroll}
+          >
+            {displayLatest.map((item, index) => {
+              return (
+                <div
+                  key={item.slug}
+                  className="w-[82%] sm:w-[60%] flex-none snap-center transition-transform duration-300"
+                >
+                  <NewsCard item={item} index={index} t={t} isSlider priority={index === 0} />
+                </div>
+              );
+            })}
           </div>
 
-          {/* Navigation */}
-          <div className="mt-8 flex items-center justify-center gap-6">
-            <button
-              onClick={prevSlide}
-              disabled={activeIndex === 0}
-              aria-label="Berita sebelumnya"
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-700 transition hover:bg-emerald-700 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-            </button>
-
-            <div className="flex gap-2">
-              {displayLatest.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300 dark:bg-slate-700"}`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={nextSlide}
-              disabled={activeIndex === displayLatest.length - 1}
-              aria-label="Berita berikutnya"
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/50 text-emerald-700 transition hover:bg-emerald-700 hover:text-white dark:bg-slate-800 dark:shadow-none ${activeIndex === displayLatest.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
+          {/* Navigation Dots */}
+          <div className="mt-2 flex justify-center gap-2">
+            {displayLatest.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300 dark:bg-slate-700"}`}
+              />
+            ))}
           </div>
         </div>
 

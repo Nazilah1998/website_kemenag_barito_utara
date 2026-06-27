@@ -87,10 +87,10 @@ export const messagesEn = {
     },
     home: {
       hero: {
-        badge: "Official Portal of Kemenag Barito Utara",
-        title: "Religious Services and Information in One Official Portal.",
+        badge: "Kemenag Barito Utara",
+        title: "Religious Information Services Based on the Spirit of HAPAKAT.",
         description:
-          "Official website of the Ministry of Religious Affairs of Barito Utara Regency as a center for public information, news, services, and institutional publications easily accessible to the community.",
+          "Providing excellent services that are Harmonious, Trustworthy (Amanah), Professional, Accountable, Creative, Fair (Adil), and Transparent for all people of Barito Utara.",
         ctaLayanan: "Access PTSP Services",
         ctaBerita: "View News",
       },

@@ -40,6 +40,17 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
     }
   };
 
+  const handleScroll = (e) => {
+    const container = e.target;
+    // Calculate the active index based on scroll position and item width (~75% of container)
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = container.offsetWidth * 0.75; 
+    const newIndex = Math.round(scrollLeft / itemWidth);
+    if (newIndex !== activeIndex) {
+      setActiveIndex(newIndex);
+    }
+  };
+
   return (
     <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20 overflow-hidden">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -67,64 +78,41 @@ export default function HomeGallerySection({ latestGaleri = [] }) {
       </div>
 
       {/* 1. MOBILE & TABLET SLIDER */}
-      <div className="mt-10 lg:hidden">
-        <div className="relative overflow-hidden py-4 -mx-6 sm:-mx-10">
-          <div
-            className="flex transition-transform duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]"
-            style={{ transform: `translateX(calc(50% - ${activeIndex * 75 + 37.5}%))` }}
-          >
-            {latestGaleri.map((item, index) => {
-              const isSliderActive = index === activeIndex;
-              const itemId = item.id || index;
-              return (
-                <div
-                  key={itemId}
-                  className={`w-[75%] flex-none px-1 sm:px-2 transition-all duration-700 [transition-timing-function:cubic-bezier(0.4,0,0.2,1)] ${isSliderActive ? "scale-100 opacity-100 z-10" : "scale-[0.92] opacity-40 grayscale-[30%] blur-[1px]"}`}
-                >
-                  <GalleryCard
-                    item={item}
-                    index={index}
-                    locale={locale}
-                    t={t}
-                    onPreview={() => setSelectedIndex(index)}
-                    isMobile={true}
-                    isActive={tappedId === itemId}
-                    onToggle={() => setTappedId(tappedId === itemId ? null : itemId)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Navigation Dots & Buttons (With End Stop logic) */}
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <button
-            onClick={prevSlide}
-            disabled={activeIndex === 0}
-            aria-label="Galeri sebelumnya"
-            className={`flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg text-emerald-700 transition hover:bg-emerald-700 hover:text-white dark:bg-slate-800 ${activeIndex === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-          </button>
-
-          <div className="flex gap-1.5">
-            {latestBeritaDots(latestGaleri).map((_, i) => (
+      <div className="mt-4 lg:hidden">
+        <div 
+          className="relative flex overflow-x-auto snap-x snap-mandatory pb-6 pt-4 -mx-6 sm:-mx-10 px-6 sm:px-10 gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          onScroll={handleScroll}
+        >
+          {latestGaleri.map((item, index) => {
+            const itemId = item.id || index;
+            return (
               <div
-                key={i}
-                className={`h-1 rounded-full transition-all duration-300 ${i === activeIndex ? "w-6 bg-emerald-600" : "w-1 bg-slate-300"}`}
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={nextSlide}
-            disabled={activeIndex === latestGaleri.length - 1}
-            aria-label="Galeri berikutnya"
-            className={`flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg text-emerald-700 transition hover:bg-emerald-700 hover:text-white dark:bg-slate-800 ${activeIndex === latestGaleri.length - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100"}`}
-          >
-            <ChevronRightIcon className="h-4 w-4" />
-          </button>
+                key={itemId}
+                className="w-[75%] sm:w-[50%] flex-none snap-center transition-transform duration-300"
+              >
+                <GalleryCard
+                  item={item}
+                  index={index}
+                  locale={locale}
+                  t={t}
+                  onPreview={() => setSelectedIndex(index)}
+                  isMobile={true}
+                  isActive={tappedId === itemId}
+                  onToggle={() => setTappedId(tappedId === itemId ? null : itemId)}
+                />
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Navigation Dots */}
+        <div className="mt-2 flex justify-center gap-1.5">
+          {latestBeritaDots(latestGaleri).map((_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all duration-300 ${i === activeIndex ? "w-6 bg-emerald-600" : "w-1 bg-slate-300"}`}
+            />
+          ))}
         </div>
       </div>
 

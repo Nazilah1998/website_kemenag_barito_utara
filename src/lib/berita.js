@@ -229,14 +229,14 @@ export async function getAdjacentBerita(currentBerita) {
 
   try {
     const [newerData] = await db
-      .select({ slug: berita.slug, title: berita.title })
+      .select({ slug: berita.slug, title: berita.title, coverImage: berita.cover_image, isoDate: berita.published_at })
       .from(berita)
       .where(and(eq(berita.is_published, true), gt(berita.published_at, date)))
       .orderBy(asc(berita.published_at))
       .limit(1);
 
     const [olderData] = await db
-      .select({ slug: berita.slug, title: berita.title })
+      .select({ slug: berita.slug, title: berita.title, coverImage: berita.cover_image, isoDate: berita.published_at })
       .from(berita)
       .where(and(eq(berita.is_published, true), lt(berita.published_at, date)))
       .orderBy(desc(berita.published_at))

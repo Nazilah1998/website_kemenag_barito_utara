@@ -77,21 +77,22 @@ export default function HomeHeroSection() {
             </div>
 
             <h1 className="mt-5 max-w-3xl text-3.5xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl animate-fade-in-up animate-delay-100">
-              {t("home.hero.title")
-                .split(".")
-                .map((part, i) => (
-                  <span
-                    key={i}
-                    className={
-                      i === 0
-                        ? "block"
-                        : "block bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent"
-                    }
-                  >
-                    {part}
-                    {i === 0 && part ? "." : ""}
-                  </span>
-                ))}
+              {t("home.hero.title").split("HAPAKAT").map((part, i, arr) => (
+                <React.Fragment key={i}>
+                  {part}
+                  {i < arr.length - 1 && (
+                    <Image 
+                      src="/assets/branding/hapakat.png" 
+                      alt="Hapakat" 
+                      width={200} 
+                      height={60} 
+                      className="h-[0.9em] w-auto object-contain inline-block -mt-2 mx-1"
+                      style={{ width: "auto" }}
+                      unoptimized 
+                    />
+                  )}
+                </React.Fragment>
+              ))}
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base lg:leading-loose animate-fade-in-up animate-delay-200">

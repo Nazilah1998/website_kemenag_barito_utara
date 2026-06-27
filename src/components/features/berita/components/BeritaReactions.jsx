@@ -15,8 +15,9 @@ export default function BeritaReactions({ slug, initialReactions }) {
   const [isAnimating, setIsAnimating] = useState(null);
 
   useEffect(() => {
-    // Gunakan setTimeout agar setState tidak dipanggil secara sinkron
-    // langsung di dalam body effect, menghindari warning linter.
+    let mounted = true;
+
+    // Check local storage for user's previous reaction
     const timer = setTimeout(() => {
       if (typeof window !== "undefined") {
         const savedReaction = localStorage.getItem(`react_berita_${slug}`);
@@ -26,7 +27,32 @@ export default function BeritaReactions({ slug, initialReactions }) {
         }
       }
     }, 0);
-    return () => clearTimeout(timer);
+
+    // Fetch real-time reaction counts from the server
+    async function fetchReactions() {
+      try {
+        const res = await fetch(`/api/berita/${slug}/react`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (mounted && data) {
+            setReactions({
+              bermanfaat: data.reaction_bermanfaat || 0,
+              inspiratif: data.reaction_inspiratif || 0,
+              informatif: data.reaction_informatif || 0
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch latest reactions:", err);
+      }
+    }
+    
+    fetchReactions();
+
+    return () => {
+      clearTimeout(timer);
+      mounted = false;
+    };
   }, [slug]);
 
   const handleReact = async (type) => {

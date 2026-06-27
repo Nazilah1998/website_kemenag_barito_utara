@@ -15,13 +15,21 @@ export function FooterBrand() {
         <div className="theme-footer-panel flex h-12 w-12 items-center justify-center rounded-2xl p-2">
           <Image src={siteInfo.logoSrc} alt={siteInfo.shortName} width={40} height={40} style={{ width: "auto", height: "auto" }} className="object-contain" unoptimized />
         </div>
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong)">{siteInfo.logoTitleLine1}</p>
-          <p className="theme-footer-muted text-xs">{siteInfo.logoTitleLine2}</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-(--primary-strong) truncate">{siteInfo.logoTitleLine1}</p>
+          </div>
+          <p className="theme-footer-muted text-xs line-clamp-1 mt-1">{siteInfo.logoTitleLine2}</p>
         </div>
 
       </div>
-      <p className="theme-footer-muted mt-4 max-w-md text-sm leading-6">
+      <div className="mt-5 mb-1.5">
+        <Image src="/assets/branding/hapakat.png" alt="Hapakat" width={80} height={24} className="h-5 sm:h-6 w-auto object-contain opacity-90 mb-1.5" style={{ width: "auto" }} />
+        <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+          <span className="text-amber-500">H</span>armonis, <span className="text-amber-500">A</span>manah, <span className="text-amber-500">P</span>rofesional, <span className="text-amber-500">A</span>kuntabel, <span className="text-amber-500">K</span>reatif, <span className="text-amber-500">A</span>dil dan <span className="text-amber-500">T</span>ransparan
+        </p>
+      </div>
+      <p className="theme-footer-muted mt-2 max-w-md text-sm leading-6">
         {t("home.hero.description")}
       </p>
       <div className="mt-4 flex flex-wrap gap-2">

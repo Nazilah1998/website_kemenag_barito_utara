@@ -213,7 +213,7 @@ function PejabatCard({ pejabat, index }) {
         {/* CTA - jumlah pegawai badge */}
         {pejabat._count?.pegawai_seksi != null && (
           <Link
-            href={pejabat.slug ? `/layanan/${pejabat.slug}` : "#"}
+            href={pejabat.slug ? `/informasi/profil-pejabat/${pejabat.slug}` : "#"}
             className="mt-auto w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-100 bg-slate-50 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-emerald-500 hover:bg-emerald-500 hover:text-white active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-600 dark:hover:border-emerald-600"
           >
             <UsersIcon />

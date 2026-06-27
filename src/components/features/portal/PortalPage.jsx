@@ -127,7 +127,7 @@ const PTSP_MENUS = [
 
 const INOVASI_MENUS = [
   {
-    title: "Pelayanan Terpadu Satu Pintu (PTSP)",
+    title: "Layanan PTSP Si ATAK",
     href: "https://ptsp.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -146,7 +146,20 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "E-Surat Mandau",
+    title: "Pusat Layanan Inklusif",
+    href: "https://inklusi.kemenag-baritoutara.com/",
+    icon: (
+      <svg
+        className="w-5 h-5 text-blue-400"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Layanan Si Mandau",
     href: "https://surat.kemenag-baritoutara.com/login",
     icon: (
       <svg
@@ -165,7 +178,7 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "E-Arsip Betang",
+    title: "Layanan Si BETANG",
     href: "https://arsip.kemenag-baritoutara.com/login",
     icon: (
       <svg
@@ -184,7 +197,7 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "E-SOP Digital",
+    title: "Layanan E-SOP Digital",
     href: "https://sop.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -203,7 +216,7 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "Pusdatin (Segera Hadir)",
+    title: "Layanan Pusdatin (Segera Hadir)",
     href: "https://pusdatin.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -509,6 +522,7 @@ const PENGADUAN_MENUS = [
 
 const PORTAL_LINKS = [
   {
+    id: "website_utama",
     title: "Website Utama",
     description: "Informasi publik, berita, dan layanan keagamaan terlengkap.",
     href: "/beranda",
@@ -743,37 +757,66 @@ export default function PortalPage() {
         {/* DESKTOP VERSION */}
         <div className="animate-fade-in hidden md:flex w-full px-6 lg:px-10 xl:px-16 flex-col">
           <div className="flex flex-col items-center justify-center">
-            {/* Logo & Title Section */}
+            {/* Logo, Title & Right Image Section - Desktop */}
             <div
-              className="animate-fade-in flex flex-col items-center text-center mb-2"
+              className="animate-fade-in flex flex-row items-center justify-center w-full max-w-5xl gap-4 md:gap-8 mb-2 mx-auto"
               style={{ animationDelay: "0.1s" }}
             >
-              <div className="w-16 h-16 mb-3 relative bg-white/10 backdrop-blur-md p-2 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500">
+              {/* Left Logo */}
+              <div className="w-20 h-20 md:w-24 md:h-24 relative bg-white/10 backdrop-blur-md p-2 md:p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500 shrink-0">
                 <Image
                   src={siteInfo.logoSrc}
-                  alt="Logo"
-                  width={48}
-                  height={48}
+                  alt="Logo Kemenag"
+                  width={96}
+                  height={96}
                   className="w-full h-full object-contain drop-shadow-lg"
                   unoptimized
                   priority
                 />
               </div>
-              <p className="mb-1 text-sm font-black uppercase tracking-[0.4em] text-emerald-500/90">
-                Portal Resmi
-              </p>
-              <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none max-w-5xl px-2 text-center">
-                <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                  {siteInfo.logoTitleLine1}
-                </span>
-                <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent mt-1">
-                  {siteInfo.logoTitleLine2}
-                </span>
-              </h1>
-              <p className="mt-1 text-slate-400 text-sm max-w-none font-medium px-4 whitespace-nowrap">
-                Akses cepat informasi dan layanan keagamaan Kabupaten Barito
-                Utara dalam satu pintu.
-              </p>
+
+              {/* Title Section */}
+              <div className="flex flex-col items-center text-center flex-1">
+                <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none px-2 text-center mb-4">
+                  <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                    {siteInfo.logoTitleLine1}
+                  </span>
+                  <span className="text-2xl lg:text-3xl bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent mt-1">
+                    {siteInfo.logoTitleLine2}
+                  </span>
+                </h1>
+
+                {/* Hapakat Logo & Text */}
+                <div className="flex flex-col items-center mt-2">
+                  <Image
+                    src="/assets/branding/hapakat.png"
+                    alt="Hapakat"
+                    width={180}
+                    height={40}
+                    className="object-contain drop-shadow-md mb-3 h-8 lg:h-10 w-auto"
+                    style={{ width: "auto" }}
+                    unoptimized
+                  />
+                  <div className="text-[11px] lg:text-xs font-bold text-slate-300 tracking-wide text-center leading-relaxed">
+                    <p>
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">H</span>armonis, <span className="text-emerald-400 text-[13px] lg:text-sm">A</span>manah, <span className="text-emerald-400 text-[13px] lg:text-sm">P</span>rofesional, <span className="text-emerald-400 text-[13px] lg:text-sm">A</span>kuntabel, <span className="text-emerald-400 text-[13px] lg:text-sm">K</span>reatif, <span className="text-emerald-400 text-[13px] lg:text-sm">A</span>dil <span className="text-emerald-400 text-[13px] lg:text-sm">dan</span> <span className="text-emerald-400 text-[13px] lg:text-sm">T</span>ransparan
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Logo */}
+              <div className="w-20 h-20 md:w-24 md:h-24 relative bg-white/10 backdrop-blur-md p-2 md:p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500 shrink-0">
+                <Image
+                  src="/assets/branding/atak-portal.png"
+                  alt="Portal Atak"
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-contain drop-shadow-lg"
+                  unoptimized
+                  priority
+                />
+              </div>
             </div>
 
             {/* Status & Time Indicator - Desktop */}
@@ -929,15 +972,16 @@ export default function PortalPage() {
         {/* MOBILE VERSION */}
         <div className="animate-fade-in flex md:hidden w-full px-5 flex-col pb-2">
           <div className="flex flex-col items-center justify-center">
-            {/* Logo & Title Section */}
+            {/* Logo, Title & Right Image Section - Mobile */}
             <div
-              className="animate-fade-in flex flex-col items-center text-center mb-3"
+              className="animate-fade-in flex flex-row items-center justify-between w-full mb-3 gap-2"
               style={{ animationDelay: "0.1s" }}
             >
-              <div className="w-16 h-16 mb-2 relative bg-white/10 backdrop-blur-md p-2 rounded-2xl ring-1 ring-white/20 shadow-2xl">
+              {/* Left Logo */}
+              <div className="w-12 h-12 relative bg-white/10 backdrop-blur-md p-1.5 rounded-xl ring-1 ring-white/20 shadow-xl shrink-0 self-start mt-2">
                 <Image
                   src={siteInfo.logoSrc}
-                  alt="Logo"
+                  alt="Logo Kemenag"
                   width={48}
                   height={48}
                   className="w-full h-full object-contain drop-shadow-lg"
@@ -945,22 +989,49 @@ export default function PortalPage() {
                   priority
                 />
               </div>
-              <p className="mb-1 text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500/90">
-                Portal Resmi
-              </p>
-              <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none px-2">
-                <span className="text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                  {siteInfo.logoTitleLine1}
-                </span>
-                <span className="text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-                  {siteInfo.logoTitleLine2}
-                </span>
-              </h1>
-              <p className="mt-2 text-slate-400 text-[9px] font-medium px-2 leading-relaxed">
-                Akses cepat informasi dan layanan keagamaan
-                <br />
-                Kabupaten Barito Utara dalam satu pintu.
-              </p>
+
+              {/* Title Section */}
+              <div className="flex flex-col items-center text-center flex-1 min-w-0">
+                <h1 className="flex flex-col items-center font-black uppercase tracking-tight leading-none px-1 mb-2">
+                  <span className="text-[15px] sm:text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent text-center leading-tight">
+                    {siteInfo.logoTitleLine1}
+                  </span>
+                  <span className="text-[15px] sm:text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent text-center leading-tight">
+                    {siteInfo.logoTitleLine2}
+                  </span>
+                </h1>
+
+                {/* Hapakat Logo & Text */}
+                <div className="flex flex-col items-center mt-1">
+                  <Image
+                    src="/assets/branding/hapakat.png"
+                    alt="Hapakat"
+                    width={120}
+                    height={28}
+                    className="object-contain drop-shadow-md mb-2 h-7 lg:h-9 w-auto"
+                    style={{ width: "auto" }}
+                    unoptimized
+                  />
+                  <div className="w-full overflow-hidden text-center">
+                    <p className="whitespace-nowrap font-bold text-slate-300 tracking-wide text-center" style={{ fontSize: 'clamp(4px, 1.45vw, 9px)' }}>
+                      <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>H</span>armonis, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>A</span>manah, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>P</span>rofesional, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>A</span>kuntabel, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>K</span>reatif, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>A</span>dil <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>dan</span> <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>T</span>ransparan
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Logo */}
+              <div className="w-12 h-12 relative bg-white/10 backdrop-blur-md p-1.5 rounded-xl ring-1 ring-white/20 shadow-xl shrink-0 self-start mt-2">
+                <Image
+                  src="/assets/branding/atak-portal.png"
+                  alt="Portal Atak"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain drop-shadow-lg"
+                  unoptimized
+                  priority
+                />
+              </div>
             </div>
 
             {/* Enhanced Status & Time - Mobile */}

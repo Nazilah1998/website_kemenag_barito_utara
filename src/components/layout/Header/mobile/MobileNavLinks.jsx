@@ -55,9 +55,10 @@ export function MobileNavLinks({
               {hasChildren && isOpen && (
                 <ul className="mt-1 ml-4 space-y-1 border-l-2 border-slate-100 py-1 pl-4 dark:border-slate-800 animate-in fade-in slide-in-from-top-1 duration-200">
                   {item.children.map((child) => (
-                    <li key={child.href}>
+                    <li key={child.label}>
                       <Link
                         href={child.href} onClick={onNavigate}
+                        {...(child.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                         className={`block rounded-xl px-4 py-3 text-xs font-bold transition-colors ${pathname === child.href ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"}`}
                       >
                         {child.label}

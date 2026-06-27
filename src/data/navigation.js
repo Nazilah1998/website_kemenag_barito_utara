@@ -20,22 +20,32 @@ export function getNavigationItems(locale = "id") {
     },
 
     { label: m.berita, href: "/berita" },
+    { label: m.galeri, href: "/galeri" },
+    { label: m.ppid, href: "/ppid" },
 
     {
       label: m.layanan,
-      href: "/layanan",
+      href: "/survey",
       children: [
-        { label: m.sekjen, href: "/layanan/sekjen" },
-        { label: m.bimasIslam, href: "/layanan/seksi-bimas-islam" },
-        { label: m.pai, href: "/layanan/seksi-pendidikan-agama-islam" },
         {
-          label: m.pdpontren,
-          href: "/layanan/seksi-pendidikan-diniyah-dan-pondok-pesantren",
+          label: m.layananInklusi,
+          href: "https://inklusi.kemenag-baritoutara.com/",
         },
-        { label: m.penmad, href: "/layanan/seksi-pendidikan-madrasah" },
-        { label: m.hindu, href: "/layanan/penyelenggara-hindu" },
-        { label: m.zakat, href: "/layanan/penyelenggara-zakat-wakaf" },
-        { label: m.kua, href: "/layanan/kua-kantor-urusan-agama" },
+        { label: m.layananPtsp, href: "https://ptsp.kemenag-baritoutara.com/" },
+        {
+          label: m.layananArsip,
+          href: "https://arsip.kemenag-baritoutara.com/",
+        },
+        {
+          label: m.layananSurat,
+          href: "https://surat.kemenag-baritoutara.com/",
+        },
+        { label: m.layananSop, href: "https://sop.kemenag-baritoutara.com/" },
+        {
+          label: m.layananPusdatin,
+          href: "https://pusdatin.kemenag-baritoutara.com/",
+        },
+        { label: m.survey, href: "/survey" },
       ],
     },
 
@@ -43,23 +53,10 @@ export function getNavigationItems(locale = "id") {
       label: m.informasi,
       href: "/informasi",
       children: [
-        { label: m.regulasi, href: "/informasi/regulasi" },
         { label: m.pejabat, href: "/informasi/profil-pejabat" },
         { label: m.struktur, href: "/informasi/struktur-organisasi" },
+        { label: m.regulasi, href: "/informasi/regulasi" },
         { label: m.dasarHukum, href: "/informasi/dasar-hukum" },
-      ],
-    },
-
-    { label: m.survey, href: "/survey" },
-    { label: m.ppid, href: "/ppid" },
-
-    {
-      label: m.zi,
-      href: "/zona-integritas",
-      children: [
-        { label: m.ziArea, href: "/zona-integritas/area-perubahan-zi" },
-        { label: m.ziVideo, href: "/zona-integritas/video-pembangunan-zi" },
-        { label: m.ziBerita, href: "/zona-integritas/berita-zona-integritas" },
       ],
     },
 
@@ -76,7 +73,17 @@ export function getNavigationItems(locale = "id") {
         { label: m.laporanRkt, href: "/laporan/rencana-kerja-tahunan" },
       ],
     },
-    { label: m.galeri, href: "/galeri" },
+
+    {
+      label: m.zi,
+      href: "/zona-integritas",
+      children: [
+        { label: m.ziArea, href: "/zona-integritas/area-perubahan-zi" },
+        { label: m.ziVideo, href: "/zona-integritas/video-pembangunan-zi" },
+        { label: m.ziBerita, href: "/zona-integritas/berita-zona-integritas" },
+      ],
+    },
+
     { label: m.kontak, href: "/kontak" },
   ];
 }

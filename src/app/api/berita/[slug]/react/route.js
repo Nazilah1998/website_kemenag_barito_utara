@@ -60,3 +60,27 @@ export async function POST(req, { params }) {
     return NextResponse.json({ error: "Terjadi kesalahan sistem." }, { status: 500 });
   }
 }
+
+export async function GET(req, { params }) {
+  try {
+    const { slug } = await params;
+    
+    const data = await db.query.berita.findFirst({
+      where: eq(berita.slug, slug),
+      columns: {
+        reaction_bermanfaat: true,
+        reaction_inspiratif: true,
+        reaction_informatif: true
+      }
+    });
+    
+    if (!data) {
+      return NextResponse.json({ error: "Berita tidak ditemukan." }, { status: 404 });
+    }
+    
+    return apiResponse(data);
+  } catch (error) {
+    console.error("Error fetching reactions:", error);
+    return NextResponse.json({ error: "Terjadi kesalahan sistem." }, { status: 500 });
+  }
+}

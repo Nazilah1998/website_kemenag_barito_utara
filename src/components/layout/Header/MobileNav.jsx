@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { MobileNavHeader } from "./mobile/MobileNavHeader";
 import { MobileNavSearch } from "./mobile/MobileNavSearch";
@@ -65,6 +66,13 @@ export function MobileNav({
             <MobileNavHeader onClose={closeMobileMenu} />
 
             <div className="flex-1 overflow-y-auto no-scrollbar py-2">
+              <div className="px-6 pb-4 pt-2 flex flex-col items-center justify-center border-b border-slate-100 dark:border-slate-800/50 mb-3 mx-2">
+                <Image src="/assets/branding/hapakat.png" alt="Hapakat" width={80} height={24} className="h-5 w-auto object-contain opacity-90 mb-1.5" style={{ width: "auto" }} />
+                <p className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 text-center leading-relaxed">
+                  <span className="text-amber-500">H</span>armonis, <span className="text-amber-500">A</span>manah, <span className="text-amber-500">P</span>rofesional, <span className="text-amber-500">A</span>kuntabel, <span className="text-amber-500">K</span>reatif, <span className="text-amber-500">A</span>dil dan <span className="text-amber-500">T</span>ransparan
+                </p>
+              </div>
+
               <MobileNavSearch
                 query={searchQuery}
                 setQuery={setSearchQuery}

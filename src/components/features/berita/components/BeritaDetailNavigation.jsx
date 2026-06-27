@@ -52,12 +52,19 @@ export function BeritaDetailNavigation({ adjacent, relatedItems }) {
 }
 
 function AdjacentLink({ label, item, align = "left", locale }) {
+  const [imgSrc, setImgSrc] = useState(null);
+  
   if (!item) return null;
   return (
-    <Link href={`/berita/${item.slug}`} className="block rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
-      <p className={`text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-400 ${align === "right" ? "text-right" : ""}`}>{label}</p>
-      <h3 className={`mt-3 text-base font-bold leading-7 text-slate-900 dark:text-slate-100 ${align === "right" ? "text-right" : ""}`}>{item.title}</h3>
-      <p className={`mt-2 text-sm text-slate-500 dark:text-slate-400 ${align === "right" ? "text-right" : ""}`}>{formatDate(item.isoDate, locale)}</p>
+    <Link href={`/berita/${item.slug}`} className={`group flex flex-row items-center gap-4 rounded-[28px] border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${align === "right" ? "flex-row-reverse" : ""}`}>
+      <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+         <Image src={imgSrc || item.coverImage || FALLBACK_IMAGE} alt={item.title} fill className="object-cover transition duration-500 group-hover:scale-110" onError={() => setImgSrc(FALLBACK_IMAGE)} />
+      </div>
+      <div className={`flex flex-col justify-center flex-1 min-w-0 ${align === "right" ? "text-right" : "text-left"}`}>
+        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 mb-2">{label}</p>
+        <h3 className="text-sm sm:text-base font-bold leading-snug text-slate-900 dark:text-slate-100 line-clamp-2 mb-1.5 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">{item.title}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{formatDate(item.isoDate, locale)}</p>
+      </div>
     </Link>
   );
 }
