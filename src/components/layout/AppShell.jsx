@@ -21,8 +21,9 @@ export default function AppShell({ children }) {
     cleanPath.startsWith("/login") || 
     cleanPath.startsWith("/auth") || 
     cleanPath.startsWith("/update-password");
+  const isBarcodeRoute = cleanPath === "/barcode";
 
-  if (isAdminRoute || isPortalPage || isAuthRoute) {
+  if (isAdminRoute || isPortalPage || isAuthRoute || isBarcodeRoute) {
     return <main id="konten-utama" className={isAdminRoute ? "bg-slate-100" : ""}>{children}</main>;
   }
 

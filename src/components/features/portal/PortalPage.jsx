@@ -127,6 +127,19 @@ const PTSP_MENUS = [
 
 const INOVASI_MENUS = [
   {
+    title: "Pusat Layanan Inklusif",
+    href: "https://inklusi.kemenag-baritoutara.com/",
+    icon: (
+      <svg
+        className="w-5 h-5 text-blue-400"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z" />
+      </svg>
+    ),
+  },
+  {
     title: "Layanan PTSP Si ATAK",
     href: "https://ptsp.kemenag-baritoutara.com/",
     icon: (
@@ -146,39 +159,7 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "Pusat Layanan Inklusif",
-    href: "https://inklusi.kemenag-baritoutara.com/",
-    icon: (
-      <svg
-        className="w-5 h-5 text-blue-400"
-        fill="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z" />
-      </svg>
-    ),
-  },
-  {
-    title: "Layanan Si Mandau",
-    href: "https://surat.kemenag-baritoutara.com/login",
-    icon: (
-      <svg
-        className="w-5 h-5 text-emerald-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Layanan Si BETANG",
+    title: "SI BETANG",
     href: "https://arsip.kemenag-baritoutara.com/login",
     icon: (
       <svg
@@ -197,7 +178,26 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "Layanan E-SOP Digital",
+    title: "SI MANDAU",
+    href: "https://surat.kemenag-baritoutara.com/login",
+    icon: (
+      <svg
+        className="w-5 h-5 text-emerald-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "E-SOP Digital",
     href: "https://sop.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -216,7 +216,7 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "Layanan Pusdatin (Segera Hadir)",
+    title: "Pusdatin (Segera Hadir)",
     href: "https://pusdatin.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -753,7 +753,7 @@ export default function PortalPage() {
     <div className="relative min-h-screen flex flex-col overflow-y-auto overflow-x-hidden bg-slate-900 selection:bg-emerald-500/30">
       <HeroBackground />
       {/* SHARED CENTERED WRAPPER */}
-      <div className="flex-1 flex flex-col justify-center w-full relative z-10 py-4 md:py-8">
+      <div className="flex-1 flex flex-col justify-start md:justify-center w-full relative z-10 pt-6 pb-4 md:py-8">
         {/* DESKTOP VERSION */}
         <div className="animate-fade-in hidden md:flex w-full px-6 lg:px-10 xl:px-16 flex-col">
           <div className="flex flex-col items-center justify-center">
@@ -799,7 +799,37 @@ export default function PortalPage() {
                   />
                   <div className="text-[11px] lg:text-xs font-bold text-slate-300 tracking-wide text-center leading-relaxed">
                     <p>
-                      <span className="text-emerald-400 text-[13px] lg:text-sm">H</span>armonis, <span className="text-emerald-400 text-[13px] lg:text-sm">A</span>manah, <span className="text-emerald-400 text-[13px] lg:text-sm">P</span>rofesional, <span className="text-emerald-400 text-[13px] lg:text-sm">A</span>kuntabel, <span className="text-emerald-400 text-[13px] lg:text-sm">K</span>reatif, <span className="text-emerald-400 text-[13px] lg:text-sm">A</span>dil <span className="text-emerald-400 text-[13px] lg:text-sm">dan</span> <span className="text-emerald-400 text-[13px] lg:text-sm">T</span>ransparan
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        H
+                      </span>
+                      armonis,{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        A
+                      </span>
+                      manah,{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        P
+                      </span>
+                      rofesional,{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        A
+                      </span>
+                      kuntabel,{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        K
+                      </span>
+                      reatif,{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        A
+                      </span>
+                      dil{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        dan
+                      </span>{" "}
+                      <span className="text-emerald-400 text-[13px] lg:text-sm">
+                        T
+                      </span>
+                      ransparan
                     </p>
                   </div>
                 </div>
@@ -1013,8 +1043,65 @@ export default function PortalPage() {
                     unoptimized
                   />
                   <div className="w-full overflow-hidden text-center">
-                    <p className="whitespace-nowrap font-bold text-slate-300 tracking-wide text-center" style={{ fontSize: 'clamp(4px, 1.45vw, 9px)' }}>
-                      <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>H</span>armonis, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>A</span>manah, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>P</span>rofesional, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>A</span>kuntabel, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>K</span>reatif, <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>A</span>dil <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>dan</span> <span className="text-emerald-400" style={{ fontSize: 'clamp(5px, 1.7vw, 11px)' }}>T</span>ransparan
+                    <p
+                      className="whitespace-nowrap font-bold text-slate-300 tracking-wide text-center"
+                      style={{ fontSize: "clamp(4px, 1.45vw, 9px)" }}
+                    >
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        H
+                      </span>
+                      armonis,{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        A
+                      </span>
+                      manah,{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        P
+                      </span>
+                      rofesional,{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        A
+                      </span>
+                      kuntabel,{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        K
+                      </span>
+                      reatif,{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        A
+                      </span>
+                      dil{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        dan
+                      </span>{" "}
+                      <span
+                        className="text-emerald-400"
+                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
+                      >
+                        T
+                      </span>
+                      ransparan
                     </p>
                   </div>
                 </div>

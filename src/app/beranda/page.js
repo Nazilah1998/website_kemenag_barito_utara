@@ -24,7 +24,7 @@ import ScrollReveal from "@/components/common/ScrollReveal";
 export const revalidate = 300;
 
 export const metadata = {
-  title: "Kementerian Agama Kabupaten Barito Utara",
+  title: "Beranda",
   description: siteInfo.description,
   alternates: {
     canonical: siteInfo.siteUrl.replace(/\/$/, "") + "/beranda",

@@ -30,11 +30,13 @@
     "nodemailer": "^8.0.10",
     "pdfjs-dist": "^5.4.296",
     "pg": "^8.20.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19",
     "react-easy-crop": "^5.5.7",
     "react-pdf": "^10.4.1",
+    "react-qr-code": "^2.2.0",
     "sharp": "^0.34.5"
   },
   "browserslist": [
