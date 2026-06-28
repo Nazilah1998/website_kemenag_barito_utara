@@ -1025,7 +1025,7 @@ export default function PortalPage() {
                   <span className="text-[15px] sm:text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent text-center leading-tight">
                     {siteInfo.logoTitleLine1}
                   </span>
-                  <span className="text-[15px] sm:text-lg bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent text-center leading-tight">
+                  <span className="text-[12px] sm:text-[15px] bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent text-center leading-tight mt-0.5">
                     {siteInfo.logoTitleLine2}
                   </span>
                 </h1>
