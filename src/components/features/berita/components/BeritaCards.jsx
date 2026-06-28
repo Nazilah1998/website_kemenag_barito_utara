@@ -60,7 +60,7 @@ export function FeaturedNewsCard({ item }) {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
           </Link>
           <div className="absolute left-4 top-4 lg:left-8 lg:top-8 z-10 pointer-events-auto">
-            <Link href={`/berita?category=${encodeURIComponent(item.category)}`} className="rounded-full bg-emerald-600 px-3 py-1 lg:px-6 lg:py-2 text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] text-white shadow-xl hover:bg-emerald-500 transition-colors">
+            <Link href={`/berita?category=${encodeURIComponent(item.category)}`} className="rounded-full bg-emerald-600 px-3 py-1 lg:px-6 lg:py-2 text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl hover:bg-emerald-500 transition-colors">
               {displayCategory}
             </Link>
           </div>
@@ -130,7 +130,7 @@ export function NewsCard({ item }) {
           {/* Category Badge */}
           {item.category && (
             <div className="absolute left-4 top-4 z-20 pointer-events-auto">
-              <Link href={`/berita?category=${encodeURIComponent(item.category)}`} className="inline-block rounded-full bg-emerald-600/90 backdrop-blur-md px-2.5 py-1 md:px-3 md:py-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white shadow-lg hover:bg-emerald-500 transition-colors">
+              <Link href={`/berita?category=${encodeURIComponent(item.category)}`} className="inline-block rounded-full bg-emerald-600/90 backdrop-blur-md px-2 py-0.5 md:px-2.5 md:py-1 text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white shadow-lg hover:bg-emerald-500 transition-colors">
                 {displayCategory}
               </Link>
             </div>

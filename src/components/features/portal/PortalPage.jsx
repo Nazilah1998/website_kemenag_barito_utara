@@ -763,13 +763,13 @@ export default function PortalPage() {
               style={{ animationDelay: "0.1s" }}
             >
               {/* Left Logo */}
-              <div className="w-20 h-20 md:w-24 md:h-24 relative bg-white/10 backdrop-blur-md p-2 md:p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500 shrink-0">
+              <div className="w-20 h-20 md:w-24 md:h-24 relative transition-transform hover:scale-110 duration-500 shrink-0">
                 <Image
                   src={siteInfo.logoSrc}
                   alt="Logo Kemenag"
                   width={96}
                   height={96}
-                  className="w-full h-full object-contain drop-shadow-lg"
+                  className="w-full h-full object-contain drop-shadow-2xl"
                   unoptimized
                   priority
                 />
@@ -822,10 +822,7 @@ export default function PortalPage() {
                       <span className="text-emerald-400 text-[13px] lg:text-sm">
                         A
                       </span>
-                      dil{" "}
-                      <span className="text-emerald-400 text-[13px] lg:text-sm">
-                        dan
-                      </span>{" "}
+                      dil dan{" "}
                       <span className="text-emerald-400 text-[13px] lg:text-sm">
                         T
                       </span>
@@ -836,13 +833,13 @@ export default function PortalPage() {
               </div>
 
               {/* Right Logo */}
-              <div className="w-20 h-20 md:w-24 md:h-24 relative bg-white/10 backdrop-blur-md p-2 md:p-3 rounded-2xl ring-1 ring-white/20 shadow-2xl transition-transform hover:scale-105 duration-500 shrink-0">
+              <div className="w-28 h-28 md:w-36 md:h-36 relative transition-transform hover:scale-110 duration-500 shrink-0">
                 <Image
                   src="/assets/branding/atak-portal.png"
                   alt="Portal Atak"
-                  width={96}
-                  height={96}
-                  className="w-full h-full object-contain drop-shadow-lg"
+                  width={144}
+                  height={144}
+                  className="w-full h-full object-contain drop-shadow-2xl"
                   unoptimized
                   priority
                 />
@@ -1008,16 +1005,18 @@ export default function PortalPage() {
               style={{ animationDelay: "0.1s" }}
             >
               {/* Left Logo */}
-              <div className="w-12 h-12 relative bg-white/10 backdrop-blur-md p-1.5 rounded-xl ring-1 ring-white/20 shadow-xl shrink-0 self-start mt-2">
-                <Image
-                  src={siteInfo.logoSrc}
-                  alt="Logo Kemenag"
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-contain drop-shadow-lg"
-                  unoptimized
-                  priority
-                />
+              <div className="w-20 sm:w-24 flex justify-center items-start shrink-0">
+                <div className="w-10 h-10 relative shrink-0 self-start mt-1 transition-transform hover:scale-105 duration-500">
+                  <Image
+                    src={siteInfo.logoSrc}
+                    alt="Logo Kemenag"
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-contain drop-shadow-xl"
+                    unoptimized
+                    priority
+                  />
+                </div>
               </div>
 
               {/* Title Section */}
@@ -1088,13 +1087,7 @@ export default function PortalPage() {
                       >
                         A
                       </span>
-                      dil{" "}
-                      <span
-                        className="text-emerald-400"
-                        style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
-                      >
-                        dan
-                      </span>{" "}
+                      dil dan{" "}
                       <span
                         className="text-emerald-400"
                         style={{ fontSize: "clamp(5px, 1.7vw, 11px)" }}
@@ -1108,16 +1101,18 @@ export default function PortalPage() {
               </div>
 
               {/* Right Logo */}
-              <div className="w-12 h-12 relative bg-white/10 backdrop-blur-md p-1.5 rounded-xl ring-1 ring-white/20 shadow-xl shrink-0 self-start mt-2">
-                <Image
-                  src="/assets/branding/atak-portal.png"
-                  alt="Portal Atak"
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-contain drop-shadow-lg"
-                  unoptimized
-                  priority
-                />
+              <div className="w-20 sm:w-24 flex justify-end items-start shrink-0">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 relative shrink-0 self-start mt-1 transition-transform hover:scale-105 duration-500">
+                  <Image
+                    src="/assets/branding/atak-portal.png"
+                    alt="Portal Atak"
+                    width={96}
+                    height={96}
+                    className="w-full h-full object-contain drop-shadow-xl"
+                    unoptimized
+                    priority
+                  />
+                </div>
               </div>
             </div>
 

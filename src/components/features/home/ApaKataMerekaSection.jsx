@@ -40,8 +40,8 @@ export default function ApaKataMerekaSection({ testimonials }) {
         rawData = getApaKataMereka(locale);
     }
 
-    // Reorder data to: [Menteri, Arbaja, Kanwil] to match user's mental model
-    const data = rawData.length >= 3 ? [rawData[0], rawData[2], rawData[1]] : rawData;
+    // Reorder data to: [Kanwil, Menteri, Arbaja] to match user request
+    const data = rawData.length >= 3 ? [rawData[1], rawData[0], rawData[2]] : rawData;
 
     const [activeIndex, setActiveIndex] = useState(1); // Default to Arbaja
 
@@ -193,11 +193,7 @@ export default function ApaKataMerekaSection({ testimonials }) {
                                                     className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
                                                 />
                                             </div>
-                                            {isCenter && (
-                                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600 px-2 py-0.5 text-[7px] font-black uppercase tracking-widest text-white shadow-lg">
-                                                    Official
-                                                </div>
-                                            )}
+
                                         </div>
 
                                         <h3 className="mt-4 text-center text-xs font-black text-slate-900 dark:text-white tracking-tight">

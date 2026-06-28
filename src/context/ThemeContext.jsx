@@ -35,10 +35,7 @@ function getStoredTheme() {
 }
 
 function getSystemTheme() {
-  if (typeof window === "undefined") return DEFAULT_THEME;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return DEFAULT_THEME;
 }
 
 function getResolvedTheme() {
@@ -72,37 +69,17 @@ function subscribeTheme(listener) {
     };
   }
 
-  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
   const onStorage = (event) => {
     if (event.key === DEFAULT_STORAGE_KEY || event.key === ADMIN_STORAGE_KEY) {
       listener();
     }
   };
 
-  const onMediaChange = () => {
-    if (!getStoredTheme()) {
-      listener();
-    }
-  };
-
   window.addEventListener("storage", onStorage);
-
-  if (typeof mediaQuery.addEventListener === "function") {
-    mediaQuery.addEventListener("change", onMediaChange);
-  } else {
-    mediaQuery.addListener(onMediaChange);
-  }
 
   return () => {
     themeListeners.delete(listener);
     window.removeEventListener("storage", onStorage);
-
-    if (typeof mediaQuery.removeEventListener === "function") {
-      mediaQuery.removeEventListener("change", onMediaChange);
-    } else {
-      mediaQuery.removeListener(onMediaChange);
-    }
   };
 }
 
