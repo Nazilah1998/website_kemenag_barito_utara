@@ -23,7 +23,7 @@ export default function VisitorStats() {
 
     const fetchStats = async () => {
       try {
-        const res = await fetch("/api/visitors");
+        const res = await fetch("/api/visitors", { cache: "no-store", next: { revalidate: 0 } });
         const data = await res.json();
         if (data && isSubscribed) {
           setTodayCount(data.today || 0);

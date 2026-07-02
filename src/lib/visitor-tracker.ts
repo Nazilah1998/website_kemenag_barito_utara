@@ -34,11 +34,11 @@ export async function getVisitorStats() {
 
     if (result.length > 0) {
       const data = result[0].value as any;
-      total = data?.total ?? INITIAL_TOTAL;
+      total = Number(data?.total ?? INITIAL_TOTAL);
       if (total < INITIAL_TOTAL) total = INITIAL_TOTAL;
       
       if (data?.todayDate === todayStr) {
-        dbToday = data?.todayCount || 0;
+        dbToday = Number(data?.todayCount || 0);
       }
     } else {
       // Seed initial data
@@ -66,7 +66,7 @@ export async function getVisitorStats() {
          today = dbToday + pendingTotal;
       }
 
-      total += pendingTotal;
+      total = Number(total) + pendingTotal;
     }
   } catch (error) {
     console.error("[visitor-tracker] getVisitorStats error:", error);

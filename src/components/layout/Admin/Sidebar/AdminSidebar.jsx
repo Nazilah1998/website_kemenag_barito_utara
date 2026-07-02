@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import { PERMISSIONS } from "@/lib/permissions";
 import { SidebarNavLink } from "./SidebarUI";
-import { DashboardIcon, NewsIcon, FolderIcon, SliderIcon, UsersIcon, AuditIcon, MailIcon, GalleryIcon, SeksiIcon, HalamanIcon, MaintenanceIcon, SettingsIcon } from "./SidebarIcons";
+import { DashboardIcon, NewsIcon, FolderIcon, SliderIcon, UsersIcon, AuditIcon, MailIcon, GalleryIcon, SeksiIcon, HalamanIcon, MaintenanceIcon, SettingsIcon, YoutubeIcon } from "./SidebarIcons";
 
 function hasAccess(context, permission) {
   if (!context) return false;
@@ -24,6 +24,7 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
     { href: "/admin/halaman", label: "Halaman Statis", icon: <HalamanIcon />, active: pathname.startsWith("/admin/halaman"), show: hasAccess(ctx, PERMISSIONS.HALAMAN_VIEW) },
     { href: "/admin/laporan", label: "Dokumen Laporan", icon: <FolderIcon />, active: pathname === "/admin/laporan" || pathname.startsWith("/admin/laporan/"), show: hasAccess(ctx, PERMISSIONS.LAPORAN_VIEW) },
     { href: "/admin/homepage-slides", label: "Slider Beranda", icon: <SliderIcon />, active: pathname.startsWith("/admin/homepage-slides"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
+    { href: "/admin/youtube", label: "Dokumentasi YouTube", icon: <YoutubeIcon />, active: pathname.startsWith("/admin/youtube"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
     { href: "/admin/pesan", label: "Pesan & Pengaduan", icon: <MailIcon />, active: pathname.startsWith("/admin/pesan"), show: hasAccess(ctx, PERMISSIONS.KONTAK_MANAGE) },
     { href: "/admin/audit", label: "Audit Log", icon: <AuditIcon />, active: pathname.startsWith("/admin/audit"), show: hasAccess(ctx, PERMISSIONS.AUDIT_VIEW) },
     { href: "/admin/editors", label: "Manajemen Editor", icon: <UsersIcon />, active: pathname.startsWith("/admin/editors"), show: role === "super_admin" },

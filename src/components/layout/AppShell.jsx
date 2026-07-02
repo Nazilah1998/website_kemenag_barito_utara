@@ -4,6 +4,8 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
+import PushNotificationPrompt from "../features/pwa/PushNotificationPrompt";
+
 const Header = dynamic(() => import("./Header/Header"));
 const Footer = dynamic(() => import("./Footer/Footer"));
 
@@ -35,6 +37,7 @@ export default function AppShell({ children }) {
         {children}
       </main>
       <Footer />
+      <PushNotificationPrompt />
     </>
   );
 }

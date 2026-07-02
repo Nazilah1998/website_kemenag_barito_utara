@@ -20,6 +20,7 @@ import { berita } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { logInfo, logError } from "@/lib/logger";
+import { sendNewsPushNotification } from "@/lib/onesignal-service";
 
 const LIMITS = {
   title: { min: 3, max: 200 },
@@ -364,6 +365,17 @@ export async function POST(request) {
       after: { slug: data?.slug, is_published: data?.is_published },
       request,
     });
+
+    // Kirim Push Notification jika berita dipublish
+    if (data?.is_published) {
+      // Background task, jangan di-await agar response API tidak delay
+      sendNewsPushNotification(
+        data.title,
+        data.slug,
+        data.excerpt,
+        data.cover_image
+      );
+    }
 
     return apiResponse(
       {

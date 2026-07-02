@@ -27,6 +27,7 @@ export const messagesId = {
     layanan: "Layanan",
     layananPtsp: "Layanan PTSP SiATAK",
     layananInklusi: "Pusat Layanan Inklusi",
+    layananKalkulator: "Kalkulator Zakat & Waris",
     layananArsip: "SiBetang",
     layananSurat: "SiMandau",
     layananSop: "E-SOP Digital",

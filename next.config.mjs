@@ -64,6 +64,9 @@ function buildCsp() {
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
+      "https://cdn.onesignal.com",
+      "https://api.onesignal.com",
+      "https://onesignal.com",
     ],
     "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
     "img-src": [
@@ -79,6 +82,8 @@ function buildCsp() {
       "https://www.google.com",
       "https://www.gstatic.com",
       "https://challenges.cloudflare.com",
+      "https://cdn.onesignal.com",
+      "https://onesignal.com",
       supabase,
       wsSupabase,
     ].filter(Boolean),
@@ -88,12 +93,13 @@ function buildCsp() {
       "https://drive.google.com",
       "https://docs.google.com",
       "https://challenges.cloudflare.com",
+      "https://www.youtube.com",
     ],
     "frame-ancestors": ["'self'"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
     "form-action": ["'self'"],
-    "worker-src": ["'self'"],
+    "worker-src": ["'self'", "https://cdn.onesignal.com"],
     "upgrade-insecure-requests": [],
   };
 

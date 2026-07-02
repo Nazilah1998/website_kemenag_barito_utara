@@ -215,18 +215,18 @@ export default function BeritaTextToSpeech({ title, content }) {
     : 0;
 
   return (
-    <div className="rounded-[28px] border border-emerald-200 bg-emerald-50 p-5 shadow-sm transition-colors dark:border-emerald-900/30 dark:bg-emerald-900/10 mb-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-bold text-emerald-800 dark:text-emerald-400">
+    <div className="rounded-[24px] sm:rounded-[28px] border border-emerald-200 bg-emerald-50 p-4 sm:p-5 shadow-sm transition-colors dark:border-emerald-900/30 dark:bg-emerald-900/10 mb-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-emerald-800 dark:text-emerald-400 truncate">
             Dengarkan Berita
           </p>
-          <p className="text-[11px] font-medium text-emerald-600/80 dark:text-emerald-500/80 mt-1 uppercase tracking-wider">
+          <p className="text-[10px] sm:text-[11px] font-medium text-emerald-600/80 dark:text-emerald-500/80 mt-1 uppercase tracking-wider leading-relaxed line-clamp-2">
             {!isPlaying ? `Estimasi waktu: ~${estimatedMinutes} Menit` : 'Sedang membacakan...'}
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
             {isPlaying && (
                 <button
                     onClick={handleStop}

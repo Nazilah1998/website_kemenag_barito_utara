@@ -17,6 +17,7 @@ const HomeNewsSection = dynamic(() => import("@/components/features/home/HomeNew
 const HomeNewsPerCategorySection = dynamic(() => import("@/components/features/home/HomeNewsPerCategorySection"));
 const HomeGallerySection = dynamic(() => import("@/components/features/home/HomeGallerySection"));
 const HomepageSlidesSection = dynamic(() => import("@/components/features/home/HomepageSlidesSection"));
+const YoutubeSection = dynamic(() => import("@/components/features/home/YoutubeSection"));
 const ExternalAppsSection = dynamic(() => import("@/components/features/home/ExternalAppsSection"));
 import ScrollReveal from "@/components/common/ScrollReveal";
 
@@ -139,6 +140,14 @@ export default async function HomePage() {
 
       <ScrollReveal delay={0.2}>
         <HomepageSlidesSection slides={slidesData} />
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.1}>
+        <SectionDivider />
+      </ScrollReveal>
+
+      <ScrollReveal delay={0.2}>
+        <YoutubeSection />
       </ScrollReveal>
 
       <ScrollReveal delay={0.1}>

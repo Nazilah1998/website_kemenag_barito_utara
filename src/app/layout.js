@@ -16,6 +16,7 @@ import {
 } from "@/lib/structured-data";
 import DynamicImports from "@/components/layout/DynamicImports";
 import JsonLd from "@/components/features/seo/JsonLd";
+import OneSignalProvider from "@/components/providers/OneSignalProvider";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
@@ -199,6 +200,7 @@ export default async function RootLayout({ children }) {
         <Providers initialSettings={settings}>
           <AppShell>{children}</AppShell>
         </Providers>
+        <OneSignalProvider />
         <DynamicImports />
       </body>
     </html>

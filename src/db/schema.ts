@@ -473,6 +473,19 @@ export const siteSettings = kemenagWebsiteSchema.table("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
 });
 
+export const youtube_videos = kemenagWebsiteSchema.table("youtube_videos", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  title: text("title").notNull(),
+  youtube_id: text("youtube_id").notNull(),
+  is_published: boolean("is_published").default(true).notNull(),
+  sort_order: integer("sort_order").default(0).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+  index("idx_youtube_videos_order").using("btree", table.is_published.asc().nullsLast().op("bool_ops"), table.sort_order.asc().nullsLast().op("int4_ops"), table.updated_at.desc().nullsFirst().op("timestamptz_ops")),
+  index("idx_youtube_videos_updated_at").using("btree", table.updated_at.desc().nullsFirst().op("timestamptz_ops")),
+]);
+
 export const kemenagPtspSchema = pgSchema("kemenag_ptsp");
 
 export const ptspServices = kemenagPtspSchema.table("ptsp_services", {

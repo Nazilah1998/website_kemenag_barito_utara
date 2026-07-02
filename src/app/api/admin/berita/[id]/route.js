@@ -9,6 +9,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { PERMISSIONS } from "@/lib/permissions";
 import { apiResponse, getSafeIdFromContext } from "@/lib/api-helpers";
 import { broadcastRefresh } from "@/lib/realtime-service";
+import { sendNewsPushNotification } from "@/lib/onesignal-service";
 import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -324,6 +325,17 @@ export async function PUT(request, context) {
       },
       request,
     });
+
+    // Kirim Push Notification JIKA statusnya berubah dari DRAFT menjadi PUBLISH
+    if (!existingItem.is_published && data?.is_published) {
+      // Background task, jangan di-await agar response API tidak delay
+      sendNewsPushNotification(
+        data.title,
+        data.slug,
+        data.excerpt,
+        data.cover_image
+      );
+    }
 
     return apiResponse({
       message: `Berita berhasil diperbarui. Ukuran cover aktif ${data?.cover_size_kb || payload.cover_size_kb} KB.`,

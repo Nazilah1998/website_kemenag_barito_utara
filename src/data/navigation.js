@@ -45,6 +45,7 @@ export function getNavigationItems(locale = "id") {
           label: m.layananPusdatin,
           href: "https://pusdatin.kemenag-baritoutara.com/",
         },
+        { label: m.layananKalkulator, href: "/layanan/kalkulator" },
         { label: m.survey, href: "/survey" },
       ],
     },

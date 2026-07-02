@@ -136,8 +136,8 @@ export default async function DetailBeritaPage({ params }) {
                 >
 
 
-                  {/* Cover Image — float left so text wraps beside it and continues below */}
-                  <div className="not-prose float-left mr-6 mb-4 w-full sm:w-[44%] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
+                  {/* Cover Image — float left only on large screens so text wraps beside it */}
+                  <div className="not-prose w-full lg:w-[44%] lg:float-left lg:mr-6 mb-4 sm:mb-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
                     <CoverImageLightbox
                       src={coverImage}
                       alt={berita.title}
@@ -145,7 +145,7 @@ export default async function DetailBeritaPage({ params }) {
                       height={450}
                       priority={true}
                       className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.02]"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 44vw, 560px"
+                      sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 44vw, 560px"
                     />
                     <div className="bg-slate-50 dark:bg-slate-900/60 px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-1.5">
                       <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
@@ -157,8 +157,8 @@ export default async function DetailBeritaPage({ params }) {
                     </div>
                   </div>
 
-                  {/* Mobile TTS Widget: Visible only on < xl screens, sits between cover image and text */}
-                  <div className="not-prose block xl:hidden mb-6 clear-both sm:clear-none">
+                  {/* Mobile TTS Widget: Visible only on < xl screens, sits below cover image on tablet, next to it on lg */}
+                  <div className="not-prose block xl:hidden mb-6 clear-both lg:clear-none">
                     <BeritaTextToSpeech title={berita.title} content={berita.content} />
                   </div>
 

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { DesktopClockSection, MobileClockSection } from "./ClockSection";
 import HeroBackground from "./HeroBackground";
 import VisitorStats from "./VisitorStats";
+import PrayerScheduleWidget from "./PrayerScheduleWidget";
 import { useSiteSettings } from "@/context/SettingsContext";
 
 const PTSP_MENUS = [
@@ -230,6 +231,25 @@ const INOVASI_MENUS = [
           strokeLinejoin="round"
           strokeWidth={2}
           d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Kalkulator Zakat & Waris",
+    href: "/layanan/kalkulator",
+    icon: (
+      <svg
+        className="w-5 h-5 text-emerald-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
     ),
@@ -750,7 +770,7 @@ export default function PortalPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-y-auto overflow-x-hidden bg-slate-900 selection:bg-emerald-500/30">
+    <div className="relative min-h-screen flex flex-col bg-slate-900 selection:bg-emerald-500/30 overflow-x-hidden">
       <HeroBackground />
       {/* SHARED CENTERED WRAPPER */}
       <div className="flex-1 flex flex-col justify-start md:justify-center w-full relative z-10 pt-6 pb-4 md:py-8">
@@ -848,6 +868,7 @@ export default function PortalPage() {
 
             {/* Status & Time Indicator - Desktop */}
             <DesktopClockSection />
+            <PrayerScheduleWidget />
 
             {/* Berita Ticker - Desktop */}
             {portalError ? (
@@ -1118,6 +1139,9 @@ export default function PortalPage() {
 
             {/* Enhanced Status & Time - Mobile */}
             <MobileClockSection />
+            <div className="md:hidden">
+              <PrayerScheduleWidget />
+            </div>
 
             {/* Berita Ticker - Mobile */}
             {portalError ? (
@@ -1288,7 +1312,7 @@ export default function PortalPage() {
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
                 <div className="flex flex-col gap-3">
                   {PTSP_MENUS.map((menu, idx) => (
                     <Link
@@ -1379,7 +1403,7 @@ export default function PortalPage() {
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
                 <div className="flex flex-col gap-3">
                   {INOVASI_MENUS.map((menu, idx) => (
                     <Link
@@ -1470,7 +1494,7 @@ export default function PortalPage() {
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
                 <div className="flex flex-col gap-3">
                   {INFORMASI_MENUS.map((menu, idx) => (
                     <Link
@@ -1563,7 +1587,7 @@ export default function PortalPage() {
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
                 <div className="flex flex-col gap-3">
                   {SURVEY_MENUS.map((menu, idx) => (
                     <Link
@@ -1661,7 +1685,7 @@ export default function PortalPage() {
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
                 <div className="flex flex-col gap-3">
                   {ZONA_MENUS.map((menu, idx) => (
                     <Link
@@ -1759,7 +1783,7 @@ export default function PortalPage() {
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
                 <div className="flex flex-col gap-3">
                   {PENGADUAN_MENUS.map((menu, idx) => (
                     <Link
