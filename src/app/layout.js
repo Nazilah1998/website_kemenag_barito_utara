@@ -8,6 +8,7 @@ import AppShell from "@/components/layout/AppShell";
 import MaintenancePage from "@/components/layout/MaintenancePage";
 
 import { siteInfo } from "@/data/site";
+import { headers } from "next/headers";
 import Script from "next/script";
 import {
   organizationSchema,
@@ -159,7 +160,11 @@ export default async function RootLayout({ children }) {
     getGlobalMaintenanceSettings()
   ]);
 
-  if (maintenance?.active) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isAdminPath = pathname.startsWith("/admin") || pathname.startsWith("/login");
+
+  if (maintenance?.active && !isAdminPath) {
     return (
       <html lang="id" suppressHydrationWarning>
         <head>

@@ -121,6 +121,9 @@ async function guardAdmin(request) {
 }
 
 export async function proxy(request) {
+  // Set x-pathname header to be read by layout.js
+  request.headers.set("x-pathname", request.nextUrl.pathname);
+
   // LANGKAH 1: Admin guard
   const guarded = await guardAdmin(request);
   if (guarded) return guarded;
