@@ -10,6 +10,9 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     env.supabaseUrl,
     env.supabasePublishableKey,
     {
+      cookieOptions: {
+        name: "sb-website-auth-token",
+      },
       cookies: {
         getAll() {
           return request.cookies.getAll();

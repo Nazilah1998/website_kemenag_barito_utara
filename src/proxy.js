@@ -56,6 +56,9 @@ function createEdgeSupabase(request, response) {
   if (!url || !key) return null;
 
   return createServerClient(url, key, {
+    cookieOptions: {
+      name: "sb-website-auth-token",
+    },
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -121,8 +124,54 @@ async function guardAdmin(request) {
 }
 
 export async function proxy(request) {
+  const pathname = request.nextUrl.pathname;
+  
   // Set x-pathname header to be read by layout.js
-  request.headers.set("x-pathname", request.nextUrl.pathname);
+  request.headers.set("x-pathname", pathname);
+
+  // LANGKAH 0: Maintenance Check Terpusat
+  if (
+    !isAdminPath(pathname) && 
+    !isAdminApiPath(pathname) && 
+    !isHealthCheckPath(pathname) &&
+    !pathname.startsWith("/api/public/") // Mencegah infinite loop jika URL Pusdatin mengarah ke diri sendiri
+  ) {
+    try {
+      const pusdatinUrl = process.env.NEXT_PUBLIC_PUSDATIN_URL || "https://pusdatin.kemenag-baritoutara.com";
+      const appId = "website-kemenag";
+      
+      const maintenanceRes = await fetch(`${pusdatinUrl}/api/public/apps/${appId}/status`, { next: { revalidate: 30 } });
+      if (maintenanceRes.ok) {
+        const data = await maintenanceRes.json();
+        if (data.status === "maintenance") {
+          return new NextResponse(
+            `<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sistem Sedang Pemeliharaan</title>
+    <link rel="icon" href="${pusdatinUrl}/branding/kemenag.svg" type="image/svg+xml">
+    <style>
+      body { margin: 0; overflow: hidden; background-color: #f8fafc; }
+      iframe { width: 100vw; height: 100vh; border: none; }
+    </style>
+  </head>
+  <body>
+    <iframe src="${pusdatinUrl}/maintenance?app=Website+Kemenag" title="Maintenance"></iframe>
+  </body>
+</html>`,
+            {
+              status: 503,
+              headers: { "Content-Type": "text/html; charset=utf-8" },
+            }
+          );
+        }
+      }
+    } catch (error) {
+      console.error("[PROXY] Failed to fetch maintenance status:", error);
+    }
+  }
 
   // LANGKAH 1: Admin guard
   const guarded = await guardAdmin(request);

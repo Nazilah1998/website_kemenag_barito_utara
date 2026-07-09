@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useChat } from "@ai-sdk/react";
 import "./ChatWidget.css";
 
 // ─── Inline SVG Icons ───────────────────────────────────────────────────────
@@ -124,16 +125,21 @@ const TypingDots = () => (
 // ─── Main Component ──────────────────────────────────────────────────────────
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Halo! Saya Asisten Virtual Kemenag Barito Utara 👋\nAda yang bisa saya bantu hari ini?",
-      time: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, append } = useChat({
+    api: '/api/chat',
+    initialMessages: [
+      {
+        id: "initial",
+        role: "assistant",
+        content: "Halo! Saya Asisten Virtual Kemenag Barito Utara 👋\nAda yang bisa saya bantu hari ini?",
+        createdAt: new Date(),
+      }
+    ],
+    onResponse: () => {
+      setShowQuickActions(false);
+    }
+  });
+
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const messagesEndRef = useRef(null);
@@ -163,13 +169,13 @@ const ChatWidget = () => {
   }, []);
 
   useEffect(() => {
-    // Deteksi jika harus melewati auto-focus (Mobile, Tablet, atau PWA)
     if (typeof window !== "undefined") {
       const isPwa =
         window.matchMedia("(display-mode: standalone)").matches ||
         window.navigator.standalone;
       const isMobile = window.matchMedia("(max-width: 1024px)").matches;
-      setSkipAutoFocus(isPwa || isMobile);
+      // Wrap in setTimeout to avoid synchronous setState during render
+      setTimeout(() => setSkipAutoFocus(isPwa || isMobile), 0);
     }
   }, []);
 
@@ -188,76 +194,24 @@ const ChatWidget = () => {
     }
   }, [isOpen, skipAutoFocus]);
 
-  const sendMessage = async (text) => {
-    const messageText = text || input;
-    if (!messageText.trim() || isLoading) return;
-
-    const userMsg = { role: "user", content: messageText, time: new Date() };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setIsLoading(true);
-    setShowQuickActions(false);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMsg].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
-      });
-      const data = await res.json();
-
-      if (data.error) {
-        // Tampilkan pesan error dari server langsung (termasuk pesan rate-limit yang ramah)
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: data.error, time: new Date() },
-        ]);
-        return;
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.content, time: new Date() },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Maaf, koneksi terganggu. Silakan coba lagi atau hubungi kami via WhatsApp.",
-          time: new Date(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleReset = () => {
     setMessages([
       {
+        id: "initial",
         role: "assistant",
         content:
           "Halo! Saya Asisten Virtual Kemenag Barito Utara 👋\nAda yang bisa saya bantu hari ini?",
-        time: new Date(),
+        createdAt: new Date(),
       },
     ]);
     setShowQuickActions(true);
-    setInput("");
     setShowResetConfirm(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    sendMessage();
+  const handleQuickAction = (text) => {
+    append({ role: "user", content: text, createdAt: new Date() });
+    setShowQuickActions(false);
   };
-  const handleQuickAction = (text) => sendMessage(text);
 
   // ─── Render ─────────────────────────────────────────────────────────────
   if (isWidgetHidden) return null;
@@ -744,6 +698,44 @@ const ChatWidget = () => {
                           })
                       : msg.content}
                   </div>
+                  
+                  {/* Generative UI & Tool Invocations */}
+                  {msg.toolInvocations?.map(toolInvocation => {
+                    const { toolName, toolCallId, state, result } = toolInvocation;
+                    
+                    if (state === 'result') {
+                      if (toolName === 'showLocationMap') {
+                        return (
+                          <div key={toolCallId} style={{ marginTop: 10, padding: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 12, width: '100%' }}>
+                            <p style={{fontSize: 12, marginBottom: 5, color: '#fff'}}>📍 Peta Lokasi:</p>
+                            <iframe 
+                              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3986.366447283995!2d114.88764021524314!3d-0.957519699301072!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df6935baab5baeb%3A0xc66512b1bdf69a68!2sKantor%20Kementerian%20Agama%20Kab.%20Barito%20Utara!5e0!3m2!1sen!2sid!4v1689000000000"
+                              width="100%" height="120" style={{border: 0, borderRadius: 8}} allowFullScreen loading="lazy"></iframe>
+                          </div>
+                        );
+                      }
+                      if (toolName === 'showServiceList') {
+                        return (
+                          <div key={toolCallId} style={{ marginTop: 10, padding: 10, background: 'rgba(16,185,129,0.1)', borderRadius: 12, border: '1px solid rgba(16,185,129,0.3)' }}>
+                            <p style={{fontSize: 12, marginBottom: 5, color: '#10b981', fontWeight: 'bold'}}>📋 Layanan PTSP & Survei</p>
+                            <a href={result.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 5, background: '#10b981', color: 'white', padding: '6px 12px', borderRadius: 16, fontSize: 12, textDecoration: 'none' }}>
+                              Buka Layanan Terpadu
+                            </a>
+                          </div>
+                        )
+                      }
+                      if (toolName === 'searchPublicKnowledge') {
+                        return (
+                          <div key={toolCallId} style={{ marginTop: 10, padding: 8, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
+                            <p style={{fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: 0}}>✓ Berhasil mencari di database publik</p>
+                          </div>
+                        )
+                      }
+                    } else {
+                      return <div key={toolCallId} style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 5 }}>⏳ Memanggil fungsi {toolName}...</div>;
+                    }
+                  })}
+
                   <span
                     style={{
                       fontSize: 10.5,
@@ -753,7 +745,7 @@ const ChatWidget = () => {
                       paddingRight: 4,
                     }}
                   >
-                    {formatTime(msg.time)}
+                    {formatTime(msg.createdAt)}
                   </span>
                 </div>
               ))}
@@ -859,7 +851,7 @@ const ChatWidget = () => {
                   ref={inputRef}
                   type="text"
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder="Tulis pesan..."
                   disabled={isLoading}
                   style={{
@@ -917,7 +909,7 @@ const ChatWidget = () => {
                   letterSpacing: "0.3px",
                 }}
               >
-                Kecerdasan Buatan Terpadu (100 Model AI) · Kemenag Barito Utara
+                Kecerdasan Buatan Terpadu (Gemini & Generative UI) · Kemenag Barito Utara
               </p>
             </div>
           </motion.div>

@@ -27,6 +27,7 @@ async function getIdentitySettings() {
       jam_layanan_rabu: "08:00 - 16:00",
       jam_layanan_kamis: "08:00 - 16:00",
       jam_layanan_jumat: "08:00 - 16:30",
+      fitur_anti_copas: false,
       updatedBy: null,
       updatedAt: null
     };
@@ -47,6 +48,7 @@ async function getIdentitySettings() {
       jam_layanan_rabu: "",
       jam_layanan_kamis: "",
       jam_layanan_jumat: "",
+      fitur_anti_copas: false,
       updatedBy: null,
       updatedAt: null
     };

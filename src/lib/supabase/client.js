@@ -16,5 +16,9 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient(url, key);
+  return createBrowserClient(url, key, {
+    cookieOptions: {
+      name: "sb-website-auth-token",
+    },
+  });
 }

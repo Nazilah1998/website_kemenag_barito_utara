@@ -5,7 +5,7 @@ import "./tailwind.css";
 import "./globals.css";
 import Providers from "@/components/layout/Providers";
 import AppShell from "@/components/layout/AppShell";
-import MaintenancePage from "@/components/layout/MaintenancePage";
+
 
 import { siteInfo } from "@/data/site";
 import { headers } from "next/headers";
@@ -145,37 +145,16 @@ async function getGlobalIdentitySettings() {
   }
 }
 
-async function getGlobalMaintenanceSettings() {
-  try {
-    const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "maintenance_mode")).limit(1);
-    return row?.value || { active: false };
-  } catch (error) {
-    return { active: false };
-  }
-}
+
 
 export default async function RootLayout({ children }) {
-  const [settings, maintenance] = await Promise.all([
-    getGlobalIdentitySettings(),
-    getGlobalMaintenanceSettings()
-  ]);
+  const settings = await getGlobalIdentitySettings();
 
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
   const isAdminPath = pathname.startsWith("/admin") || pathname.startsWith("/login");
 
-  if (maintenance?.active && !isAdminPath) {
-    return (
-      <html lang="id" suppressHydrationWarning>
-        <head>
-          <link rel="icon" href="/assets/branding/kemenag.svg" type="image/svg+xml" />
-        </head>
-        <body className={`${jakarta.className} antialiased`} suppressHydrationWarning>
-          <MaintenancePage title={maintenance.title} message={maintenance.message} />
-        </body>
-      </html>
-    );
-  }
+
 
   return (
     <html lang="id" data-scroll-behavior="smooth" suppressHydrationWarning>

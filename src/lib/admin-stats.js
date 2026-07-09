@@ -1,5 +1,5 @@
 import { db } from "@/lib/drizzle";
-import { berita, homepage_slides, galeri, kontak_pesan, report_documents, admin_audit_log } from "@/db/schema";
+import { berita, homepage_slides, galeri, kontak_pesan, report_documents } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { logError } from "@/lib/logger";
 
@@ -59,20 +59,8 @@ export async function getDashboardStats({
       db.select({ count: sql`count(*)` }).from(kontak_pesan).where(eq(kontak_pesan.status, "baru")),
       db.select({ count: sql`count(*)` }).from(report_documents).where(eq(report_documents.is_published, true)),
       
-      // Aktivitas Audit Log (hanya untuk super admin)
-      isSuperAdmin
-        ? db.select({
-            id: admin_audit_log.id,
-            action: admin_audit_log.action,
-            entity: admin_audit_log.entity,
-            summary: admin_audit_log.summary,
-            actor_email: admin_audit_log.actor_email,
-            created_at: admin_audit_log.created_at,
-          })
-          .from(admin_audit_log)
-          .orderBy(desc(admin_audit_log.created_at))
-          .limit(8)
-        : Promise.resolve([]),
+      // Aktivitas Audit Log sudah dipindahkan ke Pusdatin
+      Promise.resolve([]),
     ]);
 
     const totalBerita = beritaList.length;

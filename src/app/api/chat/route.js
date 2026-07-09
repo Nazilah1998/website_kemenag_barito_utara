@@ -1,9 +1,46 @@
-import { NextResponse } from "next/server";
+import { streamText, tool } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
+import { z } from "zod";
 import SYSTEM_PROMPT from "@/lib/chat/system-prompt";
-import ENGINES from "@/lib/chat/engines";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { logInfo, logWarn, logError } from "@/lib/logger";
+import { logInfo, logError } from "@/lib/logger";
+import { db } from "@/lib/drizzle";
+import { ai_knowledge_base } from "@/db/schema";
+import { cosineDistance, desc, gt, sql } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
+// Custom fallback wrapper to sequentially try models if one fails (e.g. rate limit, error)
+const fallback = (models) => ({
+  specificationVersion: 'v1',
+  provider: 'fallback',
+  modelId: 'fallback-model',
+  defaultObjectGenerationMode: models[0]?.defaultObjectGenerationMode || 'json',
+  doGenerate: async (options) => {
+    let lastError;
+    for (const model of models) {
+      try {
+        return await model.doGenerate(options);
+      } catch (error) {
+        lastError = error;
+        logError("model_fallback_error", { model: model.modelId, error: error.message });
+      }
+    }
+    throw lastError;
+  },
+  doStream: async (options) => {
+    let lastError;
+    for (const model of models) {
+      try {
+        return await model.doStream(options);
+      } catch (error) {
+        lastError = error;
+        logError("model_fallback_stream_error", { model: model.modelId, error: error.message });
+      }
+    }
+    throw lastError;
+  }
+});
 export async function POST(req) {
   try {
     const ip = getClientIp(req);
@@ -26,144 +63,94 @@ export async function POST(req) {
       ? `${SYSTEM_PROMPT}\n\n===========================\nINFO TAMBAHAN (DARI PTSP):\n===========================\n${system_injection}`
       : SYSTEM_PROMPT;
 
-    // API Keys from environment
-    const keys = {
-      gemini: process.env.GEMINI_API_KEY,
-      groq: process.env.GROQ_API_KEY,
-      mistral: process.env.MISTRAL_API_KEY,
-      openrouter: process.env.OPENROUTER_API_KEY,
-    };
+    // Inisialisasi Provider AI
+    const google = process.env.GEMINI_API_KEY ? createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
+    const groq = process.env.GROQ_API_KEY ? createOpenAI({ baseURL: "https://api.groq.com/openai/v1", apiKey: process.env.GROQ_API_KEY }) : null;
+    const mistral = process.env.MISTRAL_API_KEY ? createOpenAI({ baseURL: "https://api.mistral.ai/v1", apiKey: process.env.MISTRAL_API_KEY }) : null;
+    const openrouter = process.env.OPENROUTER_API_KEY ? createOpenAI({ baseURL: "https://openrouter.ai/api/v1", apiKey: process.env.OPENROUTER_API_KEY }) : null;
 
-    if (!Object.values(keys).some((k) => !!k)) {
+    if (!google && !groq && !mistral && !openrouter) {
       return NextResponse.json(
-        { error: "Tidak ada API Key yang terkonfigurasi." },
+        { error: "Tidak ada API Key AI yang terkonfigurasi." },
         { status: 500 },
       );
     }
 
-    // Persiapkan data pesan
-    const recentMessages = messages.slice(1); // skip greeting awal
-    const lastSix = recentMessages.slice(-6);
+    // Urutan model fallback: Gemini -> Groq -> Mistral -> OpenRouter
+    const fallbackModels = [];
+    if (google) fallbackModels.push(google("gemini-1.5-flash"));
+    if (groq) fallbackModels.push(groq("llama-3.3-70b-versatile"));
+    if (mistral) fallbackModels.push(mistral("mistral-large-latest"));
+    if (openrouter) fallbackModels.push(openrouter("meta-llama/llama-3.1-70b-instruct:free"));
 
-    // Gunakan ENGINES dari file terpisah (src/lib/chat/engines.js)
+    logInfo("chat_engine_try", { engineName: "AI Router with Fallback (Gemini/Groq/Mistral/OR)" });
 
-    let lastErrorMessage = "";
-    const startTime = Date.now();
+    const result = streamText({
+      model: fallback(fallbackModels),
+      system: finalSystemPrompt,
+      messages,
+      maxTokens: 800,
+      temperature: 0.7,
+      tools: {
+        searchPublicKnowledge: tool({
+          description: "Mencari informasi, berita, atau layanan publik Kemenag dari knowledge base database website.",
+          parameters: z.object({
+            query: z.string().describe("Kata kunci pencarian, misalnya 'Syarat layanan Haji' atau 'Berita terbaru kakanwil'"),
+          }),
+          execute: async ({ query }) => {
+            try {
+              // Create embedding for the query using Gemini embedding model
+              const embeddingModel = google.textEmbeddingModel("text-embedding-004");
+              const { embedding } = await embeddingModel.doEmbed({ values: [query] });
 
-    // ─── LOOP FALLBACK ENGINE ────────────────────────────────
-    for (const engine of ENGINES) {
-      // Safety check: Jika sudah berjalan lebih dari 8 detik, hentikan loop
-      // untuk menghindari timeout server (biasanya 10 detik)
-      if (Date.now() - startTime > 8000) {
-        logWarn("chat_engine_timeout");
-        break;
-      }
+              // Perform vector similarity search in the database
+              const similarity = sql`1 - (${cosineDistance(
+                ai_knowledge_base.embedding,
+                embedding[0]
+              )})`;
+              const results = await db
+                .select({
+                  title: ai_knowledge_base.title,
+                  content_summary: ai_knowledge_base.content_summary,
+                  source_url: ai_knowledge_base.source_url,
+                  similarity,
+                })
+                .from(ai_knowledge_base)
+                .where(gt(similarity, 0.5))
+                .orderBy((t) => desc(t.similarity))
+                .limit(4);
 
-      const key = keys[engine.provider];
-      if (!key) continue;
-
-      try {
-        logInfo("chat_engine_try", { engineId: engine.id, engineName: engine.name });
-
-        let response;
-        let aiText = "";
-
-        if (engine.provider === "gemini") {
-          // Format Gemini
-          const contents = [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `Sistem: ${finalSystemPrompt}\n\nPahami instruksi. Jawab "Siap".`,
-                },
-              ],
-            },
-            {
-              role: "model",
-              parts: [{ text: "Siap, saya Kemenag Barut Assistant." }],
-            },
-            ...lastSix.map((m) => ({
-              role: m.role === "user" ? "user" : "model",
-              parts: [{ text: m.content }],
-            })),
-          ];
-
-          response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${engine.model}:generateContent?key=${key}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents,
-                generationConfig: { temperature: 0.7, maxOutputTokens: 400 },
-              }),
-            },
-          );
-
-          const data = await response.json();
-          if (data.error)
-            throw new Error(data.error.message || `Error ${data.error.code}`);
-          aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        } else {
-          // Format OpenAI Compatible (Groq, Mistral, OpenRouter)
-          let url = "";
-          if (engine.provider === "groq")
-            url = "https://api.groq.com/openai/v1/chat/completions";
-          else if (engine.provider === "mistral")
-            url = "https://api.mistral.ai/v1/chat/completions";
-          else if (engine.provider === "openrouter")
-            url = "https://openrouter.ai/api/v1/chat/completions";
-
-          response = await fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${key}`,
-              ...(engine.provider === "openrouter" && {
-                "HTTP-Referer": "https://baritoutara.kemenag.go.id",
-                "X-Title": "Kemenag Barut AI",
-              }),
-            },
-            body: JSON.stringify({
-              model: engine.model,
-              messages: [
-                { role: "system", content: finalSystemPrompt },
-                ...lastSix.map((m) => ({
-                  role: m.role === "user" ? "user" : "assistant",
-                  content: m.content,
-                })),
-              ],
-              temperature: 0.7,
-              max_tokens: 400,
-            }),
-          });
-
-          const data = await response.json();
-          if (!response.ok)
-            throw new Error(data.error?.message || `HTTP ${response.status}`);
-          aiText = data.choices?.[0]?.message?.content;
-        }
-
-        if (aiText) {
-          logInfo("chat_engine_success", { engineId: engine.id, engineName: engine.name });
-          return NextResponse.json({ content: aiText });
-        }
-      } catch (err) {
-        logWarn("chat_engine_fail", { engineId: engine.id, error: err.message });
-        lastErrorMessage = err.message;
-        // Lanjut ke lapis berikutnya...
-      }
-    }
-
-    // Jika semua engine gagal
-    return NextResponse.json(
-      {
-        error:
-          "Seluruh engine AI sedang sibuk. Mohon tunggu 1 menit lalu coba lagi ya! 🙏",
+              return results;
+            } catch (error) {
+              logError("rag_search_error", { error: error.message });
+              return { error: "Gagal mencari informasi di database" };
+            }
+          },
+        }),
+        showLocationMap: tool({
+          description: "Menampilkan peta lokasi kantor Kemenag Barito Utara ke pengguna. Panggil fungsi ini jika pengguna bertanya tentang lokasi atau alamat kantor.",
+          parameters: z.object({}),
+          execute: async () => {
+            return {
+              address: "Jl. Tumenggung Surapati No. 89, Melayu, Kec. Teweh Tengah, Kabupaten Barito Utara, Kalimantan Tengah 73814",
+              component: "LocationMap" // Di-handle oleh frontend
+            };
+          }
+        }),
+        showServiceList: tool({
+          description: "Menampilkan daftar layanan PTSP Kemenag Barito Utara dalam bentuk interaktif. Panggil fungsi ini jika pengguna ingin mendaftar layanan atau bertanya jenis layanan apa saja yang tersedia.",
+          parameters: z.object({}),
+          execute: async () => {
+            return {
+              component: "PTSPServiceList",
+              url: "https://survei.kemenag-baritoutara.com" 
+            };
+          }
+        })
       },
-      { status: 429 },
-    );
+    });
+
+    return result.toDataStreamResponse();
   } catch (error) {
     logError("chat_api_error", { error: error?.message });
     return NextResponse.json(

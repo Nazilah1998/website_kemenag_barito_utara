@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FloatingFeedback } from "@/components/features/admin/slides/SlidesUI";
+import { FloatingFeedback, ToggleSwitch } from "@/components/features/admin/slides/SlidesUI";
 
 export default function PengaturanForm({ initialSettings }) {
   const [formData, setFormData] = useState(initialSettings);
@@ -224,6 +224,29 @@ export default function PengaturanForm({ initialSettings }) {
                 className="w-full rounded-xl border-2 border-slate-200 bg-transparent px-4 py-3 text-slate-900 transition-colors focus:border-rose-500 focus:outline-none dark:border-slate-800 dark:text-white dark:focus:border-rose-500"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Fitur Keamanan (Anti-Copas) */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-slate-900">
+          <h2 className="mb-6 text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg className="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Keamanan & Perlindungan Tampilan
+          </h2>
+          
+          <div className="flex items-center justify-between gap-6 p-4 rounded-xl border border-slate-200 bg-slate-50 dark:bg-white/5 dark:border-white/5">
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-white">Anti-Copas (Nonaktifkan Klik Kanan)</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Jika diaktifkan, pengunjung tidak bisa melakukan klik kanan (melihat source code atau menyimpan gambar langsung) di halaman portal publik.
+              </p>
+            </div>
+            <ToggleSwitch
+              checked={formData.fitur_anti_copas || false}
+              onChange={(checked) => setFormData(prev => ({ ...prev, fitur_anti_copas: checked }))}
+            />
           </div>
         </div>
 

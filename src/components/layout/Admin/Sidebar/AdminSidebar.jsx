@@ -26,10 +26,9 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
     { href: "/admin/homepage-slides", label: "Slider Beranda", icon: <SliderIcon />, active: pathname.startsWith("/admin/homepage-slides"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
     { href: "/admin/youtube", label: "Dokumentasi YouTube", icon: <YoutubeIcon />, active: pathname.startsWith("/admin/youtube"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
     { href: "/admin/pesan", label: "Pesan & Pengaduan", icon: <MailIcon />, active: pathname.startsWith("/admin/pesan"), show: hasAccess(ctx, PERMISSIONS.KONTAK_MANAGE) },
-    { href: "/admin/audit", label: "Audit Log", icon: <AuditIcon />, active: pathname.startsWith("/admin/audit"), show: hasAccess(ctx, PERMISSIONS.AUDIT_VIEW) },
-    { href: "/admin/editors", label: "Manajemen Editor", icon: <UsersIcon />, active: pathname.startsWith("/admin/editors"), show: role === "super_admin" },
+
     { href: "/admin/pengaturan", label: "Pengaturan Identitas", icon: <SettingsIcon />, active: pathname.startsWith("/admin/pengaturan"), show: role === "super_admin" },
-    { href: "/admin/maintenance", label: "Mode Maintenance", icon: <MaintenanceIcon />, active: pathname.startsWith("/admin/maintenance"), show: role === "super_admin" },
+
   ];
 
   return (

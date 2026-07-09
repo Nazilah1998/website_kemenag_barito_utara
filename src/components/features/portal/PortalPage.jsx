@@ -11,7 +11,7 @@ import { useSiteSettings } from "@/context/SettingsContext";
 
 const PTSP_MENUS = [
   {
-    title: "Masuk PTSP",
+    title: "Masuk PTSP Si ATAK",
     href: "https://ptsp.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -49,7 +49,7 @@ const PTSP_MENUS = [
     ),
   },
   {
-    title: "Katalog Layanan PTSP",
+    title: "Katalog Layanan PTSP Si ATAK",
     href: "https://ptsp.kemenag-baritoutara.com/layanan",
     icon: (
       <svg
@@ -217,7 +217,7 @@ const INOVASI_MENUS = [
     ),
   },
   {
-    title: "Pusdatin (Segera Hadir)",
+    title: "PUSDATIN",
     href: "https://pusdatin.kemenag-baritoutara.com/",
     icon: (
       <svg
@@ -566,7 +566,7 @@ const PORTAL_LINKS = [
   },
   {
     id: "ptsp",
-    title: "Layanan PTSP",
+    title: "Layanan PTSP Si ATAK",
     description:
       "Pusat Layanan Terpadu Satu Pintu untuk segala urusan administrasi.",
     href: "#",
@@ -655,29 +655,6 @@ const PORTAL_LINKS = [
     ),
   },
   {
-    id: "survey",
-    title: "Layanan Survey",
-    description:
-      "Bantu kami meningkatkan kualitas layanan dengan mengisi survey.",
-    href: "#",
-    icon: (
-      <svg
-        className="w-8 h-8 text-purple-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-        />
-      </svg>
-    ),
-  },
-  {
     id: "zona",
     title: "Zona Integritas",
     description:
@@ -696,6 +673,28 @@ const PORTAL_LINKS = [
           strokeLinejoin="round"
           strokeWidth={2}
           d="M9 12l2 2 4-4m5.618-4.016A3.323 3.323 0 0010.605 8.9c.228.033.445.133.615.285l2.772 2.443a.5.5 0 010 .744l-2.772 2.443a1.056 1.056 0 01-.615.285 3.323 3.323 0 00-6.013 3.116 3.323 3.323 0 006.013 3.116c.228-.033.445-.133.615-.285l2.772-2.443a.5.5 0 010-.744l-2.772-2.443a1.056 1.056 0 01.615-.285 3.323 3.323 0 006.013-3.116 3.323 3.323 0 00-6.013-3.116z"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Layanan Survey",
+    description:
+      "Bantu kami meningkatkan kualitas layanan dengan mengisi survey.",
+    href: "https://survei.kemenag-baritoutara.com",
+    icon: (
+      <svg
+        className="w-8 h-8 text-purple-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
         />
       </svg>
     ),
@@ -770,7 +769,14 @@ export default function PortalPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-slate-900 selection:bg-emerald-500/30 overflow-x-hidden">
+    <div 
+      className="relative min-h-screen flex flex-col bg-slate-900 selection:bg-emerald-500/30 overflow-x-hidden"
+      onContextMenu={(e) => {
+        if (siteInfo?.fitur_anti_copas) {
+          e.preventDefault();
+        }
+      }}
+    >
       <HeroBackground />
       {/* SHARED CENTERED WRAPPER */}
       <div className="flex-1 flex flex-col justify-start md:justify-center w-full relative z-10 pt-6 pb-4 md:py-8">
@@ -1289,7 +1295,7 @@ export default function PortalPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-white font-bold text-lg">Layanan PTSP</h3>
+                  <h3 className="text-white font-bold text-lg">Layanan PTSP Si ATAK</h3>
                 </div>
                 <button
                   onClick={() => setIsPtspModalOpen(false)}

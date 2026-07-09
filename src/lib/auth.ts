@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
 import { logWarn, logError } from "@/lib/logger";
 import { db } from "@/lib/drizzle";
-import { profiles, admin_users } from "@/db/schema";
+import { pusdatinUsers, admin_users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
@@ -62,6 +62,9 @@ function buildForbiddenUrl(message: string, fallback = "/error"): string {
 export async function createServerSupabaseClient(): Promise<unknown> {
   const cookieStore = await cookies();
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+    cookieOptions: {
+      name: "sb-website-auth-token",
+    },
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -85,8 +88,8 @@ async function getUserProfile(userId: string | null): Promise<ProfileRecord | nu
   try {
     const [profile] = await db
       .select()
-      .from(profiles)
-      .where(eq(profiles.id, userId))
+      .from(pusdatinUsers)
+      .where(eq(pusdatinUsers.id, userId))
       .limit(1);
 
     if (profile) return profile as unknown as ProfileRecord;

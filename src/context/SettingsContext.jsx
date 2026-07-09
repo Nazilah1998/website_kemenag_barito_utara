@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { siteInfo as defaultSiteInfo, siteLinks as defaultSiteLinks } from "@/data/site";
 
 const SettingsContext = createContext({
@@ -9,13 +9,13 @@ const SettingsContext = createContext({
 });
 
 export function SettingsProvider({ children, initialSettings }) {
-  const [settings, setSettings] = useState({
-    siteInfo: defaultSiteInfo,
-    siteLinks: defaultSiteLinks,
-  });
-
-  useEffect(() => {
-    if (initialSettings) {
+  const settings = useMemo(() => {
+    if (!initialSettings) {
+      return {
+        siteInfo: defaultSiteInfo,
+        siteLinks: defaultSiteLinks,
+      };
+    }
       // Merge DB settings into the static siteInfo
       const mergedInfo = { ...defaultSiteInfo };
       if (initialSettings.nama_kantor) {
@@ -45,6 +45,9 @@ export function SettingsProvider({ children, initialSettings }) {
         mergedInfo.officeHours = [initialSettings.jam_layanan];
       }
 
+      // Security Settings
+      mergedInfo.fitur_anti_copas = initialSettings.fitur_anti_copas || false;
+
       // Merge Links
       const mergedLinks = { ...defaultSiteLinks };
       mergedLinks.emailHref = `mailto:${mergedInfo.email}`;
@@ -55,11 +58,10 @@ export function SettingsProvider({ children, initialSettings }) {
       if (initialSettings.facebook) mergedLinks.facebook = initialSettings.facebook;
       if (initialSettings.youtube) mergedLinks.youtube = initialSettings.youtube;
 
-      setSettings({
+      return {
         siteInfo: mergedInfo,
         siteLinks: mergedLinks,
-      });
-    }
+      };
   }, [initialSettings]);
 
   return (

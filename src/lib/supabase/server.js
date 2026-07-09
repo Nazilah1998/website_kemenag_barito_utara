@@ -9,6 +9,9 @@ export async function createClient() {
     env.supabaseUrl,
     env.supabasePublishableKey,
     {
+      cookieOptions: {
+        name: "sb-website-auth-token",
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();

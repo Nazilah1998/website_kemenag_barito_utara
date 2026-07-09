@@ -3,8 +3,8 @@ import { getCurrentSessionContext } from "@/lib/auth";
 import type { SessionContext } from "@/lib/auth";
 import { ROLES, getRolePermissions } from "@/lib/permissions";
 import { db } from "@/lib/drizzle";
-import { profiles, editor_requests, user_permissions } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { pusdatinUsers, pusdatinAppPermissions } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import { logError } from "@/lib/logger";
 
 function forbiddenUrl(
@@ -34,13 +34,13 @@ export async function getUserPermissionContext({
   role: string | null;
   email?: string | null;
 }): Promise<PermissionContext> {
-  const normalizedRole = String(role || "")
+  const sessionRole = String(role || "")
     .trim()
     .toLowerCase();
 
   if (!userId) {
     return {
-      role: normalizedRole || null,
+      role: sessionRole || null,
       email,
       isSuperAdmin: false,
       isAdmin: false,
@@ -52,104 +52,86 @@ export async function getUserPermissionContext({
     };
   }
 
-  if (normalizedRole === ROLES.SUPER_ADMIN) {
-    const basePermissions = new Set(getRolePermissions(normalizedRole));
-    return {
-      role: normalizedRole,
-      email,
-      isSuperAdmin: true,
-      isAdmin: true,
-      isEditor: true,
-      isActive: true,
-      approved: true,
-      requestStatus: "approved",
-      permissions: [...basePermissions],
-    };
-  }
-
-  let profile: { email?: string | null; is_active?: boolean } | null = null;
-  let request: { status?: string | null } | null = null;
+  let dbUser: { email?: string | null; status?: string | null; role?: string | null } | null = null;
+  let dbPerms: { role?: string | null; features?: any } | null = null;
   let approved = false;
   let isActive = false;
-  let requestStatus: string | null = null;
+  let resolvedRole = sessionRole;
+  let customPermissions: string[] = [];
 
   try {
-    // Keep critical auth state queries together.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [profilesRes, requestsRes]: [any[], any[]] = await Promise.all([
+    const [usersRes, permsRes] = await Promise.all([
       db
         .select({
-          id: profiles.id,
-          email: profiles.email,
-          role: profiles.role,
-          is_active: profiles.is_active,
+          id: pusdatinUsers.id,
+          email: pusdatinUsers.email,
+          role: pusdatinUsers.role,
+          status: pusdatinUsers.status,
         })
-        .from(profiles)
-        .where(eq(profiles.id, userId as string))
+        .from(pusdatinUsers)
+        .where(eq(pusdatinUsers.id, userId as string))
         .limit(1),
       db
-        .select({ status: editor_requests.status })
-        .from(editor_requests)
-        .where(eq(editor_requests.user_id, userId as string))
+        .select({
+          role: pusdatinAppPermissions.role,
+          features: pusdatinAppPermissions.features,
+        })
+        .from(pusdatinAppPermissions)
+        .where(
+          and(
+            eq(pusdatinAppPermissions.userId, userId as string),
+            eq(pusdatinAppPermissions.appId, "website-kemenag")
+          )
+        )
         .limit(1),
     ]);
 
-    profile = profilesRes[0] || null;
-    request = requestsRes[0] || null;
+    dbUser = usersRes[0] || null;
+    dbPerms = permsRes[0] || null;
 
-    requestStatus = request?.status || null;
-    approved = requestStatus === "approved";
-    isActive = Boolean(profile?.is_active);
+    if (dbUser) {
+      isActive = dbUser.status === "active";
+      if (dbUser.role === "super_admin") {
+        resolvedRole = "super_admin";
+        approved = true;
+      } else if (dbPerms) {
+        resolvedRole = dbPerms.role || "editor";
+        approved = true;
+        
+        if (Array.isArray(dbPerms.features)) {
+          customPermissions = dbPerms.features
+            .map((f: any) => typeof f === 'object' && f !== null ? f.id : String(f))
+            .filter(Boolean);
+        }
+      }
+    }
   } catch (error) {
     logError("permission_context_core_query_failed", {
       userId,
       error: error as Error,
     });
-    profile = null;
-    request = null;
-    requestStatus = null;
+    dbUser = null;
+    dbPerms = null;
     approved = false;
     isActive = false;
   }
 
-  // Query custom permissions separately so transient DB issues here
-  // don't break admin page rendering or auth flow.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let permissionsList: any[] = [];
-  try {
-    permissionsList = await db
-      .select({ permission: user_permissions.permission })
-      .from(user_permissions)
-      .where(eq(user_permissions.user_id, userId as string));
-  } catch (error) {
-    logError("permission_query_failed", {
-      userId,
-      error: error as Error,
-    });
-    permissionsList = [];
-  }
-
-  const customPermissions = (permissionsList || [])
-    .map((item: { permission?: string }) => item.permission)
-    .filter(Boolean);
-
-  const basePermissions = getRolePermissions(normalizedRole);
+  const basePermissions = getRolePermissions(resolvedRole);
   const allPermissions = Array.from(new Set([...basePermissions, ...customPermissions]));
   
-  const isRoleAdmin = normalizedRole === ROLES.ADMIN;
-  const finalApproved = isRoleAdmin ? true : approved;
-  const finalActive = isRoleAdmin ? true : isActive;
+  const isSuperAdmin = resolvedRole === ROLES.SUPER_ADMIN;
+  const isRoleAdmin = isSuperAdmin || resolvedRole === ROLES.ADMIN;
 
   return {
-    role: normalizedRole || null,
-    email: profile?.email || email || null,
-    isSuperAdmin: false,
+    role: resolvedRole || null,
+    email: dbUser?.email || email || null,
+    isSuperAdmin,
     isAdmin: isRoleAdmin,
-    isEditor: normalizedRole === ROLES.EDITOR || isRoleAdmin,
-    isActive: finalActive,
-    approved: finalApproved,
-    requestStatus: isRoleAdmin ? "approved" : requestStatus,
-    permissions: (finalApproved && finalActive) ? (allPermissions as string[]) : [],
+    isEditor: resolvedRole === ROLES.EDITOR || isRoleAdmin,
+    isActive,
+    approved,
+    requestStatus: approved ? "approved" : "pending",
+    permissions: (approved && isActive) ? (allPermissions as string[]) : [],
   };
 }
 

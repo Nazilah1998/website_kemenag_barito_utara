@@ -4,12 +4,20 @@ import pg from "pg";
 import * as schema from "../db/schema";
 import * as relations from "../db/relations";
 
-const pool = new pg.Pool({
+const globalForDb = globalThis as unknown as {
+  postgresPool: pg.Pool | undefined;
+};
+
+const pool = globalForDb.postgresPool ?? new pg.Pool({
   connectionString: process.env.DATABASE_URL,
   max: 30,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.postgresPool = pool;
+}
 
 // Cegah unhandled error dari pool yang bisa crash server
 pool.on("error", (err) => {

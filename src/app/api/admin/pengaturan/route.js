@@ -33,7 +33,8 @@ export async function GET() {
       jam_layanan_selasa: "08:00 - 16:00",
       jam_layanan_rabu: "08:00 - 16:00",
       jam_layanan_kamis: "08:00 - 16:00",
-      jam_layanan_jumat: "08:00 - 16:30"
+      jam_layanan_jumat: "08:00 - 16:30",
+      fitur_anti_copas: false
     };
 
     return apiResponse({
@@ -75,6 +76,7 @@ export async function POST(request) {
       jam_layanan_rabu: body.jam_layanan_rabu || "",
       jam_layanan_kamis: body.jam_layanan_kamis || "",
       jam_layanan_jumat: body.jam_layanan_jumat || "",
+      fitur_anti_copas: Boolean(body.fitur_anti_copas),
       updatedBy: auth.session.profile?.email || auth.session.user?.email || null,
       updatedAt: new Date().toISOString(),
     };
