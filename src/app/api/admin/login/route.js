@@ -2,7 +2,6 @@ import { apiResponse } from "@/lib/api-helpers";
 import { getCurrentSessionContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/drizzle";
-import { profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -75,29 +74,7 @@ export async function POST(request) {
 
     const supabase = await createClient();
 
-    // 1. Cek profil untuk status lockout
-    const [profile] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.email, email))
-      .limit(1);
-
-    if (
-      profile &&
-      profile.lockout_until &&
-      new Date(profile.lockout_until) > new Date()
-    ) {
-      const remainingMinutes = Math.ceil(
-        (new Date(profile.lockout_until) - new Date()) / 60000,
-      );
-      return apiResponse(
-        {
-          ok: false,
-          message: `Akun dikunci karena terlalu banyak percobaan gagal. Silakan coba lagi dalam ${remainingMinutes} menit.`,
-        },
-        403,
-      );
-    }
+    // lockout check removed because profiles table no longer exists
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -105,20 +82,7 @@ export async function POST(request) {
     });
 
     if (error) {
-      // 2. Catat kegagalan login
-      if (profile) {
-        const newAttempts = (profile.failed_login_attempts || 0) + 1;
-        const lockoutUntil =
-          newAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // Kunci 15 menit jika >= 5 kali
-
-        await db
-          .update(profiles)
-          .set({
-            failed_login_attempts: newAttempts,
-            lockout_until: lockoutUntil,
-          })
-          .where(eq(profiles.id, profile.id));
-      }
+      // 2. Catat kegagalan login dihapus karena tidak ada table profile
 
       return apiResponse(
         {
@@ -129,16 +93,7 @@ export async function POST(request) {
       );
     }
 
-    // 3. Reset kegagalan login jika berhasil
-    if (profile && profile.failed_login_attempts > 0) {
-      await db
-        .update(profiles)
-        .set({
-          failed_login_attempts: 0,
-          lockout_until: null,
-        })
-        .where(eq(profiles.id, profile.id));
-    }
+    // 3. Reset kegagalan login dihapus
 
     const session = await getCurrentSessionContext();
 

@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { env } from "@/lib/env";
 import { db } from "@/lib/drizzle";
-import { profiles, admin_users } from "@/db/schema";
+import { admin_users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { logError } from "@/lib/logger";
 
@@ -72,24 +72,7 @@ export async function POST(request) {
 
     // 3) Update profiles & admin_users tables
     await db.transaction(async (tx) => {
-      // Update profiles
-      const [profileExists] = await tx
-        .select({ id: profiles.id })
-        .from(profiles)
-        .where(eq(profiles.id, user.id))
-        .limit(1);
-
-      if (profileExists) {
-        await tx
-          .update(profiles)
-          .set({
-            ...(fullName ? { full_name: fullName } : {}),
-            ...(email ? { email: email } : {}),
-            ...(finalAvatarUrl !== undefined ? { avatar_url: finalAvatarUrl } : {}),
-            updated_at: new Date()
-          })
-          .where(eq(profiles.id, user.id));
-      }
+      // Update profiles block removed because profiles table no longer exists
 
       // Update admin_users if exists
       const [adminExists] = await tx

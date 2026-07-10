@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/drizzle";
-import { admin_audit_log } from "@/db/schema";
-import { lt, sql } from "drizzle-orm";
+// Database auditing is now handled by pusdatin, so this cron is disabled
+// import { db } from "@/lib/drizzle";
+// import { admin_audit_log } from "@/db/schema";
+// import { lt, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -29,13 +30,10 @@ export async function GET(request) {
   try {
     const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
 
-    const result = await db
-      .delete(admin_audit_log)
-      .where(lt(admin_audit_log.created_at, cutoff));
-
+    // Audit logs have been moved to pusdatin, skip deletion.
     return NextResponse.json({
-      message: "OK",
-      deleted: result.count || 0,
+      message: "OK, audit logs pruning handled by pusdatin.",
+      deleted: 0,
       retentionDays: RETENTION_DAYS,
       cutoffDate: cutoff.toISOString(),
       ranAt: new Date().toISOString(),
