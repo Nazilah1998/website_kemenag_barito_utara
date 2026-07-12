@@ -8,11 +8,15 @@ const globalForDb = globalThis as unknown as {
   postgresPool: pg.Pool | undefined;
 };
 
+const isProd = process.env.NODE_ENV === "production";
 const pool = globalForDb.postgresPool ?? new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 30,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  max: isProd ? 20 : 3, // 20 di VPS/Production, 3 di Local Dev agar tidak bocor
+  idleTimeoutMillis: isProd ? 30000 : 10000,
+  connectionTimeoutMillis: 30000,
+  allowExitOnIdle: !isProd,       // Dev: pool exit jika idle (cegah numpuk)
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
 });
 
 if (process.env.NODE_ENV !== "production") {

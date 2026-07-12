@@ -16,12 +16,22 @@ export const users = authSchema.table("users", {
 
 export const pusdatinSchema = pgSchema("kemenag_pusdatin");
 
-export const pusdatinUsers = pusdatinSchema.table("users", {
+export const pusdatinUsers = pusdatinSchema.table("profiles", {
 	id: uuid("id").primaryKey(),
 	email: text("email"),
 	role: text("role"),
 	status: text("status"),
 	name: text("name"),
+	phone: text("phone"),
+	address: text("address"),
+	created_at: timestamp("created_at", { withTimezone: true, precision: 6 }).defaultNow(),
+	updated_at: timestamp("updated_at", { withTimezone: true, precision: 6 }).defaultNow(),
+	nip: text("nip"),
+	jabatan: text("jabatan"),
+	unit_kerja: text("unit_kerja"),
+	is_verified: boolean("is_verified").default(true),
+	permissions: jsonb("permissions"),
+	avatar_url: text("avatar_url"),
 });
 
 export const pusdatinAppPermissions = pusdatinSchema.table("app_permissions", {
