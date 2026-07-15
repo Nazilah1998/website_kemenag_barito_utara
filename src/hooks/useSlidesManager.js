@@ -45,13 +45,10 @@ export function useSlidesManager() {
   const [error, setError] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 3;
-
-  const totalPages = Math.ceil(items.length / pageSize);
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return items.slice(start, start + pageSize);
-  }, [items, currentPage]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPublished, setTotalPublished] = useState(0);
+  const pageSize = 5; // Server-side pagination limit
 
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
@@ -62,7 +59,7 @@ export function useSlidesManager() {
       setLoading(true);
       setError("");
 
-      const response = await fetch("/api/admin/homepage-slides", {
+      const response = await fetch(`/api/admin/homepage-slides?page=${currentPage}&limit=${pageSize}`, {
         method: "GET",
         cache: "no-store",
         signal,
@@ -70,19 +67,24 @@ export function useSlidesManager() {
 
       const data = await readJsonSafely(response);
       if (!response.ok) {
-        throw new Error(data?.message || "Gagal memuat data slider.");
+        throw new Error(data?.message || "Gagal memuat data infografis.");
       }
 
       setItems(Array.isArray(data?.items) ? data.items : []);
-      setCurrentPage(1);
+      
+      if (data?.pagination) {
+        setTotalPages(data.pagination.totalPages || 1);
+        setTotalItems(data.pagination.totalItems || 0);
+        setTotalPublished(data.pagination.totalPublished || 0);
+      }
     } catch (err) {
       if (err.name === "AbortError") return;
-      setError(err?.message || "Gagal memuat data slider.");
+      setError(err?.message || "Gagal memuat data infografis.");
       setItems([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -99,10 +101,7 @@ export function useSlidesManager() {
     return () => window.clearTimeout(timeout);
   }, [message, error]);
 
-  const totalPublished = useMemo(
-    () => items.filter((item) => Boolean(item?.is_published)).length,
-    [items],
-  );
+  const paginatedItems = items; // Items are already paginated from server
 
   const imagePreview = useMemo(() => {
     if (form.image_upload_base64) return form.image_upload_base64;
@@ -305,6 +304,7 @@ export function useSlidesManager() {
     paginatedItems,
     currentPage,
     totalPages,
+    totalItems,
     handlePageChange,
     loading,
     openForm,

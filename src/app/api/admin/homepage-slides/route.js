@@ -6,7 +6,7 @@ import { cleanString } from "@/lib/validation";
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, recordAudit } from "@/lib/audit";
 import { db } from "@/lib/drizzle";
 import { homepage_slides } from "@/db/schema";
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, sql } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { broadcastRefresh } from "@/lib/realtime-service";
 import { logError } from "@/lib/logger";
@@ -32,25 +32,49 @@ function toBool(value, fallback = false) {
   return fallback;
 }
 
-
-
-export async function GET() {
+export async function GET(request) {
   const auth = await validateAdmin();
   if (!auth.ok) return auth.response;
 
   try {
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.max(1, parseInt(searchParams.get("limit") || "5", 10));
+    const offset = (page - 1) * limit;
+
+    const [countRes] = await db
+      .select({ count: sql`count(*)` })
+      .from(homepage_slides);
+    const totalItems = Number(countRes?.count || 0);
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+
+    const [publishedRes] = await db
+      .select({ count: sql`count(*)` })
+      .from(homepage_slides)
+      .where(sql`is_published = true`);
+    const totalPublished = Number(publishedRes?.count || 0);
+
     const data = await db
       .select()
       .from(homepage_slides)
-      .orderBy(asc(homepage_slides.sort_order), desc(homepage_slides.updated_at));
+      .orderBy(asc(homepage_slides.sort_order), desc(homepage_slides.updated_at))
+      .limit(limit)
+      .offset(offset);
 
     return apiResponse({
       items: (data || []).map(normalizeHomepageSlide),
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        totalPublished,
+      },
     });
   } catch (error) {
     logError("homepage_slides_get_error", { error: error?.message });
     return apiResponse(
-      { message: error?.message || "Gagal memuat data slider beranda." },
+      { message: error?.message || "Gagal memuat data infografis." },
       500,
     );
   }

@@ -9,7 +9,7 @@ export function FooterLink({ href, children }) {
   );
 }
 
-export function FooterInfoItem({ label, value, href }) {
+export function FooterInfoItem({ label, value, href, icon: Icon }) {
   const renderValue = Array.isArray(value) ? (
     <div className="mt-1 space-y-1">
       {value.map((item, index) => (
@@ -22,7 +22,10 @@ export function FooterInfoItem({ label, value, href }) {
 
   const content = (
     <>
-      <p className="text-xs font-black uppercase tracking-[0.2em]" style={{ color: "var(--footer-fg)" }}>{label}</p>
+      <div className="flex items-center gap-1.5 mb-1">
+        {Icon && <Icon className="h-4 w-4" style={{ color: "var(--footer-fg)" }} />}
+        <p className="text-xs font-black uppercase tracking-[0.2em]" style={{ color: "var(--footer-fg)" }}>{label}</p>
+      </div>
       {renderValue}
     </>
   );

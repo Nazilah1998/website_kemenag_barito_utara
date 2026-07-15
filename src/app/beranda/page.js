@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import dynamic from "next/dynamic";
-import { getLatestBeritaHome, getPopularBeritaHome, getBeritaPerBidangHome } from "../../lib/berita-home";
+import { getLatestBeritaHome, getNasionalBeritaHome, getPopularBeritaHome, getBeritaPerBidangHome, getHariIniBeritaHome } from "../../lib/berita-home";
 import { getLatestGaleriHome } from "../../lib/galeri-home";
 import { getPublicHomepageSlides } from "../../lib/homepage-slides";
 import HomeHeroSection from "@/components/features/home/HomeHeroSection";
@@ -73,7 +73,9 @@ const getCachedTestimonials = unstable_cache(
 
 export default async function HomePage() {
   const [
+    hariIniBerita,
     latestBerita,
+    nasionalBerita,
     popularBerita,
     groupedBerita,
     latestGaleri,
@@ -81,7 +83,9 @@ export default async function HomePage() {
     ptspServices,
     testimonialData
   ] = await Promise.all([
+    getHariIniBeritaHome(),
     getLatestBeritaHome(),
+    getNasionalBeritaHome(),
     getPopularBeritaHome(),
     getBeritaPerBidangHome(),
     getLatestGaleriHome(),
@@ -117,7 +121,7 @@ export default async function HomePage() {
       </ScrollReveal>
 
       <ScrollReveal delay={0.2}>
-        <HomeNewsSection latestBerita={latestBerita} popularBerita={popularBerita} />
+        <HomeNewsSection hariIniBerita={hariIniBerita} latestBerita={latestBerita} nasionalBerita={nasionalBerita} popularBerita={popularBerita} />
       </ScrollReveal>
 
       {groupedBerita && groupedBerita.length > 0 && (

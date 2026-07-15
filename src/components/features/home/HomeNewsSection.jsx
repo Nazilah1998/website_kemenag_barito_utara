@@ -8,7 +8,11 @@ import FillImageWithFallback from "@/components/features/berita/components/FillI
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: "easeOut" },
+  },
 };
 
 const staggerContainer = {
@@ -16,33 +20,60 @@ const staggerContainer = {
   visible: { transition: { staggerChildren: 0.09 } },
 };
 
-export default function HomeNewsSection({ latestBerita = [], popularBerita = [] }) {
+export default function HomeNewsSection({
+  hariIniBerita = [],
+  latestBerita = [],
+  nasionalBerita = [],
+  popularBerita = [],
+}) {
   const { t, locale } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const hariIniList = hariIniBerita || [];
   const latestList = latestBerita || [];
   const popularList = popularBerita || [];
+  const nasionalList = nasionalBerita || [];
 
+  const displayHariIni = hariIniList.slice(0, 3);
   const displayLatest = latestList.slice(0, 6);
-  const displayPopular = popularList.slice(0, 6);
+  const displayNasional = nasionalList.slice(0, 3);
+  const displayPopular = popularList.slice(0, 5);
 
   const isEn = locale === "en";
+  const hariIniBadgeText = isEn ? "TODAY'S NEWS" : "BERITA HARI INI";
+  const kegiatanBadgeText = isEn ? "ACTIVITIES & GENERAL" : "KEGIATAN & UMUM";
   const latestBadgeText = isEn ? "LATEST NEWS" : "BERITA TERBARU";
   const popularBadgeText = isEn ? "POPULAR" : "TERPOPULER";
   const popularTitleText = isEn ? "Popular News" : "Berita Terpopuler";
 
+  const [activeHariIniIndex, setActiveHariIniIndex] = useState(0);
+
+  const handleHariIniScroll = (e) => {
+    const container = e.target;
+    const scrollLeft = container.scrollLeft;
+    const itemWidth = container.offsetWidth * 0.82;
+    const newIndex = Math.round(scrollLeft / itemWidth);
+    if (newIndex !== activeHariIniIndex) {
+      setActiveHariIniIndex(newIndex);
+    }
+  };
+
   const nextSlide = () => {
-    setActiveIndex((prev) => (prev === displayLatest.length - 1 ? 0 : prev + 1));
+    setActiveIndex((prev) =>
+      prev === displayLatest.length - 1 ? 0 : prev + 1,
+    );
   };
 
   const prevSlide = () => {
-    setActiveIndex((prev) => (prev === 0 ? displayLatest.length - 1 : prev - 1));
+    setActiveIndex((prev) =>
+      prev === 0 ? displayLatest.length - 1 : prev - 1,
+    );
   };
 
   const handleScroll = (e) => {
     const container = e.target;
     const scrollLeft = container.scrollLeft;
-    const itemWidth = container.offsetWidth * 0.82; 
+    const itemWidth = container.offsetWidth * 0.82;
     const newIndex = Math.round(scrollLeft / itemWidth);
     if (newIndex !== activeIndex) {
       setActiveIndex(newIndex);
@@ -53,9 +84,12 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
     return (
       <section className="w-full px-6 py-16 sm:px-10 lg:px-16 lg:py-20 xl:px-20 overflow-hidden">
         <div className="theme-news-empty rounded-2xl p-10 text-center">
-          <h3 className="text-xl font-black">{t("home.news.emptyTitle") || "Belum ada berita terbaru"}</h3>
+          <h3 className="text-xl font-black">
+            {t("home.news.emptyTitle") || "Belum ada berita terbaru"}
+          </h3>
           <p className="theme-text-muted mt-3 text-sm leading-7">
-            {t("home.news.emptyDesc") || "Berita yang sudah dipublikasikan akan tampil otomatis di bagian ini."}
+            {t("home.news.emptyDesc") ||
+              "Berita yang sudah dipublikasikan akan tampil otomatis di bagian ini."}
           </p>
         </div>
       </section>
@@ -76,10 +110,12 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
             {t("nav.berita")}
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight lg:text-4xl">
-            {t("home.news.title") || "Ikuti pembaruan kegiatan dan informasi terkini"}
+            {t("home.news.title") ||
+              "Ikuti pembaruan kegiatan dan informasi terkini"}
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 dark:text-slate-400">
-            {t("home.news.description") || "Berita resmi dari Kementerian Agama Kabupaten Barito Utara untuk masyarakat."}
+            {t("home.news.description") ||
+              "Berita resmi dari Kementerian Agama Kabupaten Barito Utara untuk masyarakat."}
           </p>
         </motion.div>
 
@@ -96,34 +132,171 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
       {/* 1. MOBILE & TABLET LAYOUT (lg:hidden) */}
       <div className="mt-6 lg:hidden space-y-12">
-        {/* Slider for latest news */}
-        <div>
-          <div 
-            className="relative flex overflow-x-auto snap-x snap-mandatory pb-6 pt-4 -mx-6 sm:-mx-10 px-6 sm:px-10 gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            onScroll={handleScroll}
-          >
-            {displayLatest.map((item, index) => {
-              return (
-                <div
-                  key={item.slug}
-                  className="w-[82%] sm:w-[60%] flex-none snap-center transition-transform duration-300"
+        {/* Slider for Hari Ini news */}
+        {displayHariIni.length > 0 && (
+          <div>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <NewsCard item={item} index={index} t={t} isSlider priority={index === 0} />
-                </div>
-              );
-            })}
-          </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
+                  {isEn ? "Today's Highlights" : "Berita Hari Ini"}
+                </h3>
+                <p className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase mt-0.5">
+                  {isEn ? "LATEST UPDATES" : "INFORMASI TERKINI"}
+                </p>
+              </div>
+            </div>
+            <div
+              className="relative flex overflow-x-auto snap-x snap-mandatory pb-6 -mx-6 sm:-mx-10 px-6 sm:px-10 gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              onScroll={handleHariIniScroll}
+            >
+              {displayHariIni.map((item, index) => {
+                return (
+                  <div
+                    key={item.slug}
+                    className="w-[82%] sm:w-[60%] flex-none snap-center transition-transform duration-300"
+                  >
+                    <NewsCard
+                      item={item}
+                      index={index}
+                      t={t}
+                      isSlider
+                      priority={index === 0}
+                    />
+                  </div>
+                );
+              })}
+            </div>
 
-          {/* Navigation Dots */}
-          <div className="mt-2 flex justify-center gap-2">
-            {displayLatest.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300 dark:bg-slate-700"}`}
-              />
-            ))}
+            {/* Navigation Dots for Hari Ini */}
+            <div className="mt-2 flex justify-center gap-2">
+              {displayHariIni.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === activeHariIniIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300 dark:bg-slate-700"}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Slider for Kegiatan & Umum news */}
+        {displayLatest.length > 0 && (
+          <div>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H14"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
+                  {isEn ? "Activities & General" : "Kegiatan & Umum"}
+                </h3>
+                <p className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase mt-0.5">
+                  {isEn ? "PROGRAMS & ACTIVITIES" : "PROGRAM & AKTIVITAS"}
+                </p>
+              </div>
+            </div>
+            <div
+              className="relative flex overflow-x-auto snap-x snap-mandatory pb-6 -mx-6 sm:-mx-10 px-6 sm:px-10 gap-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              onScroll={handleScroll}
+            >
+              {displayLatest.map((item, index) => {
+                return (
+                  <div
+                    key={item.slug}
+                    className="w-[82%] sm:w-[60%] flex-none snap-center transition-transform duration-300"
+                  >
+                    <NewsCard item={item} index={index} t={t} isSlider />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Navigation Dots */}
+            <div className="mt-2 flex justify-center gap-2">
+              {displayLatest.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-emerald-600" : "w-1.5 bg-slate-300 dark:bg-slate-700"}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Nasional news list on Mobile */}
+        {displayNasional.length > 0 && (
+          <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-md mb-6">
+            <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+                {isEn ? "NATIONAL" : "NASIONAL"}
+              </span>
+              <h3 className="text-xl font-black mt-1 text-slate-900 dark:text-white">
+                {isEn ? "National News" : "Berita Nasional"}
+              </h3>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {displayNasional.map((item, index) => (
+                <Link
+                  key={item.slug}
+                  href={`/berita/${item.slug}`}
+                  className="group flex gap-4 items-center p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-800/50"
+                >
+                  {/* Cover Image */}
+                  <div className="relative w-20 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-800">
+                    <FillImageWithFallback
+                      src={item.coverImage}
+                      fallbackSrc="/assets/branding/kemenag.svg"
+                      alt={item.title}
+                      sizes="80px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Info Content */}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                      {item.category}
+                    </span>
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
+                      {item.title}
+                    </h4>
+                    <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
+                      <span>{item.date}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Popular news list on Mobile */}
         {displayPopular.length > 0 && (
@@ -166,9 +339,24 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
                     <div className="flex items-center gap-3 mt-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
                       <span>{item.date}</span>
                       <span className="flex items-center gap-1">
-                        <svg className="w-3 h-3 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <svg
+                          className="w-3 h-3 text-slate-400 dark:text-slate-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
                         </svg>
                         {item.views}
                       </span>
@@ -183,98 +371,242 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
 
       {/* 2. DESKTOP LAYOUT (lg:grid) */}
       <div className="hidden lg:grid lg:grid-cols-12 lg:gap-8 mt-10">
-        {/* Left Column: Latest News (Col span 8) */}
-        <div className="lg:col-span-8 flex flex-col">
-          <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 flex-shrink-0">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
-              {latestBadgeText}
-            </span>
-          </div>
-
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 flex-grow"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={staggerContainer}
-          >
-            {displayLatest.map((item, index) => (
-              <motion.div key={item.slug} variants={fadeInUp}>
-                <NewsCard
-                  item={item}
-                  index={index}
-                  t={t}
-                  priority={index === 0}
-                />
+        {/* Left Column: Hari Ini & Kegiatan Umum (Col span 8) */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          {/* HARI INI BLOCK */}
+          {displayHariIni.length > 0 && (
+            <div>
+              <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                    {isEn ? "Today's Highlights" : "Berita Hari Ini"}
+                  </h3>
+                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase mt-1">
+                    {isEn
+                      ? "LATEST UPDATES & BREAKING NEWS"
+                      : "INFORMASI TERKINI & TERBARU"}
+                  </p>
+                </div>
+              </div>
+              <motion.div
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 flex-grow"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
+                variants={staggerContainer}
+              >
+                {displayHariIni.map((item, index) => (
+                  <motion.div key={item.slug} variants={fadeInUp}>
+                    <NewsCard
+                      item={item}
+                      index={index}
+                      t={t}
+                      priority={index === 0}
+                    />
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
+            </div>
+          )}
+
+          {/* KEGIATAN & UMUM BLOCK */}
+          {displayLatest.length > 0 && (
+            <div>
+              <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H14"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                    {isEn ? "Activities & General" : "Kegiatan & Umum"}
+                  </h3>
+                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase mt-1">
+                    {isEn
+                      ? "PROGRAMS AND AGENCY ACTIVITIES"
+                      : "PROGRAM DAN AKTIVITAS KANTOR"}
+                  </p>
+                </div>
+              </div>
+              <motion.div
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 flex-grow"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
+                variants={staggerContainer}
+              >
+                {displayLatest.map((item, index) => (
+                  <motion.div key={item.slug} variants={fadeInUp}>
+                    <NewsCard item={item} index={index} t={t} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          )}
         </div>
 
-        {/* Right Column: Popular News (Col span 4) */}
-        {displayPopular.length > 0 && (
+        {/* Right Column: Nasional and Popular News (Col span 4) */}
+        {(displayNasional.length > 0 || displayPopular.length > 0) && (
           <div className="lg:col-span-4 flex flex-col">
             {/* Spacer header matching the height of the left header perfectly */}
             <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 opacity-0 select-none pointer-events-none hidden lg:block flex-shrink-0">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">SPACER</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                SPACER
+              </span>
             </div>
 
-            <div className="flex-grow flex flex-col">
-              <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-md flex flex-col h-full">
-                <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4 flex-shrink-0">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
-                    {popularBadgeText}
-                  </span>
-                  <h3 className="text-xl font-black mt-1 text-slate-900 dark:text-white">
-                    {popularTitleText}
-                  </h3>
-                </div>
+            <div className="flex flex-col gap-6">
+              {/* Nasional Block */}
+              {displayNasional.length > 0 && (
+                <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-md flex flex-col">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4 flex-shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+                      {isEn ? "NATIONAL" : "NASIONAL"}
+                    </span>
+                    <h3 className="text-xl font-black mt-1 text-slate-900 dark:text-white">
+                      {isEn ? "National News" : "Berita Nasional"}
+                    </h3>
+                  </div>
 
-                <div className="flex-1 flex flex-col justify-between gap-2">
-                  {displayPopular.map((item, index) => (
-                    <div
-                      key={item.slug}
-                      className="flex-grow flex flex-col justify-center"
-                    >
-                      <Link
-                        href={`/berita/${item.slug}`}
-                        className="group flex gap-4 items-center p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-800/50 w-full"
+                  <div className="flex flex-col gap-4">
+                    {displayNasional.map((item, index) => (
+                      <div
+                        key={item.slug}
+                        className="flex flex-col justify-center"
                       >
-                        {/* Cover Image */}
-                        <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-800">
-                          <FillImageWithFallback
-                            src={item.coverImage}
-                            fallbackSrc="/assets/branding/kemenag.svg"
-                            alt={item.title}
-                            sizes="96px"
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
-
-                        {/* Info Content */}
-                        <div className="flex-1 min-w-0">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                            {item.category}
-                          </span>
-                          <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
-                            {item.title}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                            <span>{item.date}</span>
-                            <span className="flex items-center gap-1">
-                              <svg className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                              {item.views}
-                            </span>
+                        <Link
+                          href={`/berita/${item.slug}`}
+                          className="group flex gap-4 items-center p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-800/50 w-full"
+                        >
+                          {/* Cover Image */}
+                          <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-800">
+                            <FillImageWithFallback
+                              src={item.coverImage}
+                              fallbackSrc="/assets/branding/kemenag.svg"
+                              alt={item.title}
+                              sizes="96px"
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
                           </div>
-                        </div>
-                      </Link>
-                    </div>
-                  ))}
+
+                          {/* Info Content */}
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                              {item.category}
+                            </span>
+                            <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
+                              {item.title}
+                            </h4>
+                            <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                              <span>{item.date}</span>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Popular Block */}
+              {displayPopular.length > 0 && (
+                <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-md flex flex-col">
+                  <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4 flex-shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+                      {popularBadgeText}
+                    </span>
+                    <h3 className="text-xl font-black mt-1 text-slate-900 dark:text-white">
+                      {popularTitleText}
+                    </h3>
+                  </div>
+
+                  <div className="flex flex-col gap-6">
+                    {displayPopular.map((item, index) => (
+                      <div
+                        key={item.slug}
+                        className="flex flex-col justify-center"
+                      >
+                        <Link
+                          href={`/berita/${item.slug}`}
+                          className="group flex gap-4 items-center p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 border border-transparent hover:border-slate-100 dark:hover:border-slate-800/50 w-full"
+                        >
+                          {/* Cover Image */}
+                          <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-800">
+                            <FillImageWithFallback
+                              src={item.coverImage}
+                              fallbackSrc="/assets/branding/kemenag.svg"
+                              alt={item.title}
+                              sizes="96px"
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          </div>
+
+                          {/* Info Content */}
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                              {item.category}
+                            </span>
+                            <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors mt-0.5">
+                              {item.title}
+                            </h4>
+                            <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                              <span>{item.date}</span>
+                              <span className="flex items-center gap-1">
+                                <svg
+                                  className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2.5"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                  />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2.5"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                  />
+                                </svg>
+                                {item.views}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -283,10 +615,17 @@ export default function HomeNewsSection({ latestBerita = [], popularBerita = [] 
   );
 }
 
-function NewsCard({ item, index, t, className = "", isSlider = false, priority = false }) {
+function NewsCard({
+  item,
+  index,
+  t,
+  className = "",
+  isSlider = false,
+  priority = false,
+}) {
   return (
     <article
-      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-2 hover:scale-[1.01] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? 'mx-1' : ''} ${className}`}
+      className={`group relative h-full overflow-hidden rounded-3xl border border-slate-200/60 bg-white shadow-lg transition-all duration-500 hover:border-emerald-200 hover:shadow-[0_30px_60px_-15px_rgba(16,185,129,0.15)] hover:-translate-y-2 hover:scale-[1.01] dark:border-slate-800 dark:bg-slate-900 ${isSlider ? "mx-1" : ""} ${className}`}
     >
       <Link href={`/berita/${item.slug}`} className="flex h-full flex-col">
         {/* Image Area */}
@@ -325,7 +664,8 @@ function NewsCard({ item, index, t, className = "", isSlider = false, priority =
         {/* Content Area */}
         <div className="flex flex-1 flex-col p-6">
           <p className="line-clamp-3 text-[11px] leading-6 text-slate-500 dark:text-slate-400 lg:leading-5">
-            {item.excerpt || "Baca selengkapnya mengenai berita terbaru dari Kementerian Agama Kabupaten Barito Utara..."}
+            {item.excerpt ||
+              "Baca selengkapnya mengenai berita terbaru dari Kementerian Agama Kabupaten Barito Utara..."}
           </p>
 
           <div className="mt-auto pt-6 flex items-center justify-between border-t border-slate-50 dark:border-white/5">
@@ -344,7 +684,16 @@ function NewsCard({ item, index, t, className = "", isSlider = false, priority =
 
 function ArrowRightIcon({ className = "" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
   );
@@ -352,7 +701,16 @@ function ArrowRightIcon({ className = "" }) {
 
 function ChevronLeftIcon({ className = "" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M15 18l-6-6 6-6" />
     </svg>
   );
@@ -360,7 +718,16 @@ function ChevronLeftIcon({ className = "" }) {
 
 function ChevronRightIcon({ className = "" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M9 18l6-6-6-6" />
     </svg>
   );

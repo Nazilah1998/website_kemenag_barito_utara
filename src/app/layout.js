@@ -18,6 +18,7 @@ import {
 import DynamicImports from "@/components/layout/DynamicImports";
 import JsonLd from "@/components/features/seo/JsonLd";
 import OneSignalProvider from "@/components/providers/OneSignalProvider";
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
@@ -186,6 +187,8 @@ export default async function RootLayout({ children }) {
         </Providers>
         <OneSignalProvider />
         <DynamicImports />
+        <GoogleAnalytics gaId="G-GX7FWC45J3" />
+        <GoogleTagManager gtmId="GTM-NKNG878L" />
       </body>
     </html>
   );

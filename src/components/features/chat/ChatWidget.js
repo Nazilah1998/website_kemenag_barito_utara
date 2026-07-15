@@ -125,8 +125,9 @@ const TypingDots = () => (
 // ─── Main Component ──────────────────────────────────────────────────────────
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, append } = useChat({
+  const { messages, setMessages, status, isLoading: legacyIsLoading, sendMessage } = useChat({
     api: '/api/chat',
+    maxSteps: 3,
     initialMessages: [
       {
         id: "initial",
@@ -140,6 +141,9 @@ const ChatWidget = () => {
     }
   });
 
+  const isChatLoading = status ? status === 'submitted' || status === 'streaming' : legacyIsLoading;
+
+  const [localInput, setLocalInput] = useState("");
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const messagesEndRef = useRef(null);
@@ -209,7 +213,9 @@ const ChatWidget = () => {
   };
 
   const handleQuickAction = (text) => {
-    append({ role: "user", content: text, createdAt: new Date() });
+    if (sendMessage) {
+      sendMessage({ text });
+    }
     setShowQuickActions(false);
   };
 
@@ -670,10 +676,9 @@ const ChatWidget = () => {
                           : "0 2px 8px rgba(0,0,0,0.2)",
                     }}
                   >
-                    {typeof msg.content === "string"
-                      ? msg.content
-                          .split(/(https?:\/\/[^\s]+)/g)
-                          .map((part, idx) => {
+                    {(() => {
+                      const textContent = msg.content || (msg.parts ? msg.parts.filter(p => p.type === 'text').map(p => p.text).join('') : '');
+                      return textContent.split(/(https?:\/\/[^\s]+)/g).map((part, idx) => {
                             if (part.match(/(https?:\/\/[^\s]+)/)) {
                               return (
                                 <a
@@ -696,7 +701,7 @@ const ChatWidget = () => {
                               <React.Fragment key={idx}>{part}</React.Fragment>
                             );
                           })
-                      : msg.content}
+                    })()}
                   </div>
                   
                   {/* Generative UI & Tool Invocations */}
@@ -745,13 +750,13 @@ const ChatWidget = () => {
                       paddingRight: 4,
                     }}
                   >
-                    {formatTime(msg.createdAt)}
+                    {msg.createdAt ? formatTime(new Date(msg.createdAt)) : formatTime(new Date())}
                   </span>
                 </div>
               ))}
 
               {/* Typing Indicator */}
-              {isLoading && (
+              {isChatLoading && (
                 <div
                   style={{
                     display: "flex",
@@ -774,7 +779,7 @@ const ChatWidget = () => {
               )}
 
               {/* Quick Actions */}
-              {showQuickActions && messages.length === 1 && (
+              {showQuickActions && (
                 <div style={{ animation: "fadeSlideIn 0.4s ease 0.2s both" }}>
                   <p
                     style={{
@@ -829,7 +834,15 @@ const ChatWidget = () => {
               }}
             >
               <form
-                onSubmit={handleSubmit}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!localInput.trim()) return;
+                  if (sendMessage) {
+                    sendMessage({ text: localInput });
+                  }
+                  setLocalInput("");
+                  setShowQuickActions(false);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -850,10 +863,10 @@ const ChatWidget = () => {
                 <input
                   ref={inputRef}
                   type="text"
-                  value={input}
-                  onChange={handleInputChange}
+                  value={localInput}
+                  onChange={(e) => setLocalInput(e.target.value)}
                   placeholder="Tulis pesan..."
-                  disabled={isLoading}
+                  disabled={isChatLoading}
                   style={{
                     flex: 1,
                     background: "transparent",
@@ -867,32 +880,32 @@ const ChatWidget = () => {
                 />
                 <motion.button
                   type="submit"
-                  disabled={!input.trim() || isLoading}
-                  whileHover={input.trim() && !isLoading ? { scale: 1.08 } : {}}
-                  whileTap={input.trim() && !isLoading ? { scale: 0.92 } : {}}
+                  disabled={!localInput.trim() || isChatLoading}
+                  whileHover={localInput.trim() && !isChatLoading ? { scale: 1.08 } : {}}
+                  whileTap={localInput.trim() && !isChatLoading ? { scale: 0.92 } : {}}
                   style={{
                     width: 36,
                     height: 36,
                     borderRadius: 12,
                     border: "none",
                     background:
-                      input.trim() && !isLoading
+                      localInput.trim() && !isChatLoading
                         ? "linear-gradient(135deg, #059669, #10b981)"
                         : "rgba(255,255,255,0.08)",
                     color:
-                      input.trim() && !isLoading
+                      localInput.trim() && !isChatLoading
                         ? "#fff"
                         : "rgba(255,255,255,0.25)",
                     cursor:
-                      input.trim() && !isLoading ? "pointer" : "not-allowed",
+                      localInput.trim() && !isChatLoading ? "pointer" : "not-allowed",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     transition: "all 0.2s",
                     flexShrink: 0,
                     boxShadow:
-                      input.trim() && !isLoading
-                        ? "0 2px 12px rgba(5,150,105,0.4)"
+                      localInput.trim() && !isChatLoading
+                        ? "0 4px 12px rgba(16, 185, 129, 0.3)"
                         : "none",
                   }}
                 >

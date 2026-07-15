@@ -12,6 +12,18 @@ export default function YoutubeManager() {
   const [editingId, setEditingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [fetchingTitle, setFetchingTitle] = useState(false);
+  const [urlError, setUrlError] = useState("");
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  
+  const currentItems = items.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const [form, setForm] = useState({
     title: "",
@@ -23,6 +35,44 @@ export default function YoutubeManager() {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : url;
+  };
+
+  const handleYoutubeUrlChange = async (e) => {
+    const url = e.target.value;
+    setForm((prev) => ({ ...prev, youtube_id: url }));
+
+    if (!url.trim()) {
+      setUrlError("");
+      setForm((prev) => ({ ...prev, title: "" }));
+      return;
+    }
+
+    const id = extractYoutubeId(url);
+    if (id && id !== url && id.length === 11) {
+      setUrlError("");
+      if (!form.title) {
+        try {
+          setFetchingTitle(true);
+          const res = await fetch(`/api/admin/youtube/info?id=${id}`);
+          
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.title) {
+              setForm((prev) => ({ ...prev, title: data.title }));
+            }
+          } else {
+            setUrlError("Video tidak ditemukan atau private.");
+          }
+        } catch (err) {
+          setUrlError("Terjadi kesalahan saat mengambil judul.");
+        } finally {
+          setFetchingTitle(false);
+        }
+      }
+    } else {
+      setUrlError("URL YouTube tidak valid.");
+      setForm((prev) => ({ ...prev, title: "" }));
+    }
   };
 
   const fetchItems = async () => {
@@ -110,32 +160,42 @@ export default function YoutubeManager() {
     }
   };
 
-  const handleMove = async (index, direction) => {
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === items.length - 1) return;
+  const handleMove = async (localIndex, direction) => {
+    const globalIndex = (currentPage - 1) * itemsPerPage + localIndex;
+    
+    if (direction === "up" && globalIndex === 0) return;
+    if (direction === "down" && globalIndex === items.length - 1) return;
 
     const newItems = [...items];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const targetGlobalIndex = direction === "up" ? globalIndex - 1 : globalIndex + 1;
 
-    // Swap elements
-    [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
+    // We only swap the items and their sort_order
+    const itemA = { ...newItems[globalIndex] };
+    const itemB = { ...newItems[targetGlobalIndex] };
+    
+    // Swap the logical sort_order
+    const tempSortOrder = itemA.sort_order;
+    itemA.sort_order = itemB.sort_order;
+    itemB.sort_order = tempSortOrder;
 
-    // Update sort_order locally
-    const updatedItems = newItems.map((item, idx) => ({ ...item, sort_order: idx }));
-    setItems(updatedItems);
+    // Swap in array
+    newItems[globalIndex] = itemB;
+    newItems[targetGlobalIndex] = itemA;
+
+    setItems(newItems);
 
     try {
-      // Background save for the two swapped items
+      // Send updates for the two swapped items only
       await Promise.all([
-        fetch(`/api/admin/youtube/${updatedItems[index].id}`, {
+        fetch(`/api/admin/youtube/${itemA.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sort_order: updatedItems[index].sort_order }),
+          body: JSON.stringify({ sort_order: itemA.sort_order }),
         }),
-        fetch(`/api/admin/youtube/${updatedItems[targetIndex].id}`, {
+        fetch(`/api/admin/youtube/${itemB.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sort_order: updatedItems[targetIndex].sort_order }),
+          body: JSON.stringify({ sort_order: itemB.sort_order }),
         })
       ]);
     } catch (err) {
@@ -202,21 +262,23 @@ export default function YoutubeManager() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {items.map((item, index) => (
+                {currentItems.map((item, index) => {
+                  const globalIndex = (currentPage - 1) * itemsPerPage + index;
+                  return (
                   <tr key={item.id} className="transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50">
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-center gap-1">
                         <button 
                           onClick={() => handleMove(index, "up")}
-                          disabled={index === 0}
+                          disabled={globalIndex === 0}
                           className="text-slate-400 hover:text-emerald-600 disabled:opacity-30 transition-colors"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7"/></svg>
                         </button>
-                        <span className="font-bold text-slate-700 dark:text-slate-200">{index + 1}</span>
+                        <span className="font-bold text-slate-700 dark:text-slate-200">{globalIndex + 1}</span>
                         <button 
                           onClick={() => handleMove(index, "down")}
-                          disabled={index === items.length - 1}
+                          disabled={globalIndex === items.length - 1}
                           className="text-slate-400 hover:text-emerald-600 disabled:opacity-30 transition-colors"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
@@ -234,8 +296,8 @@ export default function YoutubeManager() {
                             e.target.src = `https://img.youtube.com/vi/${item.youtube_id}/hqdefault.jpg`;
                           }}
                         />
-                        {index === 0 && (
-                          <div className="absolute top-1 left-1 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">UTAMA</div>
+                        {globalIndex === 0 && (
+                          <div className="absolute top-1 left-1 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md">UTAMA</div>
                         )}
                       </div>
                     </td>
@@ -259,9 +321,51 @@ export default function YoutubeManager() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-6 dark:border-slate-800">
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, items.length)} dari {items.length} video
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+              >
+                Sebelumnya
+              </button>
+              
+              <div className="hidden sm:flex items-center gap-1">
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold transition-all ${
+                      currentPage === i + 1 
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' 
+                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+              >
+                Selanjutnya
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -279,7 +383,24 @@ export default function YoutubeManager() {
             
             <form onSubmit={handleSave} className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Judul Video</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">URL / ID YouTube</label>
+                <input
+                  type="text"
+                  required
+                  value={form.youtube_id}
+                  onChange={handleYoutubeUrlChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-400"
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+                <p className="mt-2 text-xs text-slate-500">Ketik/tempel URL YouTube di sini. Judul akan diisi otomatis.</p>
+                {urlError && <p className="mt-1 text-xs text-red-500 font-medium">{urlError}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  Judul Video 
+                  {fetchingTitle && <span className="text-emerald-600 text-xs font-normal italic ml-2 animate-pulse">(Mengambil judul otomatis...)</span>}
+                </label>
                 <input
                   type="text"
                   required
@@ -288,19 +409,6 @@ export default function YoutubeManager() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-400"
                   placeholder="Masukkan judul video..."
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">URL / ID YouTube</label>
-                <input
-                  type="text"
-                  required
-                  value={form.youtube_id}
-                  onChange={(e) => setForm({...form, youtube_id: e.target.value})}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-400"
-                  placeholder="https://youtube.com/watch?v=..."
-                />
-                <p className="mt-2 text-xs text-slate-500">Anda dapat memasukkan URL penuh atau ID videonya saja.</p>
               </div>
 
               <label className="flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800">

@@ -30,11 +30,11 @@ const ProfileNode = ({ data, variant = "secondary", className = "", delay = 0 })
       </div>
       {/* Name Container */}
       <div className="min-h-[44px] flex flex-col items-center justify-start w-full mb-2">
-        <h4 className={`font-black text-[13px] sm:text-[14px] leading-tight whitespace-nowrap truncate ${isPrimary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+        <h4 className={`font-black text-[14px] sm:text-[15px] leading-snug text-center ${isPrimary ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
           {data.name}
         </h4>
         {data.nip && data.nip !== "-" && (
-          <div className={`mt-1.5 inline-flex items-center gap-1 rounded-md px-2 py-0.5 border ${isPrimary ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700'}`}>
+          <div className={`mt-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 border ${isPrimary ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-100 dark:bg-slate-800 dark:border-slate-700'}`}>
             <p className={`text-[9px] sm:text-[10px] font-mono tracking-wide ${isPrimary ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
               NIP. {data.nip}
             </p>

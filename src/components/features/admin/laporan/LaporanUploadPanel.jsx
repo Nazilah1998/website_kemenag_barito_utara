@@ -1,4 +1,4 @@
-// src/components/admin/laporan/LaporanUploadPanel.jsx
+// src/components/features/admin/laporan/LaporanUploadPanel.jsx
 "use client";
 
 import React from "react";
@@ -19,8 +19,8 @@ export default function LaporanUploadPanel({
     activeCategory,
     docForm,
     setDocForm,
-    selectedFile,
-    setSelectedFile,
+    selectedFiles = [],
+    setSelectedFiles,
     savingDocument,
     uploadFeedback,
     handleUpload,
@@ -46,10 +46,12 @@ export default function LaporanUploadPanel({
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            const file = e.dataTransfer.files[0];
-            if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-                setSelectedFile(file);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const files = Array.from(e.dataTransfer.files).filter(
+                (file) => file.type === "application/pdf" || file.name.endsWith(".pdf")
+            );
+            if (files.length > 0) {
+                setSelectedFiles(files);
             } else {
                 alert("Hanya file PDF yang diizinkan.");
             }
@@ -134,11 +136,10 @@ export default function LaporanUploadPanel({
 
                     <Input
                         inputId="laporan-title"
-                        label="Judul Dokumen"
-                        required
+                        label="Judul Dokumen (Bisa Kosong Jika Banyak File)"
                         className="!h-12"
                         placeholder="Masukkan judul resmi..."
-                        hint="Gunakan bahasa Indonesia yang baku."
+                        hint="Jika kosong pada upload massal, judul akan diambil dari nama file."
                         value={docForm.title}
                         onChange={(e) => setDocForm((prev) => ({ ...prev, title: e.target.value }))}
                     />
@@ -157,7 +158,7 @@ export default function LaporanUploadPanel({
 
                     <div className="space-y-2">
                         <label className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-slate-100 ml-1">
-                            File PDF <span className="text-rose-500">*</span>
+                            File PDF (Bisa Pilih Banyak) <span className="text-rose-500">*</span>
                         </label>
                         <div 
                             className="relative group mt-1 w-full min-w-0"
@@ -169,11 +170,12 @@ export default function LaporanUploadPanel({
                                 id="pdf-upload-input"
                                 type="file"
                                 accept="application/pdf,.pdf"
-                                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                multiple
+                                onChange={(e) => setSelectedFiles(Array.from(e.target.files || []))}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
                             <div className={`relative flex flex-col items-center justify-center min-h-[160px] w-full min-w-0 overflow-hidden rounded-[1.5rem] border-2 border-dashed px-6 py-8 transition-all duration-300 ${isDragging ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 scale-[1.02] shadow-xl shadow-emerald-500/20" : "border-slate-200 bg-white/50 hover:bg-white hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-slate-700 dark:bg-slate-800/30 dark:hover:border-emerald-500 dark:hover:bg-slate-800"}`}>
-                                {selectedFile || docForm.file_name ? (
+                                {selectedFiles?.length > 0 ? (
                                     <>
                                         <div className="relative shrink-0 flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-700 dark:from-emerald-900/60 dark:to-emerald-800/40 dark:text-emerald-400 mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
                                             <div className="absolute inset-0 rounded-[1.25rem] border border-white/40 dark:border-emerald-400/20" />
@@ -183,8 +185,11 @@ export default function LaporanUploadPanel({
                                         </div>
                                         <div className="w-full min-w-0 max-w-full px-2 text-center flex flex-col items-center">
                                             <span className="block w-full max-w-full line-clamp-2 break-all text-sm font-bold text-slate-900 dark:text-white">
-                                                {selectedFile?.name || docForm.file_name}
+                                                {selectedFiles.length} file dipilih
                                             </span>
+                                            {selectedFiles.length === 1 && (
+                                                <span className="block mt-1 text-xs text-slate-500 dark:text-slate-400 truncate w-full">{selectedFiles[0].name}</span>
+                                            )}
                                             <span className="text-[10px] font-bold text-slate-500 mt-3 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full transition-colors group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:group-hover:bg-emerald-900/30 dark:group-hover:text-emerald-400">Klik atau seret file PDF lain untuk mengganti</span>
                                         </div>
                                     </>
@@ -196,7 +201,7 @@ export default function LaporanUploadPanel({
                                             </svg>
                                         </div>
                                         <span className={`text-[11px] font-black uppercase tracking-widest text-center transition-colors ${isDragging ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"}`}>
-                                            {isDragging ? "Lepaskan PDF di sini" : "Pilih / Drag File PDF"}
+                                            {isDragging ? "Lepaskan PDF di sini" : "Pilih / Drag Beberapa File PDF"}
                                         </span>
                                     </>
                                 )}

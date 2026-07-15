@@ -14,6 +14,20 @@ function getCoverImage(item) {
   return item.coverImage || FALLBACK_IMAGE;
 }
 
+function HighlightText({ text, keyword }) {
+  if (!keyword || !text) return <>{text}</>;
+  const parts = String(text).split(new RegExp(`(${keyword})`, 'gi'));
+  return (
+    <span>
+      {parts.map((part, i) => 
+        part.toLowerCase() === keyword.toLowerCase() ? 
+          <mark key={i} className="bg-yellow-300 text-slate-900 rounded-sm px-0.5 font-bold">{part}</mark> : 
+          <span key={i}>{part}</span>
+      )}
+    </span>
+  );
+}
+
 function NewsCardImage({ item, className, sizes, ...rest }) {
   const [imgSrc, setImgSrc] = React.useState(null);
   return (
@@ -31,7 +45,7 @@ function NewsCardImage({ item, className, sizes, ...rest }) {
 
 
 
-export function FeaturedNewsCard({ item }) {
+export function FeaturedNewsCard({ item, searchQuery }) {
   const { t, locale } = useLanguage();
   if (!item) return null;
 
@@ -77,12 +91,15 @@ export function FeaturedNewsCard({ item }) {
               href={`/berita/${item.slug}`}
               className="transition-colors hover:text-emerald-700 dark:hover:text-emerald-400"
             >
-              {item.title}
+              <HighlightText text={item.title} keyword={searchQuery} />
             </Link>
           </h2>
 
           <p className="mt-4 lg:mt-6 line-clamp-3 lg:line-clamp-none text-xs lg:text-sm leading-6 lg:leading-8 text-slate-500 dark:text-slate-400">
-            {item.excerpt || (locale === "en" ? "Latest news from Kemenag Barito Utara." : "Berita terbaru dari Kemenag Barito Utara.") || "Baca selengkapnya mengenai berita terbaru dari Kementerian Agama Kabupaten Barito Utara."}
+            <HighlightText 
+              text={item.excerpt || (locale === "en" ? "Latest news from Kemenag Barito Utara." : "Berita terbaru dari Kemenag Barito Utara.") || "Baca selengkapnya mengenai berita terbaru dari Kementerian Agama Kabupaten Barito Utara."} 
+              keyword={searchQuery} 
+            />
           </p>
 
           <div className="mt-6 lg:mt-10 flex flex-wrap items-center gap-4 lg:gap-6">
@@ -101,7 +118,7 @@ export function FeaturedNewsCard({ item }) {
   );
 }
 
-export function NewsCard({ item }) {
+export function NewsCard({ item, searchQuery }) {
   const { t, locale } = useLanguage();
   const displayDate = formatDate(item.isoDate, locale);
   const displayCategory = t(`berita.categories.${item.category}`) || item.category;
@@ -143,7 +160,7 @@ export function NewsCard({ item }) {
               {displayDate}
             </div>
             <h3 className="mt-1 lg:mt-2 line-clamp-2 text-xs lg:text-sm font-black leading-tight text-white transition-colors group-hover:text-emerald-50">
-              {item.title}
+              <HighlightText text={item.title} keyword={searchQuery} />
             </h3>
           </div>
         </div>
@@ -151,7 +168,10 @@ export function NewsCard({ item }) {
         {/* Content Area */}
         <div className="flex flex-1 flex-col p-2.5 lg:p-5">
           <p className="line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-300 lg:line-clamp-3 lg:text-sm lg:leading-6">
-            {item.excerpt || (locale === "en" ? "Click to read more news." : "Klik untuk membaca berita selengkapnya.")}
+            <HighlightText 
+              text={item.excerpt || (locale === "en" ? "Click to read more news." : "Klik untuk membaca berita selengkapnya.")} 
+              keyword={searchQuery} 
+            />
           </p>
 
           <div className="mt-auto pt-3 lg:pt-5 flex items-center justify-between border-t border-slate-50 dark:border-white/5">

@@ -26,9 +26,9 @@ export function SlideFormModal({
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h14a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Form Slider</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Form Infografis</p>
               <h3 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-                {editingId ? "Update Slide" : "Tambah Slide Baru"}
+                {editingId ? "Update Infografis" : "Tambah Infografis Baru"}
               </h3>
             </div>
           </div>
@@ -55,7 +55,7 @@ export function SlideFormModal({
                     name="title"
                     value={form.title}
                     onChange={onChange}
-                    placeholder="Judul besar yang muncul di slide..."
+                    placeholder="Judul infografis..."
                     className="mt-1.5 h-14 w-full rounded-2xl border border-slate-200 bg-white px-5 text-base font-bold text-slate-900 outline-none transition-all focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-white"
                   />
                 </div>
@@ -66,7 +66,7 @@ export function SlideFormModal({
                     name="caption"
                     value={form.caption}
                     onChange={onChange}
-                    placeholder="Deskripsi singkat slide..."
+                    placeholder="Deskripsi singkat infografis..."
                     rows={4}
                     className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white p-5 text-sm font-bold text-slate-900 outline-none transition-all focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-white"
                   />
@@ -92,7 +92,7 @@ export function SlideFormModal({
                       onChange={onChange}
                       className="mt-1.5 h-12 w-full rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-900 outline-none transition-all focus:border-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-white"
                     >
-                      <option value="utama">Slider Utama (Tengah)</option>
+                      <option value="utama">Infografis Utama (Tengah)</option>
                       <option value="kristen">Renungan Kristen</option>
                       <option value="katolik">Renungan Katolik</option>
                       <option value="islam">Mutiara Hikmah Islam</option>
@@ -140,7 +140,7 @@ export function SlideFormModal({
                     checked={Boolean(form.is_published)}
                     onChange={(val) => onChange({ target: { name: "is_published", type: "checkbox", checked: val } })}
                     label="PUBLIKASI"
-                    description="Tampilkan slide di beranda."
+                    description="Tampilkan infografis di beranda."
                   />
                 </div>
               </div>
@@ -172,7 +172,7 @@ export function SlideFormModal({
                   disabled={saving || uploadingImage}
                   className="flex h-14 w-full items-center justify-center rounded-2xl bg-slate-900 px-6 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 dark:bg-white dark:text-black dark:shadow-none"
                 >
-                  {saving ? "Menyimpan..." : "Simpan Slide"}
+                  {saving ? "Menyimpan..." : "Simpan Infografis"}
                 </button>
                 <button
                   type="button"

@@ -12,24 +12,24 @@ async function parseResponse(response) {
   return json;
 }
 
-export async function fetchCategoryDocuments(slug) {
-  const response = await fetch(`${BASE}?slug=${encodeURIComponent(slug)}`, {
+export async function fetchCategoryDocuments(slug, page = 1, limit = 10, year = "") {
+  let url = `${BASE}?slug=${encodeURIComponent(slug)}&page=${page}&limit=${limit}`;
+  if (year) {
+    url += `&year=${encodeURIComponent(year)}`;
+  }
+  
+  const response = await fetch(url, {
     method: "GET",
     cache: "no-store",
     credentials: "include",
   });
 
   const json = await parseResponse(response);
-
-  const categoryData = Array.isArray(json?.categories)
-    ? json.categories.find((item) => item.slug === slug)
-    : null;
-
-  return Array.isArray(categoryData?.documents) ? categoryData.documents : [];
+  return json;
 }
 
 export async function uploadLaporanDocument({
-  file,
+  files,
   categoryId,
   categorySlug,
   title,
@@ -38,7 +38,13 @@ export async function uploadLaporanDocument({
   is_published,
 }) {
   const formData = new FormData();
-  formData.append("file", file);
+  
+  if (Array.isArray(files)) {
+    files.forEach(f => formData.append("files", f));
+  } else if (files) {
+    formData.append("files", files);
+  }
+
   formData.append("categoryId", String(categoryId || ""));
   formData.append("categorySlug", String(categorySlug || ""));
   formData.append("title", String(title || "").trim());

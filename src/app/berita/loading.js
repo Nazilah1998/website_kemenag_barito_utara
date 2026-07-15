@@ -1,30 +1,44 @@
 export default function BeritaLoading() {
   return (
-    <main className="w-full px-6 py-12 sm:px-10 lg:px-16 xl:px-20">
-      <section className="rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-700 px-6 py-12 text-white md:px-10">
-        <div className="h-4 w-24 animate-pulse rounded bg-white/20" />
-        <div className="mt-4 h-10 w-80 max-w-full animate-pulse rounded bg-white/20" />
-        <div className="mt-4 h-4 w-[32rem] max-w-full animate-pulse rounded bg-white/20" />
-      </section>
+    <>
+      {/* Banner Skeleton */}
+      <div className="relative w-full h-[250px] md:h-[350px] bg-slate-200 dark:bg-slate-800 animate-pulse" />
 
-      <section className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200"
-          >
-            <div className="h-48 animate-pulse bg-slate-200" />
-            <div className="p-6">
-              <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
-              <div className="mt-3 h-6 w-full animate-pulse rounded bg-slate-200" />
-              <div className="mt-2 h-6 w-3/4 animate-pulse rounded bg-slate-200" />
-              <div className="mt-4 h-4 w-full animate-pulse rounded bg-slate-200" />
-              <div className="mt-2 h-4 w-5/6 animate-pulse rounded bg-slate-200" />
-              <div className="mt-5 h-10 w-36 animate-pulse rounded-xl bg-slate-200" />
+      <main className="bg-slate-50 transition-colors dark:bg-slate-950 overflow-hidden min-h-screen">
+        <section className="w-full px-6 py-10 sm:px-10 lg:px-16 xl:px-20">
+          {/* Filters Skeleton */}
+          <div className="h-24 sm:h-32 w-full rounded-[2rem] sm:rounded-[2.5rem] bg-slate-200/70 dark:bg-slate-800/50 animate-pulse mb-10" />
+
+          {/* Featured News Skeleton */}
+          <div className="relative mb-10 h-[300px] lg:h-[400px] w-full rounded-3xl bg-slate-200/70 dark:bg-slate-800/50 animate-pulse" />
+
+          {/* Title Area Skeleton */}
+          <div className="mt-10 mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 animate-pulse rounded mb-2" />
+              <div className="h-8 w-64 bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
             </div>
+            <div className="h-4 w-40 bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
           </div>
-        ))}
-      </section>
-    </main>
+
+          {/* Grid Skeleton */}
+          <div className="mt-6 grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-3 xl:grid-cols-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex flex-col rounded-3xl border border-slate-200 dark:border-slate-800 p-2 sm:p-3 pb-6">
+                <div className="h-32 sm:h-48 w-full rounded-[1.25rem] bg-slate-200/70 dark:bg-slate-800/50 animate-pulse mb-4" />
+                <div className="px-3 flex flex-col gap-3">
+                  <div className="flex gap-2 items-center">
+                    <div className="h-2 w-16 bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
+                    <div className="h-2 w-16 bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
+                  </div>
+                  <div className="h-5 w-full bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
+                  <div className="h-5 w-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </>
   );
 }

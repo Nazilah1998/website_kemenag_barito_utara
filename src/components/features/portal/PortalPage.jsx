@@ -314,15 +314,12 @@ const INFORMASI_MENUS = [
       </svg>
     ),
   },
-];
-
-const SURVEY_MENUS = [
   {
-    title: "Masuk Layanan Survey",
-    href: "https://baritoutara.kemenag.go.id/survey",
+    title: "Video YouTube",
+    href: "https://baritoutara.kemenag.go.id/video",
     icon: (
       <svg
-        className="w-5 h-5 text-blue-400"
+        className="w-5 h-5 text-rose-400"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -331,14 +328,23 @@ const SURVEY_MENUS = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+          d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
       </svg>
     ),
   },
+];
+
+const SURVEY_MENUS = [
   {
-    title: "Survey Kepuasan Masyarakat (SKM)",
-    href: "/survey/skm",
+    title: "SKM KEMENPAN RB",
+    href: "https://skm.go.id/share/instansi/a461fae7-6b20-40f2-b82d-238c5adf4c01/2",
     icon: (
       <svg
         className="w-5 h-5 text-emerald-400"
@@ -356,11 +362,11 @@ const SURVEY_MENUS = [
     ),
   },
   {
-    title: "Survey Persepsi Anti Korupsi (SPAK)",
-    href: "/survey/spak",
+    title: "SI ARUS",
+    href: "https://survei.kemenag-baritoutara.com",
     icon: (
       <svg
-        className="w-5 h-5 text-rose-400"
+        className="w-5 h-5 text-blue-400"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -369,26 +375,7 @@ const SURVEY_MENUS = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Survey Pelayanan PTSP",
-    href: "/survey/ptsp",
-    icon: (
-      <svg
-        className="w-5 h-5 text-amber-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
         />
       </svg>
     ),
@@ -678,10 +665,11 @@ const PORTAL_LINKS = [
     ),
   },
   {
+    id: "survey",
     title: "Layanan Survey",
     description:
       "Bantu kami meningkatkan kualitas layanan dengan mengisi survey.",
-    href: "https://survei.kemenag-baritoutara.com",
+    href: "#",
     icon: (
       <svg
         className="w-8 h-8 text-purple-400"

@@ -46,7 +46,7 @@ export default function BeritaPageClient({
 
           {actualShowFeatured ? (
             <div className="relative mb-10">
-              <FeaturedNewsCard item={latestNews} />
+              <FeaturedNewsCard item={latestNews} searchQuery={values.q} />
               <button 
                 onClick={() => setIsFeaturedDismissed(true)}
                 className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur transition-colors hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
@@ -83,7 +83,7 @@ export default function BeritaPageClient({
               >
                 {paginatedNews.map((item) => (
                   <div key={item.id} className="animate-fade-in">
-                    <NewsCard item={item} />
+                    <NewsCard item={item} searchQuery={values.q} />
                   </div>
                 ))}
               </div>

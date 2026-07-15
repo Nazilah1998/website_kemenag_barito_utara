@@ -70,7 +70,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                 {/* 1. GLOBAL MOBILE HEADER */}
                 <div className="mb-6 lg:hidden">
                     <SectionHeader
-                        label="SLIDER BERANDA"
+                        label="INFOGRAFIS"
                         title="Informasi Utama"
                         color="text-emerald-700 dark:text-emerald-300"
                         center
@@ -171,7 +171,7 @@ export default function HomepageSlidesSection({ slides = [] }) {
                         <div className="relative flex flex-col">
                             <div className="hidden lg:block">
                                 <SectionHeader
-                                    label="SLIDER BERANDA"
+                                    label="INFOGRAFIS"
                                     title="Informasi Utama"
                                     color="text-emerald-700 dark:text-emerald-300"
                                     center

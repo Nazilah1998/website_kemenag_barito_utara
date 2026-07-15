@@ -1,7 +1,7 @@
 import AdminHomepageSlidesManager from "@/components/features/admin/AdminHomepageSlidesManager";
 
 export const metadata = {
-    title: "Slider Beranda",
+    title: "Infografis",
 };
 
 export default function AdminHomepageSlidesPage() {

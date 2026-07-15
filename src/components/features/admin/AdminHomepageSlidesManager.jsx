@@ -24,10 +24,10 @@ export default function AdminHomepageSlidesManager() {
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-            Slider Beranda
+            Infografis
           </h1>
           <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-            Manajemen visual utama halaman depan website.
+            Manajemen visual infografis halaman depan website.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function AdminHomepageSlidesManager() {
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          <span>Tambah Slide</span>
+          <span>Tambah Infografis</span>
         </button>
       </div>
 
@@ -49,7 +49,7 @@ export default function AdminHomepageSlidesManager() {
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Total {s.items.length} slide • {s.totalPublished} aktif saat ini
+              Total {s.totalItems} infografis • {s.totalPublished} aktif saat ini
             </p>
           </div>
         </div>
@@ -92,8 +92,8 @@ export default function AdminHomepageSlidesManager() {
         onConfirm={s.handleConfirmDelete}
         onCancel={s.handleCancelDelete}
         loading={Boolean(s.deletingId)}
-        title="Hapus Slide?"
-        description="Slide ini akan dihapus permanen dari sistem. Anda harus mengunggah ulang jika ingin menampilkannya kembali."
+        title="Hapus Infografis?"
+        description="Infografis ini akan dihapus permanen dari sistem. Anda harus mengunggah ulang jika ingin menampilkannya kembali."
       />
     </section>
   );

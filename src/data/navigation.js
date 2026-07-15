@@ -19,34 +19,56 @@ export function getNavigationItems(locale = "id") {
       ],
     },
 
-    { label: m.berita, href: "/berita" },
-    { label: m.galeri, href: "/galeri" },
-    { label: m.ppid, href: "/ppid" },
+    {
+      label: m.mediaCenter,
+      href: "/berita", // default to berita
+      children: [
+        { label: m.berita, href: "/berita" },
+        { label: m.galeri, href: "/galeri" },
+        { label: m.videoYoutube, href: "/video" },
+      ],
+    },
+    { label: m.ppid, href: "https://ppid.kemenag-baritoutara.com" },
 
     {
       label: m.layanan,
-      href: "/survey",
+      href: "https://skm.go.id/share/instansi/a461fae7-6b20-40f2-b82d-238c5adf4c01/2",
       children: [
-        {
-          label: m.layananInklusi,
-          href: "https://inklusi.kemenag-baritoutara.com/",
-        },
         { label: m.layananPtsp, href: "https://ptsp.kemenag-baritoutara.com/" },
+        { label: m.standarPelayanan, href: "/layanan/standar" },
+        { label: m.maklumatPelayanan, href: "/layanan/maklumat" },
         {
-          label: m.layananArsip,
-          href: "https://arsip.kemenag-baritoutara.com/",
+          label: m.layananInovasi,
+          href: "#",
+          children: [
+            {
+              label: m.layananInklusi,
+              href: "https://inklusi.kemenag-baritoutara.com/",
+            },
+            {
+              label: m.layananArsip,
+              href: "https://arsip.kemenag-baritoutara.com/",
+            },
+            {
+              label: m.layananSurat,
+              href: "https://surat.kemenag-baritoutara.com/",
+            },
+            { label: m.layananSop, href: "https://sop.kemenag-baritoutara.com/" },
+            { label: m.layananKalkulator, href: "/layanan/kalkulator" },
+          ],
         },
         {
-          label: m.layananSurat,
-          href: "https://surat.kemenag-baritoutara.com/",
+          label: m.survey,
+          href: "#",
+          children: [
+            { label: m.surveySkm, href: "https://skm.go.id/share/instansi/a461fae7-6b20-40f2-b82d-238c5adf4c01/2" },
+            { label: m.surveySiarus, href: "https://survei.kemenag-baritoutara.com" },
+          ],
         },
-        { label: m.layananSop, href: "https://sop.kemenag-baritoutara.com/" },
         {
           label: m.layananPusdatin,
           href: "https://pusdatin.kemenag-baritoutara.com/",
         },
-        { label: m.layananKalkulator, href: "/layanan/kalkulator" },
-        { label: m.survey, href: "/survey" },
       ],
     },
 

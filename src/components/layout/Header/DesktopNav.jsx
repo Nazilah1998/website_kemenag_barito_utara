@@ -56,6 +56,7 @@ export function DesktopNav({
                 ) : (
                   <Link
                     href={item.href}
+                    {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className={`relative inline-flex flex-shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-black uppercase tracking-tight transition-all duration-300 ${active
                       ? "text-emerald-700 dark:text-emerald-400"
                       : "text-slate-500 hover:bg-emerald-500/5 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
@@ -79,25 +80,61 @@ export function DesktopNav({
                         ['Laporan', 'Zona Integritas', 'Report', 'Integrity Zone'].includes(item.label) ? 'right-0' : 'left-0'
                       }`}
                     >
-                      <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
+                      <div className="relative rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
                         {/* Decorative Background for Dropdown */}
-                        <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl" />
+                        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                          <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-emerald-500/5 blur-2xl" />
+                        </div>
 
                         <ul className="relative z-10 space-y-0.5">
-                          {item.children.map((child) => (
-                            <li key={child.label}>
-                              <Link
-                                href={child.href}
-                                {...(child.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                                className="group/item flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
-                              >
-                                <span>{child.label}</span>
-                                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0" stroke="currentColor" strokeWidth="3">
-                                  <path d="M5 12h14M12 5l7 7-7 7" />
-                                </svg>
-                              </Link>
-                            </li>
-                          ))}
+                          {item.children.map((child) => {
+                            const hasSubChildren = child.children && child.children.length > 0;
+                            return (
+                              <li key={child.label} className="relative group/sub">
+                                {hasSubChildren ? (
+                                  <>
+                                    <div className="group/item flex cursor-pointer items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white">
+                                      <span>{child.label}</span>
+                                      <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-50 transition-all group-hover/item:opacity-100" stroke="currentColor" strokeWidth="3">
+                                        <path d="M9 18l6-6-6-6" />
+                                      </svg>
+                                    </div>
+                                    <div className="absolute left-full top-0 pl-3 hidden opacity-0 group-hover/sub:block group-hover/sub:opacity-100 transition-opacity z-50">
+                                      <div className="w-[240px] overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
+                                        <ul className="space-y-0.5">
+                                          {child.children.map((subChild) => (
+                                            <li key={subChild.label}>
+                                              <Link
+                                                href={subChild.href}
+                                                {...(subChild.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                                className="group/subitem flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+                                              >
+                                                <span>{subChild.label}</span>
+                                                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover/subitem:opacity-100 group-hover/subitem:translate-x-0" stroke="currentColor" strokeWidth="3">
+                                                  <path d="M5 12h14M12 5l7 7-7 7" />
+                                                </svg>
+                                              </Link>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <Link
+                                    href={child.href}
+                                    {...(child.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                    className="group/item flex items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+                                  >
+                                    <span>{child.label}</span>
+                                    <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-0 transition-all -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0" stroke="currentColor" strokeWidth="3">
+                                      <path d="M5 12h14M12 5l7 7-7 7" />
+                                    </svg>
+                                  </Link>
+                                )}
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     </motion.div>

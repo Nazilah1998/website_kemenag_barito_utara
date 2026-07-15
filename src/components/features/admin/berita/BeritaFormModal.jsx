@@ -9,17 +9,15 @@ import {
   IconBold,
   IconItalic,
   IconUnderline,
-  IconH2,
-  IconH3,
   IconAlignLeft,
   IconAlignCenter,
   IconAlignRight,
   IconJustify,
-  IconQuote,
-  IconBullet,
   IconNumber,
   IconLink,
-  IconClear
+  IconClear,
+  IconImage,
+  IconBullet
 } from "./BeritaIcons";
 import { BERITA_CATEGORIES } from "@/lib/berita-utils";
 import DatePicker from "@/components/ui/DatePicker";
@@ -41,8 +39,12 @@ export function BeritaFormModal({
   onPublishedToggle,
   onEditorInput,
   onEditorPaste,
+  onEditorClick,
+  onEditorKeyDown,
   onRunCommand,
+  onInsertText,
   onInsertLink,
+  onInsertImage,
   onCoverChange,
   isDraggingCover,
   onCoverDragOver,
@@ -172,17 +174,16 @@ export function BeritaFormModal({
                     <ToolbarButton title="Italic" onClick={() => onRunCommand("italic")}><IconItalic /></ToolbarButton>
                     <ToolbarButton title="Underline" onClick={() => onRunCommand("underline")}><IconUnderline /></ToolbarButton>
                     <div className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-700" />
-                    <ToolbarButton title="H2" onClick={() => onRunCommand("formatBlock", "h2")}><IconH2 /></ToolbarButton>
-                    <ToolbarButton title="H3" onClick={() => onRunCommand("formatBlock", "h3")}><IconH3 /></ToolbarButton>
-                    <div className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-700" />
                     <ToolbarButton title="L" onClick={() => onRunCommand("justifyLeft")}><IconAlignLeft /></ToolbarButton>
                     <ToolbarButton title="C" onClick={() => onRunCommand("justifyCenter")}><IconAlignCenter /></ToolbarButton>
                     <ToolbarButton title="R" onClick={() => onRunCommand("justifyRight")}><IconAlignRight /></ToolbarButton>
                     <ToolbarButton title="J" onClick={() => onRunCommand("justifyFull")}><IconJustify /></ToolbarButton>
                     <div className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-700" />
-                    <ToolbarButton title="Quote" onClick={() => onRunCommand("formatBlock", "blockquote")}><IconQuote /></ToolbarButton>
-                    <ToolbarButton title="Bullet" onClick={() => onRunCommand("insertUnorderedList")}><IconBullet /></ToolbarButton>
+                    <ToolbarButton title="Bullet List" onClick={() => onRunCommand("insertUnorderedList")}><IconBullet /></ToolbarButton>
+                    <ToolbarButton title="Number List" onClick={() => onRunCommand("insertOrderedList")}><IconNumber /></ToolbarButton>
+                    <div className="mx-1 h-4 w-px bg-slate-200 dark:bg-slate-700" />
                     <ToolbarButton title="Link" onClick={onInsertLink}><IconLink /></ToolbarButton>
+                    <ToolbarButton title="Gambar" onClick={onInsertImage}><IconImage /></ToolbarButton>
                   </div>
 
                   <div
@@ -191,7 +192,9 @@ export function BeritaFormModal({
                     suppressContentEditableWarning
                     onInput={onEditorInput}
                     onPaste={onEditorPaste}
-                    className="min-h-[300px] sm:flex-1 overflow-y-auto custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/30 px-6 py-5 text-sm leading-relaxed text-slate-700 outline-none focus:ring-4 focus:ring-slate-900/5 selection:bg-emerald-200 selection:text-emerald-900 dark:border-slate-800/50 dark:bg-slate-900/40 dark:text-slate-300 dark:selection:bg-emerald-600/60 dark:selection:text-white"
+                    onClick={onEditorClick}
+                    onKeyDown={onEditorKeyDown}
+                    className="admin-editor-content min-h-[300px] sm:flex-1 overflow-y-auto custom-scrollbar rounded-xl border border-slate-100 bg-slate-50/30 px-6 py-5 text-sm leading-relaxed text-slate-700 outline-none focus:ring-4 focus:ring-slate-900/5 selection:bg-emerald-200 selection:text-emerald-900 dark:border-slate-800/50 dark:bg-slate-900/40 dark:text-slate-300 dark:selection:bg-emerald-600/60 dark:selection:text-white"
                   />
                 </div>
               </div>

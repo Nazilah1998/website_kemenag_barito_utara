@@ -11,6 +11,7 @@ import {
 } from "./FooterIcons";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSiteSettings } from "@/context/SettingsContext";
+import { Mail, Phone, MessageCircle, Clock, MapPin } from "lucide-react";
 
 export function FooterBrand() {
   const { t } = useLanguage();
@@ -123,29 +124,27 @@ export function FooterContact() {
       >
         {t("nav.kontak")}
       </p>
-      <div className="mt-3 space-y-3">
+      <div className="mt-4 space-y-5">
         <FooterInfoItem
           label={t("footer.email")}
           value={siteInfo.email}
           href={siteLinks.emailHref}
+          icon={Mail}
         />
         <FooterInfoItem
           label={t("footer.phone")}
           value={siteInfo.phone}
           href={siteLinks.phoneHref}
+          icon={Phone}
         />
-        <FooterInfoItem
-          label={t("footer.officeHours")}
-          value={
-            siteInfo.officeHours
-              ? siteInfo.officeHours[0]
-              : t("contact.officeHours")
-          }
-        />
-        <FooterInfoItem
-          label={t("footer.region")}
-          value={t("footer.regionValue")}
-        />
+        {siteInfo.whatsapp && (
+          <FooterInfoItem
+            label="WhatsApp"
+            value={siteInfo.whatsapp}
+            href={siteLinks.whatsappHref}
+            icon={MessageCircle}
+          />
+        )}
       </div>
     </div>
   );
@@ -153,7 +152,7 @@ export function FooterContact() {
 
 export function FooterSocial() {
   const { t } = useLanguage();
-  const { siteLinks } = useSiteSettings();
+  const { siteInfo, siteLinks } = useSiteSettings();
   const socialLinks = [
     { label: "Instagram", href: siteLinks.instagram, icon: InstagramIcon },
     { label: "YouTube", href: siteLinks.youtube, icon: YouTubeIcon },
@@ -163,22 +162,41 @@ export function FooterSocial() {
   ];
 
   return (
-    <div>
-      <p
-        className="text-xs font-bold uppercase tracking-[0.18em]"
-        style={{ color: "var(--footer-fg)" }}
-      >
-        {t("footer.followUs")}
-      </p>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {socialLinks.map((item) => (
-          <SocialIconLink
-            key={item.label}
-            label={item.label}
-            href={item.href}
-            icon={item.icon}
-          />
-        ))}
+    <div className="flex flex-col gap-8">
+      <div className="space-y-5">
+        <FooterInfoItem
+          label={t("footer.officeHours")}
+          value={
+            siteInfo.officeHours
+              ? siteInfo.officeHours[0]
+              : t("contact.officeHours")
+          }
+          icon={Clock}
+        />
+        <FooterInfoItem
+          label={t("footer.region")}
+          value={t("footer.regionValue")}
+          icon={MapPin}
+        />
+      </div>
+
+      <div>
+        <p
+          className="text-xs font-bold uppercase tracking-[0.18em]"
+          style={{ color: "var(--footer-fg)" }}
+        >
+          {t("footer.followUs")}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {socialLinks.map((item) => (
+            <SocialIconLink
+              key={item.label}
+              label={item.label}
+              href={item.href}
+              icon={item.icon}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

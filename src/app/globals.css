@@ -197,6 +197,107 @@ select {
   }
 }
 
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Khusus untuk editor berita admin */
+.admin-editor-content figure.image-insertion {
+  width: 100% !important;
+  float: none !important;
+  margin: 1.5rem 0 !important;
+  clear: both !important;
+  text-align: center !important;
+}
+
+.admin-editor-content figure.image-insertion img {
+  display: none !important;
+}
+
+.admin-editor-content figure.image-insertion::before {
+  content: "[ SISIPAN GAMBAR - " attr(data-filename) " ]";
+  display: block;
+  padding: 1.5rem;
+  background-color: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  color: #64748b;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.admin-editor-content figure.image-insertion figcaption {
+  display: none !important;
+}
+
+.admin-editor-content ul {
+  list-style-type: "- ";
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-editor-content ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-editor-content li {
+  margin-bottom: 0.25rem;
+  padding-left: 0;
+}
+
+.prose figure.image-insertion {
+  width: 100% !important;
+  float: none !important;
+  margin-left: 0 !important;
+  margin-bottom: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  clear: none !important;
+  text-align: center !important;
+}
+
+.prose .edit-image-btn {
+  display: none !important;
+}
+
+.prose ul {
+  list-style-type: "- ";
+}
+
+@media (min-width: 640px) {
+  .prose figure.image-insertion {
+    width: 50% !important;
+    float: right !important;
+    margin-left: 1.5rem !important;
+  }
+}
+
+.prose figure.image-insertion img {
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 1rem !important;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+  object-fit: cover !important;
+  margin: 0 !important;
+}
+
+.prose figure.image-insertion figcaption {
+  margin-top: 0.75rem !important;
+  font-size: 0.875rem !important;
+  color: #6b7280 !important;
+  font-style: italic !important;
+  text-align: center !important;
+  width: 100% !important;
+  display: block !important;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

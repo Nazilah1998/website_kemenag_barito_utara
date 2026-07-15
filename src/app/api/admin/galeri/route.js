@@ -97,49 +97,60 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    const uploadBase64 = cleanString(body?.gallery_upload_base64, 10_000_000);
     const publishedAt = body?.published_at
       ? new Date(body.published_at)
       : new Date();
 
-    if (!uploadBase64) {
+    let base64List = [];
+    if (Array.isArray(body?.gallery_uploads) && body.gallery_uploads.length > 0) {
+      base64List = body.gallery_uploads.map(b64 => cleanString(b64, 10_000_000)).filter(Boolean);
+    } else if (body?.gallery_upload_base64) {
+      base64List = [cleanString(body.gallery_upload_base64, 10_000_000)].filter(Boolean);
+    }
+
+    if (base64List.length === 0) {
       return apiResponse({ message: "Gambar galeri wajib diupload." }, 400);
     }
 
-    const base64Meta = getBase64PayloadMeta(uploadBase64);
-    if (!base64Meta) {
-      return apiResponse({ message: "Format file tidak valid." }, 400);
+    const insertedItems = [];
+    const timestamp = Date.now();
+
+    // Process sequentially to avoid storage upload limits/timeouts
+    for (let i = 0; i < base64List.length; i++) {
+      const uploadBase64 = base64List[i];
+      const base64Meta = getBase64PayloadMeta(uploadBase64);
+      
+      if (!base64Meta) {
+        throw new Error(`Format file pada urutan ke-${i + 1} tidak valid.`);
+      }
+
+      if (base64Meta.sizeBytes > MAX_IMAGE_SIZE_BYTES) {
+        throw new Error(`Ukuran file pada urutan ke-${i + 1} terlalu besar. Maksimal ${MAX_IMAGE_SIZE_KB} KB.`);
+      }
+
+      const uploaded = await uploadBase64Image({
+        dataUrl: uploadBase64,
+        folder: "galeri",
+        fileNameStem: `galeri-${timestamp}-${i}`,
+      });
+
+      const [insertedItem] = await db
+        .insert(galeri)
+        .values({
+          title: "",
+          image_url: uploaded.publicUrl,
+          image_size_kb: base64Meta.sizeKB,
+          image_size_bytes: base64Meta.sizeBytes,
+          link_url: "",
+          source_type: "manual",
+          source_id: randomUUID(),
+          is_published: true,
+          published_at: publishedAt,
+        })
+        .returning();
+
+      insertedItems.push(insertedItem);
     }
-
-    if (base64Meta.sizeBytes > MAX_IMAGE_SIZE_BYTES) {
-      return apiResponse(
-        {
-          message: `Ukuran file terlalu besar. Maksimal ${MAX_IMAGE_SIZE_KB} KB.`,
-        },
-        400,
-      );
-    }
-
-    const uploaded = await uploadBase64Image({
-      dataUrl: uploadBase64,
-      folder: "galeri",
-      fileNameStem: `galeri-${Date.now()}`,
-    });
-
-    const [insertedItem] = await db
-      .insert(galeri)
-      .values({
-        title: "",
-        image_url: uploaded.publicUrl,
-        image_size_kb: base64Meta.sizeKB,
-        image_size_bytes: base64Meta.sizeBytes,
-        link_url: "",
-        source_type: "manual",
-        source_id: randomUUID(),
-        is_published: true,
-        published_at: publishedAt,
-      })
-      .returning();
 
     revalidateGaleriPaths();
 
@@ -147,18 +158,19 @@ export async function POST(request) {
       session: auth.session,
       action: AUDIT_ACTIONS.CREATE,
       entity: AUDIT_ENTITIES.GALERI,
-      entityId: insertedItem?.id ?? null,
-      summary: "Menambah item galeri baru secara manual",
+      entityId: insertedItems.length === 1 ? insertedItems[0].id : null,
+      summary: `Menambah ${insertedItems.length} item galeri baru secara massal`,
       after: {
-        image_url: uploaded.publicUrl,
+        total_items: insertedItems.length,
         published_at: publishedAt,
       },
       request,
     });
 
     return apiResponse({
-      message: "Item galeri berhasil disimpan.",
-      item: insertedItem,
+      message: `${insertedItems.length} item galeri berhasil disimpan.`,
+      items: insertedItems,
+      item: insertedItems[0], // for backwards compatibility if needed
     });
   } catch (error) {
     logError("galeri_post_error", { error: error?.message });

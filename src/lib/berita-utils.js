@@ -1,6 +1,7 @@
 export const BERITA_CATEGORIES = [
   "Umum",
   "Kegiatan",
+  "Nasional",
   "Sub Tata Usaha",
   "Pendidikan Madrasah",
   "Pendidikan Agama Islam",
@@ -145,6 +146,14 @@ export function sanitizeEditorHtml(html = "") {
       });
 
       element.classList.remove("Apple-interchange-newline");
+
+      if (element.tagName.toLowerCase() === "a") {
+        element.setAttribute("target", "_blank");
+        element.setAttribute("rel", "noopener noreferrer");
+      }
+      
+      // We rely on globals.css for styling figures, images, and captions in the public view.
+      // Modifying classes here causes cursor resets during editing and unexpected layout in the editor.
     });
 
     return doc.body.innerHTML;

@@ -8,7 +8,7 @@ import { BeritaFilters } from "./berita/BeritaFilters";
 import { BeritaTable } from "./berita/BeritaTable";
 import { BeritaPagination } from "./berita/BeritaPagination";
 import { BeritaFormModal } from "./berita/BeritaFormModal";
-import { DeleteConfirmModal, CloseFormConfirmModal } from "./berita/BeritaModals";
+import { DeleteConfirmModal, CloseFormConfirmModal, LinkPromptModal, ImagePromptModal } from "./berita/BeritaModals";
 
 export default function AdminBeritaManager() {
   const m = useBeritaManager();
@@ -29,6 +29,20 @@ export default function AdminBeritaManager() {
         onConfirm={m.handleConfirmCloseForm}
       />
 
+      <LinkPromptModal
+        open={m.linkModalOpen}
+        onClose={() => m.setLinkModalOpen(false)}
+        onSubmit={m.handleLinkModalSubmit}
+      />
+
+      <ImagePromptModal
+        open={m.imageModalOpen}
+        initialData={m.imageModalData}
+        isUploading={m.uploadingImage}
+        onClose={() => m.setImageModalOpen(false)}
+        onSubmit={m.handleImageModalSubmit}
+      />
+
       <FloatingFeedback
         message={m.message}
         error={m.error}
@@ -44,7 +58,8 @@ export default function AdminBeritaManager() {
             statusFilter={m.statusFilter} setStatusFilter={m.setStatusFilter}
             yearFilter={m.yearFilter} setYearFilter={m.setYearFilter}
             monthFilter={m.monthFilter} setMonthFilter={m.setMonthFilter}
-            yearOptions={m.yearOptions} monthOptions={m.monthOptions}
+            categoryFilter={m.categoryFilter} setCategoryFilter={m.setCategoryFilter}
+            yearOptions={m.yearOptions} monthOptions={m.monthOptions} categoryOptions={m.categoryOptions}
             onAddClick={m.handleOpenCreate}
             filteredCount={m.filteredItems.length} totalCount={m.items.length}
           />
@@ -72,8 +87,8 @@ export default function AdminBeritaManager() {
         isDraggingCover={m.isDraggingCover}
         onClose={m.handleCloseForm} onChange={m.handleChange}
         onPublishedToggle={m.handlePublishedToggle} onEditorInput={m.onEditorInput}
-        onEditorPaste={m.onEditorPaste} onRunCommand={m.onRunCommand}
-        onInsertLink={m.onInsertLink} onCoverChange={m.onCoverChange}
+        onEditorPaste={m.onEditorPaste} onEditorClick={m.onEditorClick} onEditorKeyDown={m.onEditorKeyDown} onRunCommand={m.onRunCommand}
+        onInsertText={m.onInsertText} onInsertLink={m.onInsertLink} onInsertImage={m.onInsertImage} onCoverChange={m.onCoverChange}
         onCoverDragOver={m.handleCoverDragOver}
         onCoverDragLeave={m.handleCoverDragLeave}
         onCoverDrop={m.handleCoverDrop}

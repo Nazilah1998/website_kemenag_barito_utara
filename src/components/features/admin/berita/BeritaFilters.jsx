@@ -13,6 +13,9 @@ export function BeritaFilters({
   setMonthFilter,
   yearOptions,
   monthOptions,
+  categoryFilter,
+  setCategoryFilter,
+  categoryOptions,
   onAddClick,
   filteredCount,
   totalCount,
@@ -48,7 +51,7 @@ export function BeritaFilters({
 
       {/* Filter Card - Premium Glass-like effect in light mode */}
       <div className="rounded-3xl sm:rounded-[2.5rem] border border-slate-200 bg-slate-50/50 p-5 sm:p-8 shadow-2xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900/50 dark:shadow-none">
-        <div className="grid gap-4 sm:gap-8 lg:grid-cols-2 xl:grid-cols-[2fr_1.5fr_1fr_1fr]">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-5">
           {/* Search */}
           <div className="flex flex-col gap-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
@@ -91,12 +94,23 @@ export function BeritaFilters({
           </div>
 
           <ModernSelect
+            label="Kategori"
+            name="category"
+            value={categoryOptions?.find(o => o.key === categoryFilter)?.label || "Semua Kategori"}
+            options={[{ key: "all", label: "Semua Kategori" }, ...(categoryOptions || [])].map(o => o.label)}
+            onChange={(e) => {
+              const selected = [{ key: "all", label: "Semua Kategori" }, ...(categoryOptions || [])].find(o => o.label === e.target.value);
+              setCategoryFilter(selected?.key || "all");
+            }}
+          />
+
+          <ModernSelect
             label="Tahun"
             name="year"
-            value={yearOptions.find(o => o.key === yearFilter)?.label || "Semua Tahun"}
-            options={[{ key: "all", label: "Semua Tahun" }, ...yearOptions].map(o => o.label)}
+            value={yearOptions?.find(o => o.key === yearFilter)?.label || "Semua Tahun"}
+            options={[{ key: "all", label: "Semua Tahun" }, ...(yearOptions || [])].map(o => o.label)}
             onChange={(e) => {
-              const selected = [{ key: "all", label: "Semua Tahun" }, ...yearOptions].find(o => o.label === e.target.value);
+              const selected = [{ key: "all", label: "Semua Tahun" }, ...(yearOptions || [])].find(o => o.label === e.target.value);
               setYearFilter(selected?.key || "all");
             }}
           />
@@ -104,10 +118,10 @@ export function BeritaFilters({
           <ModernSelect
             label="Bulan"
             name="month"
-            value={monthOptions.find(o => o.key === monthFilter)?.label || "Semua Bulan"}
-            options={[{ key: "all", label: "Semua Bulan" }, ...monthOptions].map(o => o.label)}
+            value={monthOptions?.find(o => o.key === monthFilter)?.label || "Semua Bulan"}
+            options={[{ key: "all", label: "Semua Bulan" }, ...(monthOptions || [])].map(o => o.label)}
             onChange={(e) => {
-              const selected = [{ key: "all", label: "Semua Bulan" }, ...monthOptions].find(o => o.label === e.target.value);
+              const selected = [{ key: "all", label: "Semua Bulan" }, ...(monthOptions || [])].find(o => o.label === e.target.value);
               setMonthFilter(selected?.key || "all");
             }}
           />
@@ -121,11 +135,12 @@ export function BeritaFilters({
             </p>
           </div>
 
-          {(query || statusFilter !== "all" || yearFilter !== "all" || monthFilter !== "all") && (
+          {(query || statusFilter !== "all" || categoryFilter !== "all" || yearFilter !== "all" || monthFilter !== "all") && (
             <button
               onClick={() => {
                 setQuery("");
                 setStatusFilter("all");
+                setCategoryFilter("all");
                 setYearFilter("all");
                 setMonthFilter("all");
               }}

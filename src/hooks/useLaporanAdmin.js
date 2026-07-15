@@ -20,36 +20,17 @@ import {
 
 const FEEDBACK_TIMEOUT = 3500;
 
-function buildInitialDocsBySlug(categories = []) {
-  return (categories || []).reduce((acc, category) => {
-    const slug = category?.slug;
-    if (!slug) return acc;
-
-    acc[slug] = Array.isArray(category.documents) ? category.documents : [];
-    return acc;
-  }, {});
-}
-
 function createInitialState({ initialCategory, categories }) {
   const baseState = createLaporanAdminInitialState({
     initialCategory,
     categories,
   });
 
-  const initialSlug = initialCategory?.slug || categories?.[0]?.slug || "";
-
-  const docsBySlug = buildInitialDocsBySlug(categories);
-
-  if (initialCategory?.slug) {
-    docsBySlug[initialCategory.slug] = Array.isArray(initialCategory.documents)
-      ? initialCategory.documents
-      : [];
-  }
-
   return {
     ...baseState,
-    activeSlug: initialSlug,
-    docsBySlug,
+    totalPages: 1,
+    totalItems: 0,
+    availableYears: [],
   };
 }
 
@@ -71,46 +52,70 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     );
   }, [categories, initialCategory, state.activeSlug]);
 
-  const allDocuments = useMemo(() => {
+  const paginatedDocuments = useMemo(() => {
     if (!activeCategory?.slug) return [];
     const docs = state.docsBySlug?.[activeCategory.slug];
     return Array.isArray(docs) ? docs : [];
   }, [activeCategory, state.docsBySlug]);
 
-  const yearOptions = useMemo(() => {
-    const years = Array.from(
-      new Set(
-        allDocuments
-          .map((doc) => String(doc?.year || "").trim())
-          .filter(Boolean),
-      ),
-    );
-    return years.sort((a, b) => Number(b) - Number(a));
-  }, [allDocuments]);
-
-  const filteredDocuments = useMemo(() => {
-    if (!state.yearFilter) return allDocuments;
-
-    return allDocuments.filter(
-      (doc) => String(doc?.year || "") === String(state.yearFilter),
-    );
-  }, [allDocuments, state.yearFilter]);
-
-  const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE));
-  }, [filteredDocuments]);
-
-  const paginatedDocuments = useMemo(() => {
-    const safePage = Math.min(state.currentPage, totalPages);
-    const start = (safePage - 1) * ITEMS_PER_PAGE;
-    return filteredDocuments.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredDocuments, state.currentPage, totalPages]);
-
+  // Data Fetching logic for Pagination & Filtering
   useEffect(() => {
-    if (state.currentPage > totalPages) {
-      dispatch({ type: "SET_CURRENT_PAGE", payload: totalPages });
+    const slug = state.activeSlug;
+    if (!slug) return;
+
+    const controller = new AbortController();
+
+    async function loadData() {
+      dispatch({ type: "SET_LOADING_SLUG", payload: slug });
+
+      try {
+        const data = await fetchCategoryDocuments(slug, state.currentPage, ITEMS_PER_PAGE, state.yearFilter);
+        
+        // Since API returns categories array with documents attached:
+        const cat = data?.categories?.find(c => c.slug === slug);
+        
+        dispatch({
+          type: "SET_DOCS_FOR_SLUG",
+          slug,
+          documents: Array.isArray(cat?.documents) ? cat.documents : [],
+        });
+
+        dispatch({
+          type: "SET_PAGINATION_DATA",
+          payload: data?.pagination || { totalPages: 1, total: 0 }
+        });
+
+        dispatch({
+          type: "SET_AVAILABLE_YEARS",
+          payload: data?.availableYears || []
+        });
+
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+        dispatch({
+          type: "SET_DOCS_FOR_SLUG",
+          slug,
+          documents: [],
+        });
+        dispatch({
+          type: "SET_ACTION_FEEDBACK",
+          payload: {
+            type: "error",
+            message: error?.message || "Gagal memuat dokumen kategori.",
+          },
+        });
+      } finally {
+        if (!controller.signal.aborted) {
+          dispatch({ type: "SET_LOADING_SLUG", payload: null });
+        }
+      }
     }
-  }, [state.currentPage, totalPages]);
+
+    loadData();
+
+    return () => controller.abort();
+  }, [state.activeSlug, state.currentPage, state.yearFilter]);
+
 
   useEffect(() => {
     if (!state.uploadFeedback?.message) return;
@@ -150,8 +155,8 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     dispatch({ type: "SET_DOC_FORM", payload });
   }
 
-  function setSelectedFile(file) {
-    dispatch({ type: "SET_SELECTED_FILE", payload: file });
+  function setSelectedFiles(files) {
+    dispatch({ type: "SET_SELECTED_FILES", payload: files });
   }
 
   function setYearFilter(value) {
@@ -178,43 +183,9 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
   async function handleSwitchCategory(slug) {
     if (!slug || slug === state.activeSlug) return;
-
     dispatch({ type: "SET_ACTIVE_SLUG", payload: slug });
     dispatch({ type: "RESET_VIEW_STATE" });
-
-    const cachedDocs = state.docsBySlug?.[slug];
-    if (Array.isArray(cachedDocs)) {
-      dispatch({ type: "SET_LOADING_SLUG", payload: null });
-      return;
-    }
-
-    dispatch({ type: "SET_LOADING_SLUG", payload: slug });
-
-    try {
-      const docs = await fetchCategoryDocuments(slug);
-
-      dispatch({
-        type: "SET_DOCS_FOR_SLUG",
-        slug,
-        documents: Array.isArray(docs) ? docs : [],
-      });
-    } catch (error) {
-      dispatch({
-        type: "SET_DOCS_FOR_SLUG",
-        slug,
-        documents: [],
-      });
-
-      dispatch({
-        type: "SET_ACTION_FEEDBACK",
-        payload: {
-          type: "error",
-          message: error?.message || "Gagal memuat dokumen kategori.",
-        },
-      });
-    } finally {
-      dispatch({ type: "SET_LOADING_SLUG", payload: null });
-    }
+    // Effect will handle the fetching automatically!
   }
 
   async function handleUpload(event) {
@@ -231,23 +202,23 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
       return;
     }
 
-    if (!state.docForm.title.trim()) {
+    if (!state.selectedFiles || state.selectedFiles.length === 0) {
       dispatch({
         type: "SET_UPLOAD_FEEDBACK",
         payload: {
           type: "error",
-          message: "Judul dokumen wajib diisi.",
+          message: "Pilih setidaknya satu file PDF yang ingin diupload.",
         },
       });
       return;
     }
 
-    if (!state.selectedFile) {
+    if (state.selectedFiles.length === 1 && !state.docForm.title.trim()) {
       dispatch({
         type: "SET_UPLOAD_FEEDBACK",
         payload: {
           type: "error",
-          message: "Pilih file PDF yang ingin diupload.",
+          message: "Judul dokumen wajib diisi.",
         },
       });
       return;
@@ -261,7 +232,7 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
     try {
       const json = await uploadLaporanDocument({
-        file: state.selectedFile,
+        files: state.selectedFiles,
         categoryId: activeCategory.id,
         categorySlug: activeCategory.slug,
         title: state.docForm.title.trim(),
@@ -270,14 +241,24 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
         is_published: state.docForm.is_published,
       });
 
-      if (json?.document) {
+      // Refetch page 1 to ensure UI shows exactly 10 latest
+      dispatch({ type: "SET_CURRENT_PAGE", payload: 1 });
+      
+      // If we are already on page 1, effect might not trigger refetch if other dependencies didn't change, 
+      // but in this case, actually it's better to force fetch or manually prepend.
+      // Manually prepend to be safe:
+      if (json?.documents) {
+        let currentDocs = state.docsBySlug?.[activeCategory.slug] || [];
+        json.documents.forEach(doc => {
+           currentDocs = prependDocumentToList(currentDocs, doc);
+        });
+        // slice to limit
+        currentDocs = currentDocs.slice(0, ITEMS_PER_PAGE);
+        
         dispatch({
           type: "SET_DOCS_FOR_SLUG",
           slug: activeCategory.slug,
-          documents: prependDocumentToList(
-            state.docsBySlug?.[activeCategory.slug] || [],
-            json.document,
-          ),
+          documents: currentDocs,
         });
       }
 
@@ -291,7 +272,6 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
         },
       });
 
-      dispatch({ type: "SET_CURRENT_PAGE", payload: 1 });
     } catch (error) {
       dispatch({
         type: "SET_UPLOAD_FEEDBACK",
@@ -454,6 +434,9 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
       dispatch({ type: "SET_SHOW_DELETE_MODAL", payload: false });
       dispatch({ type: "SET_ID_TO_DELETE", payload: null });
+      
+      // Ideally trigger a re-fetch here if we want exactly ITEMS_PER_PAGE docs shown, 
+      // but for simplicity client removal works for now.
     } catch (error) {
       dispatch({
         type: "SET_ACTION_FEEDBACK",
@@ -473,7 +456,7 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     loadingSlug: state.loadingSlug,
 
     docForm: state.docForm,
-    selectedFile: state.selectedFile,
+    selectedFiles: state.selectedFiles, // updated
     savingDocument: state.savingDocument,
     uploadFeedback: state.uploadFeedback,
 
@@ -483,10 +466,10 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     setYearFilter,
 
     currentPage: state.currentPage,
-    totalPages,
+    totalPages: state.totalPages,
     paginatedDocuments,
-    filteredDocuments,
-    yearOptions,
+    filteredDocuments: paginatedDocuments, // mapped for legacy UI compatibility
+    yearOptions: state.availableYears, // mapped from server
     setCurrentPage,
 
     editingId: state.editingId,
@@ -503,7 +486,7 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
     handleSwitchCategory,
     setDocForm,
-    setSelectedFile,
+    setSelectedFiles,
     resetForm,
     handleUpload,
     startEdit,

@@ -51,11 +51,11 @@ export default function AdminLaporanCategoryManager({
                         <LaporanUploadPanel
                             activeCategory={admin.activeCategory}
                             docForm={admin.docForm}
-                            selectedFile={admin.selectedFile}
+                            selectedFiles={admin.selectedFiles}
                             savingDocument={admin.savingDocument}
                             uploadFeedback={admin.uploadFeedback}
                             setDocForm={admin.setDocForm}
-                            setSelectedFile={admin.setSelectedFile}
+                            setSelectedFiles={admin.setSelectedFiles}
                             handleUpload={admin.handleUpload}
                             resetForm={admin.resetForm}
                         />

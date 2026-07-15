@@ -119,43 +119,11 @@ function formatDate(iso) {
   }
 }
 
-function RecentActivity({ items = [] }) {
-  if (!items || items.length === 0) {
-    return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">Belum ada aktivitas tercatat.</p>
-    );
-  }
 
-  return (
-    <ul className="space-y-3">
-      {items.map((it) => (
-        <li
-          key={it.id}
-          className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-800/50"
-        >
-          <span
-            className="mt-1 inline-flex h-2 w-2 shrink-0 rounded-full bg-emerald-500"
-            aria-hidden="true"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-              {it.summary || `${it.action} ${it.entity}`}
-            </p>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-              {it.actor_email || "-"} · {formatDate(it.created_at)}
-            </p>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export default function DashboardCharts({
   trend,
   topBerita,
-  recentActivity,
-  showRecentActivity = false,
 }) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
@@ -180,16 +148,6 @@ export default function DashboardCharts({
         </div>
       </div>
 
-      {showRecentActivity && (
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/50 transition-all hover:shadow-lg hover:shadow-slate-200/80 lg:col-span-3 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Aktivitas Terbaru
-          </h2>
-          <div className="mt-4">
-            <RecentActivity items={recentActivity} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

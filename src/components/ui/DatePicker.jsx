@@ -27,7 +27,7 @@ function Chevron({ orientation, className }) {
   );
 }
 
-export default function DatePicker({ value, onChange, label, buttonClassName }) {
+export default function DatePicker({ value, onChange, label, buttonClassName, formatStr = "d MMMM yyyy" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -43,7 +43,7 @@ export default function DatePicker({ value, onChange, label, buttonClassName }) 
 
   const selectedDate = value instanceof Date ? value : null;
   const displayText = selectedDate
-    ? format(selectedDate, "d MMMM yyyy", { locale: id })
+    ? format(selectedDate, formatStr, { locale: id })
     : "";
 
   return (

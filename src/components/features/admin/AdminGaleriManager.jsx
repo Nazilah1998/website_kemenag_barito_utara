@@ -49,7 +49,7 @@ export default function AdminGaleriManager() {
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-              Total {g.items.length} visual dokumentasi
+              Total {g.totalItems} visual dokumentasi
             </p>
           </div>
         </div>

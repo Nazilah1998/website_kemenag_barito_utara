@@ -89,16 +89,26 @@ export function GaleriFormModal({
                     : "border-slate-200 bg-white hover:border-slate-900 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-white"
                 }`}
               >
-                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={onFileChange} />
+                <input type="file" ref={fileInputRef} accept="image/*" multiple={!editingId} className="hidden" onChange={onFileChange} />
 
-                {imagePreview ? (
-                  <Image
-                    src={imagePreview}
-                    alt="Preview"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 40vw"
-                    className="object-cover transition-opacity group-hover:opacity-75"
-                  />
+                {imagePreview && imagePreview.length > 0 ? (
+                  <>
+                    <Image
+                      src={imagePreview[0]}
+                      alt="Preview"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 40vw"
+                      className="object-cover transition-opacity group-hover:opacity-75"
+                    />
+                    {imagePreview.length > 1 && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity group-hover:bg-slate-900/70">
+                         <div className="flex flex-col items-center">
+                           <span className="text-white text-3xl font-black">+{imagePreview.length - 1}</span>
+                           <span className="text-white/80 text-[10px] font-bold uppercase tracking-widest mt-1">Foto Lainnya</span>
+                         </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center">
                     <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 dark:bg-slate-900">
@@ -108,6 +118,9 @@ export function GaleriFormModal({
                     </div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Upload Foto</p>
                     <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">Tarik & lepas atau klik untuk pilih</p>
+                    {!editingId && (
+                      <p className="mt-2 text-[8px] font-bold uppercase tracking-widest text-emerald-500">Bisa pilih banyak foto sekaligus</p>
+                    )}
                   </div>
                 )}
 
@@ -144,7 +157,7 @@ export function GaleriFormModal({
                   <path d="M5 13l4 4L19 7" />
                 </svg>
               )}
-              <span>{saving ? "Sedang Menyimpan..." : "Simpan Konten"}</span>
+              <span>{saving ? "Sedang Menyimpan..." : (imagePreview?.length > 1 ? `Simpan ${imagePreview.length} Visual` : "Simpan Konten")}</span>
             </div>
           </button>
         </div>

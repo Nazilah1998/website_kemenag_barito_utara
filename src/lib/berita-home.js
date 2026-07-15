@@ -39,9 +39,14 @@ const getCachedPopularBeritaHome = unstable_cache(
       const data = await db
         .select()
         .from(berita)
-        .where(eq(berita.is_published, true))
+        .where(
+          and(
+            eq(berita.is_published, true),
+            sql`${berita.published_at} >= NOW() - INTERVAL '14 days'`
+          )
+        )
         .orderBy(desc(berita.views), desc(berita.published_at))
-        .limit(6);
+        .limit(5);
 
       return (data || []).map(normalizeBerita);
     } catch (error) {
@@ -65,7 +70,7 @@ const getCachedBeritaPerBidangHome = unstable_cache(
         .where(
           and(
             eq(berita.is_published, true),
-            notInArray(berita.category, ['Umum', 'Kegiatan'])
+            notInArray(berita.category, ['Umum', 'Kegiatan', 'Nasional'])
           )
         )
         .orderBy(desc(berita.published_at), desc(berita.created_at))
@@ -130,6 +135,44 @@ const getCachedBeritaPerBidangHome = unstable_cache(
 
 export async function getLatestBeritaHome() {
   return getCachedLatestBeritaHome();
+}
+
+export async function getNasionalBeritaHome() {
+  try {
+    const data = await db
+      .select()
+      .from(berita)
+      .where(
+        and(
+          eq(berita.is_published, true),
+          eq(berita.category, 'Nasional')
+        )
+      )
+      .orderBy(desc(berita.published_at), desc(berita.created_at))
+      .limit(3);
+
+    return (data || []).map(normalizeBerita);
+  } catch (error) {
+    logError("getNasionalBeritaHome_error", { error: error?.message });
+    return [];
+  }
+}
+
+export async function getHariIniBeritaHome() {
+  try {
+    // We fetch the latest 3 published news regardless of category
+    const data = await db
+      .select()
+      .from(berita)
+      .where(eq(berita.is_published, true))
+      .orderBy(desc(berita.published_at), desc(berita.created_at))
+      .limit(3);
+
+    return (data || []).map(normalizeBerita);
+  } catch (error) {
+    logError("getHariIniBeritaHome_error", { error: error?.message });
+    return [];
+  }
 }
 
 export async function getPopularBeritaHome() {

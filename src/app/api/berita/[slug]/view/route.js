@@ -5,9 +5,11 @@ import { logError } from "@/lib/logger";
 
 export async function POST(request, context) {
   const ip = getClientIp(request);
+  const { slug } = await context.params;
+  // IP limit dinaikkan dari 30 menjadi 1000 karena di kantor (satu WiFi) semua orang berbagi 1 IP.
   const limitCheck = await rateLimit({
-    key: `berita-view:${ip}`,
-    limit: 30,
+    key: `berita-view:${slug}:${ip}`,
+    limit: 1000,
     windowMs: 60_000,
   });
 
@@ -15,7 +17,6 @@ export async function POST(request, context) {
     return apiResponse({ message: "Terlalu banyak permintaan." }, 429);
   }
   try {
-    const { slug } = await context.params;
     const views = await incrementView(slug);
 
     return apiResponse({ ok: true, views });

@@ -1,10 +1,11 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { db } from "@/lib/drizzle";
 import { berita } from "@/db/schema";
-import { eq, and, ne, desc, asc, gt, lt } from "drizzle-orm";
+import { eq, and, ne, desc, asc, gt, lt, sql, ilike, or } from "drizzle-orm";
 import { toCoverPreviewUrl } from "@/lib/cover-image";
 import { logWarn, logError } from "@/lib/logger";
 import { formatDate } from "@/lib/date-utils";
+import { BERITA_CATEGORIES } from "@/lib/berita-utils";
 
 export function normalizeBerita(item = {}) {
   if (!item) return null;
@@ -72,7 +73,16 @@ function getTimeValue(value) {
 
 export function getAvailableBeritaCategories(items = []) {
   return [...new Set(items.map((item) => item.category).filter(Boolean))].sort(
-    (a, b) => a.localeCompare(b, "id"),
+    (a, b) => {
+      const indexA = BERITA_CATEGORIES.indexOf(a);
+      const indexB = BERITA_CATEGORIES.indexOf(b);
+      
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      
+      return a.localeCompare(b, "id");
+    }
   );
 }
 
@@ -149,6 +159,110 @@ export async function getAllBerita(options = {}) {
   } catch (error) {
     logError("getAllBerita_error", { error: error?.message });
     return [];
+  }
+}
+
+export async function getAvailableBeritaMonthsDB() {
+  noStore();
+  try {
+    const result = await db
+      .select({ monthKey: sql`to_char(${berita.published_at}, 'YYYY-MM')` })
+      .from(berita)
+      .where(eq(berita.is_published, true))
+      .groupBy(sql`to_char(${berita.published_at}, 'YYYY-MM')`)
+      .orderBy(desc(sql`to_char(${berita.published_at}, 'YYYY-MM')`));
+
+    const formatter = new Intl.DateTimeFormat("id-ID", {
+      month: "long",
+      year: "numeric",
+    });
+
+    return result
+      .filter((row) => row.monthKey)
+      .map((row) => {
+        const monthValue = String(row.monthKey);
+        const date = new Date(`${monthValue}-01T00:00:00`);
+        const formatted = formatter.format(date);
+        const label = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        return { value: monthValue, label };
+      });
+  } catch (error) {
+    logError("getAvailableBeritaMonthsDB_error", { error: error?.message });
+    return [];
+  }
+}
+
+export async function getBeritaPaginated(options = {}) {
+  const {
+    q = "",
+    category = "",
+    month = "",
+    sort = "newest",
+    page = 1,
+    limit = 12,
+    includeDrafts = false,
+  } = options;
+
+  if (includeDrafts) noStore();
+
+  try {
+    const conditions = [];
+
+    if (!includeDrafts) {
+      conditions.push(eq(berita.is_published, true));
+    }
+
+    if (category && category !== "all") {
+      conditions.push(eq(berita.category, category));
+    }
+
+    if (month && month !== "all") {
+      conditions.push(eq(sql`to_char(${berita.published_at}, 'YYYY-MM')`, month));
+    }
+
+    if (q) {
+      const tsQuery = q.trim();
+      conditions.push(
+        sql`to_tsvector('simple', coalesce(${berita.title}, '') || ' ' || coalesce(${berita.excerpt}, '') || ' ' || coalesce(${berita.category}, '') || ' ' || coalesce(${berita.content}, '')) @@ plainto_tsquery('simple', ${tsQuery})`
+      );
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    let orderByClause;
+    if (sort === "oldest") {
+      orderByClause = [asc(berita.published_at), asc(berita.created_at)];
+    } else if (sort === "popular") {
+      orderByClause = [
+        desc(berita.views),
+        desc(berita.published_at),
+        desc(berita.created_at),
+      ];
+    } else {
+      // newest
+      orderByClause = [desc(berita.published_at), desc(berita.created_at)];
+    }
+
+    const [{ total }] = await db
+      .select({ total: sql`count(*)` })
+      .from(berita)
+      .where(whereClause);
+
+    const data = await db
+      .select()
+      .from(berita)
+      .where(whereClause)
+      .orderBy(...orderByClause)
+      .limit(Number(limit))
+      .offset(options.offset !== undefined ? Number(options.offset) : (Number(page) - 1) * Number(limit));
+
+    return {
+      data: (data || []).map(normalizeBerita),
+      total: Number(total || 0),
+    };
+  } catch (error) {
+    logError("getBeritaPaginated_error", { error: error?.message });
+    return { data: [], total: 0 };
   }
 }
 
@@ -229,14 +343,14 @@ export async function getAdjacentBerita(currentBerita) {
 
   try {
     const [newerData] = await db
-      .select({ slug: berita.slug, title: berita.title, coverImage: berita.cover_image, isoDate: berita.published_at })
+      .select({ slug: berita.slug, title: berita.title, coverImage: berita.cover_image, isoDate: berita.published_at, category: berita.category })
       .from(berita)
       .where(and(eq(berita.is_published, true), gt(berita.published_at, date)))
       .orderBy(asc(berita.published_at))
       .limit(1);
 
     const [olderData] = await db
-      .select({ slug: berita.slug, title: berita.title, coverImage: berita.cover_image, isoDate: berita.published_at })
+      .select({ slug: berita.slug, title: berita.title, coverImage: berita.cover_image, isoDate: berita.published_at, category: berita.category })
       .from(berita)
       .where(and(eq(berita.is_published, true), lt(berita.published_at, date)))
       .orderBy(desc(berita.published_at))

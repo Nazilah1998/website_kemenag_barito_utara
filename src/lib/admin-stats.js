@@ -1,5 +1,5 @@
 import { db } from "@/lib/drizzle";
-import { berita, homepage_slides, galeri, kontak_pesan, report_documents } from "@/db/schema";
+import { berita, homepage_slides, galeri, report_documents, youtube_videos } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { logError } from "@/lib/logger";
 
@@ -34,9 +34,8 @@ export async function getDashboardStats({
       beritaList,
       [{ count: totalSlides }],
       [{ count: totalGallery }],
-      [{ count: totalKontak }],
-      [{ count: kontakBaru }],
       [{ count: totalReportDocs }],
+      [{ count: totalYoutubeVideos }],
       recentActivity,
     ] = await Promise.all([
       // Data Berita
@@ -55,11 +54,8 @@ export async function getDashboardStats({
       // Counter lainnya
       db.select({ count: sql`count(*)` }).from(homepage_slides),
       db.select({ count: sql`count(*)` }).from(galeri),
-      db.select({ count: sql`count(*)` }).from(kontak_pesan),
-      db.select({ count: sql`count(*)` }).from(kontak_pesan).where(eq(kontak_pesan.status, "baru")),
       db.select({ count: sql`count(*)` }).from(report_documents).where(eq(report_documents.is_published, true)),
-      
-      // Aktivitas Audit Log sudah dipindahkan ke Pusdatin
+      db.select({ count: sql`count(*)` }).from(youtube_videos),
       Promise.resolve([]),
     ]);
 
@@ -119,11 +115,10 @@ export async function getDashboardStats({
         totalDraft,
         totalViews,
         recent7,
-        totalKontak,
-        kontakBaru,
         totalReportDocs,
         totalSlides,
         totalGallery,
+        totalYoutubeVideos,
       },
       trend,
       topBerita,

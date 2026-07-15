@@ -26,9 +26,6 @@ export const pusdatinUsers = pusdatinSchema.table("profiles", {
 	address: text("address"),
 	created_at: timestamp("created_at", { withTimezone: true, precision: 6 }).defaultNow(),
 	updated_at: timestamp("updated_at", { withTimezone: true, precision: 6 }).defaultNow(),
-	nip: text("nip"),
-	jabatan: text("jabatan"),
-	unit_kerja: text("unit_kerja"),
 	is_verified: boolean("is_verified").default(true),
 	permissions: jsonb("permissions"),
 	avatar_url: text("avatar_url"),
@@ -244,23 +241,6 @@ export const report_documents = kemenagWebsiteSchema.table("report_documents", {
 	pgPolicy("admin_all_report_documents", { as: "permissive", for: "all", to: ["authenticated"] }),
 ]);
 
-export const kontak_pesan = kemenagWebsiteSchema.table("kontak_pesan", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	nama: text().notNull(),
-	whatsapp: text().notNull(),
-	subjek: text(),
-	pesan: text().notNull(),
-	ip_address: text(),
-	user_agent: text(),
-	status: text().default('baru').notNull(),
-	created_at: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("idx_kontak_pesan_created_at").using("btree", table.created_at.desc().nullsFirst().op("timestamptz_ops")),
-	index("idx_kontak_pesan_status").using("btree", table.status.asc().nullsLast().op("text_ops")),
-	pgPolicy("kontak_pesan_select_admin", { as: "permissive", for: "select", to: ["authenticated"], using: sql`(EXISTS ( SELECT 1
-   FROM profiles p
-  WHERE ((p.id = auth.uid()) AND (lower(p.role) = ANY (ARRAY['admin'::text, 'super_admin'::text])))))` }),
-]);
 
 export const admin_users = kemenagWebsiteSchema.table("admin_users", {
 	user_id: uuid().primaryKey().notNull(),

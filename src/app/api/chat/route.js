@@ -1,4 +1,4 @@
-import { streamText, tool } from "ai";
+import { streamText, tool, convertToModelMessages } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { NextResponse } from "next/server";
 
 // Custom fallback wrapper to sequentially try models if one fails (e.g. rate limit, error)
 const fallback = (models) => ({
-  specificationVersion: 'v1',
+  specificationVersion: 'v3',
   provider: 'fallback',
   modelId: 'fallback-model',
   defaultObjectGenerationMode: models[0]?.defaultObjectGenerationMode || 'json',
@@ -58,6 +58,7 @@ export async function POST(req) {
     }
 
     const { messages, system_injection } = await req.json();
+    const modelMessages = await convertToModelMessages(messages);
 
     const finalSystemPrompt = system_injection
       ? `${SYSTEM_PROMPT}\n\n===========================\nINFO TAMBAHAN (DARI PTSP):\n===========================\n${system_injection}`
@@ -78,17 +79,19 @@ export async function POST(req) {
 
     // Urutan model fallback: Gemini -> Groq -> Mistral -> OpenRouter
     const fallbackModels = [];
-    if (google) fallbackModels.push(google("gemini-1.5-flash"));
+    if (google) fallbackModels.push(google("gemini-3.5-flash"));
     if (groq) fallbackModels.push(groq("llama-3.3-70b-versatile"));
     if (mistral) fallbackModels.push(mistral("mistral-large-latest"));
-    if (openrouter) fallbackModels.push(openrouter("meta-llama/llama-3.1-70b-instruct:free"));
+    if (openrouter) fallbackModels.push(openrouter("meta-llama/llama-3.3-70b-instruct:free"));
 
     logInfo("chat_engine_try", { engineName: "AI Router with Fallback (Gemini/Groq/Mistral/OR)" });
 
     const result = streamText({
       model: fallback(fallbackModels),
       system: finalSystemPrompt,
-      messages,
+      messages: modelMessages,
+      maxSteps: 3,
+      maxRetries: 0,
       maxTokens: 800,
       temperature: 0.7,
       tools: {
@@ -100,13 +103,15 @@ export async function POST(req) {
           execute: async ({ query }) => {
             try {
               // Create embedding for the query using Gemini embedding model
-              const embeddingModel = google.textEmbeddingModel("text-embedding-004");
-              const { embedding } = await embeddingModel.doEmbed({ values: [query] });
+              const embeddingModel = google.textEmbeddingModel("gemini-embedding-2");
+              const { embeddings } = await embeddingModel.doEmbed({ values: [query] });
 
-              // Perform vector similarity search in the database
+              // Perform vector similarity search in the database (Slice 3072D to 768D for MRL)
+              const truncatedEmbedding = embeddings[0].slice(0, 768);
+              
               const similarity = sql`1 - (${cosineDistance(
                 ai_knowledge_base.embedding,
-                embedding[0]
+                truncatedEmbedding
               )})`;
               const results = await db
                 .select({
@@ -150,11 +155,12 @@ export async function POST(req) {
       },
     });
 
-    return result.toDataStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
-    logError("chat_api_error", { error: error?.message });
+    console.error("FULL CHAT ERROR:", error);
+    logError("chat_api_error", { error: error?.message, stack: error?.stack });
     return NextResponse.json(
-      { error: "Terjadi kesalahan pada server." },
+      { error: "Terjadi kesalahan pada server.", details: error?.message, stack: error?.stack },
       { status: 500 },
     );
   }

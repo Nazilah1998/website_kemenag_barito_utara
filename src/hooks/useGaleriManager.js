@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { compressImageToBase64 } from "@/lib/image-compress";
 
 const ITEMS_PER_PAGE = 10;
 
 const emptyForm = {
   published_at: null,
-  gallery_upload_base64: "",
+  gallery_upload_base64: "", // for edit
+  gallery_uploads: [],       // for bulk upload
   image_url: "",
 };
 
@@ -16,6 +17,9 @@ export function useGaleriManager() {
   const [error, setError] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
   const [openForm, setOpenForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -26,37 +30,37 @@ export function useGaleriManager() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  async function loadItems(signal) {
+  const loadItems = useCallback(async (signal, page = 1) => {
     try {
       setLoading(true);
-      const response = await fetch("/api/admin/galeri", { cache: "no-store", signal });
+      const response = await fetch(`/api/admin/galeri?page=${page}&limit=${ITEMS_PER_PAGE}`, { cache: "no-store", signal });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Gagal memuat galeri.");
       setItems(data.items || []);
+      setTotalPages(data.pagination?.totalPages || 1);
+      setTotalItems(data.pagination?.total || 0);
     } catch (err) {
       if (err.name === "AbortError") return;
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
-    loadItems(controller.signal);
+    loadItems(controller.signal, currentPage);
     return () => controller.abort();
-  }, []);
+  }, [currentPage, loadItems]);
 
-  const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return items.slice(start, start + ITEMS_PER_PAGE);
-  }, [items, currentPage]);
+  const paginatedItems = items; // Already paginated from server
 
   const imagePreview = useMemo(() => {
-    if (form.gallery_upload_base64) return form.gallery_upload_base64;
-    return form.image_url || "";
-  }, [form.gallery_upload_base64, form.image_url]);
+    if (editingId && form.gallery_upload_base64) return [form.gallery_upload_base64];
+    if (editingId && form.image_url) return [form.image_url];
+    if (!editingId && form.gallery_uploads.length > 0) return form.gallery_uploads;
+    return [];
+  }, [form.gallery_upload_base64, form.image_url, form.gallery_uploads, editingId]);
 
   function handleOpenCreate() {
     setEditingId(null);
@@ -70,6 +74,7 @@ export function useGaleriManager() {
       published_at: item.published_at ? new Date(item.published_at) : new Date(),
       image_url: item.image_url || "",
       gallery_upload_base64: "",
+      gallery_uploads: [],
     });
     setOpenForm(true);
   }
@@ -85,26 +90,41 @@ export function useGaleriManager() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function processImageFile(file) {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setError("File harus berupa gambar.");
-      return;
-    }
+  async function processImageFiles(files) {
+    if (!files || files.length === 0) return;
 
     try {
       setUploadingImage(true);
-      const compressed = await compressImageToBase64(file, {
-        targetSizeKB: 400,
-        hardMaxSizeKB: 500,
-        throwIfOverHardLimit: false,
-        maxWidth: 1200,
-        maxHeight: 1600,
+      setError("");
+
+      const processedImages = [];
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        
+        const compressed = await compressImageToBase64(file, {
+          targetSizeKB: 400,
+          hardMaxSizeKB: 500,
+          throwIfOverHardLimit: false,
+          maxWidth: 1200,
+          maxHeight: 1600,
+        });
+        processedImages.push(compressed.base64);
+      }
+
+      if (processedImages.length === 0) {
+        setError("File harus berupa gambar.");
+        return;
+      }
+
+      setForm((prev) => {
+        if (editingId) {
+          // Edit mode only supports 1 image
+          return { ...prev, gallery_upload_base64: processedImages[0] };
+        } else {
+          // Bulk upload mode
+          return { ...prev, gallery_uploads: [...prev.gallery_uploads, ...processedImages] };
+        }
       });
-      setForm((prev) => ({
-        ...prev,
-        gallery_upload_base64: compressed.base64,
-      }));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -113,8 +133,8 @@ export function useGaleriManager() {
   }
 
   async function handleImageFileChange(e) {
-    const file = e.target.files?.[0];
-    if (file) await processImageFile(file);
+    const files = Array.from(e.target.files || []);
+    await processImageFiles(files);
   }
 
   const handleImageDragOver = (e) => {
@@ -129,8 +149,8 @@ export function useGaleriManager() {
   const handleImageDrop = (e) => {
     e.preventDefault();
     setIsDraggingImage(false);
-    const file = e.dataTransfer.files[0];
-    if (file) processImageFile(file);
+    const files = Array.from(e.dataTransfer.files || []);
+    processImageFiles(files);
   };
 
   async function handleSave() {
@@ -141,10 +161,20 @@ export function useGaleriManager() {
         : "/api/admin/galeri";
       const method = editingId ? "PUT" : "POST";
 
+      const payload = {
+        published_at: form.published_at,
+      };
+
+      if (editingId) {
+        payload.gallery_upload_base64 = form.gallery_upload_base64;
+      } else {
+        payload.gallery_uploads = form.gallery_uploads;
+      }
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -152,7 +182,13 @@ export function useGaleriManager() {
 
       setMessage(data.message);
       handleCloseForm();
-      await loadItems();
+      
+      // If we are on page 1, manually reload, else set page 1 to trigger reload
+      if (currentPage === 1) {
+        await loadItems(null, 1);
+      } else {
+        setCurrentPage(1);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -177,7 +213,7 @@ export function useGaleriManager() {
       setMessage("Item berhasil dihapus.");
       setShowDeleteConfirm(false);
       setDeleteTarget(null);
-      await loadItems();
+      await loadItems(null, currentPage); // stay on same page
     } catch (err) {
       setError(err.message);
     } finally {
@@ -216,6 +252,7 @@ export function useGaleriManager() {
     handleCancelDelete: () => setShowDeleteConfirm(false),
     deletingId,
     totalPages,
+    totalItems,
     paginatedItems,
   };
 }

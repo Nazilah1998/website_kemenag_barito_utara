@@ -426,22 +426,43 @@ export default function LaporanDocumentPanel({
                                 </Button>
 
                                 <div className="flex items-center gap-1.5">
-                                    {Array.from({ length: totalPages }).map((_, i) => {
-                                        const p = i + 1;
-                                        const isAct = p === currentPage;
-                                        return (
-                                            <button
-                                                key={p}
-                                                onClick={() => setCurrentPage(p)}
-                                                className={`h-9 min-w-[36px] rounded-xl text-[10px] font-black transition-all border-2 ${isAct
-                                                    ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black"
-                                                    : "bg-white border-slate-100 text-slate-400 hover:border-slate-900 hover:text-slate-900 dark:bg-slate-800 dark:border-slate-800 dark:text-slate-500"
-                                                    }`}
-                                            >
-                                                {p}
-                                            </button>
-                                        );
-                                    })}
+                                    {(() => {
+                                        let pages = [];
+                                        for (let i = 1; i <= totalPages; i++) {
+                                            if (
+                                                i === 1 ||
+                                                i === totalPages ||
+                                                (i >= currentPage - 1 && i <= currentPage + 1)
+                                            ) {
+                                                pages.push(i);
+                                            } else if (pages[pages.length - 1] !== "...") {
+                                                pages.push("...");
+                                            }
+                                        }
+
+                                        return pages.map((p, idx) => {
+                                            if (p === "...") {
+                                                return (
+                                                    <span key={`ellipsis-${idx}`} className="px-2 text-[10px] font-black text-slate-400 dark:text-slate-500">
+                                                        ...
+                                                    </span>
+                                                );
+                                            }
+                                            const isAct = p === currentPage;
+                                            return (
+                                                <button
+                                                    key={p}
+                                                    onClick={() => setCurrentPage(p)}
+                                                    className={`h-9 min-w-[36px] rounded-xl text-[10px] font-black transition-all border-2 ${isAct
+                                                        ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black scale-105 shadow-md"
+                                                        : "bg-white border-slate-100 text-slate-400 hover:border-slate-900 hover:text-slate-900 dark:bg-slate-800 dark:border-slate-800 dark:text-slate-500"
+                                                        }`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            );
+                                        });
+                                    })()}
                                 </div>
 
                                 <Button

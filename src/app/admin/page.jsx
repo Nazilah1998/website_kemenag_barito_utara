@@ -48,8 +48,7 @@ export default async function AdminDashboardPage({ searchParams }) {
     totalDraft: 0,
     totalViews: 0,
     recent7: 0,
-    totalKontak: 0,
-    kontakBaru: 0,
+    totalYoutubeVideos: 0,
     totalReportDocs: 0,
   };
 
@@ -114,7 +113,7 @@ export default async function AdminDashboardPage({ searchParams }) {
           }
         />
         <StatCard
-          label="Slider Beranda"
+          label="Infografis"
           value={numberFmt(summary.totalSlides)}
           helper="Jumlah banner promo yang aktif bergantian."
           tone="fuchsia"
@@ -125,13 +124,14 @@ export default async function AdminDashboardPage({ searchParams }) {
           }
         />
         <StatCard
-          label="Pesan Masuk"
-          value={numberFmt(summary.totalKontak)}
-          helper={`${numberFmt(summary.kontakBaru)} pesan baru perlu ditanggapi.`}
-          tone="amber"
+          label="Video YouTube"
+          value={numberFmt(summary.totalYoutubeVideos)}
+          helper="Total dokumentasi video YouTube."
+          tone="rose"
           icon={
             <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12c0-4.418-4.03-8-9-8s-9 3.582-9 8 4.03 8 9 8 9-3.582 9-8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
             </svg>
           }
         />
@@ -153,8 +153,6 @@ export default async function AdminDashboardPage({ searchParams }) {
         <DashboardCharts
           trend={stats.trend}
           topBerita={stats.topBerita}
-          recentActivity={stats.recentActivity}
-          showRecentActivity={session?.role === "super_admin"}
         />
       </div>
     </div>

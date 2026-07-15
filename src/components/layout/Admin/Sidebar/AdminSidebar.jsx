@@ -23,9 +23,8 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
     { href: "/admin/galeri", label: "Galeri Visual", icon: <GalleryIcon />, active: pathname.startsWith("/admin/galeri"), show: hasAccess(ctx, PERMISSIONS.GALERI_VIEW) },
     { href: "/admin/halaman", label: "Halaman Statis", icon: <HalamanIcon />, active: pathname.startsWith("/admin/halaman"), show: hasAccess(ctx, PERMISSIONS.HALAMAN_VIEW) },
     { href: "/admin/laporan", label: "Dokumen Laporan", icon: <FolderIcon />, active: pathname === "/admin/laporan" || pathname.startsWith("/admin/laporan/"), show: hasAccess(ctx, PERMISSIONS.LAPORAN_VIEW) },
-    { href: "/admin/homepage-slides", label: "Slider Beranda", icon: <SliderIcon />, active: pathname.startsWith("/admin/homepage-slides"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
+    { href: "/admin/homepage-slides", label: "Infografis", icon: <SliderIcon />, active: pathname.startsWith("/admin/homepage-slides"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
     { href: "/admin/youtube", label: "Dokumentasi YouTube", icon: <YoutubeIcon />, active: pathname.startsWith("/admin/youtube"), show: hasAccess(ctx, PERMISSIONS.HOMEPAGE_SLIDES_VIEW) },
-    { href: "/admin/pesan", label: "Pesan & Pengaduan", icon: <MailIcon />, active: pathname.startsWith("/admin/pesan"), show: hasAccess(ctx, PERMISSIONS.KONTAK_MANAGE) },
 
     { href: "/admin/pengaturan", label: "Pengaturan Identitas", icon: <SettingsIcon />, active: pathname.startsWith("/admin/pengaturan"), show: role === "super_admin" },
 

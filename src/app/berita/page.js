@@ -1,43 +1,12 @@
 import BeritaPageClient from "@/components/features/berita/BeritaPageClient";
 import {
-  filterAndSortBerita,
-  getAllBerita,
-  getAvailableBeritaCategories,
+  getBeritaPaginated,
+  getAvailableBeritaMonthsDB,
 } from "../../lib/berita";
+import { BERITA_CATEGORIES } from "@/lib/berita-utils";
 import { siteInfo } from "@/data/site";
 
-const ITEMS_PER_PAGE = 12;
-
-function getAvailableBeritaMonths(items = []) {
-  const formatter = new Intl.DateTimeFormat("id-ID", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const uniqueMonths = new Map();
-
-  items.forEach((item) => {
-    const isoDate = String(item.isoDate || "");
-    const monthValue = isoDate.slice(0, 7);
-
-    if (!monthValue || uniqueMonths.has(monthValue)) return;
-
-    const date = new Date(`${monthValue}-01T00:00:00`);
-    if (Number.isNaN(date.getTime())) return;
-
-    const formatted = formatter.format(date);
-    const label = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-
-    uniqueMonths.set(monthValue, {
-      value: monthValue,
-      label,
-    });
-  });
-
-  return Array.from(uniqueMonths.values()).sort((a, b) =>
-    b.value.localeCompare(a.value),
-  );
-}
+const ITEMS_PER_PAGE = 18;
 
 function clampPage(value, max) {
   if (!Number.isFinite(value) || value < 1) return 1;
@@ -90,34 +59,42 @@ export default async function BeritaPage({ searchParams }) {
   const category = typeof params?.category === "string" ? params.category : "";
   const month = typeof params?.month === "string" ? params.month : "";
   const sort = typeof params?.sort === "string" ? params.sort : "newest";
+  
+  const requestedPage = Number(params?.page ?? 1);
+  const initialPage = !Number.isFinite(requestedPage) || requestedPage < 1 ? 1 : requestedPage;
 
-  const beritaList = await getAllBerita();
-  const categories = getAvailableBeritaCategories(beritaList);
-  const months = getAvailableBeritaMonths(beritaList);
+  // Pagination Logic
+  const isFirstPage = initialPage === 1;
+  const limit = isFirstPage ? ITEMS_PER_PAGE + 1 : ITEMS_PER_PAGE;
+  const offset = isFirstPage ? 0 : (initialPage - 1) * ITEMS_PER_PAGE + 1;
 
-  const filteredBerita = filterAndSortBerita(beritaList, {
+  const { data: dbData, total: totalResults } = await getBeritaPaginated({
     q,
     category,
     month,
     sort,
+    limit,
+    offset,
   });
 
-  const totalResults = filteredBerita.length;
-  const latestNews = filteredBerita[0] ?? null;
-  const remainingNews = filteredBerita.slice(1);
+  const categories = BERITA_CATEGORIES;
+  const months = await getAvailableBeritaMonthsDB();
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(remainingNews.length / ITEMS_PER_PAGE),
-  );
+  const remainingTotal = Math.max(0, totalResults - 1);
+  const totalPages = Math.max(1, Math.ceil(remainingTotal / ITEMS_PER_PAGE));
+  const currentPage = clampPage(initialPage, totalPages);
 
-  const currentPage = clampPage(Number(params?.page ?? 1), totalPages);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedNews = remainingNews.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE,
-  );
+  let latestNews = null;
+  let remainingNews = [];
 
+  if (isFirstPage && dbData.length > 0) {
+    latestNews = dbData[0];
+    remainingNews = dbData.slice(1);
+  } else {
+    remainingNews = dbData;
+  }
+  
+  const paginatedNews = remainingNews;
   const showFeatured = currentPage === 1 && latestNews;
 
   return (

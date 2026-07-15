@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import PageBanner from "@/components/common/PageBanner";
-import KontakForm from "@/components/features/kontak/KontakForm";
-import { siteInfo, siteLinks } from "../../data/site";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SettingsContext";
 
 function getOfficeScheduleByDay(weekday) {
   if (["Mon", "Tue", "Wed", "Thu"].includes(weekday)) {
@@ -110,6 +109,7 @@ function OfficeHoursBlock({
 
 export default function KontakPage() {
   const { t } = useLanguage();
+  const { siteInfo, siteLinks } = useSiteSettings();
   const [officeStatus, setOfficeStatus] = useState(() => getOfficeStatus(t));
 
   useEffect(() => {
@@ -247,7 +247,7 @@ export default function KontakPage() {
             </div>
           </section>
 
-          <section className="mt-10 grid gap-6 lg:grid-cols-[1fr_1fr]">
+          <section className="mt-10">
             <div 
               className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 animate-fade-in-up"
             >
@@ -290,12 +290,6 @@ export default function KontakPage() {
                   {t("contact.openInMaps")}
                 </a>
               </div>
-            </div>
-
-            <div
-              className="animate-fade-in-up"
-            >
-              <KontakForm />
             </div>
           </section>
         </div>

@@ -142,9 +142,9 @@ export function SlidePagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="mt-8 flex flex-col items-center justify-between gap-6 border-t border-slate-100 pt-8 sm:flex-row dark:border-slate-800/50">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-        Halaman <span className="text-slate-900 dark:text-white">{currentPage}</span> dari <span className="text-slate-900 dark:text-white">{totalPages}</span>
+    <div className="mt-8 sm:mt-12 flex flex-col items-center justify-between gap-5 sm:gap-6 border-t-2 border-slate-900 pt-6 sm:pt-8 dark:border-white lg:flex-row">
+      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+        <span className="text-slate-900 dark:text-white">{currentPage}</span> / <span className="text-slate-900 dark:text-white">{totalPages}</span>
       </p>
 
       <div className="flex items-center gap-2">
@@ -152,17 +152,60 @@ export function SlidePagination({ currentPage, totalPages, onPageChange }) {
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="flex h-11 items-center justify-center rounded-2xl border-2 border-slate-100 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all hover:border-slate-900 hover:text-slate-900 disabled:opacity-30 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
+          className="flex h-10 w-10 sm:h-11 sm:w-auto items-center justify-center gap-2 rounded-2xl border-2 border-slate-100 bg-white sm:px-5 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all hover:border-slate-900 hover:text-slate-900 disabled:opacity-30 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
         >
-          Prev
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4"><path d="M15 19l-7-7 7-7" /></svg>
+          <span className="hidden sm:block">Prev</span>
         </button>
+
+        <div className="flex items-center gap-1.5 mx-2">
+            {(() => {
+                let pages = [];
+                for (let i = 1; i <= totalPages; i++) {
+                    if (
+                        i === 1 ||
+                        i === totalPages ||
+                        (i >= currentPage - 1 && i <= currentPage + 1)
+                    ) {
+                        pages.push(i);
+                    } else if (pages[pages.length - 1] !== "...") {
+                        pages.push("...");
+                    }
+                }
+
+                return pages.map((p, idx) => {
+                    if (p === "...") {
+                        return (
+                            <span key={`ellipsis-${idx}`} className="px-2 text-[10px] font-black text-slate-400 dark:text-slate-500">
+                                ...
+                            </span>
+                        );
+                    }
+                    const isAct = p === currentPage;
+                    return (
+                        <button
+                            key={p}
+                            onClick={() => onPageChange(p)}
+                            className={`h-10 min-w-[40px] sm:h-11 sm:min-w-[44px] rounded-2xl text-[10px] font-black transition-all border-2 ${isAct
+                                ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-black scale-105 shadow-md"
+                                : "bg-white border-slate-100 text-slate-400 hover:border-slate-900 hover:text-slate-900 dark:bg-slate-800 dark:border-slate-800 dark:text-slate-500"
+                                }`}
+                        >
+                            {p}
+                        </button>
+                    );
+                });
+            })()}
+        </div>
+
         <button
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="flex h-11 items-center justify-center rounded-2xl border-2 border-slate-100 bg-white px-5 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all hover:border-slate-900 hover:text-slate-900 disabled:opacity-30 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
+          className="flex h-10 w-10 sm:h-11 sm:w-auto items-center justify-center gap-2 flex-row-reverse rounded-2xl border-2 border-slate-100 bg-white sm:px-5 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all hover:border-slate-900 hover:text-slate-900 disabled:opacity-30 dark:border-slate-800 dark:bg-transparent dark:hover:border-white dark:hover:text-white"
         >
-          Next
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4"><path d="M9 5l7 7-7 7" /></svg>
+          <span className="hidden sm:block">Next</span>
         </button>
       </div>
     </div>

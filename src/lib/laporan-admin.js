@@ -93,7 +93,7 @@ export function createLaporanAdminInitialState({
     loadingSlug: null,
 
     docForm: { ...EMPTY_DOC_FORM },
-    selectedFile: null,
+    selectedFiles: [], // changed from selectedFile for bulk
     savingDocument: false,
 
     uploadFeedback: {
@@ -108,6 +108,9 @@ export function createLaporanAdminInitialState({
 
     yearFilter: "",
     currentPage: 1,
+    totalPages: 1, // added
+    availableYears: [], // added
+    totalItems: 0, // added
 
     editingId: null,
     editForm: { ...EMPTY_DOC_FORM },
@@ -141,6 +144,19 @@ export function laporanAdminReducer(state, action) {
         },
       };
 
+    case "SET_PAGINATION_DATA":
+      return {
+        ...state,
+        totalPages: action.payload.totalPages || 1,
+        totalItems: action.payload.total || 0,
+      };
+
+    case "SET_AVAILABLE_YEARS":
+      return {
+        ...state,
+        availableYears: Array.isArray(action.payload) ? action.payload : [],
+      };
+
     case "SET_LOADING_SLUG":
       return {
         ...state,
@@ -160,13 +176,13 @@ export function laporanAdminReducer(state, action) {
       return {
         ...state,
         docForm: { ...EMPTY_DOC_FORM },
-        selectedFile: null,
+        selectedFiles: [],
       };
 
-    case "SET_SELECTED_FILE":
+    case "SET_SELECTED_FILES":
       return {
         ...state,
-        selectedFile: action.payload,
+        selectedFiles: action.payload,
       };
 
     case "SET_SAVING_DOCUMENT":
