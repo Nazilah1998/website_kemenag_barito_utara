@@ -6,7 +6,7 @@ import Turnstile from "@/components/ui/Turnstile";
 import { siteInfo } from "@/data/site";
 import { useAdminLogin } from "@/hooks/useAdminLogin";
 import { EyeIcon, inputClassName, LoginLoading } from "./login/LoginUI";
-import { LogIn, ArrowLeft } from "lucide-react";
+import { LogIn, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 32 },
@@ -231,6 +231,24 @@ export default function AdminLoginClient({ initialUnauthorized = false }) {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Success Toast */}
+      <AnimatePresence>
+        {l.success && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+            className="fixed top-6 right-6 z-50 flex items-center gap-3 rounded-2xl bg-slate-900 px-6 py-4 text-white shadow-2xl dark:bg-emerald-950 dark:border dark:border-emerald-800"
+          >
+            <CheckCircle className="h-6 w-6 text-emerald-400" />
+            <div>
+              <p className="text-sm font-bold">Login Berhasil!</p>
+              <p className="text-xs text-slate-300 dark:text-emerald-200/70">Mengarahkan ke Dashboard...</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
@@ -325,7 +343,10 @@ function SubmitButton({ submitting, disabled }) {
     >
       <span className="relative z-10 flex items-center gap-2">
         {submitting ? (
-          "Memverifikasi..."
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />
+            Memverifikasi...
+          </>
         ) : (
           <>
             Masuk ke Dashboard

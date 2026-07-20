@@ -12,7 +12,7 @@ function hasAccess(context, permission) {
   return Array.isArray(context.permissions) ? context.permissions.includes(permission) : false;
 }
 
-export default function AdminSidebar({ profile, role, permissionContext, onNavigate, onClose }) {
+export default function AdminSidebar({ profile, role, permissionContext, onNavigate, onClose, isCollapsed = false, setIsCollapsed }) {
   const pathname = usePathname();
   const ctx = permissionContext;
 
@@ -32,12 +32,14 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-slate-950">
-      <SidebarHeader onClose={onClose} />
+      <SidebarHeader onClose={onClose} isCollapsed={isCollapsed} />
       <div className="flex-1 overflow-y-auto px-5 py-8 no-scrollbar">
-        <p className="mb-5 px-5 text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500">Menu Navigasi</p>
+        {!isCollapsed && (
+          <p className="mb-5 px-5 text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 dark:text-slate-500">Menu Navigasi</p>
+        )}
         <nav className="space-y-3 no-scrollbar">
           {links.filter(l => l.show).map(l => (
-            <SidebarNavLink key={l.href} {...l} onNavigate={onNavigate} />
+            <SidebarNavLink key={l.href} {...l} onNavigate={onNavigate} isCollapsed={isCollapsed} />
           ))}
         </nav>
       </div>
@@ -45,16 +47,24 @@ export default function AdminSidebar({ profile, role, permissionContext, onNavig
   );
 }
 
-function SidebarHeader({ onClose }) {
+function SidebarHeader({ onClose, isCollapsed }) {
   return (
-    <div className="flex items-center justify-between border-b-2 border-slate-50 px-6 py-6 dark:border-white/5">
-      <div className="group cursor-default">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="h-1 w-1 rounded-full bg-emerald-500" />
-          <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">Admin CMS</p>
+    <div className={`flex items-center border-b-2 border-slate-50 py-6 dark:border-white/5 ${isCollapsed ? 'justify-center px-4' : 'justify-between px-6'}`}>
+      {!isCollapsed ? (
+        <div className="group cursor-default">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-1 w-1 rounded-full bg-emerald-500" />
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-400">Admin CMS</p>
+          </div>
+          <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight">Kemenag Barito Utara</h2>
         </div>
-        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase leading-none tracking-tight">Kemenag Barito Utara</h2>
-      </div>
+      ) : (
+        <div className="flex items-center justify-center h-8 w-8 rounded-xl bg-slate-50 dark:bg-slate-800">
+          <div className="h-2 w-2 rounded-full bg-emerald-500" />
+        </div>
+      )}
+
+      {/* Mobile Close Button */}
       {onClose && (
         <button
           type="button"

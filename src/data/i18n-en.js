@@ -23,6 +23,8 @@ export const messagesEn = {
       tugasFungsi: "Duties and Functions",
       nilaiBudaya: "Work Culture Values",
       tujuan: "Objectives",
+      mediaCenter: "Media Center",
+      videoYoutube: "YouTube Video",
       berita: "News",
       layanan: "Services",
       standarPelayanan: "Service Standards",

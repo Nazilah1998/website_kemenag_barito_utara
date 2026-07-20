@@ -3,6 +3,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { HeaderSearchForm } from "./HeaderSearchForm";
+import { Lock } from "lucide-react";
 
 export function DesktopNav({
   navigationItems,
@@ -26,14 +27,14 @@ export function DesktopNav({
     <nav className="hidden border-t border-slate-100/50 py-2.5 dark:border-white/5 lg:block">
       <div className="flex items-center justify-end">
         <ul className="flex flex-nowrap items-center justify-start gap-3 xl:gap-6 mr-6" ref={desktopDropdownRef}>
-          {navigationItems.map((item) => {
+          {navigationItems.map((item, idx) => {
             const hasChildren = item.children && item.children.length > 0;
             const isOpen = openDesktopDropdown === item.label;
             const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
 
             return (
               <li
-                key={item.label}
+                key={`nav-${idx}-${item.href || item.label}`}
                 className="relative"
                 onMouseEnter={() => hasChildren && setOpenDesktopDropdown(item.label)}
                 onMouseLeave={() => hasChildren && setOpenDesktopDropdown(null)}
@@ -87,10 +88,10 @@ export function DesktopNav({
                         </div>
 
                         <ul className="relative z-10 space-y-0.5">
-                          {item.children.map((child) => {
+                          {item.children.map((child, cIdx) => {
                             const hasSubChildren = child.children && child.children.length > 0;
                             return (
-                              <li key={child.label} className="relative group/sub">
+                              <li key={`child-${cIdx}-${child.href || child.label}`} className="relative group/sub">
                                 {hasSubChildren ? (
                                   <>
                                     <div className="group/item flex cursor-pointer items-center justify-between rounded-xl px-4 py-3 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-emerald-600 hover:text-white dark:text-slate-400 dark:hover:bg-emerald-600 dark:hover:text-white">
@@ -102,8 +103,8 @@ export function DesktopNav({
                                     <div className="absolute left-full top-0 pl-3 hidden opacity-0 group-hover/sub:block group-hover/sub:opacity-100 transition-opacity z-50">
                                       <div className="w-[240px] overflow-hidden rounded-2xl border border-slate-200/60 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
                                         <ul className="space-y-0.5">
-                                          {child.children.map((subChild) => (
-                                            <li key={subChild.label}>
+                                          {child.children.map((subChild, scIdx) => (
+                                            <li key={`sub-${scIdx}-${subChild.href || subChild.label}`}>
                                               <Link
                                                 href={subChild.href}
                                                 {...(subChild.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -254,57 +255,43 @@ function AdminLoginButton({ adminState }) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-200/50 dark:bg-slate-900/95 dark:ring-white/10 dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]"
+                className="relative w-full max-w-sm overflow-hidden rounded-[2rem] bg-white p-8 shadow-2xl ring-1 ring-slate-900/5 dark:bg-slate-900 dark:ring-white/10"
               >
-                {/* Top red warning accent */}
-                <div className="absolute top-0 left-0 right-0 h-1.5 w-full bg-red-500" />
+                {/* Decorative background accent */}
+                <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
                 
-                <div className="relative p-8 z-10">
-                  <div className="flex flex-col items-center text-center">
-                    {/* Clean Warning Icon */}
-                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="h-8 w-8 text-red-600 dark:text-red-400"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
-                    </div>
-
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                      Peringatan Akses
-                    </h3>
-
-                    <div className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                      <p>Halaman ini dikhususkan bagi</p>
-                      <p className="font-bold text-red-600 dark:text-red-400">Admin Kemenag Barito Utara.</p>
-                    </div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                    <Lock className="h-7 w-7 text-emerald-600 dark:text-emerald-400" strokeWidth={2.5} />
                   </div>
 
-                  <div className="mt-8 flex gap-3">
+                  <h3 className="mb-2 text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Akses Terbatas
+                  </h3>
+
+                  <div className="mb-8 space-y-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p>Halaman ini dikhususkan bagi</p>
+                    <p className="font-bold text-emerald-600 dark:text-emerald-400">Admin Kemenag Barito Utara.</p>
+                  </div>
+
+                  <div className="flex w-full gap-3">
                     <button
                       onClick={() => setShowConfirm(false)}
-                      className="flex-1 rounded-2xl border border-slate-200 bg-white py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-50 hover:border-slate-300 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:border-white/20 active:scale-95"
+                      className="flex-1 rounded-xl bg-slate-100 py-3.5 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
-                      Kembali
+                      Batal
                     </button>
                     <Link
                       href="/admin"
                       onClick={() => setShowConfirm(false)}
-                      className="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 py-3.5 text-center text-[11px] font-black uppercase tracking-widest text-white transition-all hover:shadow-[0_8px_20px_-6px_rgba(225,29,72,0.5)] active:scale-95"
+                      className="group relative flex-1 overflow-hidden rounded-xl bg-slate-900 py-3.5 text-center text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-black dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-2">
-                        Ya, Masuk
+                        Masuk
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                       </span>
-                      <div className="absolute inset-0 bg-white/20 transition-transform duration-500 translate-y-full group-hover:translate-y-0" />
+                      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
                     </Link>
                   </div>
                 </div>

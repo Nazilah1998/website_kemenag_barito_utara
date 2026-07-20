@@ -32,6 +32,10 @@ export default async function VideoPage() {
   return (
     <>
       <PageBanner
+        breadcrumb={[
+          { label: "Beranda", href: "/beranda" },
+          { label: "Video", href: "/video" },
+        ]}
         title="Dokumentasi Video Youtube"
         eyebrow="MEDIA CENTER"
         description="Saksikan berbagai liputan, kegiatan, dan inovasi Kementerian Agama Barito Utara secara eksklusif langsung dari kanal YouTube resmi."

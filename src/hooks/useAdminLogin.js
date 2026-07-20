@@ -27,6 +27,8 @@ export function useAdminLogin(initialUnauthorized) {
       : "",
   );
 
+  const [success, setSuccess] = useState(false);
+
   useEffect(() => {
     try {
       const savedEmail = localStorage.getItem("admin_remember_email");
@@ -104,6 +106,7 @@ export function useAdminLogin(initialUnauthorized) {
       const payload = await res.json();
       if (!res.ok || !payload?.ok) {
         setError(mapLoginError(payload));
+        setSubmitting(false);
         return;
       }
 
@@ -117,10 +120,12 @@ export function useAdminLogin(initialUnauthorized) {
         // ignore
       }
 
-      window.location.href = "/admin";
+      setSuccess(true);
+      setTimeout(() => {
+        window.location.href = "/admin";
+      }, 1500);
     } catch (err) {
       setError(err?.message || "Terjadi kesalahan jaringan saat login.");
-    } finally {
       setSubmitting(false);
     }
   }
@@ -132,6 +137,7 @@ export function useAdminLogin(initialUnauthorized) {
     setPassword,
     loadingSession,
     submitting,
+    success,
     showPassword,
     setShowPassword,
     capsLock,

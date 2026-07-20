@@ -3,7 +3,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import AdminLogoutButton from "./AdminLogoutButton";
 
-export function SidebarNavLink({ href, label, icon, active, onNavigate }) {
+export function SidebarNavLink({ href, label, icon, active, onNavigate, isCollapsed }) {
   return (
     <motion.div
       whileHover={!active ? { x: 3 } : {}}
@@ -12,13 +12,14 @@ export function SidebarNavLink({ href, label, icon, active, onNavigate }) {
       <Link
         href={href}
         onClick={onNavigate}
-        className={`group flex items-center gap-3 rounded-2xl px-5 py-3.5 text-[11px] font-black uppercase tracking-widest transition-all ${active
+        title={isCollapsed ? label : undefined}
+        className={`group flex items-center ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-2xl' : 'gap-3 rounded-2xl px-5 py-3.5'} text-[11px] font-black uppercase tracking-widest transition-all ${active
           ? "bg-slate-900 text-white shadow-xl shadow-slate-900/10 dark:bg-white dark:text-black dark:shadow-white/5"
           : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
           }`}
       >
-        <span className={`transition-colors ${active ? "text-emerald-400" : "text-slate-400 group-hover:text-emerald-700"}`}>{icon}</span>
-        <span>{label}</span>
+        <span className={`transition-colors flex-shrink-0 ${active ? "text-emerald-400" : "text-slate-400 group-hover:text-emerald-700"}`}>{icon}</span>
+        {!isCollapsed && <span>{label}</span>}
       </Link>
     </motion.div>
   );
