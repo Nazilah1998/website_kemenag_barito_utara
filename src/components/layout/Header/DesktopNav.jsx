@@ -169,13 +169,32 @@ export function HeaderControls({ locale, setLocale, theme, setLightTheme, setDar
       <div className="flex items-center gap-4 border-r border-slate-200/50 pr-4 dark:border-white/5">
         {/* Language Switcher */}
         <div className="flex items-center gap-1 rounded-full bg-slate-100/50 p-1 ring-1 ring-slate-200/50 dark:bg-white/5 dark:ring-white/10">
-          {["id", "en"].map((l) => (
+          {[
+            { id: "id", label: "ID", flag: (
+              <svg className="w-3.5 h-3.5 rounded-full overflow-hidden shadow-sm shrink-0" viewBox="0 0 640 480">
+                <g fillRule="evenodd" strokeWidth="1pt">
+                  <path fill="#e70011" d="M0 0h640v240H0z"/>
+                  <path fill="#fff" d="M0 240h640v240H0z"/>
+                </g>
+              </svg>
+            )},
+            { id: "en", label: "EN", flag: (
+              <svg className="w-3.5 h-3.5 rounded-full overflow-hidden shadow-sm shrink-0" viewBox="0 0 640 480">
+                <path fill="#012169" d="M0 0h640v480H0z"/>
+                <path fill="#FFF" d="m75 0 245 180L565 0h75v55L395 240l245 185v55h-75L320 300 75 480H0v-55l245-185L0 55V0h75z"/>
+                <path fill="#C8102E" d="m400 290 170 130h70v-20L440 270l-40 20zM240 190 70 60H0v20l200 130 40-20zm0 100L40 420H0v20l200-130 40 10zm160-100L570 60h70V40L440 170l-40 20z"/>
+                <path fill="#FFF" d="M240 0v480h160V0H240zM0 160v160h640V160H0z"/>
+                <path fill="#C8102E" d="M267 0v480h106V0H267zM0 187v106h640V187H0z"/>
+              </svg>
+            )}
+          ].map((item) => (
             <button
-              key={l}
-              onClick={() => setLocale(l)}
-              className={`rounded-full px-3 py-1 text-[10px] font-black uppercase transition-all duration-300 ${locale === l ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"}`}
+              key={item.id}
+              onClick={() => setLocale(item.id)}
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase transition-all duration-300 ${locale === item.id ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"}`}
             >
-              {l}
+              {item.flag}
+              <span>{item.label}</span>
             </button>
           ))}
         </div>

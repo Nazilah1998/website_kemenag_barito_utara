@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { searchSite } from "@/lib/search";
 import { useLanguage } from "@/context/LanguageContext";
+import { useGAEvent } from "@/hooks/useGAEvent";
 
 function mergeResults(localResults, remoteResults) {
   const seen = new Set();
@@ -56,6 +57,7 @@ export default function SearchResultsClient({ initialQuery = "" }) {
   const [remoteResults, setRemoteResults] = useState([]);
   const [remoteStatus, setRemoteStatus] = useState("idle");
   const [activeFilter, setActiveFilter] = useState("all");
+  const { trackSearch } = useGAEvent();
 
   useEffect(() => {
     if (!query) {
@@ -78,20 +80,29 @@ export default function SearchResultsClient({ initialQuery = "" }) {
       .then((res) => (res.ok ? res.json() : { items: [] }))
       .then((data) => {
         if (cancelled) return;
-        setRemoteResults(Array.isArray(data?.items) ? data.items : []);
+        const fetchedItems = Array.isArray(data?.items) ? data.items : [];
+        setRemoteResults(fetchedItems);
         setRemoteStatus("success");
+
+        // ✅ GA4 Event — Kirim pencarian beserta total hasilnya
+        const localCount = localResults?.length || 0;
+        const totalCount = fetchedItems.length + localCount;
+        trackSearch(query, totalCount);
       })
       .catch(() => {
         if (cancelled) return;
         setRemoteResults([]);
         setRemoteStatus("error");
+
+        // ✅ GA4 Event Fallback — Kirim pencarian hanya dengan local results count
+        trackSearch(query, localResults?.length || 0);
       });
 
     return () => {
       cancelled = true;
       controller.abort();
     };
-  }, [query]);
+  }, [query, localResults, trackSearch]);
 
   const results = useMemo(() => {
     const remote = query ? remoteResults : [];

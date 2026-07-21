@@ -44,7 +44,7 @@ describe("AdminLaporanCategoryManager", () => {
         ],
     };
 
-    it("renders category panel, upload panel, and document list", () => {
+  it("renders category panel, upload panel, and document list", () => {
         render(
             <AdminLaporanCategoryManager
                 category={category}

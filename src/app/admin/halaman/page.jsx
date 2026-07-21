@@ -86,7 +86,7 @@ export default function AdminHalamanPage() {
                 ) : m.items.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-5 py-12 text-center text-sm text-slate-400">
-                      Belum ada halaman. Klik "Tambah Halaman" untuk membuat.
+                      Belum ada halaman. Klik &quot;Tambah Halaman&quot; untuk membuat.
                     </td>
                   </tr>
                 ) : (

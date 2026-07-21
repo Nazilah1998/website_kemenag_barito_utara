@@ -22,12 +22,31 @@ export function MobileNavUtilities({
         <div className="flex flex-col gap-2">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Bahasa</p>
           <div className="flex items-center gap-1 rounded-[1.25rem] bg-slate-100/50 p-1 shadow-inner dark:bg-slate-800/50">
-            {["id", "en"].map((l) => (
+            {[
+              { id: "id", label: "ID", flag: (
+                <svg className="w-3.5 h-3.5 rounded-full overflow-hidden shadow-sm shrink-0" viewBox="0 0 640 480">
+                  <g fillRule="evenodd" strokeWidth="1pt">
+                    <path fill="#e70011" d="M0 0h640v240H0z"/>
+                    <path fill="#fff" d="M0 240h640v240H0z"/>
+                  </g>
+                </svg>
+              )},
+              { id: "en", label: "EN", flag: (
+                <svg className="w-3.5 h-3.5 rounded-full overflow-hidden shadow-sm shrink-0" viewBox="0 0 640 480">
+                  <path fill="#012169" d="M0 0h640v480H0z"/>
+                  <path fill="#FFF" d="m75 0 245 180L565 0h75v55L395 240l245 185v55h-75L320 300 75 480H0v-55l245-185L0 55V0h75z"/>
+                  <path fill="#C8102E" d="m400 290 170 130h70v-20L440 270l-40 20zM240 190 70 60H0v20l200 130 40-20zm0 100L40 420H0v20l200-130 40 10zm160-100L570 60h70V40L440 170l-40 20z"/>
+                  <path fill="#FFF" d="M240 0v480h160V0H240zM0 160v160h640V160H0z"/>
+                  <path fill="#C8102E" d="M267 0v480h106V0H267zM0 187v106h640V187H0z"/>
+                </svg>
+              )}
+            ].map((item) => (
               <button
-                key={l} onClick={() => setLocale(l)}
-                className={`flex-1 rounded-xl py-2.5 text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${locale === l ? "bg-white text-emerald-600 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:bg-slate-700 dark:text-emerald-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
+                key={item.id} onClick={() => setLocale(item.id)}
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${locale === item.id ? "bg-white text-emerald-600 shadow-[0_4px_12px_rgba(0,0,0,0.05)] dark:bg-slate-700 dark:text-emerald-400" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"}`}
               >
-                {l}
+                {item.flag}
+                <span>{item.label}</span>
               </button>
             ))}
           </div>

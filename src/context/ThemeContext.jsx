@@ -39,7 +39,7 @@ function getSystemTheme() {
 }
 
 function getResolvedTheme() {
-  return getStoredTheme() || getSystemTheme();
+  return getStoredTheme() || DEFAULT_THEME;
 }
 
 function applyTheme(theme) {

@@ -176,6 +176,7 @@ export function laporanAdminReducer(state, action) {
       return {
         ...state,
         docForm: { ...EMPTY_DOC_FORM },
+        selectedFile: null,
         selectedFiles: [],
       };
 

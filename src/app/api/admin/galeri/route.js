@@ -121,11 +121,11 @@ export async function POST(request) {
       const base64Meta = getBase64PayloadMeta(uploadBase64);
       
       if (!base64Meta) {
-        throw new Error(`Format file pada urutan ke-${i + 1} tidak valid.`);
+        return apiResponse({ message: `Format file pada urutan ke-${i + 1} tidak valid.` }, 400);
       }
 
       if (base64Meta.sizeBytes > MAX_IMAGE_SIZE_BYTES) {
-        throw new Error(`Ukuran file pada urutan ke-${i + 1} terlalu besar. Maksimal ${MAX_IMAGE_SIZE_KB} KB.`);
+        return apiResponse({ message: `Ukuran file pada urutan ke-${i + 1} terlalu besar. Maksimal ${MAX_IMAGE_SIZE_KB} KB.` }, 400);
       }
 
       const uploaded = await uploadBase64Image({

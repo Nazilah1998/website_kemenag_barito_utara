@@ -8,7 +8,7 @@ import HeroBackground from "./HeroBackground";
 import PrayerScheduleWidget from "./PrayerScheduleWidget";
 import { useSiteSettings } from "@/context/SettingsContext";
 import { 
-  Globe, FolderOpen, Lightbulb, Info, MessageSquareWarning, ShieldCheck, ClipboardList, Headset, ChevronRight,
+  Globe, FolderOpen, Lightbulb, Info, MessageSquareWarning, ShieldCheck, ClipboardList, Headset, ChevronRight, X,
   LogIn, UserPlus, FileSearch, Navigation, BookOpen, CalendarDays,
   Users, Archive, MailOpen, FileCheck, Database, Calculator,
   Newspaper, Image as ImageIcon, FileText,
@@ -759,7 +759,7 @@ export default function PortalPage() {
         </div>
         {/* PTSP Modal */}
         {isPtspModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in">
             {/* Backdrop Click Area */}
             <div
               className="absolute inset-0"
@@ -767,50 +767,29 @@ export default function PortalPage() {
             ></div>
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="relative w-full max-w-md bg-slate-900/90 border border-emerald-500/20 rounded-3xl shadow-2xl shadow-emerald-950/40 overflow-hidden animate-fade-in-up backdrop-blur-2xl">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 bg-white/5 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-emerald-950/30 to-slate-900 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-inner">
+                    <FolderOpen className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <h3 className="text-white font-bold text-lg">Layanan PTSP Si ATAK</h3>
+                  <div>
+                    <h3 className="text-white font-black text-base sm:text-lg tracking-tight">Layanan PTSP Si ATAK</h3>
+                    <p className="text-[11px] font-medium text-slate-400">Pusat Layanan Terpadu Satu Pintu</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsPtspModalOpen(false)}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-200"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-3">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2.5">
                   {PTSP_MENUS.map((menu, idx) => (
                     <Link
                       key={idx}
@@ -818,15 +797,17 @@ export default function PortalPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsPtspModalOpen(false)}
-                      className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 hover:bg-gradient-to-r hover:from-emerald-900/40 hover:to-emerald-800/10 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgb(16,185,129,0.15)]"
+                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-white/[0.03] hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group shadow-sm"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-br group-hover:from-emerald-400 group-hover:to-emerald-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-emerald-500/30 group-hover:rotate-3 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/5 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/20 group-hover:scale-105 flex items-center justify-center transition-all duration-300 shrink-0">
                         {menu.icon}
                       </div>
-                      <span className="flex-1 text-slate-200 font-bold text-[14.5px] group-hover:text-white transition-colors tracking-wide">
+                      <span className="flex-1 text-slate-200 font-semibold text-sm group-hover:text-emerald-300 transition-colors">
                         {menu.title}
                       </span>
-                      <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" strokeWidth={2.5} />
+                      <div className="w-7 h-7 rounded-lg bg-white/5 group-hover:bg-emerald-500/20 flex items-center justify-center transition-all duration-300">
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-300 group-hover:translate-x-0.5 transition-all duration-300" strokeWidth={2.5} />
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -836,7 +817,7 @@ export default function PortalPage() {
         )}
         {/* Inovasi Modal */}
         {isInovasiModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in">
             {/* Backdrop Click Area */}
             <div
               className="absolute inset-0"
@@ -844,52 +825,29 @@ export default function PortalPage() {
             ></div>
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="relative w-full max-w-md bg-slate-900/90 border border-amber-500/20 rounded-3xl shadow-2xl shadow-amber-950/40 overflow-hidden animate-fade-in-up backdrop-blur-2xl">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 bg-white/5 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-amber-950/30 to-slate-900 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                      />
-                    </svg>
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shadow-inner">
+                    <Lightbulb className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <h3 className="text-white font-bold text-lg">
-                    Inovasi Kemenag
-                  </h3>
+                  <div>
+                    <h3 className="text-white font-black text-base sm:text-lg tracking-tight">Inovasi Kemenag</h3>
+                    <p className="text-[11px] font-medium text-slate-400">Aplikasi & Layanan Digital Terintegrasi</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsInovasiModalOpen(false)}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-200"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-3">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2.5">
                   {INOVASI_MENUS.map((menu, idx) => (
                     <Link
                       key={idx}
@@ -897,15 +855,17 @@ export default function PortalPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsInovasiModalOpen(false)}
-                      className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 hover:bg-gradient-to-r hover:from-amber-900/40 hover:to-amber-800/10 border border-white/5 hover:border-amber-500/30 transition-all duration-300 group shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgb(245,158,11,0.15)]"
+                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-white/[0.03] hover:bg-amber-500/10 border border-white/5 hover:border-amber-500/30 transition-all duration-300 group shadow-sm"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-br group-hover:from-amber-400 group-hover:to-amber-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-amber-500/30 group-hover:rotate-3 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/5 group-hover:border-amber-500/30 group-hover:bg-amber-500/20 group-hover:scale-105 flex items-center justify-center transition-all duration-300 shrink-0">
                         {menu.icon}
                       </div>
-                      <span className="flex-1 text-slate-200 font-bold text-[14.5px] group-hover:text-white transition-colors tracking-wide">
+                      <span className="flex-1 text-slate-200 font-semibold text-sm group-hover:text-amber-300 transition-colors">
                         {menu.title}
                       </span>
-                      <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" strokeWidth={2.5} />
+                      <div className="w-7 h-7 rounded-lg bg-white/5 group-hover:bg-amber-500/20 flex items-center justify-center transition-all duration-300">
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-amber-300 group-hover:translate-x-0.5 transition-all duration-300" strokeWidth={2.5} />
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -915,7 +875,7 @@ export default function PortalPage() {
         )}
         {/* Informasi Publik Modal */}
         {isInformasiModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in">
             {/* Backdrop Click Area */}
             <div
               className="absolute inset-0"
@@ -923,52 +883,29 @@ export default function PortalPage() {
             ></div>
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="relative w-full max-w-md bg-slate-900/90 border border-fuchsia-500/20 rounded-3xl shadow-2xl shadow-fuchsia-950/40 overflow-hidden animate-fade-in-up backdrop-blur-2xl">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 bg-white/5 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-fuchsia-950/30 to-slate-900 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
+                  <div className="w-10 h-10 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shadow-inner">
+                    <Info className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <h3 className="text-white font-bold text-lg">
-                    Informasi Publik
-                  </h3>
+                  <div>
+                    <h3 className="text-white font-black text-base sm:text-lg tracking-tight">Informasi Publik</h3>
+                    <p className="text-[11px] font-medium text-slate-400">Portal Berita, Galeri & Laporan</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsInformasiModalOpen(false)}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-200"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-3">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2.5">
                   {INFORMASI_MENUS.map((menu, idx) => (
                     <Link
                       key={idx}
@@ -976,17 +913,17 @@ export default function PortalPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsInformasiModalOpen(false)}
-                      className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 hover:bg-gradient-to-r hover:from-fuchsia-900/40 hover:to-fuchsia-800/10 border border-white/5 hover:border-fuchsia-500/30 transition-all duration-300 group shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgb(217,70,239,0.15)]"
+                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-white/[0.03] hover:bg-fuchsia-500/10 border border-white/5 hover:border-fuchsia-500/30 transition-all duration-300 group shadow-sm"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-br group-hover:from-fuchsia-400 group-hover:to-fuchsia-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-fuchsia-500/30 group-hover:rotate-3 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/5 group-hover:border-fuchsia-500/30 group-hover:bg-fuchsia-500/20 group-hover:scale-105 flex items-center justify-center transition-all duration-300 shrink-0">
                         {menu.icon}
                       </div>
-                      <div className="flex flex-col flex-1">
-                        <span className="text-slate-200 font-bold text-[14.5px] group-hover:text-white transition-colors tracking-wide">
-                          {menu.title}
-                        </span>
+                      <span className="flex-1 text-slate-200 font-semibold text-sm group-hover:text-fuchsia-300 transition-colors">
+                        {menu.title}
+                      </span>
+                      <div className="w-7 h-7 rounded-lg bg-white/5 group-hover:bg-fuchsia-500/20 flex items-center justify-center transition-all duration-300">
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-fuchsia-300 group-hover:translate-x-0.5 transition-all duration-300" strokeWidth={2.5} />
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" strokeWidth={2.5} />
                     </Link>
                   ))}
                 </div>
@@ -996,7 +933,7 @@ export default function PortalPage() {
         )}
         {/* Layanan Survey Modal */}
         {isSurveyModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in">
             {/* Backdrop Click Area */}
             <div
               className="absolute inset-0"
@@ -1004,52 +941,29 @@ export default function PortalPage() {
             ></div>
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="relative w-full max-w-md bg-slate-900/90 border border-purple-500/20 rounded-3xl shadow-2xl shadow-purple-950/40 overflow-hidden animate-fade-in-up backdrop-blur-2xl">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 bg-white/5 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-purple-950/30 to-slate-900 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                      />
-                    </svg>
+                  <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shadow-inner">
+                    <ClipboardList className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <h3 className="text-white font-bold text-lg">
-                    Layanan Survey
-                  </h3>
+                  <div>
+                    <h3 className="text-white font-black text-base sm:text-lg tracking-tight">Layanan Survey</h3>
+                    <p className="text-[11px] font-medium text-slate-400">Survei Kepuasan & Indeks Pelayanan</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsSurveyModalOpen(false)}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-200"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-3">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2.5">
                   {SURVEY_MENUS.map((menu, idx) => (
                     <Link
                       key={idx}
@@ -1062,17 +976,17 @@ export default function PortalPage() {
                         if (menu.href === "#") e.preventDefault();
                         setIsSurveyModalOpen(false);
                       }}
-                      className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 hover:bg-gradient-to-r hover:from-purple-900/40 hover:to-purple-800/10 border border-white/5 hover:border-purple-500/30 transition-all duration-300 group shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgb(168,85,247,0.15)]"
+                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-white/[0.03] hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 transition-all duration-300 group shadow-sm"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-br group-hover:from-purple-400 group-hover:to-purple-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-purple-500/30 group-hover:rotate-3 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/5 group-hover:border-purple-500/30 group-hover:bg-purple-500/20 group-hover:scale-105 flex items-center justify-center transition-all duration-300 shrink-0">
                         {menu.icon}
                       </div>
-                      <div className="flex flex-col flex-1">
-                        <span className="text-slate-200 font-bold text-[14.5px] group-hover:text-white transition-colors tracking-wide">
-                          {menu.title}
-                        </span>
+                      <span className="flex-1 text-slate-200 font-semibold text-sm group-hover:text-purple-300 transition-colors">
+                        {menu.title}
+                      </span>
+                      <div className="w-7 h-7 rounded-lg bg-white/5 group-hover:bg-purple-500/20 flex items-center justify-center transition-all duration-300">
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-purple-300 group-hover:translate-x-0.5 transition-all duration-300" strokeWidth={2.5} />
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" strokeWidth={2.5} />
                     </Link>
                   ))}
                 </div>
@@ -1082,7 +996,7 @@ export default function PortalPage() {
         )}
         {/* Zona Integritas Modal */}
         {isZonaModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in">
             {/* Backdrop Click Area */}
             <div
               className="absolute inset-0"
@@ -1090,52 +1004,29 @@ export default function PortalPage() {
             ></div>
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="relative w-full max-w-md bg-slate-900/90 border border-emerald-500/20 rounded-3xl shadow-2xl shadow-emerald-950/40 overflow-hidden animate-fade-in-up backdrop-blur-2xl">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 bg-white/5 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-emerald-950/30 to-slate-900 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m5.618-4.016A3.323 3.323 0 0010.605 8.9c.228.033.445.133.615.285l2.772 2.443a.5.5 0 010 .744l-2.772 2.443a1.056 1.056 0 01-.615.285 3.323 3.323 0 00-6.013 3.116 3.323 3.323 0 006.013 3.116c.228-.033.445-.133.615-.285l2.772-2.443a.5.5 0 010-.744l-2.772-2.443a1.056 1.056 0 01.615-.285 3.323 3.323 0 006.013-3.116 3.323 3.323 0 00-6.013-3.116z"
-                      />
-                    </svg>
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-inner">
+                    <ShieldCheck className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <h3 className="text-white font-bold text-lg">
-                    Zona Integritas
-                  </h3>
+                  <div>
+                    <h3 className="text-white font-black text-base sm:text-lg tracking-tight">Zona Integritas</h3>
+                    <p className="text-[11px] font-medium text-slate-400">Pembangunan WBK & WBBM</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsZonaModalOpen(false)}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-200"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-3">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2.5">
                   {ZONA_MENUS.map((menu, idx) => (
                     <Link
                       key={idx}
@@ -1148,17 +1039,17 @@ export default function PortalPage() {
                         if (menu.href === "#") e.preventDefault();
                         setIsZonaModalOpen(false);
                       }}
-                      className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 hover:bg-gradient-to-r hover:from-emerald-900/40 hover:to-emerald-800/10 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgb(16,185,129,0.15)]"
+                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-white/[0.03] hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 group shadow-sm"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-br group-hover:from-emerald-400 group-hover:to-emerald-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-emerald-500/30 group-hover:rotate-3 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/5 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/20 group-hover:scale-105 flex items-center justify-center transition-all duration-300 shrink-0">
                         {menu.icon}
                       </div>
-                      <div className="flex flex-col flex-1">
-                        <span className="text-slate-200 font-bold text-[14.5px] group-hover:text-white transition-colors tracking-wide">
-                          {menu.title}
-                        </span>
+                      <span className="flex-1 text-slate-200 font-semibold text-sm group-hover:text-emerald-300 transition-colors">
+                        {menu.title}
+                      </span>
+                      <div className="w-7 h-7 rounded-lg bg-white/5 group-hover:bg-emerald-500/20 flex items-center justify-center transition-all duration-300">
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-300 group-hover:translate-x-0.5 transition-all duration-300" strokeWidth={2.5} />
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" strokeWidth={2.5} />
                     </Link>
                   ))}
                 </div>
@@ -1168,7 +1059,7 @@ export default function PortalPage() {
         )}
         {/* Layanan Pengaduan Modal */}
         {isPengaduanModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in">
             {/* Backdrop Click Area */}
             <div
               className="absolute inset-0"
@@ -1176,52 +1067,29 @@ export default function PortalPage() {
             ></div>
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="relative w-full max-w-md bg-slate-900/90 border border-cyan-500/20 rounded-3xl shadow-2xl shadow-cyan-950/40 overflow-hidden animate-fade-in-up backdrop-blur-2xl">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 bg-white/5 border-b border-white/10">
+              <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-cyan-950/30 to-slate-900 border-b border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
+                  <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shadow-inner">
+                    <Headset className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <h3 className="text-white font-bold text-lg">
-                    Layanan Pengaduan
-                  </h3>
+                  <div>
+                    <h3 className="text-white font-black text-base sm:text-lg tracking-tight">Layanan Pengaduan</h3>
+                    <p className="text-[11px] font-medium text-slate-400">Saluran Aspirasi & Pengaduan Masyarakat</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsPengaduanModalOpen(false)}
-                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors"
+                  className="text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-all duration-200"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto">
-                <div className="flex flex-col gap-3">
+              <div className="p-4 sm:p-5 max-h-[60vh] overflow-y-auto hide-scrollbar">
+                <div className="flex flex-col gap-2.5">
                   {PENGADUAN_MENUS.map((menu, idx) => (
                     <Link
                       key={idx}
@@ -1234,17 +1102,17 @@ export default function PortalPage() {
                         if (menu.href === "#") e.preventDefault();
                         setIsPengaduanModalOpen(false);
                       }}
-                      className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 hover:bg-gradient-to-r hover:from-cyan-900/40 hover:to-cyan-800/10 border border-white/5 hover:border-cyan-500/30 transition-all duration-300 group shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:shadow-[0_4px_20px_rgb(6,182,212,0.15)]"
+                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-white/[0.03] hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 transition-all duration-300 group shadow-sm"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-slate-800/80 group-hover:bg-gradient-to-br group-hover:from-cyan-400 group-hover:to-cyan-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-cyan-500/30 group-hover:rotate-3 shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-800/90 border border-white/5 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/20 group-hover:scale-105 flex items-center justify-center transition-all duration-300 shrink-0">
                         {menu.icon}
                       </div>
-                      <div className="flex flex-col flex-1">
-                        <span className="text-slate-200 font-bold text-[14.5px] group-hover:text-white transition-colors tracking-wide">
-                          {menu.title}
-                        </span>
+                      <span className="flex-1 text-slate-200 font-semibold text-sm group-hover:text-cyan-300 transition-colors">
+                        {menu.title}
+                      </span>
+                      <div className="w-7 h-7 rounded-lg bg-white/5 group-hover:bg-cyan-500/20 flex items-center justify-center transition-all duration-300">
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all duration-300" strokeWidth={2.5} />
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" strokeWidth={2.5} />
                     </Link>
                   ))}
                 </div>

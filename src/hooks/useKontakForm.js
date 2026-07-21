@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useGAEvent } from "@/hooks/useGAEvent";
 
 const INITIAL = {
   nama: "",
@@ -13,6 +14,7 @@ export function useKontakForm() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [fieldErrors, setFieldErrors] = useState([]);
+  const { trackContact, trackEvent } = useGAEvent();
 
   function onChange(e) {
     const { name, value } = e.target;
@@ -42,6 +44,13 @@ export function useKontakForm() {
             data.message ||
             "Pesan gagal dikirim. Silakan coba lagi beberapa saat lagi.",
         });
+
+        // ✅ GA4 event — form submit gagal
+        trackEvent("form_error", {
+          event_category: "kontak",
+          form_name: "kontak_publik",
+          error_message: data.message || "validation_error",
+        });
         return;
       }
 
@@ -52,10 +61,20 @@ export function useKontakForm() {
           "Pesan berhasil dikirim. Tim kami akan menindaklanjuti pada jam layanan.",
       });
       setForm(INITIAL);
+
+      // ✅ GA4 event — kontak berhasil dikirim (konversi utama)
+      trackContact(form.subjek);
     } catch {
       setResult({
         ok: false,
         message: "Terjadi kesalahan jaringan. Silakan coba kembali.",
+      });
+
+      // ✅ GA4 event — network error
+      trackEvent("form_error", {
+        event_category: "kontak",
+        form_name: "kontak_publik",
+        error_message: "network_error",
       });
     } finally {
       setLoading(false);

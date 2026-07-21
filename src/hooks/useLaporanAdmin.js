@@ -45,25 +45,38 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
   );
 
   const activeCategory = useMemo(() => {
-    return (
-      categories.find((item) => item.slug === state.activeSlug) ||
-      initialCategory ||
-      null
-    );
-  }, [categories, initialCategory, state.activeSlug]);
+    const fromList = categories.find((item) => item.slug === state.activeSlug);
+    const target = fromList || (initialCategory?.slug === state.activeSlug ? initialCategory : null) || initialCategory || categories?.[0] || null;
+    if (!target) return null;
+    const docsFromState = state.docsBySlug?.[target.slug];
+    const docs = Array.isArray(docsFromState) && docsFromState.length > 0
+      ? docsFromState
+      : (Array.isArray(target.documents) && target.documents.length > 0
+          ? target.documents
+          : (Array.isArray(initialCategory?.documents) ? initialCategory.documents : []));
+    return {
+      ...target,
+      documents: docs,
+    };
+  }, [categories, initialCategory, state.activeSlug, state.docsBySlug]);
 
   const paginatedDocuments = useMemo(() => {
     if (!activeCategory?.slug) return [];
     const docs = state.docsBySlug?.[activeCategory.slug];
-    return Array.isArray(docs) ? docs : [];
+    if (Array.isArray(docs) && docs.length > 0) return docs;
+    return Array.isArray(activeCategory?.documents) ? activeCategory.documents : [];
   }, [activeCategory, state.docsBySlug]);
 
   // Data Fetching logic for Pagination & Filtering
   useEffect(() => {
     const slug = state.activeSlug;
     if (!slug) return;
-
     const controller = new AbortController();
+
+    // Skip fetch on mount if documents already populated for initialCategory
+    if (initialCategory?.slug === slug && Array.isArray(initialCategory?.documents) && initialCategory.documents.length > 0 && !state.yearFilter && state.currentPage === 1) {
+      return;
+    }
 
     async function loadData() {
       dispatch({ type: "SET_LOADING_SLUG", payload: slug });
@@ -74,11 +87,13 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
         // Since API returns categories array with documents attached:
         const cat = data?.categories?.find(c => c.slug === slug);
         
-        dispatch({
-          type: "SET_DOCS_FOR_SLUG",
-          slug,
-          documents: Array.isArray(cat?.documents) ? cat.documents : [],
-        });
+        if (data && data.categories) {
+          dispatch({
+            type: "SET_DOCS_FOR_SLUG",
+            slug,
+            documents: Array.isArray(cat?.documents) ? cat.documents : [],
+          });
+        }
 
         dispatch({
           type: "SET_PAGINATION_DATA",
@@ -92,11 +107,6 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
 
       } catch (error) {
         if (error?.name === "AbortError") return;
-        dispatch({
-          type: "SET_DOCS_FOR_SLUG",
-          slug,
-          documents: [],
-        });
         dispatch({
           type: "SET_ACTION_FEEDBACK",
           payload: {
@@ -114,7 +124,7 @@ export function useLaporanAdmin({ initialCategory, categories = [] }) {
     loadData();
 
     return () => controller.abort();
-  }, [state.activeSlug, state.currentPage, state.yearFilter]);
+  }, [state.activeSlug, state.currentPage, state.yearFilter, initialCategory?.slug, initialCategory?.documents]);
 
 
   useEffect(() => {

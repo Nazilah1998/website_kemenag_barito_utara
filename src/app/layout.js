@@ -18,7 +18,8 @@ import {
 import DynamicImports from "@/components/layout/DynamicImports";
 import JsonLd from "@/components/features/seo/JsonLd";
 import OneSignalProvider from "@/components/providers/OneSignalProvider";
-import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
+import { GoogleAnalytics } from '@next/third-parties/google';
+import GAPageviewTracker from "@/components/features/analytics/GAPageviewTracker";
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
@@ -137,14 +138,16 @@ import { db } from "@/lib/drizzle";
 import { siteSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-async function getGlobalIdentitySettings() {
+import { cache } from "react";
+
+const getGlobalIdentitySettings = cache(async () => {
   try {
     const [row] = await db.select({ value: siteSettings.value }).from(siteSettings).where(eq(siteSettings.key, "identity")).limit(1);
     return row?.value || null;
   } catch (error) {
     return null;
   }
-}
+});
 
 
 
@@ -171,7 +174,7 @@ export default async function RootLayout({ children }) {
           id="theme-detection"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: "(function(){try{var e=\"site-theme\",t=document.documentElement,n=window.localStorage.getItem(e),r=n===\"light\"||n===\"dark\"?n:window.matchMedia(\"(prefers-color-scheme: dark)\").matches?\"dark\":\"light\";t.dataset.theme=r,r===\"dark\"?t.classList.add(\"dark\"):t.classList.remove(\"dark\"),t.style.colorScheme=r}catch(e){}})();",
+            __html: "(function(){try{var k=window.location.pathname.startsWith('/admin')?'admin-theme':'site-theme',t=document.documentElement,n=window.localStorage.getItem(k),r=n==='light'||n==='dark'?n:'light';t.dataset.theme=r,r==='dark'?t.classList.add('dark'):t.classList.remove('dark'),t.style.colorScheme=r}catch(e){}})();",
           }}
         />
         <JsonLd
@@ -187,8 +190,13 @@ export default async function RootLayout({ children }) {
         </Providers>
         <OneSignalProvider />
         <DynamicImports />
-        <GoogleAnalytics gaId="G-GX7FWC45J3" />
-        <GoogleTagManager gtmId="GTM-NKNG878L" />
+        {/* Google Analytics 4 — hanya aktif di production, mencegah polusi data dev */}
+        {process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+            <GAPageviewTracker gaId={process.env.NEXT_PUBLIC_GA_ID} />
+          </>
+        )}
       </body>
     </html>
   );

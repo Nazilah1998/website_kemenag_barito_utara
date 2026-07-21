@@ -6,10 +6,12 @@ import { logError } from "@/lib/logger";
 export async function POST(request, context) {
   const ip = getClientIp(request);
   const { slug } = await context.params;
-  // IP limit dinaikkan dari 30 menjadi 1000 karena di kantor (satu WiFi) semua orang berbagi 1 IP.
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  const uaHash = Buffer.from(userAgent).toString("base64").slice(0, 16);
+  
   const limitCheck = await rateLimit({
-    key: `berita-view:${slug}:${ip}`,
-    limit: 1000,
+    key: `berita-view:${slug}:${ip}:${uaHash}`,
+    limit: 10,
     windowMs: 60_000,
   });
 

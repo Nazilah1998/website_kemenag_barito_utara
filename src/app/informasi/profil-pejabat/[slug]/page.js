@@ -40,16 +40,14 @@ export default async function ProfilPejabatSubPage({ params }) {
 
   let seksiData = null;
   try {
-    const data = await db.select().from(seksi).where(eq(seksi.slug, slug)).limit(1);
-    seksiData = data[0] || null;
-
-    if (seksiData) {
-      const [pegawai] = await Promise.all([
-        db.select().from(pegawai_seksi).where(eq(pegawai_seksi.seksi_id, seksiData.id)).orderBy(asc(pegawai_seksi.sort_order)).catch(() => []),
-      ]);
-      
-      seksiData.pegawai_seksis = pegawai;
-    }
+    seksiData = await db.query.seksi.findFirst({
+      where: eq(seksi.slug, slug),
+      with: {
+        pegawai_seksis: {
+          orderBy: (pegawai, { asc }) => [asc(pegawai.sort_order)],
+        },
+      },
+    });
   } catch (error) {
     logError("profil_pejabat_slug_fetch_error", { error: error?.message });
   }

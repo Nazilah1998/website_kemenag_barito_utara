@@ -12,14 +12,25 @@ export default function AdminLaporanCategoryManager({
     category: initialCategory,
     categories = [],
 }) {
+    const mergedCategories = useMemo(() => {
+        if (!initialCategory?.slug) return categories;
+        const index = categories.findIndex((c) => c.slug === initialCategory.slug);
+        if (index !== -1) {
+            const copy = [...categories];
+            copy[index] = { ...categories[index], ...initialCategory };
+            return copy;
+        }
+        return [initialCategory, ...categories];
+    }, [initialCategory, categories]);
+
     const firstCategory = useMemo(() => {
         if (initialCategory?.slug) return initialCategory;
-        return categories?.[0] || null;
-    }, [initialCategory, categories]);
+        return mergedCategories?.[0] || null;
+    }, [initialCategory, mergedCategories]);
 
     const admin = useLaporanAdmin({
         initialCategory: firstCategory,
-        categories,
+        categories: mergedCategories,
     });
 
     return (
